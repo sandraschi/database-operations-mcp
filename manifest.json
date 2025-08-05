@@ -1,0 +1,96 @@
+{
+  "name": "vbox_mcp",
+  "version": "0.1.0",
+  "dxt_version": "1.0.0",
+  "description": "MCP server for managing VirtualBox virtual machines with Windows Sandbox, Hyper-V, and security analysis capabilities",
+  "author": {
+    "name": "vboxmcp",
+    "email": "contact@example.com",
+    "url": "https://example.com/vbox-mcp"
+  },
+  "license": "MIT",
+  "server": {
+    "type": "python",
+    "entry_point": "vboxmcp.server:app",
+    "mcp_config": {
+      "command": "python -m vbox_mcp.server"
+    }
+  },
+  "prompts": [
+    {
+      "name": "list_vms_prompt",
+      "description": "List all available VirtualBox virtual machines",
+      "text": "List all available VirtualBox virtual machines"
+    },
+    {
+      "name": "start_vm_prompt",
+      "description": "Start a specific VirtualBox virtual machine",
+      "text": "Start the VirtualBox virtual machine named {vm_name}"
+    },
+    {
+      "name": "stop_vm_prompt",
+      "description": "Stop a running VirtualBox virtual machine",
+      "text": "Stop the VirtualBox virtual machine named {vm_name}"
+    },
+    {
+      "name": "create_vm_prompt",
+      "description": "Create a new VirtualBox virtual machine",
+      "text": "Create a new VirtualBox virtual machine named {vm_name} with {ram_gb}GB RAM and {disk_gb}GB disk"
+    },
+    {
+      "name": "delete_vm_prompt",
+      "description": "Delete a VirtualBox virtual machine",
+      "text": "Delete the VirtualBox virtual machine named {vm_name}"
+    },
+    {
+      "name": "create_snapshot_prompt",
+      "description": "Create a snapshot of a virtual machine",
+      "text": "Create a snapshot named {snapshot_name} of the virtual machine {vm_name} with description '{description}'"
+    },
+    {
+      "name": "restore_snapshot_prompt",
+      "description": "Restore a virtual machine to a previous snapshot",
+      "text": "Restore the virtual machine {vm_name} to the snapshot named {snapshot_name}"
+    },
+    {
+      "name": "list_snapshots_prompt",
+      "description": "List all snapshots for a virtual machine",
+      "text": "List all snapshots for the virtual machine named {vm_name}"
+    },
+    {
+      "name": "delete_snapshot_prompt",
+      "description": "Delete a snapshot from a virtual machine",
+      "text": "Delete the snapshot named {snapshot_name} from the virtual machine {vm_name}"
+    },
+    {
+      "name": "set_network_adapter_prompt",
+      "description": "Configure network adapter settings for a virtual machine",
+      "text": "Set the network adapter {adapter_number} of virtual machine {vm_name} to {network_mode} with {additional_params}"
+    },
+    {
+      "name": "attach_iso_prompt",
+      "description": "Attach an ISO file to a virtual machine",
+      "text": "Attach the ISO file at {iso_path} to the virtual machine {vm_name}"
+    },
+    {
+      "name": "modify_vm_prompt",
+      "description": "Modify virtual machine settings",
+      "text": "Modify the virtual machine {vm_name} with the following settings: {settings}"
+    },
+    {
+      "name": "clone_vm_prompt",
+      "description": "Clone an existing virtual machine",
+      "text": "Create a clone named {new_vm_name} from the virtual machine {source_vm_name} with {options}"
+    },
+    {
+      "name": "export_vm_prompt",
+      "description": "Export a virtual machine to an OVA/OVF file",
+      "text": "Export the virtual machine {vm_name} to {output_file} with {options}"
+    },
+    {
+      "name": "import_vm_prompt",
+      "description": "Import a virtual machine from an OVA/OVF file",
+      "text": "Import a virtual machine from {input_file} with name {vm_name} and {options}"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "database-operations-mcp"
+version = "1.0.0"
+description = "Universal database operations MCP server supporting SQL, NoSQL, and Vector databases"
+authors = [
+    {name = "Sandra", email = "sandra@example.com"}
+]
+dependencies = [
+    "fastmcp>=2.10.0",
+    "psycopg2-binary>=2.9.0",  # PostgreSQL
+    "pymongo>=4.0.0",          # MongoDB
+    "redis>=4.0.0",            # Redis
+    "chromadb>=0.4.0",         # ChromaDB
+    "mysql-connector-python>=8.0.0",  # MySQL
+    "pinecone-client>=2.0.0",  # Pinecone
+    "influxdb-client>=1.40.0", # InfluxDB
+    "neo4j>=5.0.0",           # Neo4j
+    "sqlalchemy>=2.0.0",      # SQL toolkit
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+]
+
+[project.scripts]
+database-operations-mcp = "database_operations_mcp:mcp"
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
