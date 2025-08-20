@@ -1,25 +1,28 @@
 {
   "name": "database-operations-mcp",
   "version": "1.0.0",
-  "description": "Universal Database Operations MCP - SQL, NoSQL, and Vector database management",
+  "description": "Universal Database Operations MCP - SQL, NoSQL, and Vector database management with Windows Registry support",
   "author": "Sandra",
   "license": "MIT",
   "mcp": {
     "version": "2.10.1",
     "server": {
       "command": "python",
-      "args": ["-m", "database_operations_mcp"],
+      "args": ["-m", "src.database_operations"],
       "transport": "stdio"
     },
     "capabilities": {
       "tools": true,
-      "resources": false,
+      "resources": true,
       "prompts": true
     }
   },
   "fastmcp_compliance": {
     "version": "2.10.1",
     "transport": "stdio",
-    "entry_point": "database_operations_mcp:main"
+    "entry_point": "src.database_operations.main:main"
+  },
+  "dependencies": {
+    "python": ">=3.9.0"
   }
 }
