@@ -10,7 +10,7 @@ authors = [
     {name = "Sandra", email = "sandra@example.com"}
 ]
 dependencies = [
-    "fastmcp>=2.10.0",
+    "fastmcp>=2.10.1",
     "psycopg2-binary>=2.9.0",  # PostgreSQL
     "pymongo>=4.0.0",          # MongoDB
     "redis>=4.0.0",            # Redis

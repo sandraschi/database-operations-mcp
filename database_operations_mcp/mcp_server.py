@@ -1,5 +1,5 @@
 """
-Database Operations MCP Server - FastMCP 2.10 Implementation
+Database Operations MCP Server - FastMCP 2.10.1 Implementation
 
 Universal database operations server with modular tool organization.
 Austrian dev efficiency: One unified interface for all database operations.
@@ -37,8 +37,8 @@ def main():
     
     logger.info("Starting Database Operations MCP server with stdio transport")
     
-    # Run the FastMCP server with stdio transport
-    mcp.run_stdio()
+    # Run the FastMCP server with stdio transport (FastMCP 2.0+ API)
+    mcp.run()
 
 if __name__ == "__main__":
     main()

@@ -2,14 +2,14 @@
 
 **Universal database operations MCP server with SQLite, PostgreSQL, and ChromaDB support**
 
-[![FastMCP](https://img.shields.io/badge/FastMCP-2.10-blue.svg)](https://github.com/jlowin/fastmcp)
+[![FastMCP](https://img.shields.io/badge/FastMCP-2.10.1-blue.svg)](https://github.com/jlowin/fastmcp)
 [![DXT Compatible](https://img.shields.io/badge/DXT-Compatible-green.svg)](https://github.com/anthropics/dxt)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Overview
 
-Database Operations MCP is a comprehensive Model Context Protocol server that provides AI agents with secure, efficient access to multiple database systems. Built with FastMCP 2.10, it offers a unified interface for SQLite, PostgreSQL, and ChromaDB operations through 8 specialized tools and 20 guided user prompts.
+Database Operations MCP is a comprehensive Model Context Protocol server that provides AI agents with secure, efficient access to multiple database systems. Built with FastMCP 2.10.1, it offers a unified interface for SQLite, PostgreSQL, and ChromaDB operations through 8 specialized tools and 20 guided user prompts.
 
 ### 🎯 Key Features
 
@@ -17,7 +17,7 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 - **20 Guided Prompts**: Pre-built workflows for common database tasks
 - **Security First**: SQL injection prevention, input validation, secure credential storage
 - **One-Click Installation**: Desktop Extension (DXT) format for Claude Desktop
-- **FastMCP 2.10**: Modern, efficient MCP implementation
+- **FastMCP 2.10.1**: Modern, efficient MCP implementation
 - **Cross-Platform**: Windows, macOS, and Linux support
 
 ## 🚀 Quick Start (DXT Installation)
@@ -263,7 +263,7 @@ python src/server.py
 5. Open a Pull Request
 
 ### Development Guidelines
-- Follow FastMCP 2.10 patterns
+- Follow FastMCP 2.10.1 patterns
 - Add comprehensive error handling
 - Include security validation
 - Write descriptive prompts
@@ -273,7 +273,7 @@ python src/server.py
 
 ### Python Dependencies
 ```
-fastmcp>=2.10.0
+fastmcp>=2.10.1
 sqlite3  # Built-in
 psycopg2-binary>=2.9.0
 chromadb>=0.4.0
@@ -318,4 +318,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ using FastMCP 2.10 and the Model Context Protocol**
+**Built with ❤️ using FastMCP 2.10.1 and the Model Context Protocol**

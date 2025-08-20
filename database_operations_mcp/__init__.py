@@ -1,5 +1,5 @@
 """
-Database Operations MCP - FastMCP 2.10 Implementation
+Database Operations MCP - FastMCP 2.10.1 Implementation
 
 Universal database operations server supporting traditional SQL databases,
 modern NoSQL databases, and specialized databases like vector stores.
