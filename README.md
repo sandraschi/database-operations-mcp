@@ -3,51 +3,156 @@
 **Universal database operations MCP server with SQLite, PostgreSQL, and ChromaDB support**
 
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.10.1-blue.svg)](https://github.com/jlowin/fastmcp)
-[![DXT Compatible](https://img.shields.io/badge/DXT-Compatible-green.svg)](https://github.com/anthropics/dxt)
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Overview
 
 Database Operations MCP is a comprehensive Model Context Protocol server that provides AI agents with secure, efficient access to multiple database systems. Built with FastMCP 2.10.1, it offers a unified interface for SQLite, PostgreSQL, and ChromaDB operations through 8 specialized tools and 20 guided user prompts.
 
-### 🎯 Key Features
+## Features
 
-- **Multi-Database Support**: SQLite, PostgreSQL, and ChromaDB in one server
-- **20 Guided Prompts**: Pre-built workflows for common database tasks
-- **Security First**: SQL injection prevention, input validation, secure credential storage
-- **One-Click Installation**: Desktop Extension (DXT) format for Claude Desktop
+- **Multi-Database Support**: PostgreSQL, MongoDB, ChromaDB, and SQLite
+- **Unified API**: Consistent interface across different database systems
+- **Security First**: Secure credential storage, role-based access control
 - **FastMCP 2.10.1**: Modern, efficient MCP implementation
 - **Cross-Platform**: Windows, macOS, and Linux support
+- **Containerized**: Easy deployment with Docker
 
-## 🚀 Quick Start (DXT Installation)
+## Installation
 
 ### Prerequisites
-- Claude Desktop (latest version)
+- Python 3.9+
+- pip (Python package manager)
+- Git
+- (Optional) Docker and Docker Compose
 
-### Installation
-1. Download `database-operations-mcp.dxt`
-2. Double-click the .dxt file or drag into Claude Desktop Settings > Extensions
-3. Configure your database paths and credentials
+### Quick Start
+
+1. Clone the repository
+2. Install dependencies
+3. Start the MCP server
 4. Start using the 20 guided prompts!
 
 ## 🛠️ Available Tools
 
-### SQLite Operations
-- `sqlite_query` - Execute SELECT queries on SQLite databases
-- `sqlite_execute` - Execute CREATE, INSERT, UPDATE, DELETE operations
+### Registry Tools
 
-### PostgreSQL Operations  
-- `postgres_query` - Execute SELECT queries on PostgreSQL databases
-- `postgres_execute` - Execute CREATE, INSERT, UPDATE, DELETE operations
+Interact with the Windows Registry as a hierarchical database:
 
-### ChromaDB Operations
-- `chromadb_query` - Query vector embeddings in ChromaDB collections
-- `chromadb_insert` - Insert documents and embeddings into ChromaDB
+- `get_registry_value` - Get a registry value with type information
+- `list_registry_key` - List contents of a registry key (values and subkeys)
+- `search_registry` - Search across registry keys, values, and data
+- `monitor_registry` - Monitor registry keys for changes in real-time
+- `backup_registry` - Create backups of registry keys
+- `restore_registry` - Restore registry keys from backups
+- `export_registry_key` - Export registry data to JSON or .reg format
 
-### Database Utilities
-- `database_info` - Get database schema and table information
-- `table_schema` - Get detailed schema information for specific tables
+### Help System
+- `list_tools` - List all available MCP tools with descriptions
+- `get_tool_help` - Get detailed documentation for a specific tool
+- `get_quick_start` - Get a quick start guide for using MCP tools
+
+### Database Connections
+- `init_database` - Initialize a database connection
+- `list_connections` - List all active database connections
+- `close_connection` - Close a database connection
+- `init_schema` - Initialize database schema
+
+### Data Operations
+- `execute_query` - Execute read-only queries
+- `execute_write` - Execute write operations (INSERT, UPDATE, DELETE)
+- `batch_execute` - Execute multiple queries in a transaction
+- `export_data` - Export query results to various formats (JSON, CSV, TSV)
+
+### Database-Specific Tools
+- `sqlite_query` - Execute SELECT queries on SQLite
+- `postgres_query` - Execute SELECT queries on PostgreSQL
+- `chromadb_query` - Query vector embeddings in ChromaDB
+- `mongodb_query` - Query documents in MongoDB
+
+
+## 🆘 Getting Help
+
+### Registry Examples
+
+#### 1. Monitor Registry Changes
+
+```python
+# Start monitoring a registry key
+await monitor_registry(
+    path='HKCU\\Software\\Microsoft\\Windows',
+    action='start',
+    callback_url='https://your-webhook.com/registry-changes'
+)
+
+# Stop monitoring
+await monitor_registry(
+    path='HKCU\\Software\\Microsoft\\Windows',
+    action='stop'
+)
+```
+
+#### 2. Backup and Restore Registry
+```python
+# Create a backup
+backup = await backup_registry(
+    path='HKLM\\SOFTWARE\\MyApp',
+    output_file='myapp_backup.reg'
+)
+
+# Restore from backup
+await restore_registry(
+    backup_file='myapp_backup.reg',
+    create_backup=True  # Creates a backup before restoring
+)
+```
+
+### Interactive Help
+```python
+# List all available tools
+await list_tools()
+
+# Get help for a specific tool
+await get_tool_help('execute_query')
+
+# Get a quick start guide
+await get_quick_start()
+```
+
+### Example Workflows
+
+#### 1. Initialize and Query SQLite
+```python
+# Initialize SQLite database
+await init_database('sqlite', {'database': 'mydb.sqlite'})
+
+# Create a table
+await execute_write('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE
+    )
+''')
+
+# Insert data
+await execute_write(
+    'INSERT INTO users (name, email) VALUES (?, ?)',
+    ['John Doe', 'john@example.com']
+)
+
+# Query data
+result = await execute_query('SELECT * FROM users')
+```
+
+#### 2. Export Data to CSV
+```python
+# Execute query and export to CSV
+await export_data(
+    'SELECT * FROM large_dataset',
+    format='csv',
+    output_file='export.csv'
+)
+```
 
 ## 💬 Guided Prompts (20 Available)
 
@@ -82,6 +187,29 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 - **Database Reporting** - Generate comprehensive reports from database data
 - **API Database Integration** - Design integration between databases and APIs
 - **Database Monitoring Setup** - Set up monitoring and alerting for database systems
+
+
+## 📊 Registry Tools Reference
+
+### Registry Monitor
+
+Monitor registry keys for changes in real-time:
+
+- Tracks additions, modifications, and deletions
+- Supports webhook notifications
+- Configurable polling interval
+
+### Backup & Restore
+
+- Create full or partial registry backups
+- Automatic backup before restore operations
+- Export to standard .reg format
+
+### Search Capabilities
+
+- Search across all registry hives
+- Filter by key names, value names, or value data
+- Case-insensitive matching
 
 ## 🏗️ Architecture
 

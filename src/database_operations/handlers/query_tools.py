@@ -1,4 +1,4 @@
-"""
+﻿"""
 Database query execution and data operation tools.
 
 Handles SQL queries, data retrieval, and result formatting.
@@ -7,7 +7,7 @@ Handles SQL queries, data retrieval, and result formatting.
 import logging
 from typing import Any, Dict, List, Optional
 
-from ..database_manager import db_manager
+from database_operationsdatabase_manager import db_manager
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +169,7 @@ def _apply_query_limit(query: str, limit: Optional[int], database_type) -> str:
         return query
     
     # Add LIMIT based on database type
-    from ..database_manager import DatabaseType
+    from database_operationsdatabase_manager import DatabaseType
     
     if database_type in [DatabaseType.POSTGRESQL, DatabaseType.MYSQL, DatabaseType.SQLITE]:
         return f"{query.rstrip(';')} LIMIT {limit}"
@@ -184,7 +184,7 @@ def _apply_query_limit(query: str, limit: Optional[int], database_type) -> str:
 
 def _generate_sample_query(database_type, table_name: str, database_name: Optional[str], sample_size: int) -> str:
     """Generate appropriate sample query based on database type."""
-    from ..database_manager import DatabaseType
+    from database_operationsdatabase_manager import DatabaseType
     
     if database_type in [DatabaseType.POSTGRESQL, DatabaseType.MYSQL, DatabaseType.SQLITE]:
         table_ref = f"{database_name}.{table_name}" if database_name else table_name
@@ -238,3 +238,4 @@ def _format_export_data(result: Dict[str, Any], export_format: str) -> Any:
             "columns": columns,
             "rows": rows
         }
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Database schema inspection and metadata tools.
 
 Handles table/collection discovery, schema analysis, and metadata operations.
@@ -7,7 +7,7 @@ Handles table/collection discovery, schema analysis, and metadata operations.
 import logging
 from typing import Any, Dict, List, Optional
 
-from ..database_manager import db_manager
+from database_operationsdatabase_manager import db_manager
 
 logger = logging.getLogger(__name__)
 
@@ -179,3 +179,4 @@ def register_tools(mcp):
                 "success": False,
                 "error": str(e)
             }
+

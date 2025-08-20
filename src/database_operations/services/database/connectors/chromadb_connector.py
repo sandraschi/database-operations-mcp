@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 import json
 
-from ..database_manager import (
+from database_operations.database_manager import (
     BaseDatabaseConnector, 
     DatabaseType, 
     ConnectionStatus,
@@ -444,3 +444,4 @@ class ChromaDBConnector(BaseDatabaseConnector):
                 "error": str(e),
                 "timestamp": datetime.now().isoformat()
             }
+

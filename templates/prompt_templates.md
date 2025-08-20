@@ -2,6 +2,24 @@
 
 ## Core Database Operations
 
+### Database Connection Management
+```
+Help me set up and manage my database connections. I need to:
+1. Initialize connections to my SQLite, PostgreSQL, and MongoDB databases
+2. List all active connections with their status
+3. Test each connection and report any issues
+4. Close inactive connections to free up resources
+```
+
+### Interactive Help and Discovery
+```
+I'm new to this MCP system. Show me:
+1. All available database operations
+2. Detailed help for executing queries
+3. Examples of common workflows
+4. How to get started with different database types
+```
+
 ### Quick Database Status Check
 ```
 Get me a complete overview of all my database connections. Show health status, performance metrics, and any issues that need attention.
@@ -20,6 +38,29 @@ Help me understand the structure of my e-commerce database. Show me all tables, 
 ### Performance Optimization
 ```
 My PostgreSQL database is running slowly. Run a comprehensive health check, analyze performance metrics, and suggest specific optimizations for better query performance.
+```
+
+## Data Operations and Management
+
+### Batch Data Processing
+```
+I need to perform a complex data migration with multiple steps:
+1. Read data from multiple tables in my SQLite database
+2. Transform the data (clean, normalize, enrich)
+3. Insert the processed data into PostgreSQL
+4. Generate a detailed report of the migration results
+
+Use batch_execute to ensure all operations succeed or fail together.
+```
+
+### Data Export and Reporting
+```
+Export the results of this complex query to a CSV file:
+- Source: PostgreSQL production database
+- Query: [Your complex SQL query here]
+- Format: CSV with headers
+- Include execution metrics in the report
+- Save to: /reports/customer_analysis_$(date +%Y%m%d).csv
 ```
 
 ## Development Workflows
@@ -47,7 +88,38 @@ Set up a complete development database environment:
 Create a comprehensive backup strategy for my production databases. Include automated health checks, performance monitoring, and maintenance recommendations.
 ```
 
+## Schema Management
+
+### Database Schema Migration
+```
+Help me manage my database schema changes:
+1. Initialize a new schema version in my PostgreSQL database
+2. Generate and apply migration scripts
+3. Handle data migration between schema versions
+4. Rollback if anything goes wrong
+5. Document all changes made
+```
+
+### Schema Analysis and Documentation
+```
+Analyze the current database schema and:
+1. Generate ER diagrams for all tables
+2. Document relationships and constraints
+3. Identify potential performance issues
+4. Suggest normalization improvements
+5. Export the documentation as markdown
+```
+
 ## AI and Vector Database Operations
+
+### Vector Database Management
+```
+Help me set up and manage my ChromaDB vector database:
+1. Initialize a new ChromaDB instance with persistent storage
+2. Create collections for different types of embeddings
+3. Optimize the database for semantic search
+4. Set up regular backups and monitoring
+```
 
 ### Semantic Search Setup
 ```

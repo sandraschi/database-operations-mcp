@@ -11,7 +11,7 @@ import os
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 
-from ..database_manager import (
+from database_operations.database_manager import (
     BaseDatabaseConnector, 
     DatabaseType, 
     ConnectionStatus,
@@ -436,3 +436,4 @@ class SQLiteConnector(BaseDatabaseConnector):
                 "error": str(e),
                 "timestamp": datetime.now().isoformat()
             }
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tools package for Database Operations MCP.
 
 Organized tool modules:
@@ -14,3 +14,4 @@ __all__ = [
     "schema_tools",
     "management_tools"
 ]
+

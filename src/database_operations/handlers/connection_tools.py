@@ -1,4 +1,4 @@
-"""
+﻿"""
 Database connection management tools.
 
 Handles database registration, testing, and connection lifecycle.
@@ -7,7 +7,7 @@ Handles database registration, testing, and connection lifecycle.
 import logging
 from typing import Any, Dict, List, Optional
 
-from ..database_manager import (
+from database_operationsdatabase_manager import (
     db_manager, 
     create_connector, 
     get_supported_databases
@@ -179,3 +179,4 @@ def register_tools(mcp):
                 "success": False,
                 "error": str(e)
             }
+

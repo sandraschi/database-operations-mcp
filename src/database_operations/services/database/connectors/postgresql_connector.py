@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 from datetime import datetime
 import json
 
-from ..database_manager import (
+from database_operations.database_manager import (
     BaseDatabaseConnector, 
     DatabaseType, 
     ConnectionStatus,
@@ -587,3 +587,4 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                 "error": str(e),
                 "timestamp": datetime.now().isoformat()
             }
+
