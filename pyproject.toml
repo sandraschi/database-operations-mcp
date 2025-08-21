@@ -5,13 +5,29 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "database-operations-mcp"
 version = "0.1.0"
-description = "A FastMCP 2.10.1 compliant server for managing and interacting with multiple database systems"
+description = "A FastMCP 2.10.1 compliant server for managing and interacting with multiple database systems via stdio"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Sandra", email = "sandra@example.com"}
 ]
+dependencies = [
+    "fastapi>=0.95.0",
+    "uvicorn[standard]>=0.21.0",
+    "pydantic>=2.11.7",
+    "python-dotenv>=1.0.0",
+    "psycopg2-binary>=2.9.5",
+    "pymongo>=4.3.0",
+    "chromadb>=0.4.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "aiohttp>=3.8.0",
+    "fastmcp>=2.10.1,<3.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.0",
+    "python-multipart>=0.0.5"
+]
+
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -23,6 +39,9 @@ classifiers = [
     "Topic :: Database",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
+
+[project.scripts]
+database-operations-mcp = "database_operations_mcp.main:main"
 
 [project.urls]
 Homepage = "https://github.com/sandraschi/database-operations-mcp"
@@ -47,12 +66,11 @@ docs = [
     "mkdocstrings[python]>=0.20.0"
 ]
 
-[project.scripts]
-database-operations-mcp = "database_operations.main:main"
-
 [tool.setuptools]
 package-dir = {"" = "src"}
-packages = find:
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.black]
 line-length = 100
@@ -90,18 +108,3 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --cov=database_operations --cov-report=term-missing"
 asyncio_mode = "auto"
-
-[project.dependencies]
-fastapi = ">=0.95.0"
-uvicorn = {extras = ["standard"], version = ">=0.21.0"}
-pydantic = ">=1.10.0,<2.0.0"
-python-dotenv = ">=1.0.0"
-psycopg2-binary = ">=2.9.5"
-pymongo = ">=4.3.0"
-chromadb = ">=0.4.0"
-sqlalchemy = {extras = ["asyncio"], version = ">=2.0.0"}
-aiohttp = ">=3.8.0"
-fastmcp = ">=2.10.1,<3.0.0"
-python-jose = {extras = ["cryptography"], version = ">=3.3.0"}
-passlib = {extras = ["bcrypt"], version = ">=1.7.0"}
-python-multipart = ">=0.0.5"

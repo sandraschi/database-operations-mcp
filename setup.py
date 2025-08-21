@@ -42,7 +42,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "database-operations-mcp=src.database_operations.main:main",
+            "database-operations-mcp=database_operations_mcp.main:main",
         ],
     },
 )

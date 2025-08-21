@@ -1,6 +1,8 @@
 # Database Operations MCP 🗄️
 
-**Universal database operations MCP server with SQLite, PostgreSQL, and ChromaDB support**
+## Universal Database Operations MCP Server
+
+A comprehensive MCP server supporting SQLite, PostgreSQL, and ChromaDB operations.
 
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.10.1-blue.svg)](https://github.com/jlowin/fastmcp)
 
@@ -20,6 +22,7 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 ## Installation
 
 ### Prerequisites
+
 - Python 3.9+
 - pip (Python package manager)
 - Git
@@ -47,28 +50,31 @@ Interact with the Windows Registry as a hierarchical database:
 - `export_registry_key` - Export registry data to JSON or .reg format
 
 ### Help System
+
 - `list_tools` - List all available MCP tools with descriptions
 - `get_tool_help` - Get detailed documentation for a specific tool
 - `get_quick_start` - Get a quick start guide for using MCP tools
 
 ### Database Connections
+
 - `init_database` - Initialize a database connection
 - `list_connections` - List all active database connections
 - `close_connection` - Close a database connection
 - `init_schema` - Initialize database schema
 
 ### Data Operations
+
 - `execute_query` - Execute read-only queries
 - `execute_write` - Execute write operations (INSERT, UPDATE, DELETE)
 - `batch_execute` - Execute multiple queries in a transaction
 - `export_data` - Export query results to various formats (JSON, CSV, TSV)
 
 ### Database-Specific Tools
+
 - `sqlite_query` - Execute SELECT queries on SQLite
 - `postgres_query` - Execute SELECT queries on PostgreSQL
 - `chromadb_query` - Query vector embeddings in ChromaDB
 - `mongodb_query` - Query documents in MongoDB
-
 
 ## 🆘 Getting Help
 
@@ -92,6 +98,7 @@ await monitor_registry(
 ```
 
 #### 2. Backup and Restore Registry
+
 ```python
 # Create a backup
 backup = await backup_registry(
@@ -107,6 +114,7 @@ await restore_registry(
 ```
 
 ### Interactive Help
+
 ```python
 # List all available tools
 await list_tools()
@@ -121,6 +129,7 @@ await get_quick_start()
 ### Example Workflows
 
 #### 1. Initialize and Query SQLite
+
 ```python
 # Initialize SQLite database
 await init_database('sqlite', {'database': 'mydb.sqlite'})
@@ -145,6 +154,7 @@ result = await execute_query('SELECT * FROM users')
 ```
 
 #### 2. Export Data to CSV
+
 ```python
 # Execute query and export to CSV
 await export_data(
@@ -157,11 +167,13 @@ await export_data(
 ## 💬 Guided Prompts (20 Available)
 
 ### 🗄️ Database Exploration & Analysis
+
 - **Explore Database** - Get overview of database structure and available tables
 - **Analyze Table Schema** - Examine structure and columns of specific tables
 - **Query Data Patterns** - Find patterns, trends, or insights in database data
 
 ### ⚡ Performance & Optimization
+
 - **Optimize Query Performance** - Analyze and suggest query optimizations
 - **Database Health Check** - Perform comprehensive health and performance checks
 - **Database Indexing Strategy** - Design optimal indexing for query performance
