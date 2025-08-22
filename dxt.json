@@ -4,6 +4,7 @@
   "description": "Universal Database Operations MCP - SQL, NoSQL, and Vector database management with Windows Registry support",
   "author": "Sandra",
   "license": "MIT",
+  "outputDir": "dist",
   "mcp": {
     "version": "2.10.1",
     "server": {

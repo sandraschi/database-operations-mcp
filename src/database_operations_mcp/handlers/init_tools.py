@@ -5,7 +5,7 @@ Provides tools for initializing, configuring, and managing database connections.
 """
 
 from typing import Dict, Any, Optional, List
-from fastmcp import mcp_tool
+from fastmcp import FastMCP
 from ..services.database.connectors import (
     SQLiteConnector,
     PostgreSQLConnector,
@@ -17,11 +17,7 @@ import logging
 
 def register_tools(mcp):
     """Register all initialization tools with the MCP server."""
-    mcp.tool()(init_database)
-    mcp.tool()(list_connections)
-    mcp.tool()(close_connection)
-    mcp.tool()(init_schema)
-    
+    # Tools will be registered by their decorators
     logger.info("Registered initialization tools")
 
 logger = logging.getLogger(__name__)
@@ -29,8 +25,8 @@ logger = logging.getLogger(__name__)
 # Active database connections
 DATABASE_CONNECTIONS: Dict[str, Any] = {}
 
-@HelpSystem.register_tool
-@mcp_tool()
+@mcp.tool()
+@HelpSystem.register_tool(category='database')
 async def init_database(
     db_type: str, 
     connection_params: Dict[str, Any],
@@ -90,8 +86,8 @@ async def init_database(
             'error': str(e)
         }
 
-@HelpSystem.register_tool
-@mcp_tool()
+@mcp.tool()
+@HelpSystem.register_tool(category='database')
 async def list_connections() -> Dict[str, Any]:
     """List all active database connections.
     
@@ -108,8 +104,8 @@ async def list_connections() -> Dict[str, Any]:
         }
     return result
 
-@HelpSystem.register_tool
-@mcp_tool()
+@mcp.tool()
+@HelpSystem.register_tool(category='database')
 async def close_connection(connection_name: str) -> Dict[str, Any]:
     """Close a database connection.
     
@@ -139,8 +135,8 @@ async def close_connection(connection_name: str) -> Dict[str, Any]:
             'message': f'Error closing connection: {str(e)}'
         }
 
-@HelpSystem.register_tool
-@mcp_tool()
+@mcp.tool()
+@HelpSystem.register_tool(category='database')
 async def init_schema(
     connection_name: str = "default",
     schema_definition: Optional[Dict[str, Any]] = None

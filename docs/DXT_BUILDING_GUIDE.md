@@ -1,39 +1,237 @@
-# DXT Extension Building - Complete Guide for All MCP Servers
+# DXT Extension Building - Complete Guide for MCP Servers
 
-**Version:** 2.1  
-**Date:** 2025-08-15  
+**Version:** 3.0.0  
+**Date:** 2025-08-22  
 **Applies to:** ALL MCP server repositories  
 **AI Tools:** Windsurf, Cursor, Claude Code  
-**Critical Update:** Claude Desktop Extension Path Bug Workarounds  
 
 ## 🎯 CRITICAL RULES - READ FIRST
 
 ### ❌ NEVER DO
-1. **NO `dxt init`** - Primitive 1980s CLI prompting
-2. **NO manual manifest editing** - Use AI to generate comprehensive configs
-3. **NO custom build scripts** - Use official `dxt pack` only
-4. **NO hardcoded external paths** - Use `user_config` for all dependencies
-5. **NO shell variable substitution** - Claude Desktop doesn't resolve `${VAR}` literals
-6. **NO fastmcp < 2.10.1** - CRITICAL: Use fastmcp>=2.10.1,<3.0.0 for stability
-7. **NO incorrect Python paths** - DXT requires explicit `cwd` and `PYTHONPATH` setup
+
+1. **NO `dxt init`** - Outdated and creates minimal configurations
+2. **NO manual configuration** - Use proper `dxt.json` with all required fields
+3. **NO custom build scripts** - Use standard DXT tooling only
+4. **NO hardcoded paths** - Use relative paths in configuration
+5. **NO direct server execution** - Always use DXT CLI tools
 
 ### ✅ ALWAYS DO
-1. **AI-generate manifest.json** - Comprehensive, professional configurations
-2. **Use `user_config`** - For ALL external dependencies (executables, directories, API keys)
-3. **Template literals** - `${user_config.key}` for runtime substitution
-4. **Official DXT toolchain** - `dxt validate`, `dxt pack`, `dxt sign`
-5. **GitHub Actions automation** - Tag-based releases with CI/CD
-6. **Exact fastmcp version** - `fastmcp>=2.10.1,<3.0.0` in requirements.txt
-7. **Python path fixes** - Explicit `cwd` and `PYTHONPATH` in mcp_config
-**Use `dxt validate`** - Always use `dxt validate` to validate the final extension packag
-8. **Use `dxt pack`** - Always use `dxt pack` to create the final extension package. do not use a script to create the final extension package
-9. **Use `dxt sign`** - Always use `dxt sign` to sign the final extension package
-10. **Include everything** - Include all requirements and dependencies, not just sources
 
+1. **Use `dxt.json`** - Central configuration file for all DXT settings
+2. **Follow semantic versioning** - For both package and MCP versions
+3. **Use stdio transport** - Required for reliable communication
+4. **Specify exact versions** - For all dependencies
+5. **Validate before building** - Always run `dxt validate` first
+6. **Test thoroughly** - Verify in a clean environment
 
-## 📋 DXT MANIFEST.JSON SPECIFICATION
+## 🖥️ DXT CLI COMMAND SYNTAX
+
+### Core Commands
+
+#### 1. Package Creation
+
+```bash
+# Basic package creation (creates in current directory)
+dxt pack
+
+# Specify output file
+dxt pack -o dist/package-name.dxt
+
+# Package with specific manifest
+dxt pack --manifest custom-manifest.json
+
+# Package with specific output directory (alternative syntax)
+dxt pack . dist/package-name.dxt
+```
+
+#### 2. Package Validation
+
+```bash
+# Validate manifest file
+dxt validate manifest.json
+
+# Validate built package
+dxt validate package.dxt
+```
+
+#### 3. Package Signing
+
+```bash
+# Sign a package
+dxt sign package.dxt
+
+# Sign with specific key
+dxt sign --key my-key.pem package.dxt
+```
+
+### Common Options
+
+- `--verbose` or `-v`: Enable verbose output
+- `--help` or `-h`: Show help message
+- `--version` or `-V`: Show version information
+
+### Environment Variables
+
+- `DXT_DEBUG=1`: Enable debug mode
+- `DXT_LOG_LEVEL=debug`: Set log level (debug, info, warn, error)
+
+### Important Notes
+
+1. Always run from the project root directory
+2. The `dxt init` command is deprecated - do not use it
+3. For production builds, always validate before packaging
+4. Sign packages for distribution when sharing with others
+
+## 📋 DXT.JSON VS MANIFEST.JSON
+
+### Key Differences
+
+| File | Purpose | When Used | Example Use Case |
+|------|---------|-----------|------------------|
+| `dxt.json` | Development/build configuration | During development and build process | Configure build output directory, development server settings |
+| `manifest.json` | Runtime configuration | When the extension is running | Define server entry points, capabilities, and extension metadata |
+
+### dxt.json (Build Configuration)
+Used by the DXT CLI tools during development and build. Defines how to build and package your extension.
+
+### manifest.json (Runtime Configuration)
+Packaged with your extension and used by the DXT runtime. Defines how your extension should be loaded and executed.
+
+## 📋 DXT.JSON CONFIGURATION
 
 ### Required Fields
+
+```json
+{
+  "name": "your-mcp-server",
+  "version": "1.0.0",
+  "description": "Brief description of your MCP server",
+  "author": "Your Name",
+  "license": "MIT",
+  "outputDir": "dist",
+  "mcp": {
+    "version": "2.10.1",
+    "server": {
+      "command": "python",
+      "args": ["-m", "your.package.module"],
+      "transport": "stdio"
+    },
+    "capabilities": {
+      "tools": true,
+      "resources": true,
+      "prompts": true
+    }
+  },
+  "dependencies": {
+    "python": ">=3.9.0"
+  }
+}
+```
+
+## 🛠️ BUILDING THE PACKAGE
+
+### 1. Validate Configuration
+
+```bash
+dxt validate
+```
+
+### 2. Build the Package
+
+```bash
+dxt pack
+```
+
+This will create the package in the `dist` directory.
+
+### 3. Package Signing (Not Currently Used)
+
+```bash
+dxt sign package.dxt
+```
+
+Package signing is used to verify the authenticity and integrity of DXT packages. However, we currently do not use package signing in our workflow. If needed in the future, signing can be enabled by:
+
+1. Generating a signing key pair
+2. Configuring the build process to sign packages
+3. Distributing the public key to all clients
+
+For now, you can safely ignore any signing-related steps in the DXT documentation.
+
+## 📜 MANIFEST.JSON - CORE CONFIGURATION
+
+### Purpose
+`manifest.json` is the primary configuration file that defines your DXT extension's behavior, dependencies, and capabilities. It's crucial for the DXT runtime to understand how to load and execute your extension.
+
+### Required Fields
+
+```json
+{
+  "dxt_version": "0.1",
+  "name": "your-extension-name",
+  "version": "1.0.0",
+  "description": "Brief description of your extension",
+  "author": "Your Name <email@example.com>",
+  "license": "MIT",
+  "server": {
+    "type": "python",
+    "entry_point": "src/your_package/server.py"
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": true,
+    "prompts": true
+  }
+}
+```
+
+### Key Sections Explained
+
+1. **Server Configuration**
+   - `type`: Must be "python" for Python-based extensions
+   - `entry_point`: Path to your main server file
+
+2. **Capabilities**
+   - `tools`: Enable/disable tool support
+   - `resources`: Enable/disable resource handling
+   - `prompts`: Enable/disable prompt templates
+
+### Best Practices
+- Keep `manifest.json` in the root of your project
+- Use semantic versioning for the `version` field
+- Include all required fields
+- Validate using `dxt validate manifest.json` before building
+
+## 🏗️ PROJECT STRUCTURE
+
+```text
+your-mcp/
+   ├── dxt.json           # DXT configuration
+   ├── pyproject.toml     # Python project metadata
+   ├── src/               # Source code
+   │   └── your_package/  # Your Python package
+   ├── tests/             # Test files
+   └── dist/              # Output directory for packages
+```
+
+## ⚙️ SERVER CONFIGURATION
+
+### FastMCP Server Best Practices
+
+- Use FastMCP 2.10.1 or later
+- Implement proper signal handling
+- Use structured logging
+- Handle all exceptions gracefully
+
+### Dependency Management
+
+- List all dependencies in `pyproject.toml`
+- Pin exact versions for production
+- Use virtual environments
+
+## 📦 PACKAGE MANIFEST
+
+### Manifest Fields
 ```json
 {
   "dxt_version": "0.1",
@@ -173,6 +371,167 @@ Add a `prompts` section to your manifest.json:
 4. **Test Thoroughly**: Validate prompts with various inputs
 5. **Keep Secure**: Don't include sensitive information in prompts
 6. **Document Assumptions**: Note any assumptions about the environment or user knowledge
+
+## 🚀 GITHUB RELEASES & CI/CD
+
+### PyPI & TestPyPI Publishing
+
+#### Prerequisites
+1. **PyPI Account**
+   - Create at [pypi.org/account/register/](https://pypi.org/account/register/)
+   - Verify your email address
+
+2. **API Tokens**
+   - **PyPI Token**:
+     1. Go to [pypi.org/manage/account/token/](https://pypi.org/manage/account/token/)
+     2. Create token with "Entire account" scope
+     3. Add to GitHub secrets as `PYPI_API_TOKEN`
+   - **TestPyPI Token** (optional):
+     1. Create account at [test.pypi.org](https://test.pypi.org/)
+     2. Create token at [test.pypi.org/manage/account/token/](https://test.pypi.org/manage/account/token/)
+     3. Add to GitHub secrets as `TEST_PYPI_API_TOKEN`
+
+### Automated Release Process
+
+1. **Version Tagging**
+   - Update version in `pyproject.toml`
+   - Create and push tag:
+     ```bash
+     # Update version in pyproject.toml first
+     git add pyproject.toml
+     git commit -m "bump version to 1.0.0"
+     git tag -a v1.0.0 -m "Release v1.0.0"
+     git push origin v1.0.0
+     ```
+
+2. **CI/CD Pipeline**
+   - **On tag push**:
+     1. Build Python package (wheel and source)
+     2. Create DXT package (`.dxt` file)
+     3. Publish to TestPyPI (for testing)
+     4. Publish to PyPI (production)
+     5. Create GitHub release with all artifacts
+   - **On `main` branch push**:
+     1. Build packages
+     2. Publish to PyPI
+   - **On `develop` branch push**:
+     1. Build packages
+     2. Publish to TestPyPI
+
+3. **Verification**
+   - Check PyPI: [pypi.org/project/database-operations-mcp/](https://pypi.org/project/database-operations-mcp/)
+   - Check TestPyPI: [test.pypi.org/project/database-operations-mcp/](https://test.pypi.org/project/database-operations-mcp/)
+
+### Release Artifacts
+
+1. **GitHub Release**
+   - Source distribution (`.tar.gz`)
+   - Python wheel (`.whl`)
+   - DXT package (`.dxt`)
+   - Auto-generated release notes
+
+2. **PyPI**
+   - Source distribution
+   - Python wheel
+   - Package metadata and documentation
+
+3. **TestPyPI** (for testing)
+   - Same as PyPI, but in a testing environment
+
+### Manual Release (if needed)
+
+1. **Create Release on GitHub**
+   ```bash
+   # Build packages locally first
+   python -m build
+   dxt pack -o dist/database-operations-mcp.dxt
+   
+   # Create and push tag
+   git tag -a v1.0.0 -m "Release v1.0.0"
+   git push origin v1.0.0
+   ```
+
+2. **Manual PyPI Upload (if needed)**
+   ```bash
+   # Install twine
+   pip install twine
+   
+   # Upload to TestPyPI
+   twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+   
+   # Upload to PyPI (after testing)
+   twine upload dist/*
+   ```
+
+### CI/CD Pipeline Details
+
+```yaml
+# .github/workflows/ci-cd.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']  # Trigger on version tags
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # ... (test and lint jobs remain the same) ...
+  
+  build:
+    name: Build and Publish
+    needs: [test, lint]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build dxt
+    
+    - name: Build Python package
+      run: python -m build
+    
+    - name: Build DXT package
+      run: |
+        mkdir -p dist
+        dxt pack -o dist/package-name.dxt
+    
+    - name: Publish to PyPI
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+    
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
+          dist/*.dxt
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Required Secrets
+1. `PYPI_API_TOKEN`: Token for PyPI uploads
+   - Create at PyPI account settings → API tokens
+   - Add to GitHub repository secrets
+
+2. `GITHUB_TOKEN` (automatically provided by GitHub Actions)
 
 ## 🔧 FASTMCP VERSION REQUIREMENT
 

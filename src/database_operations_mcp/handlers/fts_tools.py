@@ -16,7 +16,7 @@ def register_tools(mcp):
     """Register FTS tools with the MCP server."""
     
     @mcp.tool()
-    @HelpSystem.register_tool
+    @HelpSystem.register_tool(category='fts')
     async def fts_search(
         self,
         query: str,

@@ -1,20 +1,28 @@
 """
 Data read/write operations for databases.
 
-Provides tools for executing queries, inserting, updating, and deleting data.
+This module provides tools for executing queries, inserting, updating, and deleting data
+across various database backends through a unified interface.
 """
 
-from typing import Dict, Any, List, Optional, Union
-from ..database_manager import QueryError
+from typing import Dict, Any, List, Optional, Union, TypeVar, Type, cast
+from fastmcp import FastMCP
+from ..database_manager import QueryError, QueryResult
 from .help_tools import HelpSystem
 import logging
 import json
 
+# Type variable for generic type hints
+T = TypeVar('T')
+
 logger = logging.getLogger(__name__)
 
-def register_tools(mcp):
-    """Register data operation tools with the MCP server."""
+def register_tools(mcp: FastMCP) -> None:
+    """Register data operation tools with the MCP server.
     
+    Args:
+        mcp: The FastMCP instance to register tools with.
+    """
     @mcp.tool()
     @HelpSystem.register_tool
     async def execute_query(
@@ -26,24 +34,47 @@ def register_tools(mcp):
         
         Args:
             query: SQL or database-specific query string
-            parameters: Parameters for parameterized queries
-            connection_name: Name of the database connection to use
+            parameters: Parameters for parameterized queries. Can be a dictionary for named
+                      parameters or a list for positional parameters.
+            connection_name: Name of the database connection to use. Defaults to 'default'.
             
         Returns:
-            Query results and metadata
+            A dictionary containing:
+            - status: 'success' or 'error'
+            - data: Query results (for successful queries)
+            - rowcount: Number of rows affected/returned (for successful queries)
+            - message: Error message (if an error occurred)
+            - error_type: Type of error (if an error occurred)
+            
+        Example:
+            ```python
+            # Using named parameters
+            result = await execute_query(
+                "SELECT * FROM users WHERE id = :user_id",
+                {"user_id": 1},
+                "postgres"
+            )
+            
+            # Using positional parameters
+            result = await execute_query(
+                "SELECT * FROM users WHERE id = ?",
+                [1],
+                "sqlite"
+            )
+            ```
         """
         from .init_tools import DATABASE_CONNECTIONS
         
         if connection_name not in DATABASE_CONNECTIONS:
             return {
                 'status': 'error',
-                'message': f'No such connection: {connection_name}'
+                'message': f'No such connection: {connection_name}',
+                'error_type': 'ConnectionError'
             }
         
-        connector = DATABASE_CONNECTIONS[connection_name]['connector']
-        
         try:
-            result = await connector.execute_query(query, parameters or {})
+            connector = DATABASE_CONNECTIONS[connection_name]['connector']
+            result: QueryResult = await connector.execute_query(query, parameters or {})
             return {
                 'status': 'success',
                 'data': result.data,
@@ -71,32 +102,54 @@ def register_tools(mcp):
     @mcp.tool()
     @HelpSystem.register_tool
     async def execute_write(
-        self,
         query: str,
         parameters: Optional[Union[Dict[str, Any], List[Any]]] = None,
         connection_name: str = "default"
     ) -> Dict[str, Any]:
-        """Execute a write operation (INSERT, UPDATE, DELETE, etc.).
+        """Execute a write operation (INSERT, UPDATE, DELETE, etc.) on the database.
         
         Args:
-            query: SQL or database-specific write operation
-            parameters: Parameters for parameterized queries
-            connection_name: Name of the database connection to use
+            query: SQL or database-specific write operation string
+            parameters: Parameters for parameterized queries. Can be a dictionary for named
+                      parameters or a list for positional parameters.
+            connection_name: Name of the database connection to use. Defaults to 'default'.
             
         Returns:
-            Execution status and result
+            A dictionary containing:
+            - status: 'success' or 'error'
+            - rowcount: Number of rows affected by the write operation
+            - lastrowid: The primary key of the last inserted row (if applicable)
+            - message: Status message or error details
+            - execution_time: Time taken to execute the query in seconds
+            
+        Example:
+            ```python
+            # Insert operation with named parameters
+            result = await execute_write(
+                "INSERT INTO users (name, email) VALUES (:name, :email)",
+                {"name": "John Doe", "email": "john@example.com"},
+                "postgres"
+            )
+            
+            # Update operation with positional parameters
+            result = await execute_write(
+                "UPDATE users SET active = ? WHERE id = ?",
+                [True, 42],
+                "sqlite"
+            )
+            ```
         """
         from .init_tools import DATABASE_CONNECTIONS
         
         if connection_name not in DATABASE_CONNECTIONS:
             return {
                 'status': 'error',
-                'message': f'No such connection: {connection_name}'
+                'message': f'No such connection: {connection_name}',
+                'error_type': 'ConnectionError'
             }
         
-        connector = DATABASE_CONNECTIONS[connection_name]['connector']
-        
         try:
+            connector = DATABASE_CONNECTIONS[connection_name]['connector']
             result = await connector.execute_write(query, parameters or {})
             return {
                 'status': 'success',

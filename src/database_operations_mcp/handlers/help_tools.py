@@ -19,7 +19,9 @@ class HelpSystem:
     _tools = {}
     _categories = {
         'database': 'Core database operations',
-        'calibre': 'Calibre library management and search',
+        'connection': 'Database connection management',
+        'data': 'Data manipulation and querying',
+        'fts': 'Full-text search operations',
         'help': 'Help and documentation',
         'admin': 'Administrative functions'
     }
@@ -30,7 +32,7 @@ class HelpSystem:
         
         Args:
             tool_func: The tool function to register
-            category: Tool category (database, calibre, help, admin)
+            category: Tool category (database, connection, data, fts, help, admin)
         """
         doc = tool_func.__doc__ or ""
         # Parse docstring for name, description, and parameters
