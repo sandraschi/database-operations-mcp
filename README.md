@@ -5,6 +5,25 @@
 A comprehensive MCP server supporting SQLite, PostgreSQL, and ChromaDB operations.
 
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.10.1-blue.svg)](https://github.com/jlowin/fastmcp)
+[![PyPI](https://img.shields.io/pypi/v/database-operations-mcp)](https://pypi.org/project/database-operations-mcp/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+
+## 🚀 Quick Start
+
+```bash
+# Install from PyPI
+pip install database-operations-mcp
+
+# Or install from source
+pip install git+https://github.com/sandraschi/database-operations-mcp.git
+```
+
+## 📦 Latest Release: v1.0.0
+
+- 🆕 Initial stable release
+- ✨ Supports SQLite, PostgreSQL, and ChromaDB
+- 🚀 Ready for production use
 
 ## Overview
 
