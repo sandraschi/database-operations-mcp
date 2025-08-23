@@ -37,6 +37,301 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 - **FastMCP 2.10.1**: Modern, efficient MCP implementation
 - **Cross-Platform**: Windows, macOS, and Linux support
 - **Containerized**: Easy deployment with Docker
+- **DXT Packaging**: Easy packaging and distribution with DXT
+
+## 📚 Documentation
+
+### Development Standards
+- [MCP Server & DXT Packing Standards](./docs/standards/MCP_Server_Standards.md) - Guidelines for MCP server development and DXT packaging
+- [DXT Building Guide](./docs/DXT_BUILDING_GUIDE.md) - Complete guide to building and distributing DXT packages
+
+## 📦 DXT Packaging
+
+This project uses DXT for packaging the MCP server for distribution and deployment. The DXT package includes all necessary code, dependencies, and configuration.
+
+### Building the DXT Package
+
+#### Prerequisites
+
+- Python 3.9+
+- DXT CLI installed: `pip install dxt`
+
+#### Using the Build Script
+
+We provide a PowerShell build script that automates the entire packaging process:
+
+```powershell
+# Show help and available options
+.\scripts\build-mcp-package.ps1 -Help
+
+# Build and sign the package (default behavior)
+.\scripts\build-mcp-package.ps1
+
+# Build without signing (for development/testing)
+.\scripts\build-mcp-package.ps1 -NoSign
+
+# Specify custom output directory
+.\scripts\build-mcp-package.ps1 -OutputDir "C:\builds"
+```
+
+#### Manual Build Process
+
+If you prefer to build manually:
+
+1. Ensure your `manifest.json` is properly configured
+
+2. Run the DXT pack command:
+
+   ```bash
+   dxt pack . dist/
+   ```
+
+3. Sign the package (optional but recommended):
+
+   ```bash
+   dxt sign dist/your-package-name.dxt
+   ```
+
+4. Verify the package:
+
+   ```bash
+   dxt verify dist/your-package-name.dxt
+   ```
+
+### CI/CD Integration
+
+The build script is designed to work seamlessly with CI/CD pipelines. Here's an example GitHub Actions workflow:
+
+```yaml
+name: Build and Publish DXT Package
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install DXT
+      run: pip install dxt
+      
+    - name: Build DXT package
+      run: |
+        mkdir -p dist
+        .\scripts\build-mcp-package.ps1 -OutputDir dist
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: dxt-package
+        path: dist/*.dxt
+        retention-days: 5
+```
+
+### Package Verification
+
+Before deploying, always verify your package:
+
+```bash
+dxt verify dist/your-package-name.dxt
+```
+
+This will check:
+
+- Package integrity
+- Digital signatures
+- Manifest validity
+- Required files and dependencies
+
+### Best Practices
+
+1. **Versioning**: Always update the version in `manifest.json` before creating a new package
+2. **Signing**: Always sign production packages
+3. **Testing**: Test the package in a staging environment before production deployment
+4. **Documentation**: Update the README with any package-specific instructions
+5. **Dependencies**: Ensure all dependencies are properly specified in `pyproject.toml`
+   - All project dependencies installed: `pip install -e .`
+
+## Build Process
+   ```bash
+   # Navigate to the project root
+   cd /path/to/database-operations-mcp
+   
+   # Run the build script (Windows)
+   .\build.ps1
+   
+   # Or on Linux/macOS
+   pwsh build.ps1
+   ```
+
+   The build script will:
+   - Validate the manifest.json
+   - Create a DXT package in the `dist/` directory named `database-operations-mcp.dxt`
+   - Sign the package (optional, use `-NoSign` to skip)
+   - Validate the final package
+
+## Manual Build (without script)
+
+```bash
+# Basic package creation
+dxt pack . dist
+
+# The above creates dist/package.dxt - you may want to rename it:
+mv dist/package.dxt dist/database-operations-mcp.dxt
+
+# Sign the package (requires signing key)
+dxt sign dist/database-operations-mcp.dxt
+
+# Publish to a DXT registry (if configured)
+dxt publish dist/database-operations-mcp.dxt
+```
+
+## Build Script Options
+
+- `-NoSign`: Skip package signing
+
+Example:
+
+```bash
+.\build.ps1 -NoSign
+```
+
+5. **Signing and Publishing**
+   - **Signing**: Required for production use. Uses your default DXT signing key.
+     ```bash
+     dxt sign dist/database-operations-mcp.dxt
+     ```
+   
+   - **Publishing**: Upload to a DXT registry (must be configured)
+     ```bash
+     dxt publish dist/database-operations-mcp.dxt
+     ```
+   
+   - **Registry Configuration**:
+     ```bash
+     # List configured registries
+     dxt registry list
+     
+     # Add a new registry
+     dxt registry add my-registry https://registry.example.com
+     ```
+
+6. **Verification**
+   ```bash
+   # Verify package integrity
+   dxt verify dist/database-operations-mcp.dxt
+   
+   # Check package info
+   dxt info dist/database-operations-mcp.dxt
+   ```
+
+### Manifest Configuration
+
+The `manifest.json` file contains the MCP server configuration:
+
+```json
+{
+  "name": "database-operations-mcp",
+  "version": "0.1.0",
+  "dxt_version": "1.0.0",
+  "server": {
+    "type": "python",
+    "entry_point": "database_operations_mcp.main:main",
+    "mcp_config": {
+      "command": "python",
+      "args": ["-m", "database_operations_mcp.main"],
+      "cwd": "src",
+      "env": {
+        "PYTHONPATH": "${workspaceRoot}"
+      }
+    }
+  }
+}
+```
+
+### Dependencies
+
+Dependencies are managed in `pyproject.toml` and will be automatically included in the DXT package. Make sure all required dependencies are listed in the `dependencies` section.
+
+### Testing the Package
+
+After building, you can test the DXT package locally:
+
+```bash
+# Install the package in development mode
+pip install -e .
+
+# Test the MCP server directly
+python -m database_operations_mcp.main
+
+# Or test with the DXT CLI
+dxt run dist/database-operations-mcp.dxt
+
+# For debugging with verbose output
+DXT_DEBUG=1 dxt run dist/database-operations-mcp.dxt
+```
+
+### Distribution
+
+The built DXT package (`dist/database-operations-mcp.dxt`) can be distributed and installed on any system with DXT installed.
+
+To install the package on another system:
+
+```bash
+# Install DXT if not already installed
+pip install dxt
+
+# Install the package
+dxt install /path/to/database-operations-mcp.dxt
+
+# Or install from a URL
+dxt install https://example.com/path/to/database-operations-mcp.dxt
+
+# List installed packages
+dxt list
+
+# Run the installed package
+dxt run database-operations-mcp
+
+# Uninstall when done
+dxt uninstall database-operations-mcp
+```
+
+### Troubleshooting
+
+1. **Package Not Found**
+   - Ensure the package exists at the specified path
+   - Verify file permissions
+   - Check DXT version compatibility
+
+2. **Import Errors**
+   - Check if all dependencies are installed
+   - Verify PYTHONPATH includes the project root
+  
+3. **Debugging**
+   ```bash
+   # Enable debug logging
+   export DXT_DEBUG=1
+   
+   # Run with verbose output
+   dxt --verbose run dist/database-operations-mcp.dxt
+   ```
+
+4. **Common Issues**
+   - **Missing Dependencies**: Ensure all dependencies are listed in `pyproject.toml`
+   - **Path Issues**: Verify working directory and file paths in `manifest.json`
+   - **Version Conflicts**: Check for version conflicts in dependencies
 
 ## Installation
 

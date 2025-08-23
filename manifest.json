@@ -12,7 +12,12 @@
     "type": "python",
     "entry_point": "database_operations_mcp.main:main",
     "mcp_config": {
-      "command": "python -m database_operations_mcp.main"
+      "command": "python",
+      "args": ["-m", "database_operations_mcp.main"],
+      "cwd": "src",
+      "env": {
+        "PYTHONPATH": "${workspaceRoot}"
+      }
     }
   },
   "prompts": [
@@ -59,7 +64,7 @@
     {
       "name": "optimize_database_prompt",
       "description": "Optimize database performance",
-      "text": "Optimize the {database_name} database for better performance"
+      "text": "Optimize the performance of the {database_name} database"
     },
     {
       "name": "export_data_prompt",

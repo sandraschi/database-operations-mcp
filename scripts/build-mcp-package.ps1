@@ -1,24 +1,62 @@
-# Database Operations MCP - DXT Package Builder
-# This script builds and validates the DXT package for the database-operations-mcp server
+<#
+.SYNOPSIS
+    Builds, signs, and verifies MCP server packages using DXT.
 
+.DESCRIPTION
+    This script automates the process of building DXT packages for MCP servers.
+    It handles building, signing, and verifying the package in a single command.
+    The script is designed to be used across all MCP server repositories.
+
+.PARAMETER NoSign
+    Skip the package signing step. Useful for development or testing.
+
+.PARAMETER OutputDir
+    Specify a custom output directory for the built package. Defaults to './dist'.
+
+.PARAMETER Help
+    Show this help message and exit.
+
+.EXAMPLE
+    # Build and sign a package (default behavior)
+    .\scripts\build-mcp-package.ps1
+
+    # Build without signing
+    .\scripts\build-mcp-package.ps1 -NoSign
+
+    # Specify custom output directory
+    .\scripts\build-mcp-package.ps1 -OutputDir "C:\builds"
+
+.NOTES
+    - Requires DXT CLI to be installed and available in PATH
+    - The package name is derived from the project directory name
+    - The script will create the output directory if it doesn't exist
+#>
+
+[CmdletBinding()]
 param(
-    [switch]$NoSign = $false
+    [Parameter(Mandatory = $false)]
+    [switch]$NoSign = $false,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$OutputDir = "$PSScriptRoot\..\dist",
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$Help
 )
+
+# Show help if requested
+if ($Help) {
+    Get-Help $PSCommandPath -Detailed
+    exit 0
+}
 
 # Set error action preference
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$ProjectRoot = $PSScriptRoot
-$DistDir = Join-Path $ProjectRoot "dist"
-$PackageName = "database-operations-mcp"
-$OutputFile = Join-Path $DistDir "$PackageName.dxt"
-
-# Create dist directory if it doesn't exist
-if (-not (Test-Path -Path $DistDir)) {
-    Write-Host "Creating output directory: $DistDir"
-    New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
-}
+$ProjectRoot = Split-Path -Parent $PSScriptRoot
+$PackageName = Split-Path -Leaf $ProjectRoot
+$OutputFile = Join-Path $OutputDir "$PackageName.dxt"
 
 function Write-Header($message) {
     Write-Host "`n=== $message ===`n" -ForegroundColor Cyan
@@ -42,11 +80,12 @@ try {
     Write-Header "Validating manifest..."
     Push-Location $ProjectRoot
     
-    if (-not (Test-Path "manifest.json")) {
+    $manifestPath = Join-Path $ProjectRoot "manifest.json"
+    if (-not (Test-Path $manifestPath)) {
         Write-Error "manifest.json not found in project root"
     }
     
-    $manifest = Get-Content -Path "manifest.json" -Raw | ConvertFrom-Json
+    $manifest = Get-Content -Path $manifestPath -Raw | ConvertFrom-Json
     
     # Basic manifest validation
     $requiredFields = @("name", "version", "dxt_version", "server")
@@ -68,26 +107,28 @@ try {
     
     Write-Success "Manifest validation passed"
     
-    # Step 2: Build the DXT package
+    # Step 2: Create output directory if it doesn't exist
+    if (-not (Test-Path -Path $OutputDir)) {
+        Write-Host "Creating output directory: $OutputDir"
+        New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+    }
+    
+    # Step 3: Build the DXT package
     Write-Header "Building DXT package..."
-    
-    # Ensure we're in the project root
-    Set-Location $ProjectRoot
-    
-    # Set Python path to include the project root
-    $env:PYTHONPATH = $ProjectRoot
     
     # Clean previous build if exists
     if (Test-Path $OutputFile) {
         Remove-Item $OutputFile -Force
     }
     
+    # Set Python path to include the project root
+    $env:PYTHONPATH = $ProjectRoot
+    
     # Build the package
-    # Change to the project root and run dxt pack with just the output directory
-    $buildResult = dxt pack . $DistDir 2>&1
+    $buildResult = dxt pack . $OutputDir 2>&1
     
     # Rename the output file to include the package name
-    $defaultOutput = Join-Path $DistDir "package.dxt"
+    $defaultOutput = Join-Path $OutputDir "package.dxt"
     if (Test-Path $defaultOutput) {
         Rename-Item -Path $defaultOutput -NewName (Split-Path $OutputFile -Leaf) -Force
     }
@@ -101,10 +142,11 @@ try {
     }
     
     Write-Success "Successfully created DXT package: $OutputFile"
+    
+    # Step 4: Sign the package (unless --NoSign is specified)
     if ($NoSign) {
         Write-Warning "Skipping package signing as requested (--NoSign flag was used)"
     } else {
-        # Step 3: Sign the package
         Write-Header "Signing DXT package..."
         
         $signResult = dxt sign $OutputFile 2>&1
@@ -116,21 +158,19 @@ try {
         Write-Success "Package signed successfully"
     }
     
-    # Step 4: Verify the package
+    # Step 5: Verify the package
     Write-Header "Verifying DXT package..."
     $verifyResult = dxt verify $OutputFile 2>&1
     
     if ($LASTEXITCODE -ne 0) {
-        Write-Warning "Package validation failed: $validateResult"
-    } else {
-        Write-Success "Package validation passed"
+        Write-Error "Package verification failed: $verifyResult"
     }
+    
+    Write-Success "Package verification passed"
     
     # Final output
     Write-Host "`n🎉 DXT package created successfully!" -ForegroundColor Green
     Write-Host "Package: $OutputFile"
-    $fileInfo = Get-Item $OutputFile
-    Write-Host "Size: $([math]::Round($fileInfo.Length/1KB, 2)) KB"
     
 } catch {
     Write-Error "Build failed: $_"
