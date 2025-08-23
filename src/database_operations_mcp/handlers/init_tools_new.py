@@ -4,7 +4,7 @@ Database initialization and management tools.
 Provides tools for initializing, configuring, and managing database connections.
 """
 
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, List
 from fastmcp import FastMCP
 from ..services.database.connectors import (
     SQLiteConnector,
@@ -113,15 +113,29 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             Status of the operation
         """
-        if connection_name in DATABASE_CONNECTIONS:
-            try:
-                if hasattr(DATABASE_CONNECTIONS[connection_name]['connection'], 'close'):
-                    DATABASE_CONNECTIONS[connection_name]['connection'].close()
-                del DATABASE_CONNECTIONS[connection_name]
-                return {'status': 'success', 'message': f'Closed connection: {connection_name}'}
-            except Exception as e:
-                return {'status': 'error', 'message': f'Error closing connection: {str(e)}'}
-        return {'status': 'error', 'message': f'No such connection: {connection_name}'}
+        if connection_name not in DATABASE_CONNECTIONS:
+            return {
+                'status': 'error',
+                'message': f'No such connection: {connection_name}'
+            }
+            
+        try:
+            conn = DATABASE_CONNECTIONS[connection_name]
+            if hasattr(conn['connector'], 'disconnect'):
+                await conn['connector'].disconnect()
+            
+            del DATABASE_CONNECTIONS[connection_name]
+            return {
+                'status': 'success',
+                'message': f'Successfully closed connection: {connection_name}'
+            }
+        except Exception as e:
+            logger.exception(f"Error closing connection {connection_name}")
+            return {
+                'status': 'error',
+                'message': f'Error closing connection {connection_name}',
+                'error': str(e)
+            }
     
     @mcp.tool()
     @HelpSystem.register_tool
@@ -133,7 +147,7 @@ def register_tools(mcp: FastMCP) -> None:
         
         Args:
             connection_name: Name of the database connection
-            schema_definition: Schema definition dictionary
+            schema_definition: Schema definition (format depends on database type)
             
         Returns:
             Status of schema initialization
@@ -143,36 +157,32 @@ def register_tools(mcp: FastMCP) -> None:
                 'status': 'error',
                 'message': f'No such connection: {connection_name}'
             }
-    
-        connector = DATABASE_CONNECTIONS[connection_name]['connector']
-        db_type = DATABASE_CONNECTIONS[connection_name]['type']
-        
-        try:
-            if db_type == 'sqlite':
-                # Example for SQLite
-                if schema_definition and 'tables' in schema_definition:
-                    for table_def in schema_definition['tables']:
-                        await connector.execute_query(table_def['create_statement'])
-                        
-                        if 'indexes' in table_def:
-                            for index_def in table_def['indexes']:
-                                await connector.execute_query(index_def)
-                    
-                    return {'status': 'success', 'message': 'Schema initialized successfully'}
-                
-                return {'status': 'error', 'message': 'No schema definition provided'}
-                
-            return {'status': 'error', 'message': f'Unsupported database type: {db_type}'}
             
+        if not schema_definition:
+            return {
+                'status': 'error',
+                'message': 'No schema definition provided'
+            }
+            
+        try:
+            conn = DATABASE_CONNECTIONS[connection_name]
+            if hasattr(conn['connector'], 'init_schema'):
+                result = await conn['connector'].init_schema(schema_definition)
+                return {
+                    'status': 'success',
+                    'message': 'Schema initialized successfully',
+                    'result': result
+                }
+            else:
+                return {
+                    'status': 'error',
+                    'message': f'Database type {conn["type"]} does not support schema initialization'
+                }
         except Exception as e:
-            logger.exception(f'Error initializing schema: {str(e)}')
+            logger.exception(f"Error initializing schema for {connection_name}")
             return {
                 'status': 'error',
                 'message': f'Error initializing schema: {str(e)}'
             }
-            
-        return {
-            'status': 'success',
-            'message': 'No schema definition provided, using existing schema',
-            'current_schema': await connector.get_schema()
-        }
+    
+    logger.info("Registered database initialization tools")

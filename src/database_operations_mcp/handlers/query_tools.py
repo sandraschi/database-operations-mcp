@@ -8,18 +8,23 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from ..database_manager import db_manager, DatabaseType
+from .help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
-def register_tools(mcp):
-    """Register query execution tools with the MCP server."""
+def register_tools(mcp: 'FastMCP') -> None:
+    """Register query execution tools with the MCP server.
     
+    Args:
+        mcp: The FastMCP instance to register tools with
+    """
     @mcp.tool()
-    def execute_query(
+    @HelpSystem.register_tool
+    async def execute_query(
         connection_name: str,
         query: str,
         parameters: Optional[Dict[str, Any]] = None,
-        limit: Optional[int] = 1000
+        limit: int = 1000
     ) -> Dict[str, Any]:
         """Execute a query on the specified database connection.
         
@@ -28,6 +33,9 @@ def register_tools(mcp):
             query: SQL query or database-specific query to execute
             parameters: Optional query parameters for prepared statements
             limit: Maximum number of rows to return (default: 1000)
+            
+        Returns:
+            Dictionary with query results and metadata
         """
         try:
             connector = db_manager.get_connector(connection_name)
@@ -40,6 +48,8 @@ def register_tools(mcp):
             # Add limit to query if not already present (database-specific logic needed)
             limited_query = _apply_query_limit(query, limit, connector.database_type)
             
+            # Execute the query (assuming connector.execute_query is synchronous)
+            # In a real async context, you might need to use asyncio.to_thread here
             result = connector.execute_query(limited_query, parameters)
             
             return {
@@ -60,7 +70,8 @@ def register_tools(mcp):
             }
 
     @mcp.tool()
-    def quick_data_sample(
+    @HelpSystem.register_tool
+    async def quick_data_sample(
         connection_name: str,
         table_name: str,
         database_name: Optional[str] = None,
@@ -73,6 +84,9 @@ def register_tools(mcp):
             table_name: Name of the table/collection to sample
             database_name: Optional database name
             sample_size: Number of rows to retrieve (default: 10)
+            
+        Returns:
+            Dictionary with sample data and metadata
         """
         try:
             connector = db_manager.get_connector(connection_name)
@@ -90,6 +104,7 @@ def register_tools(mcp):
                 sample_size
             )
             
+            # Execute the query (assuming connector.execute_query is synchronous)
             result = connector.execute_query(query)
             
             return {
@@ -110,12 +125,13 @@ def register_tools(mcp):
             }
 
     @mcp.tool()
-    def export_query_results(
+    @HelpSystem.register_tool
+    async def export_query_results(
         connection_name: str,
         query: str,
         export_format: str = "json",
         parameters: Optional[Dict[str, Any]] = None,
-        limit: Optional[int] = 10000
+        limit: int = 10000
     ) -> Dict[str, Any]:
         """Execute query and export results in specified format.
         
@@ -124,7 +140,10 @@ def register_tools(mcp):
             query: Query to execute
             export_format: Output format (json, csv, excel)
             parameters: Optional query parameters
-            limit: Maximum rows to export
+            limit: Maximum rows to export (default: 10000)
+            
+        Returns:
+            Dictionary with exported data and metadata
         """
         try:
             connector = db_manager.get_connector(connection_name)
@@ -136,6 +155,8 @@ def register_tools(mcp):
             
             # Execute query with limit
             limited_query = _apply_query_limit(query, limit, connector.database_type)
+            
+            # Execute the query (assuming connector.execute_query is synchronous)
             result = connector.execute_query(limited_query, parameters)
             
             # Format results based on export format

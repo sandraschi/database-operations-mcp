@@ -25,42 +25,32 @@ def register_tools(mcp: FastMCP) -> None:
     """
     @mcp.tool()
     @HelpSystem.register_tool
-    async def execute_query(
-        query: str,
-        parameters: Optional[Union[Dict[str, Any], List[Any]]] = None,
+    async def execute_transaction(
+        queries: List[Dict[str, Any]],
         connection_name: str = "default"
     ) -> Dict[str, Any]:
-        """Execute a read-only query on the database.
+        """Execute multiple queries in a transaction.
         
         Args:
-            query: SQL or database-specific query string
-            parameters: Parameters for parameterized queries. Can be a dictionary for named
-                      parameters or a list for positional parameters.
-            connection_name: Name of the database connection to use. Defaults to 'default'.
+            queries: List of query objects with 'query' and 'parameters' keys
+            connection_name: Name of the database connection to use
             
         Returns:
-            A dictionary containing:
-            - status: 'success' or 'error'
-            - data: Query results (for successful queries)
-            - rowcount: Number of rows affected/returned (for successful queries)
-            - message: Error message (if an error occurred)
-            - error_type: Type of error (if an error occurred)
+            Dict containing the results of all queries and transaction status
             
         Example:
             ```python
-            # Using named parameters
-            result = await execute_query(
-                "SELECT * FROM users WHERE id = :user_id",
-                {"user_id": 1},
-                "postgres"
-            )
-            
-            # Using positional parameters
-            result = await execute_query(
-                "SELECT * FROM users WHERE id = ?",
-                [1],
-                "sqlite"
-            )
+            queries = [
+                {
+                    'query': 'INSERT INTO users (name, email) VALUES (?, ?)',
+                    'parameters': ['John Doe', 'john@example.com']
+                },
+                {
+                    'query': 'UPDATE counters SET value = value + 1 WHERE name = ?',
+                    'parameters': ['user_count']
+                }
+            ]
+            result = await execute_transaction(queries, 'sqlite')
             ```
         """
         from .init_tools import DATABASE_CONNECTIONS
@@ -71,32 +61,51 @@ def register_tools(mcp: FastMCP) -> None:
                 'message': f'No such connection: {connection_name}',
                 'error_type': 'ConnectionError'
             }
+            
+        connector = DATABASE_CONNECTIONS[connection_name].get('connector')
+        if not connector:
+            return {
+                'status': 'error',
+                'message': f'No connector found for connection: {connection_name}',
+                'error_type': 'ConnectionError'
+            }
+        
+        results = {'status': 'success', 'results': []}
         
         try:
-            connector = DATABASE_CONNECTIONS[connection_name]['connector']
-            result: QueryResult = await connector.execute_query(query, parameters or {})
-            return {
-                'status': 'success',
-                'data': result.data,
-                'rowcount': result.rowcount,
-                'execution_time': result.execution_time,
-                'columns': result.columns
-            }
+            async with await connector.connection() as conn:
+                for query_info in queries:
+                    query = query_info.get('query')
+                    parameters = query_info.get('parameters', {})
+                    
+                    if not query:
+                        raise ValueError("Query is required for each operation")
+                        
+                    result = await conn.execute_query(query, parameters)
+                    results['results'].append({
+                        'status': 'success',
+                        'data': result.data,
+                        'rowcount': result.rowcount,
+                        'execution_time': result.execution_time,
+                        'columns': result.columns
+                    })
+            
+            return results
+            
         except QueryError as e:
             return {
                 'status': 'error',
-                'message': 'Query execution failed',
+                'message': 'Transaction failed',
                 'error': str(e),
-                'query': query,
-                'parameters': parameters
+                'completed_queries': len(results['results'])
             }
+            
         except Exception as e:
-            logger.exception("Error executing query")
+            logger.exception("Error executing transaction")
             return {
                 'status': 'error',
                 'message': f'Unexpected error: {str(e)}',
-                'query': query,
-                'parameters': parameters
+                'completed_queries': len(results['results'])
             }
     
     @mcp.tool()
@@ -169,7 +178,6 @@ def register_tools(mcp: FastMCP) -> None:
     @mcp.tool()
     @HelpSystem.register_tool
     async def batch_execute(
-        self,
         queries: List[Dict[str, Any]],
         connection_name: str = "default"
     ) -> Dict[str, Any]:

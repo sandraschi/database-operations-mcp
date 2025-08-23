@@ -220,10 +220,10 @@ def get_supported_databases() -> List[Dict[str, Any]]:
 
 def create_connector(database_type: str, connection_config: Dict[str, Any]) -> Optional[BaseDatabaseConnector]:
     """Create a database connector instance."""
-    from .services.database.connectors import get_connector_class
+    from .services.database.connectors import AVAILABLE_CONNECTORS
     
     try:
-        connector_class = get_connector_class(database_type)
+        connector_class = AVAILABLE_CONNECTORS.get(database_type.lower())
         if not connector_class:
             logging.error(f"Unsupported database type: {database_type}")
             return None

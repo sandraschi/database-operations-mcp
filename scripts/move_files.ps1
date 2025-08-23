@@ -39,7 +39,10 @@ from fastapi import FastAPI
 from fastmcp import FastMCP
 
 app = FastAPI()
-mcp = FastMCP("database-operations")
+mcp = FastMCP(
+    name="database-operations",
+    version="0.1.0"
+)
 
 # Import and register handlers
 from database_operations.handlers import connection_tools, query_tools, schema_tools, management_tools

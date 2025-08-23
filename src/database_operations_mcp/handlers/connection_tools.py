@@ -15,11 +15,11 @@ from typing import Any, Dict, List, Optional, TypedDict, Union, Literal
 from fastmcp import FastMCP
 from .help_tools import HelpSystem
 
-from database_operations_mcp.database_manager import (
+from ..database_manager import (
     db_manager, 
     create_connector, 
     get_supported_databases,
-    DatabaseConnector
+    BaseDatabaseConnector
 )
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ def register_tools(mcp: FastMCP) -> None:
         mcp: The FastMCP instance to register tools with.
     """
     @mcp.tool()
-    @HelpSystem.register_tool(category='connection')
+    @HelpSystem.register_tool
     async def list_supported_databases() -> Dict[str, Any]:
         """List all supported database types with categories and descriptions.
         

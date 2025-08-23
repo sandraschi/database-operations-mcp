@@ -7,7 +7,10 @@ try:
     print("FastMCP imported successfully")
     
     # Create instance
-    mcp = FastMCP("test")
+    mcp = FastMCP(
+        name="test",
+        version="0.1.0"
+    )
     print("FastMCP instance created")
     
     # Check available methods

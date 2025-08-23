@@ -265,7 +265,10 @@ python -m database_operations_mcp
 from fastmcp import FastMCP
 
 # Server creation
-mcp = FastMCP("server-name")
+mcp = FastMCP(
+    name="server-name",
+    version="1.0.0"
+)
 
 # Tool registration (Method 1 - Recommended)
 def register_tools(mcp):

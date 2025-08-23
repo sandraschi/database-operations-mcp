@@ -7,18 +7,27 @@ Provides tools for querying and managing SQLite FTS5/4 virtual tables.
 import sqlite3
 import logging
 from typing import Dict, List, Optional, Any
+from fastmcp import FastMCP
 from .help_tools import HelpSystem
-from .init_tools import DATABASE_CONNECTIONS
 
 logger = logging.getLogger(__name__)
 
-def register_tools(mcp):
-    """Register FTS tools with the MCP server."""
+# This will be set when the tools are registered
+DATABASE_CONNECTIONS = None
+
+def register_tools(mcp: FastMCP) -> None:
+    """Register FTS tools with the MCP server.
+    
+    Args:
+        mcp: The FastMCP instance to register tools with
+    """
+    global DATABASE_CONNECTIONS
+    from . import init_tools
+    DATABASE_CONNECTIONS = init_tools.DATABASE_CONNECTIONS
     
     @mcp.tool()
-    @HelpSystem.register_tool(category='fts')
+    @HelpSystem.register_tool
     async def fts_search(
-        self,
         query: str,
         connection_name: str = "default",
         table: str = "fts_index",

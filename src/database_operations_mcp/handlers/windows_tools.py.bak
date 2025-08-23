@@ -17,70 +17,8 @@ from typing import Dict, List, Optional, Any, Union, Tuple
 from datetime import datetime
 from .help_tools import HelpSystem
 
-# Common Windows database locations
-WINDOWS_DB_PATHS = {
-    'chrome_history': [
-        os.path.expandvars(r'%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\History'),
-        os.path.expandvars(r'%USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History')
-    ],
-    'firefox_history': [
-        os.path.expanduser(r'~\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\*.default-release\\places.sqlite'),
-        os.path.expanduser(r'~\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\*.default\\places.sqlite')
-    ],
-    'edge_history': [
-        os.path.expandvars(r'%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Default\\History'),
-        os.path.expandvars(r'%USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\History')
-    ],
-    'brave_history': [
-        os.path.expandvars(r'%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History'),
-        os.path.expandvars(r'%USERPROFILE%\\AppData\\Local\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History')
-    ],
-    'outlook': [
-        os.path.expandvars(r'%LOCALAPPDATA%\\Microsoft\\Outlook'),
-        os.path.expandvars(r'%USERPROFILE%\\AppData\\Local\\Microsoft\\Outlook')
-    ],
-    'windows_thumbnails': [
-        os.path.expandvars(r'%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer')
-    ],
-    'windows_search': [
-        r'C:\\ProgramData\\Microsoft\\Search\\Data\\Applications\\Windows'
-    ]
-}
-
-# Plex-specific paths
-PLEX_PATHS = {
-    'metadata': [
-        os.path.expandvars(r'%LOCALAPPDATA%\\Plex Media Server\\Metadata'),
-        r'C:\\Plex\\Plex Media Server\\Metadata',
-        os.path.expandvars(r'%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db')
-    ],
-    'cache': [
-        os.path.expandvars(r'%LOCALAPPDATA%\\Plex Media Server\\Cache'),
-        r'C:\\Plex\\Plex Media Server\\Cache'
-    ],
-    'logs': [
-        os.path.expandvars(r'%LOCALAPPDATA%\\Plex Media Server\\Logs'),
-        r'C:\\Plex\\Plex Media Server\\Logs'
-    ]
-}
-
-def _find_windows_db(db_type: str) -> Optional[Path]:
-    """Find a Windows database file by type."""
-    for path in WINDOWS_DB_PATHS.get(db_type, []):
-        if db_type == 'firefox_history':
-            # Special handling for Firefox profiles
-            profiles_path = Path(path)
-            if profiles_path.exists():
-                for profile in profiles_path.iterdir():
-                    if profile.is_dir() and 'release' in profile.name.lower():
-                        db_path = profile / 'places.sqlite'
-                        if db_path.exists():
-                            return db_path
-        else:
-            db_path = Path(path)
-            if db_path.exists():
-                return db_path
-    return None
+# Set up logging
+logger = logging.getLogger(__name__)
 
 def register_tools(mcp: 'FastMCP') -> None:
     """Register all Windows tools with the MCP server.
@@ -382,5 +320,67 @@ def register_tools(mcp: 'FastMCP') -> None:
             if 'conn' in locals():
                 conn.close()
 
-# Set up logging
-logger = logging.getLogger(__name__)
+# Common Windows database locations
+WINDOWS_DB_PATHS = {
+    'chrome_history': [
+        os.path.expandvars(r'%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\History'),
+        os.path.expandvars(r'%USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History')
+    ],
+    'firefox_history': [
+        os.path.expanduser(r'~\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\*.default-release\\places.sqlite'),
+        os.path.expanduser(r'~\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\*.default\\places.sqlite')
+    ],
+    'edge_history': [
+        os.path.expandvars(r'%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Default\\History'),
+        os.path.expandvars(r'%USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\History')
+    ],
+    'brave_history': [
+        os.path.expandvars(r'%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History'),
+        os.path.expandvars(r'%USERPROFILE%\\AppData\\Local\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History')
+    ],
+    'outlook': [
+        os.path.expandvars(r'%LOCALAPPDATA%\\Microsoft\\Outlook'),
+        os.path.expandvars(r'%USERPROFILE%\\AppData\\Local\\Microsoft\\Outlook')
+    ],
+    'windows_thumbnails': [
+        os.path.expandvars(r'%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer')
+    ],
+    'windows_search': [
+        r'C:\\ProgramData\\Microsoft\\Search\\Data\\Applications\\Windows'
+    ]
+}
+
+# Plex-specific paths
+PLEX_PATHS = {
+    'metadata': [
+        os.path.expandvars(r'%LOCALAPPDATA%\\Plex Media Server\\Metadata'),
+        r'C:\\Plex\\Plex Media Server\\Metadata',
+        os.path.expandvars(r'%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db')
+    ],
+    'cache': [
+        os.path.expandvars(r'%LOCALAPPDATA%\\Plex Media Server\\Cache'),
+        r'C:\\Plex\\Plex Media Server\\Cache'
+    ],
+    'logs': [
+        os.path.expandvars(r'%LOCALAPPDATA%\\Plex Media Server\\Logs'),
+        r'C:\\Plex\\Plex Media Server\\Logs'
+    ]
+}
+
+def _find_windows_db(db_type: str) -> Optional[Path]:
+    """Find a Windows database file by type."""
+    for path in WINDOWS_DB_PATHS.get(db_type, []):
+        if db_type == 'firefox_history':
+            # Special handling for Firefox profiles
+            profiles_path = Path(path)
+            if profiles_path.exists():
+                for profile in profiles_path.iterdir():
+                    if profile.is_dir() and 'release' in profile.name.lower():
+                        db_path = profile / 'places.sqlite'
+                        if db_path.exists():
+                            return db_path
+        else:
+            db_path = Path(path)
+            if db_path.exists():
+                return db_path
+    return None

@@ -10,17 +10,12 @@ import logging
 import re
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple, Union
-from fastmcp import mcp_tool
+from typing import Dict, List, Optional, Any, Tuple, Union, TypeVar, Callable
 from .help_tools import HelpSystem
 from .init_tools import DATABASE_CONNECTIONS
 
-def register_tools(mcp):
-    """Register all Calibre tools with the MCP server."""
-    mcp.tool()(search_calibre_library)
-    mcp.tool()(get_calibre_book)
-    
-    logger.info("Registered Calibre tools")
+# Type variable for function type
+F = TypeVar('F', bound=Callable[..., Any])
 
 logger = logging.getLogger(__name__)
 
@@ -29,339 +24,318 @@ def _get_fts_db_path(library_path: Union[str, Path]) -> Path:
     lib_path = Path(library_path)
     return lib_path / 'full-text-search.db'
 
-@HelpSystem.register_tool(category='calibre')
-@mcp_tool()
-async def search_calibre_library(
-    query: str,
-    library_path: str,
-    search_fields: Optional[List[str]] = None,
-    limit: int = 20,
-    offset: int = 0,
-    highlight: bool = True
-) -> Dict[str, Any]:
-    """
-    Search for text in a Calibre library.
+def register_tools(mcp: 'FastMCP') -> None:
+    """Register all Calibre tools with the MCP server.
     
     Args:
-        query: The search query (supports FTS5 syntax)
-        library_path: Path to the Calibre library directory
-        search_fields: Fields to search in ['title', 'authors', 'tags', 'comments', 'series', 'publisher']
-        limit: Maximum number of results to return
-        offset: Number of results to skip (for pagination)
-        highlight: Whether to include highlighted snippets
-        
-    Returns:
-        Dictionary containing search results and metadata
+        mcp: The FastMCP instance to register tools with
     """
-    if not search_fields:
-        search_fields = ['title', 'authors', 'tags', 'comments']
-    
-    # Convert library path to Path object and find metadata.db
-    lib_path = Path(library_path)
-    db_path = lib_path / 'metadata.db'
-    
-    if not db_path.exists():
-        return {
-            'status': 'error',
-            'message': f'No metadata.db found in {library_path}'
-        }
-    
-    try:
-        # Connect to the Calibre database
-        conn = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
-        conn.row_factory = sqlite3.Row
+    @mcp.tool()
+    @HelpSystem.register_tool
+    async def search_calibre_library(
+        query: str,
+        library_path: str,
+        search_fields: Optional[List[str]] = None,
+        limit: int = 20,
+        offset: int = 0,
+        highlight: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Search for text in a Calibre library.
         
-        # Build the search conditions
-        conditions = []
-        params = []
+        Args:
+            query: The search query (supports FTS5 syntax)
+            library_path: Path to the Calibre library directory
+            search_fields: Fields to search in ['title', 'authors', 'tags', 'comments', 'series', 'publisher']
+            limit: Maximum number of results to return
+            offset: Number of results to skip (for pagination)
+            highlight: Whether to include highlighted snippets
+            
+        Returns:
+            Dictionary containing search results and metadata
+        """
+        if search_fields is None:
+            search_fields = ['title', 'authors', 'tags', 'comments', 'series', 'publisher']
+            
+        # Convert library path to Path object and find metadata.db
+        lib_path = Path(library_path)
+        db_path = lib_path / 'metadata.db'
         
-        # Handle different search fields
-        if 'title' in search_fields:
-            conditions.append("books.title LIKE ?")
-            params.append(f'%{query}%')
-            
-        if 'authors' in search_fields:
-            conditions.append("""
-                EXISTS (
-                    SELECT 1 FROM authors, books_authors_link 
-                    WHERE authors.id = books_authors_link.author 
-                    AND books_authors_link.book = books.id
-                    AND authors.name LIKE ?
-                )""")
-            params.append(f'%{query}%')
-            
-        if 'tags' in search_fields:
-            conditions.append("""
-                EXISTS (
-                    SELECT 1 FROM tags, books_tags_link 
-                    WHERE tags.id = books_tags_link.tag 
-                    AND books_tags_link.book = books.id
-                    AND tags.name LIKE ?
-                )""")
-            params.append(f'%{query}%')
-            
-        if 'comments' in search_fields:
-            conditions.append("comments.text LIKE ?")
-            params.append(f'%{query}%')
-            
-        if 'series' in search_fields:
-            conditions.append("""
-                series.name LIKE ? AND
-                books.series_index IS NOT NULL""")
-            params.append(f'%{query}%')
-            
-        if 'publisher' in search_fields:
-            conditions.append("publishers.name LIKE ?")
-            params.append(f'%{query}%')
-        
-        if not conditions:
+        if not db_path.exists():
             return {
                 'status': 'error',
-                'message': 'No valid search fields specified'
+                'message': f'Calibre library not found at {db_path}'
             }
-        
-        where_clause = ' OR '.join(conditions)
-        
-        # Build the query
-        sql = f"""
-        SELECT 
-            books.id,
-            books.title,
-            (SELECT GROUP_CONCAT(authors.name, ', ') 
-             FROM authors, books_authors_link 
-             WHERE authors.id = books_authors_link.author 
-             AND books_authors_link.book = books.id) as authors,
-            (SELECT GROUP_CONCAT(tags.name, ', ') 
-             FROM tags, books_tags_link 
-             WHERE tags.id = books_tags_link.tag 
-             AND books_tags_link.book = books.id) as tags,
-            series.name as series,
-            books.series_index,
-            publishers.name as publisher,
-            books.pubdate,
-            comments.text as comments,
-            data.format,
-            data.name as filename
-        FROM books
-        LEFT JOIN comments ON comments.book = books.id
-        LEFT JOIN books_series_link ON books_series_link.book = books.id
-        LEFT JOIN series ON series.id = books_series_link.series
-        LEFT JOIN books_publishers_link ON books_publishers_link.book = books.id
-        LEFT JOIN publishers ON publishers.id = books_publishers_link.publisher
-        LEFT JOIN data ON data.book = books.id
-        WHERE {where_clause}
-        GROUP BY books.id
-        ORDER BY books.sort
-        LIMIT ? OFFSET ?
-        """
-        
-        # Add limit and offset to params
-        params.extend([limit, offset])
-        
-        # Execute the query
-        cursor = conn.cursor()
-        cursor.execute(sql, params)
-        
-        # Get total count for pagination
-        count_sql = f"""
-        SELECT COUNT(DISTINCT books.id) as total
-        FROM books
-        LEFT JOIN comments ON comments.book = books.id
-        LEFT JOIN books_series_link ON books_series_link.book = books.id
-        LEFT JOIN series ON series.id = books_series_link.series
-        LEFT JOIN books_publishers_link ON books_publishers_link.book = books.id
-        LEFT JOIN publishers ON publishers.id = books_publishers_link.publisher
-        WHERE {where_clause}
-        """
-        
-        cursor.execute(count_sql, params[:-2])  # Exclude limit and offset
-        total = cursor.fetchone()[0]
-        
-        # Process results
-        results = []
-        for row in cursor.fetchall():
-            book = dict(row)
             
-            # Format the path to the book files
-            author = book.get('authors', 'Unknown').split(',')[0].strip()
-            title = book.get('title', 'Unknown')
-            book_path = lib_path / author / title / f"{title} - {author}.{book['format']}"
+        try:
+            # Connect to the database
+            conn = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
             
-            book['path'] = str(book_path)
+            # Build the query
+            fields = []
+            params = []
             
-            # Add highlights if requested
-            if highlight:
-                book['highlights'] = {}
-                for field in search_fields:
-                    if field in ['title', 'comments'] and book.get(field):
-                        book['highlights'][field] = book[field].replace(
-                            query, f'<b>{query}</b>'
-                        )
+            # Search in specified fields
+            for field in search_fields:
+                if field == 'title':
+                    fields.append("b.title LIKE ?")
+                    params.append(f'%{query}%')
+                elif field == 'authors':
+                    fields.append("a.name LIKE ?")
+                    params.append(f'%{query}%')
+                elif field == 'tags':
+                    fields.append("t.name LIKE ?")
+                    params.append(f'%{query}%')
+                elif field == 'comments':
+                    fields.append("b.comments LIKE ?")
+                    params.append(f'%{query}%')
+                elif field == 'series':
+                    fields.append("s.name LIKE ?")
+                    params.append(f'%{query}%')
+                elif field == 'publisher':
+                    fields.append("b.publisher LIKE ?")
+                    params.append(f'%{query}%')
             
-            results.append(book)
-        
-        return {
-            'status': 'success',
-            'results': results,
-            'total': total,
-            'limit': limit,
-            'offset': offset,
-            'query': query
-        }
-        
-    except sqlite3.Error as e:
-        return {
-            'status': 'error',
-            'message': f'Database error: {str(e)}'
-        }
-    except Exception as e:
-        return {
-            'status': 'error',
-            'message': f'Error searching Calibre library: {str(e)}'
-        }
-    finally:
-        conn.close()
+            # Build the SQL query
+            sql = """
+            SELECT DISTINCT b.id, b.title, b.sort, b.timestamp, b.pubdate, b.series_index,
+                   b.author_sort, b.isbn, b.lccn, b.path, b.flags, b.uuid,
+                   b.has_cover, b.last_modified
+            FROM books b
+            LEFT JOIN books_authors_link bal ON b.id = bal.book
+            LEFT JOIN authors a ON bal.author = a.id
+            LEFT JOIN books_tags_link btl ON b.id = btl.book
+            LEFT JOIN tags t ON btl.tag = t.id
+            LEFT JOIN books_series_link bsl ON b.id = bsl.book
+            LEFT JOIN series s ON bsl.series = s.id
+            """
+            
+            if fields:
+                sql += " WHERE (" + " OR ".join(fields) + ")"
+            
+            # Add ordering and limiting
+            sql += " ORDER BY b.sort"
+            sql += f" LIMIT {limit} OFFSET {offset}"
+            
+            # Execute the query
+            cursor.execute(sql, params)
+            results = [dict(row) for row in cursor.fetchall()]
+            
+            # Get total count for pagination
+            count_sql = "SELECT COUNT(DISTINCT b.id) as count FROM books b"
+            if fields:
+                count_sql += " LEFT JOIN books_authors_link bal ON b.id = bal.book"
+                count_sql += " LEFT JOIN authors a ON bal.author = a.id"
+                count_sql += " LEFT JOIN books_tags_link btl ON b.id = btl.book"
+                count_sql += " LEFT JOIN tags t ON btl.tag = t.id"
+                count_sql += " LEFT JOIN books_series_link bsl ON b.id = bsl.book"
+                count_sql += " LEFT JOIN series s ON bsl.series = s.id"
+                count_sql += " WHERE (" + " OR ".join(fields) + ")"
+            
+            cursor.execute(count_sql, params)
+            total_count = cursor.fetchone()[0]
+            
+            # Close the connection
+            conn.close()
+            
+            # Format the results
+            formatted_results = []
+            for result in results:
+                # Add the book path
+                result['path'] = str(lib_path / result['path'])
+                
+                # Add the cover path if it exists
+                cover_path = lib_path / result['path'] / 'cover.jpg'
+                if cover_path.exists():
+                    result['cover_path'] = str(cover_path)
+                
+                formatted_results.append(result)
+            
+            return {
+                'status': 'success',
+                'query': query,
+                'results': formatted_results,
+                'total_count': total_count,
+                'offset': offset,
+                'limit': limit
+            }
+            
+        except Exception as e:
+            logger.error(f"Error searching Calibre library: {str(e)}")
+            return {
+                'status': 'error',
+                'message': f'Error searching Calibre library: {str(e)}'
+            }
 
-@HelpSystem.register_tool(category='calibre')
-@mcp_tool()
-async def get_calibre_book(
-    book_id: int,
-    library_path: str
-) -> Dict[str, Any]:
-    """
-    Get detailed information about a specific book in the Calibre library.
-    
-    Args:
-        book_id: The ID of the book to retrieve
-        library_path: Path to the Calibre library directory
+    @mcp.tool()
+    @HelpSystem.register_tool
+    async def get_calibre_book(
+        book_id: int,
+        library_path: str
+    ) -> Dict[str, Any]:
+        """
+        Get detailed information about a specific book in the Calibre library.
         
-    Returns:
-        Dictionary containing book details
-    """
-    lib_path = Path(library_path)
-    db_path = lib_path / 'metadata.db'
-    
-    if not db_path.exists():
-        return {
-            'status': 'error',
-            'message': f'No metadata.db found in {library_path}'
-        }
-    
-    try:
-        conn = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        Args:
+            book_id: The ID of the book to retrieve
+            library_path: Path to the Calibre library directory
+            
+        Returns:
+            Dictionary containing book details
+        """
+        lib_path = Path(library_path)
+        db_path = lib_path / 'metadata.db'
         
-        # Get book details
-        cursor.execute("""
-        SELECT 
-            books.*,
-            comments.text as comments,
-            series.name as series_name,
-            series.id as series_id,
-            publishers.name as publisher_name,
-            publishers.id as publisher_id,
-            (SELECT GROUP_CONCAT(authors.name, ' & ') 
-             FROM authors, books_authors_link 
-             WHERE authors.id = books_authors_link.author 
-             AND books_authors_link.book = books.id) as authors,
-            (SELECT GROUP_CONCAT(authors.id) 
-             FROM authors, books_authors_link 
-             WHERE authors.id = books_authors_link.author 
-             AND books_authors_link.book = books.id) as author_ids
-        FROM books
-        LEFT JOIN comments ON comments.book = books.id
-        LEFT JOIN books_series_link ON books_series_link.book = books.id
-        LEFT JOIN series ON series.id = books_series_link.series
-        LEFT JOIN books_publishers_link ON books_publishers_link.book = books.id
-        LEFT JOIN publishers ON publishers.id = books_publishers_link.publisher
-        WHERE books.id = ?
-        """, (book_id,))
-        
-        book = dict(cursor.fetchone())
-        
-        if not book:
+        if not db_path.exists():
             return {
                 'status': 'error',
-                'message': f'Book with ID {book_id} not found'
+                'message': f'Calibre library not found at {db_path}'
             }
-        
-        # Get formats
-        cursor.execute("""
-        SELECT format, name as filename, uncompressed_size as size
-        FROM data
-        WHERE book = ?
-        """, (book_id,))
-        
-        book['formats'] = [dict(row) for row in cursor.fetchall()]
-        
-        # Get tags
-        cursor.execute("""
-        SELECT tags.name, tags.id
-        FROM tags, books_tags_link
-        WHERE tags.id = books_tags_link.tag
-        AND books_tags_link.book = ?
-        """, (book_id,))
-        
-        book['tags'] = [dict(row) for row in cursor.fetchall()]
-        
-        # Get identifiers (ISBN, etc.)
-        cursor.execute("""
-        SELECT type, val
-        FROM identifiers
-        WHERE book = ?
-        """, (book_id,))
-        
-        book['identifiers'] = {row[0]: row[1] for row in cursor.fetchall()}
-        
-        # Get custom columns
-        cursor.execute("""
-        SELECT label, name
-        FROM custom_columns
-        """)
-        
-        custom_columns = cursor.fetchall()
-        book['custom_columns'] = {}
-        
-        for col in custom_columns:
-            label, name = col
-            cursor.execute(f"""
-            SELECT value
-            FROM custom_column_{label}
-            WHERE book = ?
+            
+        try:
+            # Connect to the database
+            conn = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            # Get book details
+            cursor.execute("""
+                SELECT * FROM books WHERE id = ?
             """, (book_id,))
             
-            result = cursor.fetchone()
-            if result:
-                book['custom_columns'][name] = result[0]
-        
-        # Generate file paths
-        author = book.get('authors', 'Unknown').split('&')[0].strip()
-        title = book.get('title', 'Unknown')
-        
-        book['files'] = {}
-        for fmt in book['formats']:
-            book['files'][fmt['format']] = str(
-                lib_path / author / title / f"{title} - {author}.{fmt['format']}"
-            )
-        
-        # Get cover path
-        book['cover_path'] = str(lib_path / author / title / 'cover.jpg')
-        
-        return {
-            'status': 'success',
-            'book': book
-        }
-        
-    except sqlite3.Error as e:
-        return {
-            'status': 'error',
-            'message': f'Database error: {str(e)}'
-        }
-    except Exception as e:
-        return {
-            'status': 'error',
-            'message': f'Error getting book details: {str(e)}'
-        }
-    finally:
-        conn.close()
+            book = cursor.fetchone()
+            
+            if not book:
+                return {
+                    'status': 'error',
+                    'message': f'Book with ID {book_id} not found'
+                }
+            
+            # Convert to dict
+            book_data = dict(book)
+            
+            # Get authors
+            cursor.execute("""
+                SELECT a.id, a.name, a.sort, a.link
+                FROM authors a
+                JOIN books_authors_link bal ON a.id = bal.author
+                WHERE bal.book = ?
+                ORDER BY bal.id
+            """, (book_id,))
+            
+            authors = [dict(row) for row in cursor.fetchall()]
+            book_data['authors'] = authors
+            
+            # Get tags
+            cursor.execute("""
+                SELECT t.id, t.name
+                FROM tags t
+                JOIN books_tags_link btl ON t.id = btl.tag
+                WHERE btl.book = ?
+                ORDER BY t.name
+            """, (book_id,))
+            
+            tags = [dict(row) for row in cursor.fetchall()]
+            book_data['tags'] = tags
+            
+            # Get series
+            cursor.execute("""
+                SELECT s.id, s.name, bsl.series_index
+                FROM series s
+                JOIN books_series_link bsl ON s.id = bsl.series
+                WHERE bsl.book = ?
+            """, (book_id,))
+            
+            series = cursor.fetchone()
+            if series:
+                book_data['series'] = dict(series)
+            
+            # Get formats
+            cursor.execute("""
+                SELECT format, name, uncompressed_size
+                FROM data
+                WHERE book = ?
+            """, (book_id,))
+            
+            formats = [dict(row) for row in cursor.fetchall()]
+            book_data['formats'] = formats
+            
+            # Get identifiers
+            cursor.execute("""
+                SELECT type, val
+                FROM identifiers
+                WHERE book = ?
+            """, (book_id,))
+            
+            identifiers = {row['type']: row['val'] for row in cursor.fetchall()}
+            book_data['identifiers'] = identifiers
+            
+            # Get comments
+            cursor.execute("""
+                SELECT text FROM comments WHERE book = ?
+            """, (book_id,))
+            
+            comments = cursor.fetchone()
+            if comments:
+                book_data['comments'] = comments[0]
+            
+            # Get custom columns
+            cursor.execute("""
+                SELECT label, name, datatype, is_multiple, normalized,
+                       display, is_custom, is_multiple2
+                FROM custom_columns
+            """)
+            
+            custom_columns = {}
+            for row in cursor.fetchall():
+                col = dict(row)
+                cursor.execute(f"""
+                    SELECT value FROM books_custom_column_{col['id']}_link
+                    WHERE book = ?
+                """, (book_id,))
+                
+                values = [r[0] for r in cursor.fetchall()]
+                
+                if col['datatype'] in ('int', 'float'):
+                    values = [float(v) if '.' in v else int(v) for v in values]
+                
+                if not col['is_multiple'] and values:
+                    values = values[0]
+                
+                custom_columns[col['label']] = values
+            
+            book_data['custom_columns'] = custom_columns
+            
+            # Add the book path
+            book_path = lib_path / book_data['path']
+            book_data['path'] = str(book_path)
+            
+            # Add the cover path if it exists
+            cover_path = book_path / 'cover.jpg'
+            if cover_path.exists():
+                book_data['cover_path'] = str(cover_path)
+            
+            # Add the format file paths
+            for fmt in book_data['formats']:
+                fmt_path = book_path / f"{book_id}.{fmt['format'].lower()}"
+                if fmt_path.exists():
+                    fmt['path'] = str(fmt_path)
+            
+            # Close the connection
+            conn.close()
+            
+            return {
+                'status': 'success',
+                'book': book_data
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting Calibre book details: {str(e)}")
+            return {
+                'status': 'error',
+                'message': f'Error getting book details: {str(e)}'
+            }
+    
+    logger.info("Registered Calibre tools")

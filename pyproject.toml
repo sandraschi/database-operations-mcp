@@ -77,6 +77,9 @@ docs = [
 [project.scripts]
 database-operations-mcp = "database_operations_mcp.main:main"
 
+[project.entry-points.mcps]
+database-operations = "database_operations_mcp.main:main"
+
 [project.urls]
 Homepage = "https://github.com/sandraschi/database-operations-mcp"
 Documentation = "https://github.com/sandraschi/database-operations-mcp#readme"
