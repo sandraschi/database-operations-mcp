@@ -1,8 +1,8 @@
 """Advanced search functionality for bookmarks."""
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from . import mcp  # Import the mcp instance from __init__
 from .db import FirefoxDB
-from fastmcp import tools
 
 class BookmarkSearcher:
     """Handles bookmark search operations."""
@@ -24,7 +24,7 @@ class BookmarkSearcher:
         cursor = self.db.execute(query_sql, (search_term, search_term, limit))
         return [dict(row) for row in cursor.fetchall()]
 
-@tool()
+@mcp.tool
 async def search_bookmarks(
     query: str,
     profile_path: Optional[str] = None,

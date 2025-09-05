@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional, Set
 import re
 from collections import defaultdict
-from fastmcp import FastMCP
+from . import mcp  # Import the mcp instance from __init__
 from .db import FirefoxDB
 from .help_system import HelpSystem
 
@@ -26,7 +26,7 @@ class TagManager:
         cursor = self.db.execute(query)
         return [dict(row) for row in cursor.fetchall()]
 
-@FastMCP.tool
+@mcp.tool
 @HelpSystem.register_tool(category='firefox')
 async def find_similar_tags(
     search_pattern: str,
@@ -54,7 +54,7 @@ async def find_similar_tags(
         'match_count': len(matches)
     }
 
-@FastMCP.tool
+@mcp.tool
 @HelpSystem.register_tool(category='firefox')
 async def merge_tags(
     source_tags: List[str],
@@ -102,13 +102,13 @@ async def merge_tags(
                 })
     
     return {
-        'status': 'dry_run' if dry_run else 'success',
-        'bookmarks_affected': len(bookmarks_to_update),
+        'status': 'success' if not dry_run else 'dry_run',
         'changes': changes,
+        'change_count': len(changes),
         'dry_run': dry_run
     }
 
-@FastMCP.tool
+@mcp.tool
 @HelpSystem.register_tool(category='firefox')
 async def clean_up_tags(
     min_count: int = 1,
@@ -139,8 +139,8 @@ async def clean_up_tags(
         pass
     
     return {
-        'status': 'dry_run' if dry_run else 'success',
-        'tags_removed': tags_to_remove,
-        'count': len(tags_to_remove),
+        'status': 'success' if not dry_run else 'dry_run',
+        'removed_tags': tags_to_remove,
+        'changes': changes,
         'dry_run': dry_run
     }

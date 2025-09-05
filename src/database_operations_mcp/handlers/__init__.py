@@ -12,6 +12,7 @@ Organized tool modules:
 - windows_tools: Windows-specific operations (services, processes, filesystem)
 - calibre_tools: Calibre library management (books, metadata, conversions)
 - media_tools: Media file operations (images, audio, video processing)
+- firefox: Firefox bookmark management and analysis tools
 - help_tools: Documentation and help system (list tools, get help)
 - init_tools: Initialization and setup (configuration, first-time setup)
 - maintenance_tools: Database maintenance tasks (vacuum, reindex, optimize)
@@ -31,6 +32,7 @@ from . import registry_tools
 from . import windows_tools
 from . import calibre_tools
 from . import media_tools
+from . import firefox
 from . import help_tools
 from . import init_tools
 from . import maintenance_tools
@@ -57,13 +59,13 @@ def register_all_tools(mcp: FastMCP) -> None:
         windows_tools,
         calibre_tools,
         media_tools,
+        firefox,  # Add Firefox tools
         help_tools,
         init_tools,
         maintenance_tools,
         plex_tools
     ]
     
-    # Register tools from each module
     for module in modules:
         if hasattr(module, 'register_tools'):
             module.register_tools(mcp)
@@ -72,16 +74,17 @@ __all__ = [
     "connection_tools",
     "query_tools", 
     "schema_tools",
-    "management_tools",
     "data_tools",
     "fts_tools",
-    "help_tools",
-    "init_tools",
-    "maintenance_tools",
-    "media_tools",
+    "management_tools",
     "registry_tools",
     "windows_tools",
     "calibre_tools",
+    "media_tools",
+    "firefox",  # Add Firefox tools to __all__
+    "help_tools",
+    "init_tools",
+    "maintenance_tools",
     "plex_tools",
     "register_all_tools"
 ]

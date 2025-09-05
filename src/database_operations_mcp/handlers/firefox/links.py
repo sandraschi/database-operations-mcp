@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List
 import sqlite3
 from datetime import datetime
-from fastmcp import tools
+from fastmcp import FastMCP
 from .utils import get_places_db_path
 
-@tool()
+@FastMCP.tool
 async def list_bookmarks(
     profile_name: Optional[str] = None,
     folder_id: Optional[int] = None,
@@ -82,7 +82,7 @@ async def list_bookmarks(
         if 'conn' in locals():
             conn.close()
 
-@tool()
+@FastMCP.tool
 async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> Dict[str, Any]:
     """Get details for a specific bookmark.
     
@@ -133,7 +133,7 @@ async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> 
         
         tags = [row[0] for row in cursor.fetchall()]
         
-        bookmark_dict = dict
+        bookmark_dict = dict(bookmark)
         # ... (continuing from previous code)
         
         # Add tags if provided
@@ -157,7 +157,7 @@ async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> 
                         "COALESCE((SELECT MAX(position) FROM moz_bookmarks WHERE parent = id), 0) + 1, "
                         "?, ?, ? "
                         "FROM moz_bookmarks WHERE title = 'tags' AND parent = 4",
-                        (tag_name, now, now)
+                        (tag_name, datetime.now(), datetime.now())
                     )
                     tag_id = cursor.lastrowid
                 else:
@@ -168,7 +168,7 @@ async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> 
                     "INSERT OR IGNORE INTO moz_bookmarks "
                     "(type, fk, parent, position, dateAdded, lastModified) "
                     "VALUES (1, ?, ?, 0, ?, ?)",
-                    (place_id, tag_id, now, now)
+                    (bookmark_dict['fk'], tag_id, datetime.now(), datetime.now())
                 )
         
         # Commit transaction
@@ -189,5 +189,3 @@ async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> 
     finally:
         if 'conn' in locals():
             conn.close()
-
-            

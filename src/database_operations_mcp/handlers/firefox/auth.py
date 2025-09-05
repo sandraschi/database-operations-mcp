@@ -5,7 +5,7 @@ import hmac
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, Tuple
-from fastmcp import tools
+from . import mcp  # Import the mcp instance from __init__
 
 # In-memory session store (use a proper database in production)
 _sessions = {}
@@ -21,7 +21,7 @@ def generate_session_id(username: str) -> str:
     ).hexdigest()
     return f"{username}:{timestamp}:{signature}"
 
-@tool()
+@mcp.tool
 async def create_session(username: str, password: str) -> Dict[str, Any]:
     """Create a new authenticated session."""
     if not username or not password:
@@ -40,7 +40,7 @@ async def create_session(username: str, password: str) -> Dict[str, Any]:
         "expires_at": _sessions[session_id]["expires_at"]
     }
 
-@tool()
+@mcp.tool
 async def validate_session(session_id: str) -> Dict[str, Any]:
     """Validate a session and return session data if valid."""
     if not session_id or session_id not in _sessions:

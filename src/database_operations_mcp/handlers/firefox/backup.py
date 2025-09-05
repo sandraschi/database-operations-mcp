@@ -3,10 +3,10 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional
-from fastmcp import tools
+from . import mcp  # Import the mcp instance from __init__
 from .utils import get_places_db_path, get_profile_directory
 
-@tool()
+@mcp.tool
 async def backup_firefox_data(
     backup_dir: Optional[str] = None,
     profile_name: Optional[str] = None
@@ -56,7 +56,7 @@ async def backup_firefox_data(
             "message": f"Backup failed: {str(e)}"
         }
 
-@tool()
+@mcp.tool
 async def restore_firefox_data(
     backup_path: str,
     profile_name: Optional[str] = None

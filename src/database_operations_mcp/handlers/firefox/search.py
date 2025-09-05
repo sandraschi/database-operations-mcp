@@ -33,23 +33,23 @@ async def search_bookmarks(
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
-        # Search in both title and URL
         search_term = f"%{query}%"
-        cursor.execute("""
-            SELECT b.id, b.title, p.url, b.dateAdded, b.lastModified,
-                   (SELECT title FROM moz_bookmarks WHERE id = b.parent) as folder
+        query_sql = """
+            SELECT b.id, b.title, p.url, b.dateAdded, b.lastModified, b.parent
             FROM moz_bookmarks b
             JOIN moz_places p ON b.fk = p.id
-            WHERE b.type = 1  -- Bookmarks
+            WHERE b.type = 1
             AND (b.title LIKE ? OR p.url LIKE ?)
             ORDER BY b.lastModified DESC
             LIMIT ?
-        """, (search_term, search_term, max_results))
+        """
         
+        cursor.execute(query_sql, (search_term, search_term, max_results))
         results = [dict(row) for row in cursor.fetchall()]
         
         return {
             "status": "success",
+            "query": query,
             "count": len(results),
             "results": results
         }
@@ -89,47 +89,70 @@ async def find_duplicates(
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
-        # Build the GROUP BY and HAVING clauses based on comparison type
         if compare == "url":
             group_by = "p.url"
-            select = "p.url as match_value, p.url"
+            select_fields = "p.url as value"
         elif compare == "title":
             group_by = "b.title"
-            select = "b.title as match_value, '' as url"
-        else:  # both
+            select_fields = "b.title as value"
+        elif compare == "both":
             group_by = "b.title, p.url"
-            select = "b.title || '|' || p.url as match_value, p.url"
+            select_fields = "b.title || '|' || p.url as value"
+        else:
+            return {
+                "status": "error",
+                "message": "Invalid comparison field. Use 'url', 'title', or 'both'"
+            }
         
-        # Find duplicates
-        cursor.execute(f"""
-            WITH duplicates AS (
-                SELECT {select}, 
-                       GROUP_CONCAT(b.id) as bookmark_ids,
-                       COUNT(*) as count
+        # Find duplicate values
+        dup_query = f"""
+            SELECT {select_fields}, COUNT(*) as count
+            FROM moz_bookmarks b
+            JOIN moz_places p ON b.fk = p.id
+            WHERE b.type = 1
+            GROUP BY {group_by}
+            HAVING COUNT(*) > 1
+            ORDER BY count DESC
+        """
+        
+        cursor.execute(dup_query)
+        duplicates = cursor.fetchall()
+        
+        # Get all bookmarks for each duplicate value
+        results = []
+        for dup in duplicates:
+            value = dup['value']
+            
+            if compare == "both":
+                title, url = value.split('|', 1)
+                where_clause = "b.title = ? AND p.url = ?"
+                params = (title, url)
+            else:
+                where_clause = f"{group_by} = ?"
+                params = (value,)
+            
+            bookmarks_query = f"""
+                SELECT b.id, b.title, p.url, b.dateAdded, b.lastModified, b.parent
                 FROM moz_bookmarks b
                 JOIN moz_places p ON b.fk = p.id
-                WHERE b.type = 1  -- Bookmarks
-                GROUP BY {group_by}
-                HAVING COUNT(*) > 1
-            )
-            SELECT * FROM duplicates
-            ORDER BY count DESC
-        """)
-        
-        duplicates = {}
-        for row in cursor.fetchall():
-            row_dict = dict(row)
-            match_value = row_dict.pop('match_value')
-            duplicates[match_value] = {
-                "count": row_dict.pop('count'),
-                "url": row_dict.pop('url', ''),
-                "bookmark_ids": [int(id) for id in row_dict.pop('bookmark_ids').split(',')]
-            }
+                WHERE b.type = 1 AND {where_clause}
+                ORDER BY b.lastModified DESC
+            """
+            
+            cursor.execute(bookmarks_query, params)
+            bookmarks = [dict(row) for row in cursor.fetchall()]
+            
+            results.append({
+                'value': value,
+                'count': len(bookmarks),
+                'bookmarks': bookmarks
+            })
         
         return {
             "status": "success",
+            "compare_by": compare,
             "duplicate_count": len(duplicates),
-            "duplicates": duplicates
+            "duplicates": results
         }
         
     except sqlite3.Error as e:

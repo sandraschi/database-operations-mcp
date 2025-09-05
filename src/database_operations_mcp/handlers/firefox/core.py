@@ -4,7 +4,7 @@ import sqlite3
 from pathlib import Path
 from typing import Dict, Any, Optional
 import psutil
-from fastmcp import tools
+from . import mcp  # Import the mcp instance from __init__
 
 class FirefoxNotClosedError(Exception):
     """Raised when Firefox is running and database access would be unsafe."""
@@ -33,7 +33,7 @@ def get_default_profile_path() -> Optional[Path]:
         
     return path  # Simplified for brevity
 
-@tool()
+@mcp.tool
 async def get_firefox_profiles() -> Dict[str, Any]:
     """List available Firefox profiles."""
     if is_firefox_running():

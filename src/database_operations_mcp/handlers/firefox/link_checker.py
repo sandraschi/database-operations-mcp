@@ -8,7 +8,7 @@ import aiohttp
 import asyncio
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-from fastmcp import FastMCP
+from . import mcp  # Import the mcp instance from __init__
 from .db import FirefoxDB
 from .help_system import HelpSystem
 
@@ -47,7 +47,7 @@ class LinkChecker:
                 'is_broken': True
             }
 
-@FastMCP.tool
+@mcp.tool
 @HelpSystem.register_tool(category='firefox')
 async def find_broken_links(
     profile_path: Optional[str] = None,
