@@ -3,10 +3,12 @@ Link checking functionality for Firefox bookmarks.
 Identifies broken or redirected URLs.
 """
 
+import os
+import aiohttp
+import asyncio
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-import aiohttp
-from fastmcp import tool
+from fastmcp import FastMCP
 from .db import FirefoxDB
 from .help_system import HelpSystem
 
@@ -45,17 +47,22 @@ class LinkChecker:
                 'is_broken': True
             }
 
-@tool()
+@FastMCP.tool
 @HelpSystem.register_tool(category='firefox')
 async def find_broken_links(
     profile_path: Optional[str] = None,
-    check_external: bool = False
+    timeout: int = 10,
+    concurrent_requests: int = 10
 ) -> Dict[str, Any]:
     """Find broken or redirected links in bookmarks.
     
     Args:
         profile_path: Path to Firefox profile
-        check_external: If True, checks external URLs (slower)
+        timeout: Request timeout in seconds
+        concurrent_requests: Maximum number of concurrent HTTP requests
+        
+    Returns:
+        Dictionary with broken links and their status
     """
     results = []
     db = FirefoxDB(Path(profile_path) if profile_path else None)

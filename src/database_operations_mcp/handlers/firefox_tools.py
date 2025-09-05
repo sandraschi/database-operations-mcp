@@ -1,3 +1,8 @@
+"""
+Firefox bookmark management tools.
+Provides functionality to manage and analyze Firefox bookmarks.
+"""
+
 import os
 import sqlite3
 import json
@@ -7,8 +12,7 @@ import psutil
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
-import fastmcp as mcp
-from fastmcp import tool
+from fastmcp import FastMCP, tools
 
 # Firefox profile locations for Windows
 FIREFOX_PROFILES = {

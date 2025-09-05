@@ -5,7 +5,7 @@ import hmac
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, Tuple
-from fastmcp import tool
+from fastmcp import tools
 
 # In-memory session store (use a proper database in production)
 _sessions = {}

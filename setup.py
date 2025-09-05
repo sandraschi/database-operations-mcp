@@ -12,7 +12,7 @@ def read_requirements(file_path):
 
 # Core dependencies
 install_requires = [
-    "fastmcp>=2.10.1",
+    "fastmcp>=2.11.3",
     "pydantic>=1.10.0",
     "sqlalchemy>=2.0.0",
     "psycopg2-binary>=2.9.0",

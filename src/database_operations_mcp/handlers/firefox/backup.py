@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional
-from fastmcp import tool
+from fastmcp import tools
 from .utils import get_places_db_path, get_profile_directory
 
 @tool()

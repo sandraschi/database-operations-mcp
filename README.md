@@ -369,7 +369,35 @@ Interact with the Windows Registry as a hierarchical database:
 - `get_tool_help` - Get detailed documentation for a specific tool
 - `get_quick_start` - Get a quick start guide for using MCP tools
 
-### Database Connections
+### Firefox Bookmark Tools
+
+Manage and analyze Firefox bookmarks with these specialized tools:
+
+### Bookmark Management
+- `list_bookmarks` - List all bookmarks, optionally filtered by folder
+- `get_bookmark` - Get details for a specific bookmark
+- `add_bookmark` - Add a new bookmark
+- `search_bookmarks` - Search bookmarks by title or URL
+- `export_bookmarks` - Export bookmarks in various formats (JSON, HTML, etc.)
+
+### Tag Management
+- `list_tags` - List all tags used in bookmarks
+- `tag_from_folder` - Generate tags based on folder hierarchy
+- `batch_tag_from_folder` - Batch process bookmarks to add folder-based tags
+- `tag_from_year` - Add year-based tags to bookmarks
+- `batch_tag_from_year` - Batch process bookmarks to add year-based tags
+- `batch_update_tags` - Update tags for multiple bookmarks at once
+
+### Analysis Tools
+- `find_broken_links` - Identify broken or inaccessible bookmarks
+- `find_old_bookmarks` - Find bookmarks older than a specified number of days
+- `get_bookmark_stats` - Get statistics about bookmarks (count by folder, tag, etc.)
+
+### Backup & Restore
+- `backup_firefox_data` - Create a backup of Firefox bookmarks
+- `restore_firefox_data` - Restore bookmarks from a backup
+
+## Database Connections
 
 - `init_database` - Initialize a database connection
 - `list_connections` - List all active database connections

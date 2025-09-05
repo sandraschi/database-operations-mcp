@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from .db import FirefoxDB
-from fastmcp import tool
+from fastmcp import tools
 
 class BookmarkSearcher:
     """Handles bookmark search operations."""

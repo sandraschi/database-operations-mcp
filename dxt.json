@@ -19,7 +19,7 @@
     }
   },
   "fastmcp_compliance": {
-    "version": "2.10.1",
+    "version": "2.11.3",
     "transport": "stdio",
     "entry_point": "src.database_operations.main:main"
   },

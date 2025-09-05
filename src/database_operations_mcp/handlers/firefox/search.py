@@ -2,10 +2,10 @@
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 import sqlite3
-from fastmcp import tool
+from fastmcp import FastMCP
 from .utils import get_places_db_path
 
-@tool()
+@FastMCP.tool
 async def search_bookmarks(
     query: str,
     profile_name: Optional[str] = None,
@@ -19,7 +19,7 @@ async def search_bookmarks(
         max_results: Maximum number of results to return
         
     Returns:
-        Dictionary with search results
+        Dictionary containing search results
     """
     places_db = get_places_db_path(profile_name)
     if not places_db or not places_db.exists():
@@ -63,7 +63,7 @@ async def search_bookmarks(
         if 'conn' in locals():
             conn.close()
 
-@tool()
+@FastMCP.tool
 async def find_duplicates(
     profile_name: Optional[str] = None,
     compare: str = "url"  # or "title" or "both"

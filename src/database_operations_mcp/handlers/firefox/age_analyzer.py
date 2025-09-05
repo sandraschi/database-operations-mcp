@@ -1,112 +1,114 @@
-"""
-Age analysis for Firefox bookmarks.
-Helps identify and manage old or outdated bookmarks.
-"""
-
+"""Age analysis for Firefox bookmarks."""
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
-from fastmcp import tool
+from fastmcp import FastMCP
 from .db import FirefoxDB
 from .help_system import HelpSystem
 
-@tool()
+@FastMCP.tool
 @HelpSystem.register_tool(category='firefox')
 async def find_old_bookmarks(
     days_old: int = 365,
-    include_visited: bool = False,
     profile_path: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Find bookmarks older than specified number of days.
+    """Find bookmarks that haven't been visited in a while.
     
     Args:
         days_old: Minimum age in days to consider a bookmark "old"
-        include_visited: Include bookmarks that have been recently visited
-        profile_path: Path to Firefox profile
+        profile_path: Path to the Firefox profile directory
+        
+    Returns:
+        Dictionary with old bookmarks and statistics
     """
     db = FirefoxDB(Path(profile_path) if profile_path else None)
     cutoff_date = datetime.now() - timedelta(days=days_old)
+    cutoff_timestamp = int(cutoff_date.timestamp() * 1000000)  # Convert to microseconds
+    
+    query = """
+        SELECT b.id, b.title, p.url, 
+               p.last_visit_date / 1000000 as last_visit_ts,
+               (strftime('%s', 'now') - p.last_visit_date/1000000)/86400 as days_since_visit
+        FROM moz_places p
+        JOIN moz_bookmarks b ON b.fk = p.id
+        WHERE p.last_visit_date > 0
+          AND p.last_visit_date < ?
+        ORDER BY p.last_visit_date ASC
+    """
+    
+    cursor = db.execute(query, (cutoff_timestamp,))
     old_bookmarks = []
     
-    async for bookmark in db.get_all_bookmarks():
-        if not bookmark.get('date_added'):
-            continue
-            
-        added_date = datetime.fromtimestamp(bookmark['date_added'] / 1000000)
-        last_visited = bookmark.get('last_visit_date')
-        
-        is_old = added_date < cutoff_date
-        recently_visited = last_visited and datetime.fromtimestamp(last_visited / 1000000) > cutoff_date
-        
-        if is_old and (not recently_visited or include_visited):
-            old_bookmarks.append({
-                'id': bookmark['id'],
-                'title': bookmark.get('title', 'Untitled'),
-                'url': bookmark.get('url', ''),
-                'date_added': added_date.isoformat(),
-                'last_visited': datetime.fromtimestamp(last_visited / 1000000).isoformat() if last_visited else None,
-                'age_days': (datetime.now() - added_date).days
-            })
+    for row in cursor.fetchall():
+        bookmark = dict(row)
+        bookmark['last_visit_date'] = datetime.fromtimestamp(bookmark['last_visit_ts']).isoformat()
+        old_bookmarks.append(bookmark)
     
     return {
-        'status': 'success',
         'cutoff_date': cutoff_date.isoformat(),
         'bookmark_count': len(old_bookmarks),
-        'bookmarks': sorted(old_bookmarks, key=lambda x: x['age_days'], reverse=True)
+        'bookmarks': old_bookmarks
     }
 
-@tool()
+@FastMCP.tool
 @HelpSystem.register_tool(category='firefox')
 async def get_bookmark_stats(
     profile_path: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Get statistics about bookmark ages and usage.
+    """Get statistics about bookmark age and usage.
     
     Args:
-        profile_path: Path to Firefox profile
+        profile_path: Path to the Firefox profile directory
+        
+    Returns:
+        Dictionary with bookmark statistics
     """
     db = FirefoxDB(Path(profile_path) if profile_path else None)
-    now = datetime.now()
-    stats = {
-        'total': 0,
-        'by_age': {
-            'week': 0,
-            'month': 0,
-            'year': 0,
-            'older': 0
-        },
-        'recently_used': 0
-    }
     
-    async for bookmark in db.get_all_bookmarks():
-        if not bookmark.get('date_added'):
-            continue
-            
-        stats['total'] += 1
-        added_date = datetime.fromtimestamp(bookmark['date_added'] / 1000000)
-        age = now - added_date
-        
-        if age < timedelta(days=7):
-            stats['by_age']['week'] += 1
-        elif age < timedelta(days=30):
-            stats['by_age']['month'] += 1
-        elif age < timedelta(days=365):
-            stats['by_age']['year'] += 1
-        else:
-            stats['by_age']['older'] += 1
-            
-        # Check if visited in last 30 days
-        if (bookmark.get('last_visit_date') and 
-            (now - datetime.fromtimestamp(bookmark['last_visit_date'] / 1000000)) < timedelta(days=30)):
-            stats['recently_used'] += 1
+    # Get total bookmarks
+    total_query = "SELECT COUNT(*) as count FROM moz_bookmarks WHERE type = 1"
+    total = db.execute(total_query).fetchone()['count']
     
-    # Calculate percentages
-    if stats['total'] > 0:
-        stats['recently_used_pct'] = (stats['recently_used'] / stats['total']) * 100
-        for key in stats['by_age']:
-            stats['by_age'][f'{key}_pct'] = (stats['by_age'][key] / stats['total']) * 100
+    # Get bookmarks by age
+    age_query = """
+        SELECT 
+            COUNT(*) as count,
+            CASE 
+                WHEN (strftime('%s', 'now') - p.last_visit_date/1000000) < 7 THEN '1_week'
+                WHEN (strftime('%s', 'now') - p.last_visit_date/1000000) < 30 THEN '1_month'
+                WHEN (strftime('%s', 'now') - p.last_visit_date/1000000) < 90 THEN '3_months'
+                WHEN (strftime('%s', 'now') - p.last_visit_date/1000000) < 365 THEN '1_year'
+                ELSE 'older'
+            END as age_group
+        FROM moz_places p
+        JOIN moz_bookmarks b ON b.fk = p.id
+        WHERE p.last_visit_date > 0
+        GROUP BY age_group
+    """
+    
+    cursor = db.execute(age_query)
+    age_stats = {row['age_group']: row['count'] for row in cursor.fetchall()}
+    
+    # Get most recently visited bookmarks
+    recent_query = """
+        SELECT b.title, p.url, p.last_visit_date / 1000000 as last_visit_ts
+        FROM moz_places p
+        JOIN moz_bookmarks b ON b.fk = p.id
+        WHERE p.last_visit_date > 0
+        ORDER BY p.last_visit_date DESC
+        LIMIT 10
+    """
+    
+    cursor = db.execute(recent_query)
+    recent_bookmarks = []
+    
+    for row in cursor.fetchall():
+        bookmark = dict(row)
+        bookmark['last_visit_date'] = datetime.fromtimestamp(bookmark['last_visit_ts']).isoformat()
+        recent_bookmarks.append(bookmark)
     
     return {
-        'status': 'success',
-        'stats': stats
+        'total_bookmarks': total,
+        'age_distribution': age_stats,
+        'recently_visited': recent_bookmarks
     }

@@ -5,7 +5,7 @@ Adds tags based on the bookmark's position in the folder hierarchy.
 
 from pathlib import Path
 from typing import Dict, List, Optional, Set
-from fastmcp import tool
+from fastmcp import tools
 from .db import FirefoxDB
 from .help_system import HelpSystem
 
@@ -27,7 +27,7 @@ async def get_folder_path(db: FirefoxDB, folder_id: int) -> List[Dict[str, Any]]
     return path
 
 # Add this new function before the existing tag_from_folder function
-@tool()
+@tools.tool()
 @HelpSystem.register_tool(category='firefox')
 async def batch_tag_from_folder(
     profile_path: Optional[str] = None,
@@ -127,7 +127,7 @@ async def batch_tag_from_folder(
         'dry_run': dry_run
     }
 
-@tool()
+@tools.tool()
 @HelpSystem.register_tool(category='firefox')
 async def tag_from_folder(
     profile_path: Optional[str] = None,

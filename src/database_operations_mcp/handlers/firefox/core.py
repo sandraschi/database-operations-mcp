@@ -4,7 +4,7 @@ import sqlite3
 from pathlib import Path
 from typing import Dict, Any, Optional
 import psutil
-from fastmcp import tool
+from fastmcp import tools
 
 class FirefoxNotClosedError(Exception):
     """Raised when Firefox is running and database access would be unsafe."""

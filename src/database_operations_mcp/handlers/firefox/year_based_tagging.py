@@ -6,12 +6,12 @@ Adds creation/edit years as tags for time-based organization.
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set
-from fastmcp import tool
+from fastmcp import tools
 from .db import FirefoxDB
 from .help_system import HelpSystem
 
 # Add this new function before the existing tag_from_year function
-@tool()
+@tools.tool()
 @HelpSystem.register_tool(category='firefox')
 async def batch_tag_from_year(
     profile_path: Optional[str] = None,
@@ -103,7 +103,7 @@ async def batch_tag_from_year(
         'dry_run': dry_run
     }
 
-@tool()
+@tools.tool()
 @HelpSystem.register_tool(category='firefox')
 async def tag_from_year(
     profile_path: Optional[str] = None,

@@ -1,8 +1,8 @@
 """Core bookmark management functionality."""
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from fastmcp import FastMCP
 from .db import FirefoxDB
-from fastmcp import tool
 
 class BookmarkManager:
     """Handles bookmark operations."""
@@ -18,16 +18,15 @@ class BookmarkManager:
             JOIN moz_places p ON b.fk = p.id
             WHERE b.type = 1
         """
-        params = ()
-        
+        params = []
         if folder_id is not None:
             query += " AND b.parent = ?"
-            params = (folder_id,)
+            params.append(folder_id)
             
         cursor = self.db.execute(query, params)
         return [dict(row) for row in cursor.fetchall()]
 
-@tool()
+@FastMCP.tool
 async def list_bookmarks(
     profile_path: Optional[str] = None,
     folder_id: Optional[int] = None

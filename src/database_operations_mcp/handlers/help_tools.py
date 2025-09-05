@@ -5,7 +5,7 @@ Provides interactive help and documentation for all available tools.
 
 from typing import Dict, Any, Optional
 import inspect
-from fastmcp import tool
+from fastmcp import FastMCP
 
 class HelpSystem:
     """Centralized help system for MCP tools."""
@@ -51,9 +51,10 @@ class HelpSystem:
             
         return decorator(tool_func) if tool_func else decorator
 
-def register_tools(mcp):
+def register_tools(mcp: FastMCP):
     """Register help tools with the MCP server."""
-    @mcp.tool()
+    
+    @mcp.tool
     @HelpSystem.register_tool(category='help')
     async def list_tools(category: str = None) -> Dict[str, Any]:
         """List all available tools, optionally filtered by category.
@@ -63,12 +64,12 @@ def register_tools(mcp):
         """
         if category:
             return {
-                cat: [t for t in tools if t['category'] == category]
+                cat: [t for t in HelpSystem._tools.values() if t['category'] == category]
                 for cat, tools in HelpSystem._tools.items()
             }
         return HelpSystem._tools
 
-    @mcp.tool()
+    @mcp.tool
     @HelpSystem.register_tool(category='help')
     async def get_help(tool_name: str) -> Dict[str, Any]:
         """Get detailed help for a specific tool.

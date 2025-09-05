@@ -1,105 +1,77 @@
-"""
-Advanced tag management for Firefox bookmarks.
-Provides tools for bulk tag operations and analysis.
-"""
-
+"""Tag management functionality for Firefox bookmarks."""
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set
 import re
 from collections import defaultdict
-from fastmcp import tool
+from fastmcp import FastMCP
 from .db import FirefoxDB
 from .help_system import HelpSystem
 
 class TagManager:
-    """Handles advanced tag operations for Firefox bookmarks."""
+    """Handles tag operations for Firefox bookmarks."""
     
     def __init__(self, profile_path: Optional[Path] = None):
         self.db = FirefoxDB(profile_path)
     
-    async def get_tag_stats(self) -> Dict[str, Any]:
-        """Get statistics about tag usage."""
-        stats = {
-            'total_tags': 0,
-            'tag_counts': {},
-            'untagged_count': 0
-        }
-        
-        tag_counts = defaultdict(int)
-        total_bookmarks = 0
-        
-        async for bookmark in self.db.get_all_bookmarks():
-            total_bookmarks += 1
-            tags = await self.db.get_bookmark_tags(bookmark['id'])
-            if not tags:
-                stats['untagged_count'] += 1
-            for tag in tags:
-                tag_counts[tag] += 1
-        
-        stats['total_tags'] = len(tag_counts)
-        stats['tag_counts'] = dict(sorted(
-            tag_counts.items(),
-            key=lambda x: x[1],
-            reverse=True
-        ))
-        stats['tagged_percentage'] = (
-            (total_bookmarks - stats['untagged_count']) / total_bookmarks * 100
-            if total_bookmarks > 0 else 0
-        )
-        
-        return stats
+    def get_tag_stats(self) -> Dict[str, Any]:
+        """Get statistics about tags."""
+        query = """
+            SELECT t.title as tag, COUNT(*) as count
+            FROM moz_bookmarks t
+            JOIN moz_bookmarks b ON b.id = +t.parent
+            WHERE t.type = 2  # Tag folder
+            GROUP BY t.title
+            ORDER BY count DESC
+        """
+        cursor = self.db.execute(query)
+        return [dict(row) for row in cursor.fetchall()]
 
-@tool()
+@FastMCP.tool
 @HelpSystem.register_tool(category='firefox')
 async def find_similar_tags(
     search_pattern: str,
-    case_sensitive: bool = False,
     profile_path: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Find tags matching a pattern (supports regex).
+    """Find tags similar to the search pattern.
     
     Args:
-        search_pattern: Regex pattern to match against tags
-        case_sensitive: If True, performs case-sensitive matching
-        profile_path: Path to Firefox profile
+        search_pattern: Pattern to search for in tag names
+        profile_path: Path to the Firefox profile directory
+        
+    Returns:
+        Dictionary with matching tags and their statistics
     """
-    try:
-        regex = re.compile(
-            search_pattern,
-            flags=0 if case_sensitive else re.IGNORECASE
-        )
-    except re.error as e:
-        return {
-            'status': 'error',
-            'message': f'Invalid regex pattern: {str(e)}'
-        }
-    
     manager = TagManager(Path(profile_path) if profile_path else None)
-    stats = await manager.get_tag_stats()
-    matches = [tag for tag in stats['tag_counts'] if regex.search(tag)]
+    tags = manager.get_tag_stats()
+    
+    # Simple pattern matching (can be enhanced with fuzzy matching)
+    pattern = re.compile(search_pattern, re.IGNORECASE)
+    matches = [tag for tag in tags if pattern.search(tag['tag'])]
     
     return {
-        'status': 'success',
-        'pattern': search_pattern,
+        'search_pattern': search_pattern,
         'matches': matches,
         'match_count': len(matches)
     }
 
-@tool()
+@FastMCP.tool
 @HelpSystem.register_tool(category='firefox')
 async def merge_tags(
     source_tags: List[str],
     target_tag: str,
-    dry_run: bool = True,
-    profile_path: Optional[str] = None
+    profile_path: Optional[str] = None,
+    dry_run: bool = False
 ) -> Dict[str, Any]:
     """Merge multiple tags into a single tag.
     
     Args:
-        source_tags: List of tags to merge
-        target_tag: Tag to merge into
+        source_tags: List of tag names to merge
+        target_tag: Name of the target tag
+        profile_path: Path to the Firefox profile directory
         dry_run: If True, only show what would be changed
-        profile_path: Path to Firefox profile
+        
+    Returns:
+        Dictionary with merge results
     """
     db = FirefoxDB(Path(profile_path) if profile_path else None)
     changes = []
@@ -136,26 +108,29 @@ async def merge_tags(
         'dry_run': dry_run
     }
 
-@tool()
+@FastMCP.tool
 @HelpSystem.register_tool(category='firefox')
 async def clean_up_tags(
     min_count: int = 1,
-    dry_run: bool = True,
-    profile_path: Optional[str] = None
+    profile_path: Optional[str] = None,
+    dry_run: bool = True
 ) -> Dict[str, Any]:
-    """Remove rarely used tags.
+    """Clean up rarely used tags.
     
     Args:
-        min_count: Minimum number of bookmarks a tag must be used on
-        dry_run: If True, only show what would be deleted
-        profile_path: Path to Firefox profile
+        min_count: Minimum number of bookmarks a tag must have
+        profile_path: Path to the Firefox profile directory
+        dry_run: If True, only show what would be changed
+        
+    Returns:
+        Dictionary with cleanup results
     """
     manager = TagManager(Path(profile_path) if profile_path else None)
-    stats = await manager.get_tag_stats()
+    stats = manager.get_tag_stats()
     
     tags_to_remove = [
-        tag for tag, count in stats['tag_counts'].items()
-        if count < min_count
+        tag['tag'] for tag in stats
+        if tag['count'] < min_count
     ]
     
     changes = []

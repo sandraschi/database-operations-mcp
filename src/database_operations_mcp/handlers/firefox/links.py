@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List
 import sqlite3
 from datetime import datetime
-from fastmcp import tool
+from fastmcp import tools
 from .utils import get_places_db_path
 
 @tool()
