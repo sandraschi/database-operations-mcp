@@ -100,7 +100,7 @@ class PlexDatabase:
         self.connect()
         self.cursor.execute("""
             SELECT id, name, section_type, language, agent, scanner, 
-                   created_at, updated_at, scannned_at
+                   created_at, updated_at, scanned_at
             FROM library_sections
             ORDER BY name
         """)
