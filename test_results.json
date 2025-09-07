@@ -1,0 +1,27 @@
+{
+  "tests_run": 3,
+  "tests_passed": 3,
+  "details": {
+    "basic_initialization": {
+      "status": "PASS",
+      "name": "FastMCP-bcf0",
+      "type": "FastMCP"
+    },
+    "initialization_with_params": {
+      "status": "PASS",
+      "name": "test-mcp",
+      "version": "1.0.0"
+    },
+    "check_available_methods": {
+      "status": "PASS",
+      "method_count": 50,
+      "sample_methods": [
+        "add_middleware",
+        "add_prompt",
+        "add_resource",
+        "add_resource_fn",
+        "add_template"
+      ]
+    }
+  }
+}

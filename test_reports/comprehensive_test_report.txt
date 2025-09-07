@@ -1,0 +1,149 @@
+================================================================================
+DATABASE OPERATIONS MCP - COMPREHENSIVE TEST REPORT
+================================================================================
+Total Modules: 14
+Successfully Imported: 0
+Import Failures: 14
+Syntax Errors: 0
+FastMCP Issues: 4
+Total Functions: 0
+MCP Decorated Functions: 46
+
+FASTMCP COMPLIANCE ANALYSIS:
+----------------------------------------
+Found 36 compliance issues:
+
+  ❌ calibre_tools line 16: Relative import may cause issues
+  ❌ connection_tools line 64: MCP decorator should be at module level (no indentation)
+  ❌ connection_tools line 125: MCP decorator should be at module level (no indentation)
+  ❌ connection_tools line 242: MCP decorator should be at module level (no indentation)
+  ❌ connection_tools line 297: MCP decorator should be at module level (no indentation)
+  ❌ connection_tools line 426: MCP decorator should be at module level (no indentation)
+  ❌ connection_tools line 29: Relative import may cause issues
+  ❌ connection_tools line 32: Relative import may cause issues
+  ❌ connection_tools: FastMCP decorator usage is non-compliant
+  ❌ data_tools line 11: Relative import may cause issues
+  ❌ data_tools line 12: Relative import may cause issues
+  ❌ firefox line 6: Relative import may cause issues
+  ❌ fts_tools line 12: Relative import may cause issues
+  ❌ help_tools line 11: Relative import may cause issues
+  ❌ init_tools line 10: Relative import may cause issues
+  ❌ init_tools line 11: Relative import may cause issues
+  ❌ management_tools line 12: Relative import may cause issues
+  ❌ management_tools line 13: Relative import may cause issues
+  ❌ media_tools line 21: MCP decorator should be at module level (no indentation)
+  ❌ media_tools line 73: MCP decorator should be at module level (no indentation)
+  ❌ media_tools line 145: MCP decorator should be at module level (no indentation)
+  ❌ media_tools line 212: MCP decorator should be at module level (no indentation)
+  ❌ media_tools: FastMCP decorator usage is non-compliant
+  ❌ plex_tools line 377: MCP decorator should be at module level (no indentation)
+  ❌ plex_tools line 413: MCP decorator should be at module level (no indentation)
+  ❌ plex_tools: FastMCP decorator usage is non-compliant
+  ❌ query_tools line 11: Relative import may cause issues
+  ❌ query_tools line 12: Relative import may cause issues
+  ❌ registry_tools line 19: Relative import may cause issues
+  ❌ schema_tools line 11: Relative import may cause issues
+  ❌ schema_tools line 12: Relative import may cause issues
+  ❌ windows_tools line 91: MCP decorator should be at module level (no indentation)
+  ❌ windows_tools line 125: MCP decorator should be at module level (no indentation)
+  ❌ windows_tools line 222: MCP decorator should be at module level (no indentation)
+  ❌ windows_tools line 297: MCP decorator should be at module level (no indentation)
+  ❌ windows_tools: FastMCP decorator usage is non-compliant
+
+RECOMMENDATIONS:
+
+  💡 Fix indentation: MCP decorators (@mcp.tool()) should be at module level (no indentation)
+  💡 Fix function definitions: Functions should be defined at module level after decorators
+  💡 Fix imports: Use absolute imports instead of relative imports where possible
+  💡 Ensure proper FastMCP 2.10.1+ structure
+  💡 Test each module individually after fixes
+
+MODULE DETAILS:
+----------------------------------------
+
+CALIBRE_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 3
+
+CONNECTION_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 5
+  ❌ Indentation Issues: 5
+
+DATA_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 3
+
+FIREFOX:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+
+FTS_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 3
+
+HELP_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 2
+
+INIT_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 5
+
+MANAGEMENT_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 4
+
+MEDIA_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 4
+  ❌ Indentation Issues: 4
+
+PLEX_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 2
+  ❌ Indentation Issues: 2
+
+QUERY_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 3
+
+REGISTRY_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 4
+
+SCHEMA_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 4
+
+WINDOWS_TOOLS:
+  ❌ Import: FAILED
+    Error: attempted relative import beyond top-level package
+  ✅ Syntax: VALID
+  MCP Decorators: 4
+  ❌ Indentation Issues: 4

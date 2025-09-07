@@ -1,0 +1,384 @@
+{
+  "summary": {
+    "total_tools": 14,
+    "tools_tested": 14,
+    "tests_passed": 0,
+    "tests_failed": 0,
+    "tools_with_issues": 9,
+    "coverage_percentage": 0.0,
+    "import_failures": 13,
+    "syntax_issues": 0
+  },
+  "tools": {
+    "calibre_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "calibre_tools",
+        "syntax_valid": true,
+        "functions_found": 3,
+        "mcp_tools_found": 4,
+        "has_import_issues": false,
+        "has_indentation_issues": false,
+        "issues": []
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "connection_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "connection_tools",
+        "syntax_valid": true,
+        "functions_found": 5,
+        "mcp_tools_found": 6,
+        "has_import_issues": false,
+        "has_indentation_issues": true,
+        "issues": [
+          "Line 63: MCP decorator incorrectly indented",
+          "Line 124: MCP decorator incorrectly indented",
+          "Line 241: MCP decorator incorrectly indented",
+          "Line 296: MCP decorator incorrectly indented",
+          "Line 425: MCP decorator incorrectly indented"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "data_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "data_tools",
+        "syntax_valid": true,
+        "functions_found": 3,
+        "mcp_tools_found": 4,
+        "has_import_issues": false,
+        "has_indentation_issues": false,
+        "issues": []
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "firefox": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "firefox",
+        "syntax_valid": true,
+        "functions_found": 0,
+        "mcp_tools_found": 1,
+        "has_import_issues": true,
+        "has_indentation_issues": false,
+        "issues": [
+          "Line 6: Relative import may cause issues"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "fts_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "fts_tools",
+        "syntax_valid": true,
+        "functions_found": 3,
+        "mcp_tools_found": 3,
+        "has_import_issues": false,
+        "has_indentation_issues": false,
+        "issues": []
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "help_tools": {
+      "status": "imported",
+      "syntax_analysis": {
+        "module_name": "help_tools",
+        "syntax_valid": true,
+        "functions_found": 6,
+        "mcp_tools_found": 3,
+        "has_import_issues": false,
+        "has_indentation_issues": false,
+        "issues": []
+      },
+      "import_analysis": {
+        "import_success": true,
+        "import_error": null,
+        "functions_imported": [],
+        "classes_imported": [
+          "HelpSystem"
+        ]
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "init_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "init_tools",
+        "syntax_valid": true,
+        "functions_found": 5,
+        "mcp_tools_found": 6,
+        "has_import_issues": true,
+        "has_indentation_issues": false,
+        "issues": [
+          "Line 10: Relative import may cause issues",
+          "Line 11: Relative import may cause issues"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "management_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "management_tools",
+        "syntax_valid": true,
+        "functions_found": 4,
+        "mcp_tools_found": 5,
+        "has_import_issues": true,
+        "has_indentation_issues": false,
+        "issues": [
+          "Line 12: Relative import may cause issues",
+          "Line 13: Relative import may cause issues"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "media_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "media_tools",
+        "syntax_valid": true,
+        "functions_found": 5,
+        "mcp_tools_found": 4,
+        "has_import_issues": false,
+        "has_indentation_issues": true,
+        "issues": [
+          "Line 21: MCP decorator incorrectly indented",
+          "Line 73: MCP decorator incorrectly indented",
+          "Line 145: MCP decorator incorrectly indented",
+          "Line 212: MCP decorator incorrectly indented"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "plex_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "plex_tools",
+        "syntax_valid": true,
+        "functions_found": 9,
+        "mcp_tools_found": 2,
+        "has_import_issues": false,
+        "has_indentation_issues": true,
+        "issues": [
+          "Line 377: MCP decorator incorrectly indented",
+          "Line 413: MCP decorator incorrectly indented"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "query_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "query_tools",
+        "syntax_valid": true,
+        "functions_found": 3,
+        "mcp_tools_found": 4,
+        "has_import_issues": false,
+        "has_indentation_issues": false,
+        "issues": []
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "registry_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "registry_tools",
+        "syntax_valid": true,
+        "functions_found": 6,
+        "mcp_tools_found": 6,
+        "has_import_issues": true,
+        "has_indentation_issues": false,
+        "issues": [
+          "Line 19: Relative import may cause issues"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "schema_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "schema_tools",
+        "syntax_valid": true,
+        "functions_found": 4,
+        "mcp_tools_found": 5,
+        "has_import_issues": true,
+        "has_indentation_issues": false,
+        "issues": [
+          "Line 11: Relative import may cause issues",
+          "Line 12: Relative import may cause issues"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    },
+    "windows_tools": {
+      "status": "import_failed",
+      "syntax_analysis": {
+        "module_name": "windows_tools",
+        "syntax_valid": true,
+        "functions_found": 5,
+        "mcp_tools_found": 4,
+        "has_import_issues": false,
+        "has_indentation_issues": true,
+        "issues": [
+          "Line 91: MCP decorator incorrectly indented",
+          "Line 125: MCP decorator incorrectly indented",
+          "Line 222: MCP decorator incorrectly indented",
+          "Line 297: MCP decorator incorrectly indented"
+        ]
+      },
+      "import_analysis": {
+        "import_success": false,
+        "import_error": "attempted relative import beyond top-level package",
+        "functions_imported": [],
+        "classes_imported": [],
+        "import_traceback": "Traceback (most recent call last):\n  File \"D:\\Dev\\repos\\database-operations-mcp\\tests\\test_all_tools.py\", line 173, in attempt_module_import\n    module = importlib.import_module(module_full_name)\n  File \"C:\\Users\\sandr\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1310, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\__init__.py\", line 25, in <module>\n    from . import calibre_tools\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\calibre_tools.py\", line 18, in <module>\n    from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS\n  File \"D:\\Dev\\repos\\database-operations-mcp\\src\\database_operations_mcp\\tools\\init_tools.py\", line 10, in <module>\n    from ...config.mcp_config import mcp\nImportError: attempted relative import beyond top-level package\n"
+      },
+      "functions_tested": 0,
+      "functions_passed": 0,
+      "functions_failed": 0,
+      "issues": []
+    }
+  },
+  "issues_found": {
+    "import_errors": [],
+    "indentation_errors": [],
+    "fastmcp_issues": [],
+    "recommendations": [
+      "Fix 13 import failures - mainly caused by relative import issues",
+      "Fix FastMCP decorator indentation - decorators should be at module level",
+      "Fix indentation in modules: connection_tools, media_tools, plex_tools, windows_tools",
+      "Fix relative imports in modules: firefox, init_tools, management_tools, registry_tools, schema_tools",
+      "Ensure all @mcp.tool() decorators are at module level (no indentation)",
+      "Replace relative imports (from ...config) with absolute imports",
+      "Test each module after fixes to ensure imports work",
+      "Consider using FastMCP 2.10.1+ best practices"
+    ]
+  }
+}

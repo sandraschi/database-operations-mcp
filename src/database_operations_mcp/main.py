@@ -8,9 +8,10 @@ import asyncio
 import logging
 import signal
 import sys
-import platform
-from typing import Optional, List, Dict, Any
-from fastmcp import FastMCP
+from typing import Any, Dict, Optional
+
+# Import our centralized MCP configuration
+from .config.mcp_config import get_mcp, mcp as global_mcp
 
 # Configure logging
 logging.basicConfig(
@@ -21,22 +22,45 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class DatabaseOperationsMCP:
-    """Main application class for Database Operations MCP server."""
+    """Main MCP server class for database operations."""
     
     def __init__(self) -> None:
         """Initialize the MCP server."""
-        self.mcp: Optional[FastMCP] = None
+        # Use the global MCP instance
+        self.mcp = get_mcp()
         self._shutdown_event = asyncio.Event()
         
+        # Import all tool modules to ensure @mcp.tool decorators are executed
+        from .tools import (
+            connection_tools,
+            query_tools,
+            schema_tools,
+            data_tools,
+            fts_tools,
+            management_tools,
+            registry_tools,
+            windows_tools,
+            calibre_tools,
+            media_tools,
+            firefox,
+            help_tools,
+            init_tools,
+
+            plex_tools
+        )
+        
     async def _register_handlers(self) -> None:
-        """Register all tool handlers with the MCP server."""
-        if not self.mcp:
-            return
-            
-        # Import and register all tools from the handlers package
-        from .handlers import register_all_tools
-        register_all_tools(self.mcp)
-        # All tools are registered via register_all_tools
+        """Import all handler modules to register tools via decorators.
+        
+        In FastMCP 2.11.3, tools are registered using the @mcp.tool() decorator
+        when modules are imported. This function ensures all handler modules
+        are imported to trigger the decorators.
+        """
+        # Import all handler modules to register their tools via decorators
+        from . import handlers  # This will import all __init__.py imports
+        
+        # Log that tools have been registered
+        logger.info("All tool handlers imported and registered via decorators")
     
     async def _shutdown(self, signal: Optional[signal.Signals] = None) -> None:
         """Handle server shutdown."""
@@ -46,10 +70,14 @@ class DatabaseOperationsMCP:
         logger.info("Shutting down Database Operations MCP server...")
         self._shutdown_event.set()
         
-        # Add any cleanup code here
-        if self.mcp:
+        if self.mcp and self._loop:
             logger.info("Cleaning up MCP resources...")
-            # Cleanup any resources used by the MCP server
+            # Cancel all running tasks
+            tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            self._loop.stop()
             
     def _register_signal_handlers(self) -> None:
         """Register signal handlers for graceful shutdown."""
@@ -57,15 +85,25 @@ class DatabaseOperationsMCP:
             # Windows signal handling
             signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self._shutdown()))
             signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self._shutdown()))
-        else:
-            # Unix signal handling
-            loop = asyncio.get_running_loop()
-            for sig in (signal.SIGINT, signal.SIGTERM):
-                loop.add_signal_handler(
-                    sig, 
-                    lambda s=sig: asyncio.create_task(self._shutdown(s))
-                )
     
+    def _import_handlers(self) -> None:
+        """Import handler modules to trigger @mcp.tool decorators."""
+        # All imports are done in __init__ to trigger decorators
+        # This method is kept for backward compatibility
+        from fastmcp.utilities.inspect import get_tools
+        tools = get_tools(self.mcp)
+        logger.info(f"Registered {len(tools)} tools with FastMCP")
+        
+    async def _run_async(self) -> int:
+        """Async entry point for the MCP server (not used in current implementation).
+        
+        Returns:
+            int: Exit code (0 for success, non-zero for error)
+        """
+        # This method is kept for backward compatibility but is not used
+        # as FastMCP manages its own event loop
+        return 0
+        
     def run(self) -> int:
         """Run the MCP server.
         
@@ -73,51 +111,63 @@ class DatabaseOperationsMCP:
             int: Exit code (0 for success, non-zero for error)
         """
         exit_code = 0
-        
         try:
+            # Configure logging for FastMCP
+            import logging
+            logging.basicConfig(
+                level=logging.DEBUG,  # Set default log level to DEBUG
+                format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                stream=sys.stderr
+            )
+            
             # Register signal handlers for graceful shutdown
             self._register_signal_handlers()
             
-            # Create the MCP server
-            self.mcp = FastMCP(
-                "database-operations-mcp",
-                "Database Operations MCP Server",
-                version="0.1.0"
-            )
+            # Run the FastMCP server
+            logger.info("Starting Database Operations MCP Server...")
             
-            # Register all tool handlers
-            import asyncio
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(self._register_handlers())
+            # Log MCP configuration
+            logger.info(f"MCP Name: {self.mcp.name}")
+            logger.info(f"MCP Version: {self.mcp.version}")
             
-            # Run the MCP server
+            # Run the server
+            logger.info("Calling mcp.run()...")
             self.mcp.run()
             
-        except asyncio.CancelledError:
-            logger.info("Server task was cancelled")
-            exit_code = 1
-        except Exception as e:
-            logger.critical(f"Fatal error: {str(e)}", exc_info=True)
-            exit_code = 1
-        finally:
-            logger.info("Database Operations MCP server stopped")
+            return 0
             
-        return exit_code
+        except Exception as e:
+            logger.error(f"Error running MCP server: {e}", exc_info=True)
+            return 1
 
-def main():
+def main() -> int:
     """Entry point for the MCP server."""
-    # Create the server instance
-    server = DatabaseOperationsMCP()
+    # Configure basic logging first
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        stream=sys.stderr
+    )
     
-    # Run the server (synchronously)
+    logger = logging.getLogger(__name__)
+    logger.info("Starting Database Operations MCP Server...")
+    
     try:
+        # Create the server instance
+        logger.info("Initializing DatabaseOperationsMCP...")
+        server = DatabaseOperationsMCP()
+        logger.info("DatabaseOperationsMCP initialized successfully")
+        
+        # Run the server (synchronously)
+        logger.info("Starting server...")
         return server.run()
+        
     except KeyboardInterrupt:
-        logger.info("Shutting down gracefully...")
+        logger.info("Server stopped by user")
         return 0
     except Exception as e:
-        logger.critical(f"Fatal error: {e}", exc_info=True)
+        logger.error(f"Fatal error: {e}", exc_info=True)
         return 1
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
