@@ -14,7 +14,6 @@
     "mcp_config": {
       "command": "python",
       "args": ["-m", "database_operations_mcp.main"],
-      "cwd": "src",
       "env": {
         "PYTHONPATH": "${workspaceRoot}"
       }

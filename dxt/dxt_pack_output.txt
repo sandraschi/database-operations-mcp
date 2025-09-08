@@ -1,0 +1,167 @@
+Validating manifest...
+Manifest is valid!
+
+­ƒôª  database-operations-mcp@0.1.0
+Archive Contents
+     26B .dxtconfig
+    907B .github\workflows\build-and-release.yml
+   4.5kB .github\workflows\ci-cd.yml
+   1.6kB .github\workflows\manual-release.yml
+   1.1kB .github\workflows\release-workflow.yml
+    818B .github\workflows\release.yml
+    852B .pre-commit-config.yaml
+   2.8kB .snapshots\config.json
+    409B .snapshots\readme.md
+   2.3kB .snapshots\sponsors.md
+   1.8kB build_dxt.py
+    412B build_output.txt
+   4.0kB build.ps1
+   1.1kB check_env.py
+    594B check_fastmcp_params.py
+    865B check_fastmcp.py
+    348B check_mcp.py
+   3.0kB CONTRIBUTING.md
+   1.5kB debug_imports.py
+   5.7kB docs\AI_NATURAL_LANGUAGE_MCP_GUIDE.md
+   3.0kB docs\Calibre_export_usage.md
+   2.9kB docs\database_support_plan.md
+   6.0kB docs\Database-MCP-Assessment.md
+  47.6kB docs\DXT_BUILDING_GUIDE.md
+   5.8kB docs\DXT_TEMPLATE_INTEGRATION.md
+  10.6kB docs\FASTMCP_2_12_COMPLIANCE_FIX_GUIDE.md
+  19.7kB docs\FastMCP-2.11-Stateful-Upgrade-Guide.md
+   1.4kB docs\FastMCP-Stateful-Upgrade-Guide.md
+   9.1kB docs\Firefox_Bookmarks_Enhancement_Plan.md
+  21.0kB docs\Firefox_Bookmarks_Extensions_Plan.md
+   3.2kB docs\GITHUB_USAGE_GUIDE.md
+  19.0kB docs\MCP_Revolution.md
+  14.9kB docs\MCP_SERVER_30MIN_CHALLENGE.md
+  11.4kB docs\MCP_SERVER_BUILDER_GUIDE.md
+   5.4kB docs\PRD_HandBrake_MCP.md
+  12.6kB docs\rdf-sparql-extension-plan.md
+   3.7kB docs\SELF_HOSTING_GUIDE.md
+  23.1kB docs\standards\MCP_Server_Standards.md
+  30.1kB docs\TAILSCALE_GUIDE.md
+   5.7kB docs\TEMPLATE_PROMPT_SYSTEM.md
+   5.4kB docs\TOOL_TESTING_AND_DOCS.md
+   2.9kB docs\WINDOWS_APP_ASSESSMENT.md
+     44B dxt_pack_output.txt
+    704B dxt.json
+    210B hello.py
+   5.0kB investigate_mystery_db.py
+    783B launch_mcp.py
+   1.0kB list_tools.py
+   2.5kB manifest.json
+   1003B minimal_test.py
+    469B move_to_dist.ps1
+   5.3kB PRD.md
+   3.9kB pyproject.toml
+  22.0kB README.md
+    340B requirements-dev.txt
+    559B run_connection_tests.py
+    567B run_mcp_server.py
+   1.1kB run_server.py
+    308B run_test_final.ps1
+    314B run_test_fixed.ps1
+   5.0kB scripts\build-mcp-package.ps1
+    998B scripts\cleanup.ps1
+   1.8kB scripts\fix_imports.py
+   3.0kB scripts\fix_tool_imports.py
+   1.8kB scripts\move_files.ps1
+   1.4kB scripts\move_tools.py
+   2.0kB scripts\reorganize_structure.ps1
+   2.6kB scripts\restructure.ps1
+    854B scripts\run_tests.ps1
+   1.7kB scripts\update_imports_for_tools.py
+   1016B scripts\update_imports.ps1
+   3.2kB scripts\update_tool_imports_v2.py
+   2.5kB scripts\update_tool_imports.py
+   2.7kB setup.py
+   1.1kB simple_build.ps1
+    663B simple_check.py
+    751B simple_dxt_build.ps1
+    490B simple_test.py
+    561B src\database_operations_mcp\__init__.py
+    227B src\database_operations_mcp\__main__.py
+   8.4kB src\database_operations_mcp\database_manager.py
+   6.0kB src\database_operations_mcp\main.py
+   2.1kB templates\mcp_server\.pre-commit-config.yaml
+   4.7kB templates\mcp_server\BRANCHING_STRATEGY.md
+    787B templates\mcp_server\CHANGELOG.md
+   5.1kB templates\mcp_server\CODE_OF_CONDUCT.md
+   2.7kB templates\mcp_server\CONTRIBUTING.md
+   5.8kB templates\mcp_server\DEVELOPMENT.md
+   1.2kB templates\mcp_server\dxt.json
+   1.0kB templates\mcp_server\LICENSE
+   1.3kB templates\mcp_server\pyproject.toml
+   1.0kB templates\mcp_server\pytest.ini
+  11.2kB templates\mcp_server\README.md
+   1012B templates\mcp_server\requirements-dev.txt
+   8.2kB templates\prompt_templates.md
+   1.5kB test_env.py
+   1.2kB test_fastmcp_import.py
+     94B test_fastmcp_output.txt
+    903B test_fastmcp.py
+     48B test_file.txt
+   1.8kB test_import.py
+    834B test_imports.py
+   1.7kB test_mcp_imports.py
+   2.0kB test_mcp.py
+      0B test_output.txt
+   5.5kB test_reports\comprehensive_test_report.txt
+  55.9kB test_reports\comprehensive_test_results.json
+   4.9kB test_reports\test_report.txt
+  35.0kB test_reports\test_results.json
+    565B test_results.json
+     23B test_simple.py
+      0B tests\__init__.py
+      0B tests\integration\__init__.py
+    881B tests\run_tests.py
+  17.2kB tests\test_all_tools_fixed.py
+  17.9kB tests\test_all_tools.py
+  17.7kB tests\test_comprehensive.py
+   2.1kB tests\test_database_connection.py
+   2.6kB tests\test_fastmcp_init.py
+      0B tests\unit\__init__.py
+   7.3kB tests\unit\test_connection_tools.py
+   8.8kB tests\unit\test_export_calibre.py
+    690B tests\unit\test_fastmcp_api.py
+    525B tests\unit\test_final.py
+   1.1kB tests\unit\test_import_only.py
+    626B tests\unit\test_import.py
+   1.1kB tests\unit\test_imports_quick.py
+    636B tests\unit\test_imports.py
+   2.0kB tests\unit\test_list_tools.py
+   2.7kB tests\unit\test_mcp_integration.py
+   2.2kB tests\unit\test_mcp_server.py
+   2.1kB tests\unit\test_mcp.py
+   4.7kB tests\unit\test_mongodb.py
+   8.5kB tests\unit\test_plex_tools.py
+   2.3kB tests\unit\test_postgresql.py
+   6.1kB tests\unit\test_registry_monitor.py
+    376B tests\unit\test_server.py
+   1.6kB tests\unit\test_stdio.py
+     20B validate_output.txt
+  54.4kB .windsurf/rules/global_rules/ [and 3 more files]
+    509B src/database_operations_mcp/config/ [and 2 more files]
+   9.5kB src/database_operations_mcp/models/ [and 5 more files]
+  70.6kB src/database_operations_mcp/services/ [and 7 more files]
+ 204.2kB src/database_operations_mcp/tools/ [and 30 more files]
+   1.9kB templates\mcp_server\.github\workflows\ci-cd.yml
+  14.1kB templates/mcp_server/docs/ [and 3 more files]
+   2.1kB templates\mcp_server\dxt\build.ps1
+  16.5kB templates/mcp_server/scripts/ [and 3 more files]
+  48.5kB templates/mcp_server/src/ [and 8 more files]
+  10.8kB templates/mcp_server/tests/ [and 5 more files]
+
+Archive Details
+name: database-operations-mcp
+version: 0.1.0
+filename: database-operations-mcp-0.1.0.dxt
+package size: 348.9kB
+unpacked size: 1.1MB
+shasum: d4cb6539cb3582ccf06892878b9b4931b0768a4e
+total files: 207
+ignored (.dxtignore) files: 85
+
+Output: D:\Dev\repos\database-operations-mcp\dist\database-operations-mcp.dxt

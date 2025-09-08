@@ -1,0 +1,19 @@
+Loading Sandra's PowerShell Profile - Windsurf Bash Compatibility Enabled
+
+PowerShell Profile Loaded Successfully!
+   - Bash syntax compatibility enabled
+   - Windsurf pattern fixes active
+   - Python PATH protection loaded
+   - Type 'Show-BashCompatibility' for usage info
+
+Python PATH refreshed
+At D:\Dev\repos\database-operations-mcp\build_self
+_contained.ps1:46 char:16
++ Write-Host "ðY"' Copying project files..."
++                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The string is missing the terminator: '.
+    + CategoryInfo          : ParserError: (:) [] 
+   , ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : TerminatorExpectedA 
+   tEndOfString
+ 

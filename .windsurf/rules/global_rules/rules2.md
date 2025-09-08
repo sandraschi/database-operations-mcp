@@ -6,12 +6,14 @@ trigger: always_on
 
 ## Proof of read 2
 — Add an extra "lgr2 " to cascade output
-
+## 
 ## Shell Scripting Rules
 1. **Windows Compatibility**
    - Use PowerShell syntax, not Bash/Linux syntax
    - Use `;` for command chaining, not `&&`
-   - Use Windows-style paths with backslashes or forward slashes
+   - Use Windows-style paths
+
+2. when running scripts or builds, always redirect output (stdout or stderr) to file. when script or build has run, analyze the file. you cannot see what is output in the shell, do not try. always redirect ! do not inferrupt longrunning builds, always wait for them to complete. wait till you get 0 or 1 completion code
 
 3. **Process Management**
    - Never attempt to kill processes without elevation

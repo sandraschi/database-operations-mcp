@@ -9,7 +9,7 @@
     "version": "2.10.1",
     "server": {
       "command": "python",
-      "args": ["-m", "src.database_operations"],
+      "args": ["-m", "database_operations_mcp"],
       "transport": "stdio"
     },
     "capabilities": {
@@ -21,7 +21,7 @@
   "fastmcp_compliance": {
     "version": "2.11.3",
     "transport": "stdio",
-    "entry_point": "src.database_operations.main:main"
+    "entry_point": "database_operations_mcp.main:main"
   },
   "dependencies": {
     "python": ">=3.9.0"
