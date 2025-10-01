@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -74,9 +74,8 @@ coverage.xml
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# VS Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+# DXT Package Files (Large binary files)
+*.dxt
+dist/*.dxt
+dxt/*.dxt
+minimal_dxt/*.dxt
