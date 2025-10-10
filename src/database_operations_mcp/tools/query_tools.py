@@ -25,17 +25,149 @@ async def execute_query(
     parameters: Optional[Dict[str, Any]] = None,
     limit: int = 1000
 ) -> Dict[str, Any]:
-    """Execute a query on the specified database connection.
+    '''Execute SQL or NoSQL query on specified database connection.
     
-    Args:
-        connection_name: Name of the registered connection
-        query: SQL query or database-specific query to execute
-        parameters: Optional query parameters for prepared statements
-        limit: Maximum number of rows to return (default: 1000)
+    Executes queries on registered database connections with automatic limit enforcement,
+    parameter binding, and comprehensive result formatting. Supports SQL (PostgreSQL, SQLite),
+    NoSQL (MongoDB), and Vector (ChromaDB) databases.
+    
+    Parameters:
+        connection_name: Name of registered database connection
+            - Must be previously registered via register_database_connection
+            - Case-sensitive string
+            - Only alphanumeric and underscores allowed
         
+        query: SQL or database-specific query to execute
+            - SQL: Standard SQL SELECT, INSERT, UPDATE, DELETE
+            - MongoDB: Query syntax as string
+            - ChromaDB: Vector query syntax
+            - Maximum length: 10,000 characters
+            - Parameterized queries recommended for security
+        
+        parameters: Query parameters for prepared statements (default: None)
+            - Dictionary mapping parameter names to values
+            - Prevents SQL injection attacks
+            - Example: {"user_id": 123, "status": "active"}
+        
+        limit: Maximum rows to return (default: 1000)
+            - Applied automatically if not in query
+            - Range: 1-10000
+            - Helps prevent memory issues
+    
     Returns:
-        Dictionary with query results and metadata
-    """
+        Dictionary containing:
+            - success: Boolean indicating query execution success
+            - connection_name: Echo of connection used
+            - query: Echo of query executed
+            - parameters: Echo of parameters used
+            - applied_limit: Actual limit applied
+            - result: Query results dictionary with:
+                - rows: List of result rows
+                - columns: List of column names
+                - row_count: Number of rows returned
+            - error: Error message if success is False
+    
+    Usage:
+        Use this tool to execute any database query safely. It automatically applies
+        limits, handles parameters, and formats results consistently across all
+        database types. Best for data retrieval and analysis.
+        
+        Common scenarios:
+        - Retrieve data for analysis or reporting
+        - Check data quality or validate migrations
+        - Perform ad-hoc database queries
+        - Debug application data issues
+        
+        Best practices:
+        - Always use parameterized queries for user input
+        - Start with small limits for exploratory queries
+        - Use specific column names instead of SELECT *
+        - Consider using quick_data_sample for quick peeks
+    
+    Examples:
+        Basic SELECT query:
+            result = await execute_query(
+                connection_name="production_db",
+                query="SELECT id, name, email FROM users WHERE active = true"
+            )
+            # Returns: {
+            #     'success': True,
+            #     'result': {
+            #         'rows': [
+            #             {'id': 1, 'name': 'Alice', 'email': 'alice@example.com'},
+            #             {'id': 2, 'name': 'Bob', 'email': 'bob@example.com'}
+            #         ],
+            #         'columns': ['id', 'name', 'email'],
+            #         'row_count': 2
+            #     }
+            # }
+        
+        Parameterized query for security:
+            result = await execute_query(
+                connection_name="production_db",
+                query="SELECT * FROM orders WHERE user_id = :user_id AND status = :status",
+                parameters={"user_id": 12345, "status": "pending"},
+                limit=50
+            )
+            # Returns: Up to 50 matching orders with safe parameter binding
+        
+        Query with custom limit:
+            result = await execute_query(
+                connection_name="analytics_db",
+                query="SELECT * FROM logs WHERE date > '2024-01-01'",
+                limit=100
+            )
+            # Returns: First 100 log entries (limit auto-applied)
+        
+        Error handling:
+            result = await execute_query(
+                connection_name="nonexistent",
+                query="SELECT * FROM users"
+            )
+            if not result['success']:
+                print(f"Query failed: {result['error']}")
+            # Logs: Query failed: Connection not found: nonexistent
+        
+        Complex aggregation query:
+            result = await execute_query(
+                connection_name="sales_db",
+                query=\'\'\'
+                    SELECT 
+                        category,
+                        COUNT(*) as total_orders,
+                        SUM(amount) as total_revenue
+                    FROM orders
+                    WHERE order_date >= :start_date
+                    GROUP BY category
+                    HAVING COUNT(*) > :min_orders
+                    ORDER BY total_revenue DESC
+                \'\'\',
+                parameters={
+                    "start_date": "2024-01-01",
+                    "min_orders": 10
+                },
+                limit=20
+            )
+            # Returns: Top 20 categories by revenue
+    
+    Raises:
+        ConnectionError: When database connection is unavailable
+        QueryError: When query syntax is invalid
+        TimeoutError: When query execution exceeds 30 seconds
+        PermissionError: When user lacks query permissions
+    
+    Notes:
+        - Large result sets may consume significant memory
+        - Query timeout is 30 seconds by default
+        - Limit is automatically applied if not present in query
+        - Connection must be registered before use
+        - Parameterized queries prevent SQL injection
+    
+    See Also:
+        - quick_data_sample: Get sample data without writing queries
+        - export_query_results: Execute and export results to file
+        - list_tables: Discover available tables to query
+    '''
     try:
         connector = db_manager.get_connector(connection_name)
         if not connector:
