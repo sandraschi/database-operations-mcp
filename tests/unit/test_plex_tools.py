@@ -8,7 +8,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from database_operations_mcp.handlers.plex_tools import PlexDatabase, export_plex_library
+from database_operations_mcp.tools.plex_tools import PlexDatabase, export_plex_library
 
 class TestPlexDatabase(unittest.TestCase):
     """Test cases for PlexDatabase class."""
@@ -234,3 +234,4 @@ class TestExportPlexLibrary(unittest.TestCase):
         
         self.assertEqual(result['status'], 'error')
         self.assertIn('not found', result['message'].lower())
+

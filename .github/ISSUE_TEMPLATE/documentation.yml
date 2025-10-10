@@ -1,0 +1,90 @@
+name: Documentation Improvement
+description: Suggest improvements or report issues with documentation
+title: "[Docs]: "
+labels: ["documentation", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our documentation! Clear docs make the project better for everyone.
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation needs improvement?
+      options:
+        - README
+        - API Documentation
+        - Tutorial/Guide
+        - Code Comments
+        - Examples
+        - CHANGELOG
+        - CONTRIBUTING
+        - SECURITY
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: Documentation Issue
+      description: What's wrong or missing in the current documentation?
+      placeholder: The documentation for X is unclear because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Location
+      description: Where is the documentation that needs improvement?
+      placeholder: |
+        - File: docs/guides/example.md
+        - Section: "Getting Started"
+        - Line: 42
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: The documentation should explain...
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or References
+      description: Provide examples of good documentation or references
+      placeholder: |
+        - Similar projects that do this well
+        - Specific examples to include
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Impact
+      description: How much does this affect users?
+      options:
+        - Low - Minor typo or formatting
+        - Medium - Confusing or incomplete information
+        - High - Missing critical information or incorrect
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information about the documentation issue
+      placeholder: Additional context...
+    validations:
+      required: false
+

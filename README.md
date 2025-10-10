@@ -1,27 +1,28 @@
-# Database Operations MCP 
+# Database Operations MCP
 
 ## Universal Database Operations MCP Server
 
 A comprehensive MCP server supporting SQLite, PostgreSQL, and ChromaDB operations.
 
-[![FastMCP](https://img.shields.io/badge/FastMCP-2.11.3-blue.svg)](https://github.com/jlowin/fastmcp)
+[![FastMCP](https://img.shields.io/badge/FastMCP-2.12.0-blue.svg)](https://github.com/jlowin/fastmcp)
+[![GLAMA.ai](https://glama.ai/mcp/servers/database-operations-mcp/badge)](https://glama.ai/mcp/servers/database-operations-mcp)
 [![PyPI](https://img.shields.io/pypi/v/database-operations-mcp)](https://pypi.org/project/database-operations-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 
 ## Overview
 
-Database Operations MCP is a comprehensive Model Context Protocol server that provides AI agents with secure, efficient access to multiple database systems. Built with FastMCP 2.11.3, it offers a unified interface for SQLite, PostgreSQL, and ChromaDB operations through 8 specialized tools and 20 guided user prompts.
+Database Operations MCP is a comprehensive Model Context Protocol server that provides AI agents with secure, efficient access to multiple database systems. Built with FastMCP 2.12.0, it offers a unified interface for SQLite, PostgreSQL, and ChromaDB operations through 8 specialized tools and 20 guided user prompts.
 
 ## Features
 
 - **Multi-Database Support**: PostgreSQL, MongoDB, ChromaDB, and SQLite
 - **Unified API**: Consistent interface across different database systems
 - **Security First**: Secure credential storage, role-based access control
-- **FastMCP 2.11.3**: Modern, efficient MCP implementation
+- **FastMCP 2.12.0**: Modern, efficient MCP implementation
 - **Cross-Platform**: Windows, macOS, and Linux support
 - **Containerized**: Easy deployment with Docker
-- **DXT Packaging**: Easy packaging and distribution with DXT
+- **MCPB Packaging**: Easy packaging and distribution with DXT
 
 ## 📦 Latest Release: v1.0.0
 
@@ -29,27 +30,13 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 - ✨ Supports SQLite, PostgreSQL, and ChromaDB
 - 🚀 Ready for production use
 
-## Overview
-
-Database Operations MCP is a comprehensive Model Context Protocol server that provides AI agents with secure, efficient access to multiple database systems. Built with FastMCP 2.11.3, it offers a unified interface for SQLite, PostgreSQL, and ChromaDB operations through 8 specialized tools and 20 guided user prompts.
-
-## Features
-
-- **Multi-Database Support**: PostgreSQL, MongoDB, ChromaDB, and SQLite
-- **Unified API**: Consistent interface across different database systems
-- **Security First**: Secure credential storage, role-based access control
-- **FastMCP 2.11.3**: Modern, efficient MCP implementation
-- **Cross-Platform**: Windows, macOS, and Linux support
-- **Containerized**: Easy deployment with Docker
-- **DXT Packaging**: Easy packaging and distribution with DXT
-
 ## 📚 Documentation
 
 ### Development Standards
 - [MCP Server & DXT Packing Standards](./docs/standards/MCP_Server_Standards.md) - Guidelines for MCP server development and DXT packaging
 - [DXT Building Guide](./docs/DXT_BUILDING_GUIDE.md) - Complete guide to building and distributing DXT packages
 
-## 📦 DXT Packaging
+## 📦 MCPB Packaging
 
 This project uses DXT for packaging the MCP server for distribution and deployment. The DXT package includes all necessary code, dependencies, and configuration.
 
@@ -749,7 +736,7 @@ python src/server.py
 5. Open a Pull Request
 
 ### Development Guidelines
-- Follow FastMCP 2.11.3 patterns
+- Follow FastMCP 2.12.0 patterns
 - Add comprehensive error handling
 - Include security validation
 - Write descriptive prompts
@@ -759,7 +746,7 @@ python src/server.py
 
 ### Python Dependencies
 ```
-fastmcp>=2.11.3
+fastmcp>=2.12.0
 sqlite3  # Built-in
 psycopg2-binary>=2.9.0
 chromadb>=0.4.0
@@ -808,4 +795,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ using FastMCP 2.11.3 and the Model Context Protocol**
+**Built with ❤️ using FastMCP 2.12.0 and the Model Context Protocol**

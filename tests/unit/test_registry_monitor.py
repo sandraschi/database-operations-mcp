@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock, ANY
 
 # Import the function to test
-from database_operations_mcp.handlers.registry_tools import monitor_registry, _active_monitors
+from database_operations_mcp.tools.registry_tools import monitor_registry, _active_monitors
 
 # Test data
 TEST_REGISTRY_PATH = r"HKEY_CURRENT_USER\\Software\\TestKey"
@@ -181,3 +181,4 @@ def test_monitor_registry_stop_error(mock_registry_monitor):
     assert 'error stopping monitor' in result['message'].lower()
     # The monitor should still be removed from active monitors
     assert TEST_REGISTRY_PATH not in _active_monitors
+

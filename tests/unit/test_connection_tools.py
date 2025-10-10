@@ -15,7 +15,7 @@ from typing import Dict, Any, Optional
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 
 # Import the functions to test
-from database_operations_mcp.handlers.connection_tools import (
+from database_operations_mcp.tools.connection_tools import (
     register_tools,
     DatabaseInfo,
     ConnectionResult
@@ -57,7 +57,7 @@ def mock_mcp():
 @pytest.fixture
 def mock_db_manager():
     """Create a mock database manager with common methods."""
-    with patch('database_operations_mcp.handlers.connection_tools.db_manager') as mock:
+    with patch('database_operations_mcp.tools.connection_tools.db_manager') as mock:
         yield mock
 
 @pytest.fixture
@@ -79,7 +79,7 @@ def test_register_tools_registers_functions(mock_mcp):
     tool_calls = [call[0][0].__name__ for call in mock_mcp.tool.call_args_list]
     
     # Get the actual function names from the module
-    from database_operations_mcp.handlers import connection_tools
+    from database_operations_mcp.tools import connection_tools
     expected_functions = [
         name for name, obj in connection_tools.__dict__.items()
         if callable(obj) and not name.startswith('_')
@@ -94,7 +94,7 @@ def test_list_supported_databases(mock_mcp, mock_db_manager):
     """Test listing supported databases."""
     # Arrange
     from database_operations_mcp.database_manager import get_supported_databases
-    with patch('database_operations_mcp.handlers.connection_tools.get_supported_databases', 
+    with patch('database_operations_mcp.tools.connection_tools.get_supported_databases', 
               return_value=SAMPLE_DATABASES):
         # Register the tools with our mock MCP
         register_tools(mock_mcp)
@@ -116,7 +116,7 @@ def test_list_supported_databases(mock_mcp, mock_db_manager):
 def test_register_database_connection_success(mock_mcp, mock_db_manager, mock_connector):
     """Test successful database connection registration."""
     # Arrange
-    with patch('database_operations_mcp.handlers.connection_tools.create_connector', 
+    with patch('database_operations_mcp.tools.connection_tools.create_connector', 
               return_value=mock_connector):
         register_tools(mock_mcp)
         
@@ -207,3 +207,4 @@ def test_test_all_database_connections_parallel(mock_mcp, mock_db_manager, mock_
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+

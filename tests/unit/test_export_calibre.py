@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 # Import the function to test
-from database_operations_mcp.handlers.maintenance_tools import export_calibre_library
+from database_operations_mcp.tools.maintenance_tools import export_calibre_library
 
 # Test data
 SAMPLE_LIBRARY = {
@@ -258,3 +258,4 @@ def test_export_calibre_library_empty_library(temp_output_file):
         
         assert result['status'] == 'error'
         assert 'No books found to export' in result['message']
+
