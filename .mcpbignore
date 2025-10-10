@@ -1,0 +1,112 @@
+# MCPB Ignore - Files/directories to exclude from MCPB package
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+package_env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+*.dxt
+*.mcpb
+
+# Tests
+tests/
+test_*.py
+*_test.py
+.coverage
+htmlcov/
+.tox/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.pre-commit-config.yaml
+
+# Documentation (exclude from package, keep minimal)
+docs/
+*.md
+!README.md
+!LICENSE
+
+# Scripts
+scripts/
+*.ps1
+*.bat
+*.sh
+
+# DXT related (obsolete)
+dxt/
+minimal_dxt/
+*dxt*
+
+# Temp files
+*.log
+*.tmp
+*.temp
+*.cache
+.snapshots/
+
+# Large dependencies that should be in requirements.txt
+package_env/
+
+# Test output
+test_reports/
+test_output.txt
+test_results.json
+
+# Misc
+*.db
+*.sqlite
+*.sqlite3
+hello.py
+check_*.py
+debug_*.py
+investigate_*.py
+launch_*.py
+list_tools.py
+minimal_test.py
+simple_*.py
+test_*.py
+run_*.py
+validate_output.txt
+pip_install_output.txt
+move_to_dist.ps1
+commit_gold_status.ps1
+.ps1
+
+# Templates
+templates/
+
+# Gold status docs
+GOLD_STATUS_*.md
+REPOSITORY_*.md
+
