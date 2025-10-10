@@ -16,8 +16,8 @@
     Show this help message
 
 .EXAMPLE
-    .\scripts\build-mcpb-package.ps1 -NoSign
-    .\scripts\build-mcpb-package.ps1 -OutputDir "C:\builds"
+    .\mcpb\scripts\build-mcpb-package.ps1 -NoSign
+    .\mcpb\scripts\build-mcpb-package.ps1 -OutputDir "C:\builds"
 
 .NOTES
     Requires: MCPB CLI (@anthropic-ai/mcpb)
@@ -30,7 +30,7 @@ param(
     [switch]$NoSign = $false,
     
     [Parameter(Mandatory = $false)]
-    [string]$OutputDir = "$PSScriptRoot\..\dist",
+    [string]$OutputDir = "$PSScriptRoot\..\..\dist",
     
     [Parameter(Mandatory = $false)]
     [switch]$Help
@@ -46,7 +46,8 @@ if ($Help) {
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$ProjectRoot = Split-Path -Parent $PSScriptRoot
+# PSScriptRoot is mcpb/scripts/, go up two levels to project root
+$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $PackageName = "database-operations-mcp"
 $OutputFile = Join-Path $OutputDir "$PackageName.mcpb"
 
@@ -68,6 +69,7 @@ function Write-Error-Message($message) {
 }
 
 try {
+    # Build from project root where manifest.json is located
     Push-Location $ProjectRoot
     
     # Step 1: Check prerequisites
@@ -91,9 +93,8 @@ try {
         exit 1
     }
     
-    # Check manifest exists
-    $manifestPath = Join-Path $ProjectRoot "manifest.json"
-    if (-not (Test-Path $manifestPath)) {
+    # Check manifest exists (in project root)
+    if (-not (Test-Path "manifest.json")) {
         Write-Error-Message "manifest.json not found in project root"
         exit 1
     }
@@ -102,7 +103,7 @@ try {
     # Step 2: Validate manifest
     Write-Header "Validating Manifest"
     
-    $validateResult = mcpb validate $manifestPath 2>&1
+    $validateResult = mcpb validate manifest.json 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Error-Message "Manifest validation failed: $validateResult"
         exit 1
@@ -126,6 +127,7 @@ try {
     
     $env:PYTHONPATH = $ProjectRoot
     
+    # Pack from project root where manifest.json is located
     # mcpb pack expects: mcpb pack <source> <output_file>
     $buildResult = mcpb pack . $OutputFile 2>&1
     
