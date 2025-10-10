@@ -210,19 +210,124 @@ async def quick_data_sample(
     include_columns: Optional[List[str]] = None,
     exclude_columns: Optional[List[str]] = None
 ) -> Dict[str, Any]:
-    """Get a quick sample of data from a table/collection.
+    '''Get quick data sample from table without writing queries.
     
-    Args:
-        connection_name: Name of the registered connection
-        table_name: Name of the table/collection to sample
-        database_name: Optional database name
-        sample_size: Number of rows to retrieve (default: 10)
-        include_columns: Optional list of columns to include
-        exclude_columns: Optional list of columns to exclude
+    Retrieves a small sample of data from any table/collection for quick inspection,
+    schema validation, or data quality checks. Automatically generates appropriate
+    queries for different database types.
+    
+    Parameters:
+        connection_name: Name of registered database connection
+            - Must be previously registered
+            - Case-sensitive
         
+        table_name: Name of table/collection to sample
+            - SQL: Table name (e.g., 'users', 'orders')
+            - MongoDB: Collection name
+            - ChromaDB: Collection name
+        
+        database_name: Database/schema name (default: None)
+            - Optional for most databases
+            - Required for PostgreSQL with schemas
+            - Not used for SQLite or MongoDB
+        
+        sample_size: Number of rows to retrieve (default: 10)
+            - Range: 1-1000
+            - Recommended: 10-50 for quick inspection
+        
+        include_columns: List of columns to include (default: None)
+            - None means all columns
+            - SQL: Column names as strings
+            - MongoDB: Field names
+        
+        exclude_columns: List of columns to exclude (default: None)
+            - Useful for hiding sensitive data
+            - Applied after include_columns
+    
     Returns:
-        Dictionary with sample data and metadata
-    """
+        Dictionary containing:
+            - success: Boolean indicating operation success
+            - connection_name: Echo of connection used
+            - table_name: Echo of table sampled
+            - database_name: Database name if provided
+            - sample_size: Requested sample size
+            - generated_query: Auto-generated query used
+            - result: Sample data dictionary with rows and columns
+            - error: Error message if success is False
+    
+    Usage:
+        Use this for quick data inspection without writing queries. Perfect for
+        exploring unfamiliar databases, validating migrations, or checking data
+        quality. The tool auto-generates appropriate queries for each database type.
+        
+        Common scenarios:
+        - Explore new database tables
+        - Verify migration results
+        - Check data types and formats
+        - Quick sanity checks during development
+        
+        Best practices:
+        - Start with small sample sizes (10-20 rows)
+        - Use column filters to reduce data transfer
+        - Combine with describe_table for complete context
+    
+    Examples:
+        Basic table sample:
+            result = await quick_data_sample(
+                connection_name="production_db",
+                table_name="users"
+            )
+            # Returns: {
+            #     'success': True,
+            #     'result': {
+            #         'rows': [
+            #             {'id': 1, 'name': 'Alice', 'email': 'alice@example.com'},
+            #             {'id': 2, 'name': 'Bob', 'email': 'bob@example.com'}
+            #         ],
+            #         'columns': ['id', 'name', 'email']
+            #     },
+            #     'generated_query': 'SELECT * FROM users LIMIT 10'
+            # }
+        
+        Larger sample with database specified:
+            result = await quick_data_sample(
+                connection_name="postgres_db",
+                table_name="orders",
+                database_name="sales",
+                sample_size=50
+            )
+            # Returns: 50 rows from sales.orders table
+        
+        With column filtering:
+            result = await quick_data_sample(
+                connection_name="production_db",
+                table_name="users",
+                sample_size=20,
+                include_columns=["id", "name", "created_at"],
+                exclude_columns=["password_hash"]
+            )
+            # Returns: 20 rows with only specified columns
+        
+        Error handling:
+            result = await quick_data_sample(
+                connection_name="production_db",
+                table_name="nonexistent_table"
+            )
+            if not result['success']:
+                print(f"Sampling failed: {result['error']}")
+            # Logs: Sampling failed: Table 'nonexistent_table' does not exist
+    
+    Notes:
+        - Auto-generates database-specific queries
+        - Column filtering applied client-side for some databases
+        - Large sample sizes may impact database performance
+        - Does not modify data (read-only operation)
+    
+    See Also:
+        - describe_table: Get table schema before sampling
+        - execute_query: For custom queries with complex logic
+        - list_tables: Discover available tables
+    '''
     try:
         connector = db_manager.get_connector(connection_name)
         if not connector:
@@ -271,19 +376,112 @@ async def export_query_results(
     parameters: Optional[Dict[str, Any]] = None,
     limit: int = 1000
 ) -> Dict[str, Any]:
-    """Execute query and export results in specified format.
+    '''Execute query and export results in multiple formats.
     
-    Args:
-        connection_name: Name of the registered connection
-        query: Query to execute
-        export_format: Output format (json, csv, excel)
-        output_file: Optional file path to export to
-        parameters: Optional query parameters
-        limit: Maximum rows to export (default: 1000)
+    Runs database query and formats results as JSON, CSV, or Excel. Useful for
+    data export, reporting, and integration with other tools. Handles large
+    result sets with automatic limiting.
+    
+    Parameters:
+        connection_name: Name of registered database connection
+            - Must be previously registered
+            - Case-sensitive
         
+        query: SQL or database query to execute
+            - Same syntax as execute_query
+            - Supports parameterized queries
+        
+        export_format: Output format (default: "json")
+            - "json": Structured JSON with metadata
+            - "csv": Comma-separated values
+            - "excel": Excel-compatible structure
+        
+        output_file: File path for export (default: None)
+            - None returns data in response
+            - Provide path to save to file
+        
+        parameters: Query parameters (default: None)
+            - Same as execute_query
+            - Prevents SQL injection
+        
+        limit: Maximum rows to export (default: 1000)
+            - Auto-applied if not in query
+            - Range: 1-10000
+    
     Returns:
-        Dictionary with exported data and metadata
-    """
+        Dictionary containing:
+            - success: Boolean indicating operation success
+            - connection_name: Echo of connection used
+            - query: Query executed
+            - export_format: Format used
+            - row_count: Number of rows exported
+            - exported_data: Formatted data (if no output_file)
+            - file_path: Path where data saved (if output_file provided)
+            - error: Error message if success is False
+    
+    Usage:
+        Use this to export query results for reporting, analysis, or integration
+        with other tools. Supports multiple formats and can save directly to files.
+        
+        Common scenarios:
+        - Export data for Excel analysis
+        - Generate CSV for data imports
+        - Create JSON for API integration
+        - Backup specific data subsets
+        
+        Best practices:
+        - Use CSV for Excel compatibility
+        - Use JSON for programmatic processing
+        - Set appropriate limits to control file sizes
+        - Use parameterized queries for dynamic exports
+    
+    Examples:
+        Export to JSON:
+            result = await export_query_results(
+                connection_name="analytics_db",
+                query="SELECT * FROM sales WHERE month = 'January'",
+                export_format="json"
+            )
+            # Returns: {
+            #     'success': True,
+            #     'export_format': 'json',
+            #     'row_count': 150,
+            #     'exported_data': {
+            #         'columns': ['id', 'amount', 'date'],
+            #         'rows': [...]
+            #     }
+            # }
+        
+        Export to CSV file:
+            result = await export_query_results(
+                connection_name="production_db",
+                query="SELECT name, email, created_at FROM users",
+                export_format="csv",
+                output_file="C:/exports/users.csv",
+                limit=5000
+            )
+            # Returns: {'success': True, 'file_path': 'C:/exports/users.csv', 'row_count': 5000}
+        
+        Parameterized export:
+            result = await export_query_results(
+                connection_name="sales_db",
+                query="SELECT * FROM orders WHERE date > :start_date",
+                parameters={"start_date": "2024-01-01"},
+                export_format="excel",
+                limit=2000
+            )
+            # Returns: Excel-formatted data with 2000 rows
+    
+    Notes:
+        - Large exports may consume significant memory
+        - File paths must be writable
+        - CSV format is most compatible across tools
+        - Excel format is structured JSON, not actual .xlsx
+    
+    See Also:
+        - execute_query: For queries without export
+        - quick_data_sample: For quick data inspection
+    '''
     try:
         connector = db_manager.get_connector(connection_name)
         if not connector:
