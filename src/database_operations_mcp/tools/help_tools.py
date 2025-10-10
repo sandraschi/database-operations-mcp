@@ -139,27 +139,146 @@ class HelpSystem:
 @mcp.tool()
 @HelpSystem.register_tool(category='help')
 async def help(category: Optional[str] = None) -> Dict[str, Any]:
-    """Get help for all available tools or filter by category.
+    '''Get hierarchical help for all tools or specific category.
     
-    Args:
-        category: Optional category to filter tools (e.g., 'database', 'registry')
-        
+    Provides comprehensive help documentation for all available MCP tools,
+    organized by category. Essential starting point for discovering capabilities.
+    
+    Parameters:
+        category: Category filter (default: None)
+            - None: Show all tools
+            - 'database': Core database operations
+            - 'firefox': Firefox bookmark tools  
+            - 'calibre': Calibre library tools
+            - 'registry': Windows Registry tools
+            - 'help': Help and documentation tools
+    
     Returns:
-        Dictionary with help information for all tools in the specified category
-        or all tools if no category is specified.
-    """
+        Dictionary containing:
+            - status: 'success' (always succeeds)
+            - categories: Dictionary of categories with:
+                - description: Category description
+                - tools: List of tools in category with name and description
+            - total_tools: Count of tools returned
+    
+    Usage:
+        Use this as your first stop to discover available tools and their purposes.
+        Filter by category to narrow down to specific functionality areas.
+        
+        Common scenarios:
+        - Discover available database tools
+        - Find tools for specific tasks
+        - Learn tool capabilities
+        - Browse tools by category
+    
+    Examples:
+        Get all available tools:
+            result = await help()
+            # Returns: {
+            #     'status': 'success',
+            #     'categories': {
+            #         'database': {
+            #             'description': 'Core database operations',
+            #             'tools': [
+            #                 {'name': 'execute_query', 'description': 'Execute SQL or NoSQL query...'},
+            #                 {'name': 'list_tables', 'description': 'List all tables/collections...'}
+            #             ]
+            #         },
+            #         'firefox': {...}
+            #     },
+            #     'total_tools': 64
+            # }
+        
+        Filter by category:
+            result = await help(category="database")
+            # Returns: Only database-related tools
+        
+        Find specific functionality:
+            result = await help(category="firefox")
+            for tool in result['categories']['firefox']['tools']:
+                if 'bookmark' in tool['description']:
+                    print(f"Found: {tool['name']}")
+    
+    Notes:
+        - Categories are predefined (database, firefox, calibre, registry, help)
+        - Tool descriptions are first line of docstrings
+        - Use tool_help for detailed information about specific tools
+    
+    See Also:
+        - tool_help: Get detailed help for specific tool
+    '''
     return HelpSystem.get_help(category)
 
 @mcp.tool()
 @HelpSystem.register_tool(category='help')
 async def tool_help(tool_name: str) -> Dict[str, Any]:
-    """Get detailed help for a specific tool.
+    '''Get detailed documentation for specific tool.
     
-    Args:
-        tool_name: Name of the tool to get help for
-        
+    Retrieves complete documentation for a single tool including description,
+    parameters, return values, and full docstring with examples.
+    
+    Parameters:
+        tool_name: Name of tool to get help for
+            - Must be exact tool name
+            - Case-sensitive
+            - Use help() to discover tool names
+    
     Returns:
-        Dictionary with detailed information about the specified tool
-        including its description, parameters, and usage examples.
-    """
+        Dictionary containing:
+            - status: 'success' or 'error'
+            - tool: Tool information dictionary with:
+                - name: Tool name
+                - description: Brief description
+                - category: Tool category
+                - category_description: Category explanation
+                - parameters: Dictionary of parameters
+                - docstring: Complete docstring text
+            - error: Error message if tool not found
+    
+    Usage:
+        Use this to get detailed information about a specific tool before using it.
+        Shows complete docstring including usage examples and notes.
+        
+        Common scenarios:
+        - Learn how to use specific tool
+        - Understand tool parameters
+        - See usage examples
+        - Check tool category
+    
+    Examples:
+        Get help for execute_query:
+            result = await tool_help("execute_query")
+            # Returns: {
+            #     'status': 'success',
+            #     'tool': {
+            #         'name': 'execute_query',
+            #         'description': 'Execute SQL or NoSQL query...',
+            #         'category': 'database',
+            #         'parameters': {
+            #             'connection_name': 'Name of registered database connection...',
+            #             'query': 'SQL or database-specific query...'
+            #         },
+            #         'docstring': '... full docstring with examples ...'
+            #     }
+            # }
+        
+        Check if tool exists:
+            result = await tool_help("my_tool")
+            if result['status'] == 'error':
+                print("Tool not found, use help() to see available tools")
+        
+        Read tool docstring:
+            result = await tool_help("list_tables")
+            if result['status'] == 'success':
+                print(result['tool']['docstring'])
+                # Displays: Complete docstring with all sections
+    
+    Notes:
+        - Returns full docstring text including examples
+        - Tool names are case-sensitive
+        - Use help() first to discover tool names
+    
+    See Also:
+        - help: Browse all tools by category
+    '''
     return HelpSystem.get_tool_help(tool_name)
