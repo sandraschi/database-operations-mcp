@@ -1,10 +1,15 @@
 """Core Firefox bookmark functionality with improved status checking."""
 import os
 import sqlite3
+import tempfile
+import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 import psutil
 import configparser
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -15,6 +20,212 @@ from ..help_tools import HelpSystem
 class FirefoxNotClosedError(Exception):
     """Raised when Firefox is running and database access would be unsafe."""
     pass
+
+class FirefoxDatabaseUnlocker:
+    """Dirty tricks to access Firefox database even when locked."""
+
+    @staticmethod
+    def copy_database_to_temp(db_path: Path) -> Optional[Path]:
+        """Copy the locked database to a temporary location for reading."""
+        try:
+            with tempfile.NamedTemporaryFile(suffix='.sqlite', delete=False) as temp_file:
+                temp_path = Path(temp_file.name)
+
+            # Try to copy the database file
+            shutil.copy2(db_path, temp_path)
+            return temp_path
+
+        except (PermissionError, OSError, shutil.Error) as e:
+            logger.debug(f"Failed to copy database: {e}")
+            # Clean up failed temp file
+            if 'temp_path' in locals():
+                try:
+                    temp_path.unlink(missing_ok=True)
+                except:
+                    pass
+            return None
+
+    @staticmethod
+    def try_sqlite_tricks(db_path: Path) -> Optional[sqlite3.Connection]:
+        """Try various SQLite connection tricks to access locked database."""
+
+        connection_attempts = [
+            # Method 1: Read-only with immutable flag
+            f"file:{db_path}?mode=ro&immutable=1",
+            # Method 2: Read-only with nolock flag (if supported)
+            f"file:{db_path}?mode=ro&nolock=1",
+            # Method 3: Read-only with cache=shared
+            f"file:{db_path}?mode=ro&cache=shared",
+            # Method 4: Direct read-only URI
+            f"file:{db_path}?mode=ro",
+            # Method 5: Normal read-only (least likely to work)
+            str(db_path),
+        ]
+
+        for uri in connection_attempts:
+            try:
+                if uri.startswith("file:"):
+                    conn = sqlite3.connect(uri, uri=True, timeout=1.0)
+                else:
+                    conn = sqlite3.connect(uri, timeout=1.0)
+
+                # Test the connection with a simple query
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+                cursor.close()
+
+                logger.info(f"Successfully opened Firefox DB with: {uri}")
+                return conn
+
+            except sqlite3.Error as e:
+                logger.debug(f"Failed SQLite method {uri}: {e}")
+                continue
+
+        return None
+
+    @staticmethod
+    def get_database_connection_bruteforce(db_path: Path) -> Tuple[Optional[sqlite3.Connection], str]:
+        """
+        Use dirty tricks to access Firefox database even when locked.
+
+        Returns:
+        Tuple of (connection, method_used) or (None, error_message)
+        """
+        if not db_path.exists():
+            return None, "Database file does not exist"
+
+        # Method 1: Try direct SQLite tricks first (fastest)
+        logger.info("Attempting SQLite URI tricks...")
+        conn = FirefoxDatabaseUnlocker.try_sqlite_tricks(db_path)
+        if conn:
+            return conn, "sqlite_uri_tricks"
+
+        # Method 2: Copy database to temp location (more reliable)
+        logger.info("Attempting database copy method...")
+        temp_db_path = FirefoxDatabaseUnlocker.copy_database_to_temp(db_path)
+        if temp_db_path:
+            try:
+                conn = sqlite3.connect(f"file:{temp_db_path}?mode=ro", uri=True)
+                # Test connection
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+                cursor.close()
+
+                logger.info(f"Successfully copied and opened Firefox DB: {temp_db_path}")
+                # Store temp path in connection for cleanup
+                conn.temp_db_path = temp_db_path
+                return conn, "database_copy"
+
+            except sqlite3.Error as e:
+                logger.debug(f"Failed to use copied database: {e}")
+                # Clean up temp file
+                try:
+                    temp_db_path.unlink(missing_ok=True)
+                except:
+                    pass
+
+        # Method 3: Last resort - try with longer timeout
+        logger.info("Attempting extended timeout method...")
+        try:
+            conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=5.0)
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+            cursor.close()
+
+            logger.info("Successfully opened Firefox DB with extended timeout")
+            return conn, "extended_timeout"
+
+        except sqlite3.Error as e:
+            logger.debug(f"Extended timeout also failed: {e}")
+
+        return None, "All brute force methods failed - database is locked"
+
+@mcp.tool()
+@HelpSystem.register_tool(category='firefox')
+async def check_firefox_bruteforce_access() -> Dict[str, Any]:
+    """Check if Firefox database can be accessed using brute force methods.
+
+    This tool attempts various "dirty tricks" to access Firefox's places.sqlite
+    database even when Firefox is running and has it locked. Useful for cases
+    where you need to read Firefox data without closing the browser.
+
+    Returns:
+    Dictionary with access status and available methods
+    """
+    try:
+        # Get Firefox profile path
+        profile_path = get_default_profile_path()
+        if not profile_path:
+            return {
+                "status": "error",
+                "message": "No Firefox profile found"
+            }
+
+        db_path = profile_path / "places.sqlite"
+        if not db_path.exists():
+            return {
+                "status": "error",
+                "message": f"Firefox database not found at {db_path}"
+            }
+
+        # Check Firefox status
+        firefox_status = FirefoxStatusChecker.is_firefox_running()
+
+        # Try brute force access
+        conn, method = FirefoxDatabaseUnlocker.get_database_connection_bruteforce(db_path)
+
+        if conn:
+            # Successfully got access - get some basic info
+            try:
+                cursor = conn.cursor()
+                cursor.execute("SELECT COUNT(*) FROM moz_places")
+                places_count = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(*) FROM moz_bookmarks")
+                bookmarks_count = cursor.fetchone()[0]
+
+                cursor.close()
+
+                result = {
+                    "status": "success",
+                    "message": f"Successfully accessed Firefox database using {method}",
+                    "access_method": method,
+                    "firefox_running": firefox_status['is_running'],
+                    "database_path": str(db_path),
+                    "stats": {
+                        "places_count": places_count,
+                        "bookmarks_count": bookmarks_count
+                    }
+                }
+
+            finally:
+                # Clean up connection and temp files
+                if hasattr(conn, 'temp_db_path'):
+                    try:
+                        conn.temp_db_path.unlink(missing_ok=True)
+                    except:
+                        pass
+                conn.close()
+
+        else:
+            result = {
+                "status": "failed",
+                "message": method,  # method contains the error message
+                "firefox_running": firefox_status['is_running'],
+                "firefox_processes": firefox_status.get('processes', []),
+                "database_path": str(db_path)
+            }
+
+        return result
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Brute force access check failed: {str(e)}"
+        }
 
 class FirefoxStatusChecker:
     """Comprehensive Firefox status checking and profile management."""
@@ -168,7 +379,7 @@ async def check_firefox_status() -> Dict[str, Any]:
     """
     status = FirefoxStatusChecker.is_firefox_running()
     safety = FirefoxStatusChecker.check_database_access_safe()
-
+    
     return {
         "status": "success",
         "firefox_status": status,
@@ -211,7 +422,7 @@ async def get_firefox_profiles() -> Dict[str, Any]:
                 places_db = profile_path / "places.sqlite"
                 detailed_profiles[name] = {
                     "name": name,
-                    "path": str(profile_path),
+                "path": str(profile_path),
                     "is_relative": profile_data.get('IsRelative', '1') == '1',
                     "is_default": profile_data.get('Default', '0') == '1',
                     "bookmarks_database": str(places_db) if places_db.exists() else None,
@@ -481,16 +692,16 @@ async def create_loaded_profile(
 
         # Add bookmarks to the new profile
         bookmarks_added = await _populate_profile_with_bookmarks(profile_name, bookmarks)
-    
+
         return {
             "status": "success",
-                    "message": f"Profile '{profile_name}' created and loaded with {bookmarks_added} bookmarks",
-                    "profile_name": profile_name,
-                    "profile_path": str(profile_path),
-                    "source_type": source_type,
-                    "bookmarks_loaded": bookmarks_added,
-                "total_found": len(bookmarks)
-            }
+            "message": f"Profile '{profile_name}' created and loaded with {bookmarks_added} bookmarks",
+            "profile_name": profile_name,
+            "profile_path": str(profile_path),
+            "source_type": source_type,
+            "bookmarks_loaded": bookmarks_added,
+            "total_found": len(bookmarks)
+        }
 
     except Exception as e:
         return {
