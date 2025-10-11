@@ -148,7 +148,7 @@ async def help(category: Optional[str] = None) -> Dict[str, Any]:
         category: Category filter (default: None)
             - None: Show all tools
             - 'database': Core database operations
-            - 'firefox': Firefox bookmark tools  
+            - 'firefox': Firefox bookmark tools (profiles, bookmarks, curated collections, portmanteau profiles)  
             - 'calibre': Calibre library tools
             - 'registry': Windows Registry tools
             - 'help': Help and documentation tools
@@ -170,6 +170,7 @@ async def help(category: Optional[str] = None) -> Dict[str, Any]:
         - Find tools for specific tasks
         - Learn tool capabilities
         - Browse tools by category
+        - Discover Firefox profile and bookmark management features
     
     Examples:
         Get all available tools:

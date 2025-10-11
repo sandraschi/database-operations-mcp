@@ -12,14 +12,15 @@ A comprehensive MCP server supporting SQLite, PostgreSQL, and ChromaDB operation
 
 ## Overview
 
-Database Operations MCP is a comprehensive Model Context Protocol server that provides AI agents with secure, efficient access to multiple database systems. Built with FastMCP 2.12.0, it offers a unified interface for SQLite, PostgreSQL, and ChromaDB operations through 8 specialized tools and 20 guided user prompts.
+Database Operations MCP is a comprehensive Model Context Protocol server that provides AI agents with secure, efficient access to multiple database systems. Built with FastMCP 2.12.4, it offers a unified interface for SQLite, PostgreSQL, MongoDB, ChromaDB, and more through specialized tools. Supports both stdio and HTTP transports for maximum flexibility - use stdio for MCP clients and HTTP for web dashboards or direct API access.
 
 ## Features
 
 - **Multi-Database Support**: PostgreSQL, MongoDB, ChromaDB, and SQLite
 - **Unified API**: Consistent interface across different database systems
 - **Security First**: Secure credential storage, role-based access control
-- **FastMCP 2.12.0**: Modern, efficient MCP implementation
+- **FastMCP 2.12.4**: Modern, efficient MCP implementation
+- **Dual Transport**: Stdio for MCP clients, HTTP for web dashboards and APIs
 - **Cross-Platform**: Windows, macOS, and Linux support
 - **Containerized**: Easy deployment with Docker
 - **MCPB Packaging**: Easy packaging and distribution with DXT
@@ -340,6 +341,35 @@ dxt uninstall database-operations-mcp
 3. Start the MCP server
 4. Start using the 20 guided prompts!
 
+## 🚀 Transport Options
+
+Database Operations MCP supports multiple transport protocols for different use cases:
+
+### Stdio Transport (Default)
+- **Use case**: MCP client applications (Claude Desktop, VS Code extensions, etc.)
+- **Command**: `python -m database_operations_mcp.main --stdio`
+- **Environment**: `MCP_TRANSPORT=stdio`
+
+### HTTP Transport
+- **Use case**: Web dashboards, direct API access, testing with MCP Inspector
+- **Command**: `python -m database_operations_mcp.main --http`
+- **Environment**: `MCP_TRANSPORT=http`
+- **Default URL**: `http://0.0.0.0:8000/mcp`
+- **Configuration**:
+  - `MCP_HOST`: Server host (default: 0.0.0.0)
+  - `MCP_PORT`: Server port (default: 8000)
+
+### Dual Transport (Recommended)
+- **Use case**: Maximum compatibility - supports both MCP clients and HTTP APIs simultaneously
+- **Command**: `python -m database_operations_mcp.main --dual` (or just `python -m database_operations_mcp.main`)
+- **Environment**: `MCP_TRANSPORT=dual`
+
+### MCP Inspector
+Test the HTTP transport with the official MCP Inspector:
+```bash
+npx @modelcontextprotocol/inspector http://localhost:8000/mcp
+```
+
 ## 🛠️ Available Tools
 
 ### Registry Tools
@@ -362,14 +392,27 @@ Interact with the Windows Registry as a hierarchical database:
 
 ### Firefox Bookmark Tools
 
-Manage and analyze Firefox bookmarks with these specialized tools:
+Manage and analyze Firefox bookmarks with these specialized tools. **Important**: Firefox must be completely closed before using any bookmark tools, as Firefox locks its database files when running.
+
+### Status & Safety
+- `check_firefox_status` - Check if Firefox is running and if it's safe to access databases
+- `get_firefox_profiles` - List all available Firefox profiles with detailed information
+
+### Profile Management
+- `create_firefox_profile` - Create a new Firefox profile
+- `delete_firefox_profile` - Delete a Firefox profile and all its data (requires confirmation)
+- **`create_loaded_profile`** - Create a profile pre-loaded with curated bookmarks from various sources
+- **`create_loaded_profile_from_preset`** - Create a profile using predefined curated collections
+- **`create_portmanteau_profile`** - Create hybrid profiles combining multiple bookmark collections
+- **`suggest_portmanteau_profiles`** - Get suggestions for interesting profile combinations
+- **`list_curated_bookmark_sources`** - List available predefined bookmark collections
 
 ### Bookmark Management
-- `list_bookmarks` - List all bookmarks, optionally filtered by folder
-- `get_bookmark` - Get details for a specific bookmark
-- `add_bookmark` - Add a new bookmark
-- `search_bookmarks` - Search bookmarks by title or URL
-- `export_bookmarks` - Export bookmarks in various formats (JSON, HTML, etc.)
+- `list_bookmarks` - List all bookmarks from a specific profile
+- `search_bookmarks` - Search bookmarks with **smart profile detection**
+  - Automatically detects profile from queries like "immich bookmarks" or "work gitlab"
+  - Supports manual profile selection
+- `find_duplicates` - Find duplicate bookmarks by URL or title
 
 ### Tag Management
 - `list_tags` - List all tags used in bookmarks
@@ -387,6 +430,171 @@ Manage and analyze Firefox bookmarks with these specialized tools:
 ### Backup & Restore
 - `backup_firefox_data` - Create a backup of Firefox bookmarks
 - `restore_firefox_data` - Restore bookmarks from a backup
+
+### Smart Profile Detection Examples
+The search tool automatically detects which profile to use:
+- `"immich bookmarks"` → searches profile containing "immich"
+- `"work gitlab"` → searches work-related profile
+- `"dev stackoverflow"` → searches dev profile
+- `"afterwork netflix"` → searches afterwork/leisure profile
+
+### Loaded Profiles with Curated Bookmarks
+Create specialized Firefox profiles pre-loaded with relevant bookmarks:
+
+#### Using Predefined Collections
+```python
+# Create a developer tools profile
+await create_loaded_profile_from_preset("dev-tools", "developer_tools")
+
+# Create an AI/ML research profile
+await create_loaded_profile_from_preset("ai-research", "ai_ml")
+
+# Create a cooking profile
+await create_loaded_profile_from_preset("recipes", "cooking")
+```
+
+#### Available Preset Collections
+- `developer_tools` - GitHub, Stack Overflow, MDN, DevDocs, Postman, etc.
+- `ai_ml` - AI/ML resources from GitHub awesome repos
+- `cooking` - AllRecipes, Food Network, Serious Eats, etc.
+- `productivity` - Notion, Trello, Asana, Todoist, etc.
+- `news_media` - BBC, CNN, NYT, Reuters, etc.
+- `finance` - Yahoo Finance, Bloomberg, Investing tools
+- `entertainment` - Netflix, YouTube, Spotify, etc.
+- `shopping` - Amazon, eBay, Walmart, etc.
+
+#### Custom Bookmark Sources
+```python
+# From existing bookmarks (with filtering)
+await create_loaded_profile("work", "current_collection", {
+    "from_profile": "default",
+    "filter_tags": ["work"]
+})
+
+# From web scraping
+await create_loaded_profile("news", "web_list", {
+    "url": "https://example.com/curated-news-sites",
+    "selector": "a[href]"
+})
+
+# From GitHub awesome repos
+await create_loaded_profile("webdev", "github_awesome", {
+    "topic": "web-development"
+})
+
+# Custom bookmark list
+await create_loaded_profile("personal", "custom_list", {
+    "bookmarks": [
+        {"title": "My Blog", "url": "https://myblog.com"},
+        {"title": "Hobby Site", "url": "https://hobby.com"}
+    ]
+})
+```
+
+## 🎯 Loaded Profiles - Curated Bookmark Collections
+
+Create specialized Firefox profiles pre-loaded with relevant bookmarks for different purposes:
+
+### Quick Start with Presets
+```python
+# Create a developer tools profile
+await create_loaded_profile_from_preset("dev-tools", "developer_tools")
+
+# Create an AI/ML research profile
+await create_loaded_profile_from_preset("ai-research", "ai_ml")
+
+# Create a cooking profile
+await create_loaded_profile_from_preset("recipes", "cooking")
+```
+
+### Available Preset Collections
+- **`developer_tools`** - GitHub, Stack Overflow, MDN, DevDocs, Postman, etc. (15 sites)
+- **`ai_ml`** - AI/ML resources from GitHub awesome repos
+- **`cooking`** - AllRecipes, Food Network, Serious Eats, etc. (15 sites)
+- **`productivity`** - Notion, Trello, Asana, Todoist, etc. (15 sites)
+- **`news_media`** - BBC, CNN, NYT, Reuters, etc. (15 sites)
+- **`finance`** - Yahoo Finance, Bloomberg, Investing tools (15 sites)
+- **`entertainment`** - Netflix, YouTube, Spotify, etc. (15 sites)
+- **`shopping`** - Amazon, eBay, Walmart, etc. (15 sites)
+
+### Advanced Custom Sources
+```python
+# From existing bookmarks with filtering
+await create_loaded_profile("work", "current_collection", {
+    "from_profile": "default",
+    "filter_tags": ["work"]
+})
+
+# From web scraping
+await create_loaded_profile("news", "web_list", {
+    "url": "https://example.com/curated-news-sites",
+    "selector": "a[href]"
+})
+
+# From GitHub awesome repos
+await create_loaded_profile("webdev", "github_awesome", {
+    "topic": "web-development"
+})
+
+# Custom bookmark list
+await create_loaded_profile("personal", "custom_list", {
+    "bookmarks": [
+        {"title": "My Blog", "url": "https://myblog.com"},
+        {"title": "Hobby Site", "url": "https://hobby.com"}
+    ]
+})
+```
+
+### List Available Sources
+```python
+# See all available curated collections
+sources = await list_curated_bookmark_sources()
+print(f"Available: {sources['count']} collections")
+```
+
+## 🔀 Portmanteau Profiles - Hybrid Bookmark Collections
+
+Create profiles that blend multiple bookmark collections together for specialized use cases:
+
+### Quick Portmanteau Examples
+```python
+# Developer + AI researcher profile
+await create_portmanteau_profile("dev-ai", ["developer_tools", "ai_ml"])
+
+# Productivity + News for staying informed
+await create_portmanteau_profile("work-informed", ["productivity", "news_media"])
+
+# Cooking + Productivity for meal planning
+await create_portmanteau_profile("meal-planning", ["cooking", "productivity"])
+```
+
+### Suggested Combinations
+Get AI-suggested profile combinations for different use cases:
+```python
+suggestions = await suggest_portmanteau_profiles()
+# Returns suggested combinations like:
+# - "research-productivity": AI research + productivity tools
+# - "work-life": Productivity + entertainment balance
+# - "finance-productivity": Investment + organization tools
+```
+
+### Advanced Portmanteau Features
+```python
+# Control bookmarks per source and deduplication
+await create_portmanteau_profile(
+    "custom-combo",
+    ["developer_tools", "finance", "entertainment"],
+    max_bookmarks_per_source=5,
+    deduplicate=True  # Remove duplicate URLs
+)
+```
+
+### Perfect For:
+- **"Dev + AI"** - Full-stack development with AI assistance
+- **"Work + Life"** - Professional tools + entertainment balance
+- **"Research + Productivity"** - Academic work + organization
+- **"News + Finance"** - Current events + market information
+- **"Cooking + Planning"** - Recipes + meal organization
 
 ## Database Connections
 
