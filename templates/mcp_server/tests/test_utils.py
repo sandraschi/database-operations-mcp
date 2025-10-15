@@ -1,7 +1,7 @@
 """Test utilities for FastMCP server."""
 import asyncio
-from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock
+from typing import Any, Dict
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -93,7 +93,7 @@ def mcp_client():
 
 
 @pytest.fixture
-event_loop():
+def event_loop():
     """Create an instance of the default event loop for each test case."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop

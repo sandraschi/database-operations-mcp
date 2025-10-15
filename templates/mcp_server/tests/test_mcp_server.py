@@ -99,7 +99,7 @@ def test_invalid_tool_request():
 
 @pytest.mark.asyncio
 async def test_tool_execution_error(mocker):
-    ""Test that tool execution errors are properly handled."""
+    """Test that tool execution errors are properly handled."""
     from mcp_server.main import app, mcp
     
     # Mock the MCP instance and tool to raise an exception
