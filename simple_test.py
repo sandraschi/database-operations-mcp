@@ -1,4 +1,5 @@
 """Simple test script to verify FastMCP initialization."""
+
 from fastmcp import FastMCP
 
 print("Testing FastMCP initialization...")

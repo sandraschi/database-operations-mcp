@@ -1,5 +1,7 @@
 """Script to check FastMCP initialization parameters."""
+
 import inspect
+
 import fastmcp
 
 # Get the signature of FastMCP.__init__

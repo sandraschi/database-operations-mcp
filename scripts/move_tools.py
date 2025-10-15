@@ -2,7 +2,6 @@
 Script to move tool modules to the tools directory and update imports.
 """
 
-import os
 import shutil
 from pathlib import Path
 
@@ -12,28 +11,29 @@ TARGET_DIR = SRC_DIR / "tools"
 
 # List of tool modules to move
 TOOL_MODULES = [
-    'calibre_tools.py',
-    'connection_tools.py',
-    'data_tools.py',
-    'fts_tools.py',
-    'help_tools.py',
-    'init_tools.py',
-    'management_tools.py',
-    'media_tools.py',
-    'plex_tools.py',
-    'query_tools.py',
-    'registry_tools.py',
-    'schema_tools.py',
-    'windows_tools.py',
+    "calibre_tools.py",
+    "connection_tools.py",
+    "data_tools.py",
+    "fts_tools.py",
+    "help_tools.py",
+    "init_tools.py",
+    "management_tools.py",
+    "media_tools.py",
+    "plex_tools.py",
+    "query_tools.py",
+    "registry_tools.py",
+    "schema_tools.py",
+    "windows_tools.py",
 ]
+
 
 def move_tool_modules():
     """Move tool modules to the tools directory."""
     # Ensure the target directory exists
     TARGET_DIR.mkdir(exist_ok=True, parents=True)
-    
+
     moved_files = []
-    
+
     # Move each tool module
     for module in TOOL_MODULES:
         src = SRC_DIR / module
@@ -41,8 +41,9 @@ def move_tool_modules():
             dest = TARGET_DIR / module
             shutil.move(str(src), str(dest))
             moved_files.append(module)
-    
+
     return moved_files
+
 
 if __name__ == "__main__":
     print(f"Moving tool modules to {TARGET_DIR}...")

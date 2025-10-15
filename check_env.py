@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Check Python environment and paths."""
-import sys
+
 import os
 import platform
+import sys
 
 print("=== Python Environment ===")
 print(f"Python executable: {sys.executable}")
@@ -16,12 +17,13 @@ for path in sys.path:
 
 print("\n=== Environment Variables ===")
 for key, value in os.environ.items():
-    if 'PYTHON' in key.upper() or 'PATH' in key.upper():
+    if "PYTHON" in key.upper() or "PATH" in key.upper():
         print(f"{key}={value}")
 
 print("\n=== Test Import ===")
 try:
     import database_operations_mcp
+
     print("✅ Successfully imported database_operations_mcp")
     print(f"Version: {getattr(database_operations_mcp, '__version__', 'unknown')}")
 except ImportError as e:

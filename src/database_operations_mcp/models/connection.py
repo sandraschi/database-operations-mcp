@@ -1,13 +1,17 @@
 """Database connection models."""
-from typing import Dict, List, Optional, Union
-from enum import Enum
+
 from datetime import datetime
+from enum import Enum
+from typing import Dict, Optional
+
 from pydantic import Field, validator
 
 from .base import BaseDBModel
 
+
 class DatabaseType(str, Enum):
     """Supported database types."""
+
     SQLITE = "sqlite"
     POSTGRESQL = "postgresql"
     MONGODB = "mongodb"
@@ -18,15 +22,19 @@ class DatabaseType(str, Enum):
     REDIS = "redis"
     CASSANDRA = "cassandra"
 
+
 class ConnectionStatus(str, Enum):
     """Connection status."""
+
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"
     CONNECTED = "connected"
     ERROR = "error"
 
+
 class ConnectionConfig(BaseDBModel):
     """Database connection configuration."""
+
     name: str
     db_type: DatabaseType
     host: str = "localhost"
@@ -35,18 +43,19 @@ class ConnectionConfig(BaseDBModel):
     password: Optional[str] = None
     database: Optional[str] = None
     options: Dict[str, Any] = Field(default_factory=dict)
-    
+
     class Config:
         """Pydantic config."""
+
         use_enum_values = True
-        
-    @validator('port', always=True)
+
+    @validator("port", always=True)
     def set_default_port(cls, v, values):
         """Set default port based on database type."""
         if v is not None:
             return v
-            
-        db_type = values.get('db_type')
+
+        db_type = values.get("db_type")
         if db_type == DatabaseType.POSTGRESQL:
             return 5432
         elif db_type == DatabaseType.MONGODB:
@@ -63,8 +72,10 @@ class ConnectionConfig(BaseDBModel):
             return 9042
         return None
 
+
 class ConnectionInfo(BaseDBModel):
     """Connection information with status."""
+
     config: ConnectionConfig
     status: ConnectionStatus = ConnectionStatus.DISCONNECTED
     last_used: Optional[datetime] = None

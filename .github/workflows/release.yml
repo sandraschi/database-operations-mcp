@@ -35,10 +35,8 @@ jobs:
         uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
-      - name: Install build dependencies
-        run: uv add --dev build twine
       - name: Build package
-        run: uv run python -m build
+        run: uv build
       - name: Check package
         run: uv run twine check dist/*
       - name: Set up Node.js
@@ -82,12 +80,10 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_number=${VERSION#v}" >> $GITHUB_OUTPUT
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.version }}
-          release_name: Database Operations MCP ${{ steps.version.outputs.version }}
+          name: Database Operations MCP ${{ steps.version.outputs.version }}
           body: |
             ## 🚀 What's New in Database Operations MCP ${{ steps.version.outputs.version }}
 
@@ -96,35 +92,22 @@ jobs:
             ## 📦 Installation
 
             ### Claude Desktop Extension
-            1. Download `database-operations-mcp.mcpb` from the assets below
-            2. Open Claude Desktop
-            3. Go to Settings > Extensions
-            4. Drop the `.mcpb` file into the extensions page
+            Download `database-operations-mcp.mcpb` and install in Claude Desktop.
 
             ### Python Package
             ```bash
             pip install database-operations-mcp==${{ steps.version.outputs.version_number }}
             ```
+
+            ## 📋 What's Changed
+
+            ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, 'alpha') || contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'rc') }}
-      - name: Upload MCPB Package
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/database-operations-mcp.mcpb
-          asset_name: database-operations-mcp.mcpb
-          asset_content_type: application/octet-stream
-      - name: Upload Python Package
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/database_operations_mcp-${{ steps.version.outputs.version_number }}-py3-none-any.whl
-          asset_name: database_operations_mcp-${{ steps.version.outputs.version_number }}-py3-none-any.whl
-          asset_content_type: application/zip
+          files: |
+            dist/database-operations-mcp.mcpb
+            dist/*.whl
+            dist/*.tar.gz
 
   publish-pypi:
     name: Publish to PyPI

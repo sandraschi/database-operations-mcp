@@ -2,14 +2,15 @@
 """
 Run the Database Operations MCP server with debug output.
 """
-import sys
+
 import logging
+import sys
 
 # Enable debug logging
 logging.basicConfig(
     level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stderr
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stderr,
 )
 
 # Import and run the MCP server

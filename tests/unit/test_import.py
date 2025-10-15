@@ -4,7 +4,7 @@ Simple test script to verify the package can be imported and MCP server can be s
 """
 
 import sys
-import asyncio
+
 import database_operations_mcp
 from database_operations_mcp.main import main
 

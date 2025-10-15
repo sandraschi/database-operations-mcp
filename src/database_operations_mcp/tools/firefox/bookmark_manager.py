@@ -1,10 +1,13 @@
 """Core bookmark management functionality with enhanced safety checks."""
+
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from . import mcp  # Import the mcp instance from __init__
+from .core import FirefoxNotClosedError, FirefoxStatusChecker
 from .db import FirefoxDB
-from .core import FirefoxStatusChecker, FirefoxNotClosedError
 from .utils import get_profile_directory
+
 
 class BookmarkManager:
     """Handles bookmark operations with safety checks."""
@@ -21,8 +24,8 @@ class BookmarkManager:
         """Get database connection with safety checks."""
         if self.db is None:
             safety_check = self._ensure_safe_access()
-            if not safety_check['safe']:
-                raise FirefoxNotClosedError(safety_check['message'])
+            if not safety_check["safe"]:
+                raise FirefoxNotClosedError(safety_check["message"])
             self.db = FirefoxDB(self.profile_path)
         return self.db
 
@@ -43,10 +46,10 @@ class BookmarkManager:
         cursor = db.execute(query, params)
         return [dict(row) for row in cursor.fetchall()]
 
+
 @mcp.tool()
 async def list_bookmarks(
-    profile_name: Optional[str] = None,
-    folder_id: Optional[int] = None
+    profile_name: Optional[str] = None, folder_id: Optional[int] = None
 ) -> Dict[str, Any]:
     """List bookmarks with optional folder filtering.
 
@@ -62,10 +65,7 @@ async def list_bookmarks(
         if profile_name:
             profile_path = get_profile_directory(profile_name)
             if not profile_path:
-                return {
-                    "status": "error",
-                    "message": f"Profile '{profile_name}' not found"
-                }
+                return {"status": "error", "message": f"Profile '{profile_name}' not found"}
 
         manager = BookmarkManager(profile_path)
         bookmarks = manager.get_bookmarks(folder_id)
@@ -74,11 +74,13 @@ async def list_bookmarks(
             "status": "success",
             "profile_used": profile_name or "default",
             "count": len(bookmarks),
-            "bookmarks": bookmarks
+            "bookmarks": bookmarks,
         }
 
         if len(bookmarks) == 0:
-            response["note"] = "No bookmarks found. This could mean the profile is empty or Firefox is running."
+            response["note"] = (
+                "No bookmarks found. This could mean the profile is empty or Firefox is running."
+            )
 
         return response
 
@@ -87,10 +89,7 @@ async def list_bookmarks(
             "status": "error",
             "message": str(e),
             "firefox_status": FirefoxStatusChecker.is_firefox_running(),
-            "solution": "Close Firefox completely and try again"
+            "solution": "Close Firefox completely and try again",
         }
     except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Failed to list bookmarks: {str(e)}"
-        }
+        return {"status": "error", "message": f"Failed to list bookmarks: {str(e)}"}

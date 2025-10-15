@@ -10,9 +10,8 @@ This script tests the MCP server by:
 
 import asyncio
 import json
-import subprocess
 import sys
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class MCPClient:
@@ -26,7 +25,7 @@ class MCPClient:
             "jsonrpc": "2.0",
             "method": method,
             "params": params or {},
-            "id": self.request_id
+            "id": self.request_id,
         }
         self.request_id += 1
 
@@ -44,7 +43,9 @@ async def test_mcp_server():
     """Test the MCP server by sending a list_tools request."""
     # Start the MCP server as a subprocess
     server_process = await asyncio.create_subprocess_exec(
-        sys.executable, "-m", "database_operations_mcp.main",
+        sys.executable,
+        "-m",
+        "database_operations_mcp.main",
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -61,10 +62,10 @@ async def test_mcp_server():
         response = await client.send_request("list_tools")
 
         # Check if the response contains the expected fields
-        if 'result' in response and 'tools' in response['result']:
+        if "result" in response and "tools" in response["result"]:
             print("\n✅ MCP server is working correctly!")
             print("\nAvailable tools:")
-            for tool_name in sorted(response['result']['tools'].keys()):
+            for tool_name in sorted(response["result"]["tools"].keys()):
                 print(f"- {tool_name}")
             return True
         else:

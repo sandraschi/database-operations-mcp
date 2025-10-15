@@ -1,15 +1,16 @@
 """Advanced search functionality for bookmarks with smart profile detection."""
+
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Union
-from collections import defaultdict
-import re
+from typing import Any, Dict, List, Optional
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-from .db import FirefoxDB
-from .core import FirefoxStatusChecker
-from .utils import parse_profiles_ini, get_profile_directory
+
 from ..help_tools import HelpSystem
+from .core import FirefoxStatusChecker
+from .db import FirefoxDB
+from .utils import get_profile_directory, parse_profiles_ini
+
 
 class SmartProfileDetector:
     """Smart profile detection based on search terms and context."""
@@ -27,11 +28,11 @@ class SmartProfileDetector:
 
         # Common profile indicators
         profile_keywords = {
-            'work': ['work', 'business', 'office', 'job'],
-            'personal': ['personal', 'home', 'private'],
-            'dev': ['dev', 'development', 'coding', 'programming'],
-            'afterwork': ['afterwork', 'after-work', 'evening', 'leisure'],
-            'default': ['default', 'main']
+            "work": ["work", "business", "office", "job"],
+            "personal": ["personal", "home", "private"],
+            "dev": ["dev", "development", "coding", "programming"],
+            "afterwork": ["afterwork", "after-work", "evening", "leisure"],
+            "default": ["default", "main"],
         }
 
         # Check for explicit profile mentions
@@ -42,13 +43,13 @@ class SmartProfileDetector:
 
         # Check for application-specific searches that might indicate profile usage
         app_indicators = {
-            'immich': 'immich',
-            'plex': 'media',
-            'jellyfin': 'media',
-            'nextcloud': 'cloud',
-            'gitlab': 'dev',
-            'github': 'dev',
-            'stackoverflow': 'dev'
+            "immich": "immich",
+            "plex": "media",
+            "jellyfin": "media",
+            "nextcloud": "cloud",
+            "gitlab": "dev",
+            "github": "dev",
+            "stackoverflow": "dev",
         }
 
         for app, profile_hint in app_indicators.items():
@@ -79,14 +80,14 @@ class SmartProfileDetector:
             for profile_name in profiles.keys():
                 profile_lower = profile_name.lower()
                 # Check if detected name is contained in profile name or vice versa
-                if (detected_lower in profile_lower or
-                    profile_lower in detected_lower):
+                if detected_lower in profile_lower or profile_lower in detected_lower:
                     return profile_name
 
         except Exception:
             pass
 
         return None
+
 
 class BookmarkSearcher:
     """Handles bookmark search operations with enhanced safety checks."""
@@ -103,8 +104,8 @@ class BookmarkSearcher:
         """Get database connection with safety checks."""
         if self.db is None:
             safety_check = self._ensure_safe_access()
-            if not safety_check['safe']:
-                raise FirefoxNotClosedError(safety_check['message'])
+            if not safety_check["safe"]:
+                raise FirefoxNotClosedError(safety_check["message"])
             self.db = FirefoxDB(self.profile_path)
         return self.db
 
@@ -123,13 +124,14 @@ class BookmarkSearcher:
         cursor = db.execute(query_sql, (search_term, search_term, limit))
         return [dict(row) for row in cursor.fetchall()]
 
+
 @mcp.tool()
-@HelpSystem.register_tool(category='firefox')
+@HelpSystem.register_tool(category="firefox")
 async def search_bookmarks(
     query: str,
     profile_name: Optional[str] = None,
     limit: int = 50,
-    auto_detect_profile: bool = True
+    auto_detect_profile: bool = True,
 ) -> Dict[str, Any]:
     """Search bookmarks by title or URL with smart profile detection.
 
@@ -163,14 +165,14 @@ async def search_bookmarks(
                     detection_info = {
                         "detected_from_query": detected_profile,
                         "matched_profile": matched_profile,
-                        "auto_detection": True
+                        "auto_detection": True,
                     }
                 else:
                     detection_info = {
                         "detected_from_query": detected_profile,
                         "matched_profile": None,
                         "auto_detection": True,
-                        "note": f"Detected profile '{detected_profile}' but no matching profile found"
+                        "note": f"Detected profile '{detected_profile}' but no matching profile found",
                     }
 
         # Get profile path if we have a profile name
@@ -180,7 +182,9 @@ async def search_bookmarks(
                 return {
                     "status": "error",
                     "message": f"Profile '{actual_profile_name}' not found",
-                    "available_profiles": list(parse_profiles_ini().keys()) if parse_profiles_ini() else []
+                    "available_profiles": list(parse_profiles_ini().keys())
+                    if parse_profiles_ini()
+                    else [],
                 }
 
         # Perform the search with safety checks
@@ -192,14 +196,16 @@ async def search_bookmarks(
             "query": query,
             "count": len(results),
             "results": results,
-            "profile_used": actual_profile_name or "default"
+            "profile_used": actual_profile_name or "default",
         }
 
         if detection_info:
             response["profile_detection"] = detection_info
 
         if len(results) == 0:
-            response["note"] = "No bookmarks found matching your query. Try different keywords or check if Firefox is closed."
+            response["note"] = (
+                "No bookmarks found matching your query. Try different keywords or check if Firefox is closed."
+            )
 
         return response
 
@@ -208,20 +214,18 @@ async def search_bookmarks(
             "status": "error",
             "message": str(e),
             "firefox_status": FirefoxStatusChecker.is_firefox_running(),
-            "solution": "Close Firefox completely and try again"
+            "solution": "Close Firefox completely and try again",
         }
     except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Search failed: {str(e)}"
-        }
+        return {"status": "error", "message": f"Search failed: {str(e)}"}
+
 
 @mcp.tool()
-@HelpSystem.register_tool(category='firefox')
+@HelpSystem.register_tool(category="firefox")
 async def find_duplicates(
-    by: str = 'url',  # 'url' or 'title'
+    by: str = "url",  # 'url' or 'title'
     profile_name: Optional[str] = None,
-    min_duplicates: int = 2
+    min_duplicates: int = 2,
 ) -> Dict[str, Any]:
     """Find duplicate bookmarks based on URL or title.
 
@@ -233,11 +237,8 @@ async def find_duplicates(
     Returns:
         Dictionary with duplicate bookmarks grouped by the specified field
     """
-    if by not in ('url', 'title'):
-        return {
-            "status": "error",
-            "message": "'by' parameter must be either 'url' or 'title'"
-        }
+    if by not in ("url", "title"):
+        return {"status": "error", "message": "'by' parameter must be either 'url' or 'title'"}
 
     try:
         # Get profile path
@@ -248,16 +249,18 @@ async def find_duplicates(
                 return {
                     "status": "error",
                     "message": f"Profile '{profile_name}' not found",
-                    "available_profiles": list(parse_profiles_ini().keys()) if parse_profiles_ini() else []
+                    "available_profiles": list(parse_profiles_ini().keys())
+                    if parse_profiles_ini()
+                    else [],
                 }
 
         # Safety check
         safety_check = FirefoxStatusChecker.check_database_access_safe(profile_path)
-        if not safety_check['safe']:
+        if not safety_check["safe"]:
             return {
                 "status": "error",
-                "message": safety_check['message'],
-                "safety_check": safety_check
+                "message": safety_check["message"],
+                "safety_check": safety_check,
             }
 
         db = FirefoxDB(profile_path)
@@ -278,7 +281,7 @@ async def find_duplicates(
 
         for row in cursor.fetchall():
             item = dict(row)
-            item['ids'] = [int(id_str) for id_str in item['ids'].split(',')]
+            item["ids"] = [int(id_str) for id_str in item["ids"].split(",")]
             results.append(item)
 
         return {
@@ -288,14 +291,11 @@ async def find_duplicates(
             "min_duplicates": min_duplicates,
             "count": len(results),
             "duplicates": results,
-            "safety_check": safety_check
+            "safety_check": safety_check,
         }
 
     except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Error finding duplicates: {str(e)}"
-        }
+        return {"status": "error", "message": f"Error finding duplicates: {str(e)}"}
     finally:
-        if 'db' in locals():
+        if "db" in locals():
             db.close()

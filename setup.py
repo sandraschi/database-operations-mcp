@@ -1,14 +1,17 @@
 from pathlib import Path
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 # Read the contents of README.md
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
+
 # Read requirements from requirements files
 def read_requirements(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    with open(file_path, "r", encoding="utf-8") as f:
+        return [line.strip() for line in f if line.strip() and not line.startswith("#")]
+
 
 # Core dependencies
 install_requires = [
@@ -20,29 +23,29 @@ install_requires = [
     "chromadb>=0.4.0",
     "pandas>=1.5.0",
     "python-dotenv>=1.0.0",
-    "pywin32>=305; sys_platform == 'win32'"
+    "pywin32>=305; sys_platform == 'win32'",
 ]
 
 # Development dependencies
 extras_require = {
-    'dev': [
-        'pytest>=7.0.0',
-        'pytest-asyncio>=0.21.0',
-        'pytest-cov>=4.0.0',
-        'pytest-mock>=3.10.0',
-        'black>=23.0.0',
-        'isort>=5.12.0',
-        'mypy>=1.0.0',
-        'flake8>=6.0.0',
-        'sphinx>=6.0.0',
-        'sphinx-rtd-theme>=1.2.0',
-        'pre-commit>=3.0.0',
+    "dev": [
+        "pytest>=7.0.0",
+        "pytest-asyncio>=0.21.0",
+        "pytest-cov>=4.0.0",
+        "pytest-mock>=3.10.0",
+        "black>=23.0.0",
+        "isort>=5.12.0",
+        "mypy>=1.0.0",
+        "flake8>=6.0.0",
+        "sphinx>=6.0.0",
+        "sphinx-rtd-theme>=1.2.0",
+        "pre-commit>=3.0.0",
     ],
-    'test': [
-        'pytest>=7.0.0',
-        'pytest-asyncio>=0.21.0',
-        'pytest-cov>=4.0.0',
-        'pytest-mock>=3.10.0',
+    "test": [
+        "pytest>=7.0.0",
+        "pytest-asyncio>=0.21.0",
+        "pytest-cov>=4.0.0",
+        "pytest-mock>=3.10.0",
     ],
 }
 
@@ -74,7 +77,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX :: Linux",
-        "Operating System :: MacOS"
+        "Operating System :: MacOS",
     ],
     entry_points={
         "console_scripts": [

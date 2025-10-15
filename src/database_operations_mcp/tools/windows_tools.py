@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from ..config.mcp_config import mcp
+from ..tools.firefox.core import FirefoxStatusChecker
 from .help_tools import HelpSystem
-from ..tools.firefox.core import FirefoxStatusChecker, FirefoxNotClosedError
 
 # Common Windows database locations
 WINDOWS_DB_PATHS = {
@@ -131,21 +131,24 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
             # Special handling for Firefox - check if it's running
             if db_type == "firefox_history":
                 firefox_status = FirefoxStatusChecker.is_firefox_running()
-                if firefox_status['is_running'] and not bruteforce_firefox:
+                if firefox_status["is_running"] and not bruteforce_firefox:
                     result[db_type] = {
                         "path": paths[0] if isinstance(paths, (list, tuple)) else paths,
                         "exists": False,
                         "error": "Firefox is running - database is locked",
                         "firefox_status": firefox_status,
-                        "solution": "Close Firefox completely and try again, or set bruteforce_firefox=True"
+                        "solution": "Close Firefox completely and try again, or set bruteforce_firefox=True",
                     }
                     continue
-                elif firefox_status['is_running'] and bruteforce_firefox:
+                elif firefox_status["is_running"] and bruteforce_firefox:
                     # Try brute force access
                     from ..firefox.core import FirefoxDatabaseUnlocker
+
                     db_path = _find_windows_db(db_type)
                     if db_path:
-                        conn, method = FirefoxDatabaseUnlocker.get_database_connection_bruteforce(db_path)
+                        conn, method = FirefoxDatabaseUnlocker.get_database_connection_bruteforce(
+                            db_path
+                        )
                         if conn:
                             try:
                                 # Get database size
@@ -163,11 +166,11 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
                                     "bruteforce_access": True,
                                     "access_method": method,
                                     "firefox_running": True,
-                                    "places_count": places_count
+                                    "places_count": places_count,
                                 }
                             finally:
                                 # Clean up
-                                if hasattr(conn, 'temp_db_path'):
+                                if hasattr(conn, "temp_db_path"):
                                     try:
                                         conn.temp_db_path.unlink(missing_ok=True)
                                     except:
@@ -179,7 +182,7 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
                                 "exists": False,
                                 "error": f"Brute force access failed: {method}",
                                 "firefox_running": True,
-                                "bruteforce_attempted": True
+                                "bruteforce_attempted": True,
                             }
                     continue
 
@@ -194,7 +197,11 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
                     }
                 except (PermissionError, OSError) as e:
                     logger.warning(f"Permission error accessing {db_type}: {e}")
-                    result[db_type] = {"path": str(db_path), "error": "Permission denied", "exists": False}
+                    result[db_type] = {
+                        "path": str(db_path),
+                        "error": "Permission denied",
+                        "exists": False,
+                    }
             else:
                 result[db_type] = {
                     "path": paths[0] if isinstance(paths, (list, tuple)) else paths,
@@ -205,7 +212,7 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
             result[db_type] = {
                 "path": paths[0] if isinstance(paths, (list, tuple)) else paths,
                 "exists": False,
-                "error": str(e)
+                "error": str(e),
             }
 
     return {"status": "success", "databases": result}
@@ -308,7 +315,11 @@ async def manage_plex_metadata(
 @mcp.tool()
 @HelpSystem.register_tool
 async def query_windows_database(
-    db_type: str, query: str, params: dict | None = None, limit: int = 100, bruteforce_firefox: bool = False
+    db_type: str,
+    query: str,
+    params: dict | None = None,
+    limit: int = 100,
+    bruteforce_firefox: bool = False,
 ) -> dict[str, Any]:
     """Execute a query against a Windows database.
 
@@ -325,12 +336,12 @@ async def query_windows_database(
     # Check Firefox status for Firefox databases
     if db_type == "firefox_history":
         firefox_status = FirefoxStatusChecker.is_firefox_running()
-        if firefox_status['is_running'] and not bruteforce_firefox:
+        if firefox_status["is_running"] and not bruteforce_firefox:
             return {
                 "status": "error",
                 "message": "Firefox is running - database is locked",
                 "firefox_status": firefox_status,
-                "solution": "Close Firefox completely and try again, or set bruteforce_firefox=True"
+                "solution": "Close Firefox completely and try again, or set bruteforce_firefox=True",
             }
 
     db_path = _find_windows_db(db_type)
@@ -348,13 +359,14 @@ async def query_windows_database(
         # Use brute force connection for Firefox when requested
         if db_type == "firefox_history" and bruteforce_firefox:
             from ..firefox.core import FirefoxDatabaseUnlocker
+
             conn, method = FirefoxDatabaseUnlocker.get_database_connection_bruteforce(db_path)
             if not conn:
                 return {
                     "status": "error",
                     "message": f"Brute force access failed: {method}",
                     "db_type": db_type,
-                    "bruteforce_attempted": True
+                    "bruteforce_attempted": True,
                 }
             # Store method info for response
             bruteforce_method_used = method
@@ -391,7 +403,11 @@ async def query_windows_database(
         }
 
         # Add brute force info if used
-        if db_type == "firefox_history" and bruteforce_firefox and 'bruteforce_method_used' in locals():
+        if (
+            db_type == "firefox_history"
+            and bruteforce_firefox
+            and "bruteforce_method_used" in locals()
+        ):
             response["bruteforce_access"] = True
             response["access_method"] = bruteforce_method_used
 
@@ -425,12 +441,12 @@ async def clean_windows_database(
     # Check Firefox status for Firefox databases
     if db_type == "firefox_history":
         firefox_status = FirefoxStatusChecker.is_firefox_running()
-        if firefox_status['is_running'] and not bruteforce_firefox:
+        if firefox_status["is_running"] and not bruteforce_firefox:
             return {
                 "status": "error",
                 "message": "Firefox is running - database is locked",
                 "firefox_status": firefox_status,
-                "solution": "Close Firefox completely, or use bruteforce_firefox=True (dangerous!)"
+                "solution": "Close Firefox completely, or use bruteforce_firefox=True (dangerous!)",
             }
 
     db_path = _find_windows_db(db_type)

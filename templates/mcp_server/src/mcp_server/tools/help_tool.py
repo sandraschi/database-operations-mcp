@@ -4,19 +4,19 @@ MCP Help Tool
 This module provides a help system for the MCP server, allowing users to discover
 and understand available tools and their usage.
 """
-from typing import Dict, List, Optional, Any, Type, get_type_hints
-from inspect import signature, Parameter
-from enum import Enum
-import textwrap
-import re
 
-from mcp import Tool, tool
+import re
+from enum import Enum
+from inspect import Parameter
+from typing import Any, Dict, List, Optional, Type
 
 # Maximum line width for help text (for better readability)
 MAX_LINE_WIDTH = 80
 
 # Regular expression to match type annotations like 'Optional[str]' or 'List[int]'
-TYPE_ANNOTATION_PATTERN = re.compile(r"^([a-zA-Z_][a-zA-Z0-9_]*\.)*([a-zA-Z_][a-zA-Z0-9_]*)(\[.*\])?$")
+TYPE_ANNOTATION_PATTERN = re.compile(
+    r"^([a-zA-Z_][a-zA-Z0-9_]*\.)*([a-zA-Z_][a-zA-Z0-9_]*)(\[.*\])?$"
+)
 
 
 def format_type_name(type_obj: Type) -> str:
@@ -41,18 +41,18 @@ def format_type_name(type_obj: Type) -> str:
             if args and len(args) == 2 and args[1] is type(None):  # noqa: E721
                 return f"Optional[{format_type_name(args[0])}]"
             return "Optional"
-        
+
         # Handle other generic types
         name = getattr(origin, "__name__", str(origin))
         if hasattr(type_obj, "__args__"):
             args = ", ".join(format_type_name(arg) for arg in type_obj.__args__)
             return f"{name}[{args}]"
         return name
-    
+
     # Handle Enum types
     if isinstance(type_obj, type) and issubclass(type_obj, Enum):
         return f"{'|'.join(f'"{e.value}"' for e in type_obj)}"
-    
+
     # Handle regular types
     return type_obj.__name__
 
@@ -63,10 +63,10 @@ def format_parameter_doc(param_name: str, param: Parameter, default: Any = Param
     param_type = "Any"
     if param.annotation != Parameter.empty:
         param_type = format_type_name(param.annotation)
-    
+
     # Format the parameter line
     param_line = f"{param_name}: {param_type}"
-    
+
     # Add default value if present
     if default != Parameter.empty:
         default_str = f"'{default}'"

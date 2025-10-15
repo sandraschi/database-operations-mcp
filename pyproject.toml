@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,7 @@ name = "database-operations-mcp"
 version = "1.0.0"
 description = "A FastMCP 2.12.4 compliant server for managing and interacting with multiple database systems via stdio and HTTP transports"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Sandra Schilling", email = "sandra@example.com"}
@@ -44,6 +44,36 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS"
+]
+
+[tool.uv]
+dev-dependencies = [
+    # Testing
+    "pytest>=8.3.4",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-mock>=3.10.0",
+
+    # Linting & Type Checking
+    "ruff>=0.1.6",
+    "pyright>=1.1.390",
+    "mypy>=1.8.0",
+
+    # Security
+    "bandit>=1.7.0",
+    "safety>=3.0.0",
+
+    # Building & Publishing (CRITICAL - don't forget!)
+    "build>=1.0.0",
+    "twine>=5.0.0",
+
+    # Security (XML parsing)
+    "defusedxml>=0.7.1",
+
+    # Documentation
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "pre-commit>=3.0.0"
 ]
 
 [project.optional-dependencies]
@@ -109,7 +139,7 @@ ensure_newline_before_comments = true
 skip = ["__init__.py"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -153,9 +183,11 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
 select = ["E", "F", "B", "I"]
 ignore = ["E203"]
-target-version = "py39"
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 10

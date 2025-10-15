@@ -4,73 +4,57 @@ Main module for Database Operations MCP.
 This module provides the main entry point for the Database Operations MCP server,
 which supports both stdio and HTTP transports with FastMCP 2.12.4.
 """
+
 import asyncio
 import logging
+import os
 import signal
 import sys
-import os
-from typing import Any, Dict, Optional, Literal
+from typing import Literal, Optional
 
 # Import our centralized MCP configuration
-from .config.mcp_config import get_mcp, mcp as global_mcp
+from .config.mcp_config import get_mcp
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stderr
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stderr,
 )
 logger = logging.getLogger(__name__)
 
+
 class DatabaseOperationsMCP:
     """Main MCP server class for database operations."""
-    
+
     def __init__(self) -> None:
         """Initialize the MCP server."""
         # Use the global MCP instance
         self.mcp = get_mcp()
         self._shutdown_event = asyncio.Event()
-        
-        # Import all tool modules to ensure @mcp.tool decorators are executed
-        from .tools import (
-            connection_tools,
-            query_tools,
-            schema_tools,
-            data_tools,
-            fts_tools,
-            management_tools,
-            registry_tools,
-            windows_tools,
-            calibre_tools,
-            media_tools,
-            firefox,
-            help_tools,
-            init_tools,
 
-            plex_tools
-        )
-        
+        # Import all tool modules to ensure @mcp.tool decorators are executed
+
     async def _register_handlers(self) -> None:
         """Import all handler modules to register tools via decorators.
-        
+
         In FastMCP 2.11.3, tools are registered using the @mcp.tool() decorator
         when modules are imported. This function ensures all handler modules
         are imported to trigger the decorators.
         """
         # Import all handler modules to register their tools via decorators
-        from . import handlers  # This will import all __init__.py imports
-        
+
         # Log that tools have been registered
         logger.info("All tool handlers imported and registered via decorators")
-    
+
     async def _shutdown(self, signal: Optional[signal.Signals] = None) -> None:
         """Handle server shutdown."""
         if signal:
             logger.info(f"Received exit signal {signal.name}...")
-        
+
         logger.info("Shutting down Database Operations MCP server...")
         self._shutdown_event.set()
-        
+
         if self.mcp and self._loop:
             logger.info("Cleaning up MCP resources...")
             # Cancel all running tasks
@@ -79,19 +63,20 @@ class DatabaseOperationsMCP:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
             self._loop.stop()
-            
+
     def _register_signal_handlers(self) -> None:
         """Register signal handlers for graceful shutdown."""
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             # Windows signal handling
             signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self._shutdown()))
             signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self._shutdown()))
-    
+
     def _import_handlers(self) -> None:
         """Import handler modules to trigger @mcp.tool decorators."""
         # All imports are done in __init__ to trigger decorators
         # This method is kept for backward compatibility
         from fastmcp.utilities.inspect import get_tools
+
         tools = get_tools(self.mcp)
         logger.info(f"Registered {len(tools)} tools with FastMCP")
 
@@ -143,11 +128,7 @@ class DatabaseOperationsMCP:
 
             # Run the HTTP server
             logger.info("Starting HTTP server...")
-            await self.mcp.run_http_async(
-                host=host,
-                port=port,
-                show_banner=True
-            )
+            await self.mcp.run_http_async(host=host, port=port, show_banner=True)
 
             return 0
 
@@ -205,8 +186,7 @@ class DatabaseOperationsMCP:
 
             # Wait for either server to finish (they shouldn't finish normally)
             done, pending = await asyncio.wait(
-                [stdio_task, http_task],
-                return_when=asyncio.FIRST_COMPLETED
+                [stdio_task, http_task], return_when=asyncio.FIRST_COMPLETED
             )
 
             # Cancel remaining tasks
@@ -232,14 +212,14 @@ class DatabaseOperationsMCP:
 
     async def _run_async(self) -> int:
         """Async entry point for the MCP server (not used in current implementation).
-        
+
         Returns:
             int: Exit code (0 for success, non-zero for error)
         """
         # This method is kept for backward compatibility but is not used
         # as FastMCP manages its own event loop
         return 0
-        
+
     def run(self) -> int:
         """Run the MCP server.
 
@@ -250,10 +230,11 @@ class DatabaseOperationsMCP:
         try:
             # Configure logging for FastMCP
             import logging
+
             logging.basicConfig(
                 level=logging.DEBUG,  # Set default log level to DEBUG
-                format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                stream=sys.stderr
+                format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                stream=sys.stderr,
             )
 
             # Detect which transport to use
@@ -291,6 +272,7 @@ class DatabaseOperationsMCP:
             logger.error(f"Error running MCP server: {e}", exc_info=True)
             return 1
 
+
 def main() -> int:
     """Entry point for the MCP server.
 
@@ -307,8 +289,8 @@ def main() -> int:
     # Configure basic logging first
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        stream=sys.stderr
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        stream=sys.stderr,
     )
 
     logger = logging.getLogger(__name__)
@@ -351,6 +333,7 @@ def main() -> int:
     except Exception as e:
         logger.error(f"Fatal error: {e}", exc_info=True)
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

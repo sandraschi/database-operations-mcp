@@ -4,19 +4,20 @@ Full-Text Search (FTS) tools for SQLite databases.
 Provides tools for querying and managing SQLite FTS5/4 virtual tables.
 """
 
-import sqlite3
 import logging
-from typing import Dict, List, Optional, Any
+import sqlite3
+from typing import Any, Dict, List, Optional
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
 from database_operations_mcp.tools import init_tools
+from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
 # Get DATABASE_CONNECTIONS from init_tools
 DATABASE_CONNECTIONS = init_tools.DATABASE_CONNECTIONS
+
 
 @mcp.tool()
 @HelpSystem.register_tool
@@ -28,10 +29,10 @@ async def fts_search(
     limit: int = 20,
     offset: int = 0,
     highlight: bool = True,
-    snippet_size: int = 3
+    snippet_size: int = 3,
 ) -> Dict[str, Any]:
     """Execute a full-text search query on an SQLite FTS table.
-    
+
     Args:
         query: The search query (supports FTS5 query syntax)
         connection_name: Name of the database connection
@@ -41,104 +42,96 @@ async def fts_search(
         offset: Number of results to skip
         highlight: Whether to include highlighted snippets
         snippet_size: Number of context words around each match
-        
+
     Returns:
         Dictionary containing search results and metadata
     """
     if connection_name not in DATABASE_CONNECTIONS:
-        return {
-            'status': 'error',
-            'message': f'No such connection: {connection_name}'
-        }
+        return {"status": "error", "message": f"No such connection: {connection_name}"}
 
     try:
-        conn = DATABASE_CONNECTIONS[connection_name]['connector'].connection
-        
+        conn = DATABASE_CONNECTIONS[connection_name]["connector"].connection
+
         # Build the SELECT clause
-        select_columns = ['*']
+        select_columns = ["*"]
         if highlight and columns:
             for col in columns:
-                if col == '*':
+                if col == "*":
                     continue
-                select_columns.extend([
-                    f'highlight({table}, {col}, "<b>", "</b>") as {col}_highlight',
-                    f'snippet({table}, {col}, "... ", " ...", "...", {snippet_size}) as {col}_snippet'
-                ])
-        
+                select_columns.extend(
+                    [
+                        f'highlight({table}, {col}, "<b>", "</b>") as {col}_highlight',
+                        f'snippet({table}, {col}, "... ", " ...", "...", {snippet_size}) as {col}_snippet',
+                    ]
+                )
+
         # Build the WHERE clause
         where_parts = [f"{table} MATCH ?"]
         params = [query]
-        
+
         # Build the query
         sql = f"""
-        SELECT {', '.join(select_columns)}
+        SELECT {", ".join(select_columns)}
         FROM {table}
-        WHERE {' AND '.join(where_parts)}
+        WHERE {" AND ".join(where_parts)}
         ORDER BY rank
         LIMIT ? OFFSET ?
         """
-        
+
         # Execute the query
         cursor = conn.cursor()
         cursor.execute(sql, [*params, limit, offset])
-        
+
         # Get column names
         columns = [desc[0] for desc in cursor.description]
-        
+
         # Fetch results
         results = []
         for row in cursor.fetchall():
-            results.append(dict(zip(columns, row)))
-        
+            results.append(dict(zip(columns, row, strict=False)))
+
         # Get total count for pagination
         count_sql = f"""
         SELECT COUNT(*) as total
         FROM {table}
-        WHERE {' AND '.join(where_parts)}
+        WHERE {" AND ".join(where_parts)}
         """
-        
+
         cursor.execute(count_sql, params)
         total = cursor.fetchone()[0]
-        
+
         return {
-            'status': 'success',
-            'results': results,
-            'total': total,
-            'limit': limit,
-            'offset': offset,
-            'query': query
+            "status": "success",
+            "results": results,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "query": query,
         }
-        
+
     except sqlite3.Error as e:
         logger.exception("Error executing FTS query")
-        return {
-            'status': 'error',
-            'message': f'Error executing FTS query: {str(e)}'
-        }
+        return {"status": "error", "message": f"Error executing FTS query: {str(e)}"}
+
 
 @mcp.tool()
 @HelpSystem.register_tool
-async def fts_tables(
-    connection_name: str = "default"
-) -> Dict[str, Any]:
+async def fts_tables(connection_name: str = "default") -> Dict[str, Any]:
     """List all FTS virtual tables in the database.
-    
+
     Args:
         connection_name: Name of the database connection
-        
+
     Returns:
         List of FTS virtual tables with their types (FTS3/4/5)
     """
     if connection_name not in DATABASE_CONNECTIONS:
-        return {
-            'status': 'error',
-            'message': f'No such connection: {connection_name}'
-        }
-            
+        return {"status": "error", "message": f"No such connection: {connection_name}"}
+
     try:
-        conn = DATABASE_CONNECTIONS[connection_name]['connector'].connection
+        conn = DATABASE_CONNECTIONS[connection_name]["connector"].connection
         cursor = conn.cursor()
-            
+
         # Query to find all FTS virtual tables
         cursor.execute("""
             SELECT name, sql 
@@ -147,36 +140,27 @@ async def fts_tables(
             AND (sql LIKE '%USING FTS%' OR sql LIKE '%USING FTS3%' OR 
                  sql LIKE '%USING FTS4%' OR sql LIKE '%USING FTS5%')
         """)
-            
+
         tables = []
         for name, sql in cursor.fetchall():
             # Determine FTS version
-            if 'USING FTS5' in sql.upper():
-                fts_type = 'FTS5'
-            elif 'USING FTS4' in sql.upper():
-                fts_type = 'FTS4'
-            elif 'USING FTS3' in sql.upper():
-                fts_type = 'FTS3'
+            if "USING FTS5" in sql.upper():
+                fts_type = "FTS5"
+            elif "USING FTS4" in sql.upper():
+                fts_type = "FTS4"
+            elif "USING FTS3" in sql.upper():
+                fts_type = "FTS3"
             else:
-                fts_type = 'FTS'  # Default/unknown
-                
-            tables.append({
-                'name': name,
-                'type': fts_type,
-                'sql': sql
-            })
-            
-        return {
-            'status': 'success',
-            'tables': tables
-        }
-            
+                fts_type = "FTS"  # Default/unknown
+
+            tables.append({"name": name, "type": fts_type, "sql": sql})
+
+        return {"status": "success", "tables": tables}
+
     except sqlite3.Error as e:
         logger.exception("Error listing FTS tables")
-        return {
-            'status': 'error',
-            'message': f'Error listing FTS tables: {str(e)}'
-        }
+        return {"status": "error", "message": f"Error listing FTS tables: {str(e)}"}
+
 
 @mcp.tool()
 @HelpSystem.register_tool
@@ -185,49 +169,42 @@ async def fts_suggest(
     connection_name: str = "default",
     table: str = "fts_index",
     column: str = "content",
-    limit: int = 10
+    limit: int = 10,
 ) -> Dict[str, Any]:
     """Get search suggestions based on a prefix (for autocomplete).
-    
+
     Args:
         prefix: The prefix to get suggestions for
         connection_name: Name of the database connection
         table: FTS table name
         column: Column to get suggestions from
         limit: Maximum number of suggestions to return
-            
+
     Returns:
         List of suggested completions
     """
     if connection_name not in DATABASE_CONNECTIONS:
-        return {
-            'status': 'error',
-            'message': f'No such connection: {connection_name}'
-        }
-    
+        return {"status": "error", "message": f"No such connection: {connection_name}"}
+
     try:
-        conn = DATABASE_CONNECTIONS[connection_name]['connector'].connection
+        conn = DATABASE_CONNECTIONS[connection_name]["connector"].connection
         cursor = conn.cursor()
-        
+
         # Use FTS5 prefix search if available, otherwise use LIKE
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             SELECT DISTINCT {column}
             FROM {table}
             WHERE {column} LIKE ? || '%'
             LIMIT ?
-        """, (prefix, limit))
-        
+        """,
+            (prefix, limit),
+        )
+
         suggestions = [row[0] for row in cursor.fetchall()]
-        
-        return {
-            'status': 'success',
-            'suggestions': suggestions,
-            'count': len(suggestions)
-        }
-        
+
+        return {"status": "success", "suggestions": suggestions, "count": len(suggestions)}
+
     except sqlite3.Error as e:
         logger.exception("Error getting FTS suggestions")
-        return {
-            'status': 'error',
-            'message': f'Error getting suggestions: {str(e)}'
-        }
+        return {"status": "error", "message": f"Error getting suggestions: {str(e)}"}

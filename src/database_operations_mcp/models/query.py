@@ -1,13 +1,17 @@
 """Query and result models for database operations."""
-from typing import Any, Dict, List, Optional, Union
+
 from datetime import datetime
 from enum import Enum
-from pydantic import Field, validator
+from typing import Any, Dict, List, Optional
+
+from pydantic import Field
 
 from .base import BaseDBModel
 
+
 class QueryType(str, Enum):
     """Types of database queries."""
+
     SELECT = "select"
     INSERT = "insert"
     UPDATE = "update"
@@ -19,16 +23,20 @@ class QueryType(str, Enum):
     AGGREGATE = "aggregate"
     TRANSACTION = "transaction"
 
+
 class QueryStatus(str, Enum):
     """Query execution status."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
 
+
 class QueryResult(BaseDBModel):
     """Result of a database query."""
+
     query_id: str
     status: QueryStatus = QueryStatus.PENDING
     data: List[Dict[str, Any]] = Field(default_factory=list)
@@ -38,8 +46,10 @@ class QueryResult(BaseDBModel):
     error: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
+
 class DatabaseQuery(BaseDBModel):
     """Database query model."""
+
     query: str
     query_type: QueryType
     parameters: Optional[Dict[str, Any]] = None
@@ -48,22 +58,23 @@ class DatabaseQuery(BaseDBModel):
     result: Optional[QueryResult] = None
     executed_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    
+
     class Config:
         """Pydantic config."""
+
         use_enum_values = True
-    
+
     def start_execution(self) -> None:
         """Mark query as started."""
         self.status = QueryStatus.RUNNING
         self.executed_at = datetime.utcnow()
-    
+
     def complete(self, result: QueryResult) -> None:
         """Mark query as completed with results."""
         self.status = QueryStatus.COMPLETED
         self.completed_at = datetime.utcnow()
         self.result = result
-    
+
     def fail(self, error: str) -> None:
         """Mark query as failed with error."""
         self.status = QueryStatus.FAILED

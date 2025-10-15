@@ -1,6 +1,6 @@
 """Curated bookmark sources for profile creation."""
 
-from typing import Dict, List, Any
+from typing import Any, Dict
 
 # Predefined curated bookmark collections
 CURATED_SOURCES = {
@@ -26,19 +26,14 @@ CURATED_SOURCES = {
                 {"title": "OWASP", "url": "https://owasp.org"},
                 {"title": "SSL Labs", "url": "https://www.ssllabs.com/ssltest/"},
             ]
-        }
+        },
     },
-
     "ai_ml": {
         "name": "AI & Machine Learning",
         "description": "Resources for AI and machine learning",
         "source_type": "github_awesome",
-        "config": {
-            "topic": "ai",
-            "language": "en"
-        }
+        "config": {"topic": "ai", "language": "en"},
     },
-
     "cooking": {
         "name": "Cooking & Recipes",
         "description": "Popular cooking and recipe websites",
@@ -61,9 +56,8 @@ CURATED_SOURCES = {
                 {"title": "BBC Good Food", "url": "https://www.bbcgoodfood.com"},
                 {"title": "Jamie Oliver", "url": "https://www.jamieoliver.com"},
             ]
-        }
+        },
     },
-
     "productivity": {
         "name": "Productivity Tools",
         "description": "Tools to boost productivity and organization",
@@ -86,9 +80,8 @@ CURATED_SOURCES = {
                 {"title": "Slack", "url": "https://slack.com"},
                 {"title": "Discord", "url": "https://discord.com"},
             ]
-        }
+        },
     },
-
     "news_media": {
         "name": "News & Media",
         "description": "Major news outlets and media sources",
@@ -111,9 +104,8 @@ CURATED_SOURCES = {
                 {"title": "TechCrunch", "url": "https://techcrunch.com"},
                 {"title": "Wired", "url": "https://www.wired.com"},
             ]
-        }
+        },
     },
-
     "finance": {
         "name": "Finance & Investing",
         "description": "Financial news, tools, and investment resources",
@@ -136,9 +128,8 @@ CURATED_SOURCES = {
                 {"title": "TradingView", "url": "https://www.tradingview.com"},
                 {"title": "StockTwits", "url": "https://stocktwits.com"},
             ]
-        }
+        },
     },
-
     "entertainment": {
         "name": "Entertainment",
         "description": "Streaming services, movies, music, and entertainment",
@@ -161,9 +152,8 @@ CURATED_SOURCES = {
                 {"title": "Letterboxd", "url": "https://letterboxd.com"},
                 {"title": "Goodreads", "url": "https://www.goodreads.com"},
             ]
-        }
+        },
     },
-
     "shopping": {
         "name": "Shopping & Deals",
         "description": "Online shopping and deal-finding sites",
@@ -186,13 +176,15 @@ CURATED_SOURCES = {
                 {"title": "OfferUp", "url": "https://offerup.com"},
                 {"title": "Poshmark", "url": "https://poshmark.com"},
             ]
-        }
-    }
+        },
+    },
 }
+
 
 def get_curated_source(source_name: str) -> Dict[str, Any]:
     """Get a predefined curated source by name."""
     return CURATED_SOURCES.get(source_name)
+
 
 def list_curated_sources() -> Dict[str, Any]:
     """List all available curated sources."""
@@ -201,9 +193,9 @@ def list_curated_sources() -> Dict[str, Any]:
             name: {
                 "name": info["name"],
                 "description": info["description"],
-                "source_type": info["source_type"]
+                "source_type": info["source_type"],
             }
             for name, info in CURATED_SOURCES.items()
         },
-        "count": len(CURATED_SOURCES)
+        "count": len(CURATED_SOURCES),
     }

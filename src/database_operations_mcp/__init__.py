@@ -11,12 +11,12 @@ __author__ = "Sandra"
 __license__ = "MIT"
 
 # Import main components to make them available at package level
-from .main import main, DatabaseOperationsMCP
 from .database_manager import DatabaseManager
+from .main import DatabaseOperationsMCP, main
 
 # Define __all__ to specify public API
 __all__ = [
-    'main',
-    'DatabaseManager',
-    'DatabaseOperationsMCP',
+    "main",
+    "DatabaseManager",
+    "DatabaseOperationsMCP",
 ]
