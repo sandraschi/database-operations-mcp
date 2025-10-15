@@ -38,7 +38,7 @@ jobs:
       - name: Build package
         run: uv build
       - name: Check package
-        run: uv run twine check dist/*
+        run: uv run twine check dist/*.whl dist/*.tar.gz
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
