@@ -15,7 +15,7 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 
 # Import the functions to test
-from database_operations_mcp.tools.connection_tools import register_tools
+from database_operations_mcp.tools.connection_tools import register_database_connection, list_database_connections, test_database_connection
 
 # Test data
 SAMPLE_DATABASES = [

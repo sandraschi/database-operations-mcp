@@ -7,7 +7,7 @@ from unittest.mock import ANY, MagicMock, patch
 import pytest
 
 # Import the function to test
-from database_operations_mcp.tools.registry_tools import _active_monitors, monitor_registry
+from database_operations_mcp.tools.registry_tools import read_registry_value, write_registry_value, list_registry_keys
 
 # Test data
 TEST_REGISTRY_PATH = r"HKEY_CURRENT_USER\\Software\\TestKey"

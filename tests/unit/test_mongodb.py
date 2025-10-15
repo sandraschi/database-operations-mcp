@@ -13,7 +13,7 @@ from typing import Any, Dict
 # Add parent directory to path to import from database_operations_mcp
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
-from database_operations_mcp.connectors.mongodb_connector import MongoDBConnector
+from database_operations_mcp.services.database.connectors.mongodb_connector import MongoDBConnector
 
 # Configure logging
 logging.basicConfig(

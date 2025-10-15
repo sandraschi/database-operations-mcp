@@ -37,15 +37,15 @@ jobs:
         run: uv run ruff check . --fix
       - name: Run ruff formatting check
         run: uv run ruff format --check .
-      - name: Run mypy type checking
-        run: uv run mypy src/ --ignore-missing-imports || echo "Type checking completed with warnings"
+      - name: Run pyright type checking
+        run: uv run pyright
+        continue-on-error: true  # Optional: allow to pass with warnings
 
   test:
     name: Test Suite
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest]
         python-version: ["3.11", "3.12"]
     steps:
       - name: Checkout code
@@ -141,7 +141,7 @@ jobs:
         run: |
           if command -v mcpb >/dev/null 2>&1; then
             cd mcpb
-            mcpb validate manifest.json
+            mcpb validate mcpb.json
             cd ..
           else
             echo "MCPB CLI not available, skipping validation"
