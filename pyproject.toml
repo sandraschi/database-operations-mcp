@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "database-operations-mcp"
-version = "1.0.0"
+version = "1.2.0"
 description = "A FastMCP 2.12.4 compliant server for managing and interacting with multiple database systems via stdio and HTTP transports"
 readme = "README.md"
 requires-python = ">=3.10"

@@ -5,27 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2025-10-15
 
 ### Added
-- Initial release of Database Operations MCP Server
-- Support for multiple database operations (SQLite, PostgreSQL, MySQL)
-- Comprehensive tool set for database management
-- Windows-specific tools integration
-- Media library management (Calibre, Plex)
-- Firefox bookmark management
-- Full Text Search capabilities
+- Comprehensive tool docstring standards and migration
+- MCPB packaging system to replace obsolete DXT
+- Firefox Portmanteau Tools & Dual Interface Support
+- Complete CI/CD pipeline with modern GitHub Actions
+- Enhanced documentation and testing frameworks
 
 ### Fixed
+- CI/CD workflow failures resolved
+- MCP Server Startup Issues & Firefox Database Access
 - Import and dependency issues resolved
-- FastMCP 2.12 compatibility achieved
-- Windows API integration improvements
 - Error handling and logging enhancements
 
 ### Changed
-- Updated to FastMCP 2.12 framework
+- Reorganized MCPB files into mcpb/ folder tree
+- Updated CI workflows and build processes
 - Improved code structure and organization
-- Enhanced documentation and examples
+
+## [1.1.0] - 2025-01-15
+
+### Added
+- Gold Status achievement for Glama.ai integration
+- Enhanced MCP server stability and performance
+
+## [Unreleased]
 
 ## [1.0.0] - 2025-01-01
 
