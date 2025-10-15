@@ -1,4 +1,4 @@
-""
+"""
 Tests for the FastMCP server.
 
 These tests verify the core functionality of the MCP server, including tool registration,
@@ -13,7 +13,7 @@ from .test_utils import TestMCPClient, mock_mcp_tool
 
 
 def test_server_health_check():
-    ""Test that the health check endpoint returns a successful response.""
+    """Test that the health check endpoint returns a successful response."""
     from mcp_server.main import app
     
     client = TestClient(app)
@@ -24,7 +24,7 @@ def test_server_health_check():
 
 
 def test_list_tools(mocker):
-    ""Test that the server lists all registered tools.""
+    """Test that the server lists all registered tools."""
     from mcp_server.main import app, mcp
     
     # Mock the MCP instance
@@ -42,7 +42,7 @@ def test_list_tools(mocker):
 
 @pytest.mark.asyncio
 async def test_tool_execution(mocker):
-    ""Test that tools can be executed through the API."""
+    """Test that tools can be executed through the API."""
     from mcp_server.main import app, mcp
     
     # Mock the MCP instance and tool
@@ -61,7 +61,7 @@ async def test_tool_execution(mocker):
 
 
 def test_nonexistent_tool():
-    ""Test that calling a non-existent tool returns a 404 error."""
+    """Test that calling a non-existent tool returns a 404 error."""
     from mcp_server.main import app
     
     client = TestClient(app)
@@ -75,7 +75,7 @@ def test_nonexistent_tool():
 
 
 def test_invalid_tool_request():
-    ""Test that invalid tool requests return a 422 error."""
+    """Test that invalid tool requests return a 422 error."""
     from mcp_server.main import app
     
     client = TestClient(app)
@@ -119,7 +119,7 @@ async def test_tool_execution_error(mocker):
 
 
 def test_openapi_schema():
-    ""Test that the OpenAPI schema is generated correctly."""
+    """Test that the OpenAPI schema is generated correctly."""
     from mcp_server.main import app
     
     client = TestClient(app)

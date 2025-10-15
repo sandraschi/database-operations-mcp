@@ -16,8 +16,7 @@ from mcp_server.main import app, mcp
 
 @pytest.fixture(scope="session")
 def event_loop():
-    ""
-    Create an instance of the default event loop for the test session.
+    """Create an instance of the default event loop for the test session.
     This is required for async tests.
     """
     loop = asyncio.get_event_loop_policy().new_event_loop()
@@ -27,9 +26,8 @@ def event_loop():
 
 @pytest.fixture(scope="module")
 def test_client() -> Generator[TestClient, None, None]:
-    ""
-    Create a FastAPI test client.
-    
+    """Create a FastAPI test client.
+
     Yields:
         TestClient: A test client for the FastAPI application.
     """
@@ -39,8 +37,7 @@ def test_client() -> Generator[TestClient, None, None]:
 
 @pytest.fixture(autouse=True)
 async def reset_mcp() -> AsyncGenerator[None, None]:
-    ""
-    Reset the MCP instance before each test.
+    """Reset the MCP instance before each test.
     This ensures tests don't interfere with each other.
     """
     # Save any existing tools
@@ -58,14 +55,13 @@ async def reset_mcp() -> AsyncGenerator[None, None]:
 
 @pytest.fixture
 def mock_tool():
-    ""
-    Fixture to create a mock tool for testing.
-    
+    """Fixture to create a mock tool for testing.
+
     Returns:
         A function to create mock tools with specified behavior.
     """
     def _mock_tool(name: str, return_value=None, side_effect=None):
-        ""Create a mock tool with the given name and behavior."""
+        """Create a mock tool with the given name and behavior."""
         async def tool_func(*args, **kwargs):
             if side_effect is not None:
                 if isinstance(side_effect, Exception):
@@ -82,9 +78,8 @@ def mock_tool():
 
 @pytest.fixture(scope="session")
 def test_data_dir() -> Path:
-    ""
-    Get the path to the test data directory.
-    
+    """Get the path to the test data directory.
+
     Returns:
         Path: Path to the test data directory.
     """
@@ -93,7 +88,7 @@ def test_data_dir() -> Path:
 
 @pytest.fixture(autouse=True)
 def set_test_env(monkeypatch):
-    ""Set up test environment variables."""
+    """Set up test environment variables."""
     monkeypatch.setenv("ENV", "test")
     monkeypatch.setenv("LOG_LEVEL", "DEBUG")
     
