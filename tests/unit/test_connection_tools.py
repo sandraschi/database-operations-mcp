@@ -68,25 +68,24 @@ def mock_connector():
 
 
 # Tests
-def test_register_tools_registers_functions(mock_mcp):
-    """Test that register_tools registers all expected functions."""
-    # Act
-    register_tools(mock_mcp)
+def test_connection_tools_are_registered(mock_mcp):
+    """Test that connection tools are registered via decorators when module is imported."""
+    # Import the module to trigger @mcp.tool decorators
+    import database_operations_mcp.tools.connection_tools  # noqa: F401
 
     # Assert
     # Verify that tool() was called for each expected function
     tool_calls = [call[0][0].__name__ for call in mock_mcp.tool.call_args_list]
 
-    # Get the actual function names from the module
+    # Get the actual function names from the module that have @mcp.tool decorators
     from database_operations_mcp.tools import connection_tools
 
     expected_functions = [
-        name
-        for name, obj in connection_tools.__dict__.items()
-        if callable(obj) and not name.startswith("_")
+        "register_database_connection",
+        "list_database_connections",
+        "test_database_connection",
+        "test_all_database_connections"
     ]
-    # Remove the register_tools function from the list
-    expected_functions = [f for f in expected_functions if f != "register_tools"]
 
     for func_name in expected_functions:
         assert func_name in tool_calls, f"{func_name} was not registered"
@@ -99,14 +98,14 @@ def test_list_supported_databases(mock_mcp, mock_db_manager):
         "database_operations_mcp.tools.connection_tools.get_supported_databases",
         return_value=SAMPLE_DATABASES,
     ):
-        # Register the tools with our mock MCP
-        register_tools(mock_mcp)
+        # Import the module to register tools via decorators
+        import database_operations_mcp.tools.connection_tools  # noqa: F401
 
-        # Get the registered function
-        tool_func = mock_mcp.tool.call_args_list[0][0][0]
+        # Get the list_database_connections function
+        from database_operations_mcp.tools.connection_tools import list_database_connections
 
         # Act
-        result = tool_func()
+        result = list_database_connections()
 
         # Assert
         assert result["success"] is True
@@ -124,13 +123,11 @@ def test_register_database_connection_success(mock_mcp, mock_db_manager, mock_co
         "database_operations_mcp.tools.connection_tools.create_connector",
         return_value=mock_connector,
     ):
-        register_tools(mock_mcp)
-
-        # Get the register_database_connection function (second registered tool)
-        tool_func = mock_mcp.tool.call_args_list[1][0][0]
+        # Import the function directly
+        from database_operations_mcp.tools.connection_tools import register_database_connection
 
         # Act
-        result = tool_func(
+        result = register_database_connection(
             connection_name="test_conn",
             database_type="postgresql",
             connection_config={
@@ -157,13 +154,11 @@ def test_test_database_connection_success(mock_mcp, mock_db_manager, mock_connec
     # Arrange
     mock_db_manager.get_connector.return_value = mock_connector
 
-    register_tools(mock_mcp)
-
-    # Get the test_database_connection function (fourth registered tool)
-    tool_func = mock_mcp.tool.call_args_list[3][0][0]
+    # Import the function directly
+    from database_operations_mcp.tools.connection_tools import test_database_connection
 
     # Act
-    result = tool_func(connection_name="test_conn")
+    result = test_database_connection(connection_name="test_conn")
 
     # Assert
     assert result["success"] is True
@@ -193,13 +188,11 @@ def test_test_all_database_connections_parallel(mock_mcp, mock_db_manager, mock_
         future.result.return_value = {"success": True, "latency": 10.5}
         mock_executor.return_value.__enter__.return_value.submit.return_value = future
 
-        register_tools(mock_mcp)
-
-        # Get the test_all_database_connections function (fifth registered tool)
-        tool_func = mock_mcp.tool.call_args_list[4][0][0]
+        # Import the function directly
+        from database_operations_mcp.tools.connection_tools import test_all_database_connections
 
         # Act
-        result = tool_func(parallel=True, timeout=5.0)
+        result = test_all_database_connections(parallel=True, timeout=5.0)
 
         # Assert
         assert result["success"] is True
