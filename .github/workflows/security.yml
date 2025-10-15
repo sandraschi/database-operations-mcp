@@ -28,7 +28,8 @@ jobs:
       run: uv run safety scan --output json --save-as safety-report.json || echo "Safety scan completed"
       continue-on-error: true
     - name: Run Bandit (Python security linter)
-      run: uv run bandit -r src/ -f json -o bandit-report.json || true
+      run: uv run bandit -r src/ -f json -o bandit-report.json || echo "Bandit scan completed"
+      continue-on-error: true
     - name: Run Semgrep (Static analysis)
       run: |
         uv run semgrep --config=auto --json --output=semgrep-report.json src/ || true
