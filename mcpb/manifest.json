@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.2",
   "name": "database-operations-mcp",
-  "version": "1.2.0",
+  "version": "1.2.3",
   "description": "Universal Database Operations MCP - SQL, NoSQL, Vector databases with Windows Registry support",
   "author": {
     "name": "Sandra Schilling",
@@ -20,23 +20,8 @@
       }
     }
   },
-  "capabilities": {
-    "tools": true,
-    "resources": true,
-    "prompts": true
-  },
-  "dependencies": [
-    "fastmcp>=2.12.0,<3.0.0",
-    "fastapi>=0.95.0",
-    "uvicorn[standard]>=0.21.0",
-    "pydantic>=2.11.7",
-    "psycopg2-binary>=2.9.5",
-    "pymongo>=4.3.0",
-    "chromadb>=0.4.0",
-    "sqlalchemy[asyncio]>=2.0.0"
-  ],
   "compatibility": {
-    "platforms": ["windows", "macos", "linux"],
+    "platforms": ["win32", "darwin", "linux"],
     "python_version": ">=3.10"
   }
 }

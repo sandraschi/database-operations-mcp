@@ -51,11 +51,13 @@ jobs:
             cd mcpb
             mcpb pack . ../dist/database-operations-mcp.mcpb
             cd ..
+            echo "MCPB package built successfully"
           else
             echo "MCPB CLI not available, creating basic package"
             cd mcpb
             zip -r ../dist/database-operations-mcp.mcpb . -x "*.git*" "*.pyc" "__pycache__/*"
             cd ..
+            echo "Basic package created as fallback"
           fi
       - name: Generate changelog
         id: changelog
@@ -105,7 +107,7 @@ jobs:
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, 'alpha') || contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'rc') }}
           files: |
-            dist/database-operations-mcp.mcpb
+            dist/*.mcpb
             dist/*.whl
             dist/*.tar.gz
 
