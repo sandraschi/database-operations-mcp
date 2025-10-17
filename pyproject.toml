@@ -45,37 +45,24 @@ classifiers = [
     "Operating System :: MacOS"
 ]
 
-[tool.uv]
-dependency-groups = {
-    dev = [
-    # Testing
+[tool.uv.dependency-groups]
+dev = [
     "pytest>=8.3.4",
     "pytest-cov>=4.1.0",
-    "pytest-asyncio>=0.24.0",
+    "pytest-asyncio>=0.24.0", 
     "pytest-mock>=3.10.0",
-
-    # Linting & Type Checking
-    "ruff>=0.1.6",
+    "ruff>=0.4.10",
     "pyright>=1.1.390",
     "mypy>=1.8.0",
-
-    # Security
     "bandit>=1.7.0",
     "safety>=3.0.0",
-
-    # Building & Publishing (CRITICAL - don't forget!)
     "build>=1.0.0",
     "twine>=5.0.0",
-
-    # Security (XML parsing)
     "defusedxml>=0.7.1",
-
-    # Documentation
     "sphinx>=6.0.0",
     "sphinx-rtd-theme>=1.2.0",
     "pre-commit>=3.0.0"
-    ]
-}
+]
 
 [project.optional-dependencies]
 dev = [
