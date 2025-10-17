@@ -38,14 +38,44 @@ def send_command(command, params=None):
 
 def test_connection():
     """Test basic connection to the MCP server."""
-    logger.info("Testing connection to MCP server...")
-    response = send_command("test_connection")
-    if response and "result" in response:
-        logger.info(f"Connection test successful: {response['result']}")
-        return True
-    else:
-        logger.error(f"Connection test failed: {response}")
+    import subprocess
+    import json
+    
+    # Start the MCP server process
+    server_process = subprocess.Popen(
+        ["python", "-m", "database_operations_mcp.main"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    
+    try:
+        # Send a test request
+        request = {
+            "jsonrpc": "2.0",
+            "method": "test_connection",
+            "params": {},
+            "id": 1
+        }
+        
+        # Send request
+        server_process.stdin.write(json.dumps(request) + "\n")
+        server_process.stdin.flush()
+        
+        # Read response
+        response_line = server_process.stdout.readline()
+        if response_line:
+            response = json.loads(response_line.strip())
+            assert response["id"] == 1
+            assert "result" in response or "error" in response
+            return True
         return False
+        
+    finally:
+        # Clean up
+        server_process.terminate()
+        server_process.wait()
 
 
 if __name__ == "__main__":

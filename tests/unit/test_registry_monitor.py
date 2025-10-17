@@ -16,12 +16,13 @@ TEST_CALLBACK_URL = "http://example.com/webhook"
 @pytest.fixture(autouse=True)
 def reset_monitors():
     """Reset the _active_monitors dictionary before each test."""
+    from database_operations_mcp.tools.registry_tools import _active_monitors
     _active_monitors.clear()
     yield
     _active_monitors.clear()
 
 
-@patch("database_operations_mcp.handlers.registry_tools.RegistryMonitor")
+@patch("database_operations_mcp.tools.registry_tools.RegistryMonitor")
 def test_start_monitoring(mock_registry_monitor):
     """Test starting registry monitoring."""
     # Setup

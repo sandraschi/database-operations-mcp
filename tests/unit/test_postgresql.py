@@ -5,7 +5,7 @@ Test script for PostgreSQL connection using the database-operations-mcp package.
 from database_operations_mcp.database_manager import DatabaseManager
 
 
-def test_postgres_connection(connection_config):
+def test_postgres_connection(postgresql_config):
     """Test PostgreSQL connection with the provided configuration."""
     try:
         # Initialize the database manager
@@ -14,7 +14,7 @@ def test_postgres_connection(connection_config):
         # Create and register the PostgreSQL connector
         from database_operations_mcp.connectors.postgresql_connector import PostgreSQLConnector
 
-        connector = PostgreSQLConnector(connection_config)
+        connector = PostgreSQLConnector(postgresql_config)
 
         # Test the connection
         test_result = connector.test_connection()

@@ -22,6 +22,9 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 logger = logging.getLogger(__name__)
 
+# Global dictionary to track active monitors
+_active_monitors: Dict[str, "RegistryMonitor"] = {}
+
 # Map registry hives to their corresponding winreg constants
 HIVE_MAP = {
     "HKEY_CLASSES_ROOT": winreg.HKEY_CLASSES_ROOT,

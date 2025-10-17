@@ -151,29 +151,29 @@ class TestExportPlexLibrary(unittest.TestCase):
 
     def _create_test_database(self, db):
         """Create a test database with sample data."""
-        with db.conn:
-            cursor = db.conn.cursor()
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS library_sections (
-                    id INTEGER PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    section_type INTEGER
-                )
-            """)
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS media_items (
-                    id INTEGER PRIMARY KEY,
-                    library_section_id INTEGER,
-                    media_item_title TEXT,
-                    FOREIGN KEY (library_section_id) REFERENCES library_sections(id)
-                )
-            """)
-            cursor.execute(
-                "INSERT INTO library_sections (id, name, section_type) VALUES (1, 'Test Section', 1)"
+        cursor = db.conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS library_sections (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                section_type INTEGER
             )
-            cursor.execute(
-                "INSERT INTO media_items (id, library_section_id, media_item_title) VALUES (1, 1, 'Test Item')"
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS media_items (
+                id INTEGER PRIMARY KEY,
+                library_section_id INTEGER,
+                media_item_title TEXT,
+                FOREIGN KEY (library_section_id) REFERENCES library_sections(id)
             )
+        """)
+        cursor.execute(
+            "INSERT INTO library_sections (id, name, section_type) VALUES (1, 'Test Section', 1)"
+        )
+        cursor.execute(
+            "INSERT INTO media_items (id, library_section_id, media_item_title) VALUES (1, 1, 'Test Item')"
+        )
+        db.conn.commit()
 
     def test_export_json(self):
         """Test exporting to JSON format."""

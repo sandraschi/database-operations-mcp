@@ -22,12 +22,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def test_mongodb_connection(connection_config: Dict[str, Any]) -> None:
+def test_mongodb_connection(mongodb_config):
     """Test MongoDB connection and basic operations."""
     connector = None
     try:
         # Initialize connector
-        connector = MongoDBConnector(connection_config)
+        connector = MongoDBConnector(mongodb_config)
 
         # Test connection
         logger.info("Testing MongoDB connection...")

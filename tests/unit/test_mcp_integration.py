@@ -79,11 +79,12 @@ async def test_mcp_server():
 
     finally:
         # Clean up
-        server_process.terminate()
-        try:
-            await asyncio.wait_for(server_process.wait(), timeout=2)
-        except asyncio.TimeoutError:
-            server_process.kill()
+        if server_process.poll() is None:
+            server_process.terminate()
+            try:
+                await asyncio.wait_for(server_process.wait(), timeout=2)
+            except asyncio.TimeoutError:
+                server_process.kill()
 
 
 if __name__ == "__main__":
