@@ -57,7 +57,7 @@
 
 ## 🌟 What is MCPB?
 
-MCPB (MCP Bundle) is a powerful framework developed by Anthropic specifically for packaging and distributing MCP (Model Control Protocol) servers. It provides a standardized way to package, version, and deploy MCP server implementations with all their dependencies.
+MCPB (MCP Bundle) is a powerful framework developed by Anthropic specifically for packaging and distributing MCP (Model Control Protocol) servers. It provides a standardized way to package, version, and deploy MCP server implementations. Dependencies are installed separately by the user.
 
 ### Key Components of MCPB
 

@@ -40,7 +40,7 @@ Successfully implemented complete MCPB (MCP Bundle) packaging for the Notepad++ 
 - **26 tools** across 8 categories
 - **3 user configuration** options
 - **Python source** code (2,424 lines)
-- **Dependencies** bundled
+- **Source code only** (dependencies installed separately)
 - **Metadata** and permissions
 
 ---
@@ -308,7 +308,7 @@ Updated documentation to reflect v1.2.0:
 - ✅ Manifest validates
 - ✅ Package builds successfully
 - ✅ Package size reasonable (0.19 MB)
-- ✅ All dependencies included
+- ✅ Source code included (dependencies installed separately)
 - ✅ User configuration functional
 - ✅ GitHub Actions workflow created
 
