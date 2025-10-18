@@ -56,7 +56,7 @@
 - 🎯 **One-click installation** - Drag & drop to Claude Desktop
 - 🔒 **Security** - Cryptographically signed packages
 - ⚙️ **User configuration** - Interactive setup prompts
-- 📦 **Lightweight packages** - Source code only, dependencies installed separately
+- 📦 **Lightweight packages** - Source code only, dependencies auto-installed by MCP client
 - 🚀 **Automated distribution** - GitHub Actions integration
 
 ---
@@ -311,7 +311,7 @@ notepadpp-mcp.mcpb (0.19 MB)
 │       │   └── server.py      # Main server (2,424 lines)
 │       ├── docs/              # Documentation
 │       └── tests/             # Test suite
-└── lib/                       # Source code only (no dependencies)
+└── lib/                       # Source code only (dependencies auto-installed by MCP client)
     ├── fastmcp/               # FastMCP framework source
     ├── pywin32/               # Windows API source
     ├── psutil/                # System utilities source
