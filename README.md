@@ -23,7 +23,7 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 - **Dual Transport**: Stdio for MCP clients, HTTP for web dashboards and APIs
 - **Cross-Platform**: Windows, macOS, and Linux support
 - **Containerized**: Easy deployment with Docker
-- **MCPB Packaging**: Easy packaging and distribution with DXT
+- **MCPB Packaging**: Easy packaging and distribution with MCPB
 
 ## 📦 Latest Release: v1.0.0
 
@@ -34,68 +34,57 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 ## 📚 Documentation
 
 ### Development Standards
-- [MCP Server & DXT Packing Standards](./docs/standards/MCP_Server_Standards.md) - Guidelines for MCP server development and DXT packaging
-- [DXT Building Guide](./docs/DXT_BUILDING_GUIDE.md) - Complete guide to building and distributing DXT packages
+- [MCP Server Standards](./docs/standards/MCP_Server_Standards.md) - Guidelines for MCP server development and MCPB packaging
+- [MCPB Building Guide](./docs/mcpb-packaging/MCPB_BUILDING_GUIDE.md) - Complete guide to building and distributing MCPB packages
 
 ## 📦 MCPB Packaging
 
-This project uses DXT for packaging the MCP server for distribution and deployment. The DXT package includes all necessary code, dependencies, and configuration.
+This project uses MCPB for packaging the MCP server for distribution and deployment. The MCPB package includes all necessary code and configuration.
 
-### Building the DXT Package
+### Building the MCPB Package
 
 #### Prerequisites
 
-- Python 3.9+
-- DXT CLI installed: `pip install dxt`
+- Python 3.10+
+- MCPB CLI installed: `npm install -g @modelcontextprotocol/cli`
 
-#### Using the Build Script
+#### Using MCPB CLI
 
-We provide a PowerShell build script that automates the entire packaging process:
+You can build the MCPB package using the MCPB CLI:
 
-```powershell
-# Show help and available options
-.\scripts\build-mcp-package.ps1 -Help
+```bash
+# Navigate to the mcpb directory
+cd mcpb
 
-# Build and sign the package (default behavior)
-.\scripts\build-mcp-package.ps1
-
-# Build without signing (for development/testing)
-.\scripts\build-mcp-package.ps1 -NoSign
-
-# Specify custom output directory
-.\scripts\build-mcp-package.ps1 -OutputDir "C:\builds"
+# Build the MCPB package
+mcpb pack . ../dist/database-operations-mcp.mcpb
 ```
 
 #### Manual Build Process
 
 If you prefer to build manually:
 
-1. Ensure your `manifest.json` is properly configured
+1. Ensure your `mcpb.json` and `manifest.json` are properly configured
 
-2. Run the DXT pack command:
+2. Run the MCPB pack command:
 
    ```bash
-   dxt pack . dist/
+   cd mcpb
+   mcpb pack . ../dist/database-operations-mcp.mcpb
    ```
 
-3. Sign the package (optional but recommended):
+3. Verify the package:
 
    ```bash
-   dxt sign dist/your-package-name.dxt
-   ```
-
-4. Verify the package:
-
-   ```bash
-   dxt verify dist/your-package-name.dxt
+   mcpb verify ../dist/database-operations-mcp.mcpb
    ```
 
 ### CI/CD Integration
 
-The build script is designed to work seamlessly with CI/CD pipelines. Here's an example GitHub Actions workflow:
+The MCPB build process works seamlessly with CI/CD pipelines. Here's an example GitHub Actions workflow:
 
 ```yaml
-name: Build and Publish DXT Package
+name: Build and Publish MCPB Package
 
 on:
   push:
@@ -105,29 +94,30 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
       with:
-        python-version: '3.9'
+        node-version: '18'
         
-    - name: Install DXT
-      run: pip install dxt
+    - name: Install MCPB CLI
+      run: npm install -g @modelcontextprotocol/cli
       
-    - name: Build DXT package
+    - name: Build MCPB package
       run: |
         mkdir -p dist
-        .\scripts\build-mcp-package.ps1 -OutputDir dist
+        cd mcpb
+        mcpb pack . ../dist/database-operations-mcp.mcpb
       
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: dxt-package
-        path: dist/*.dxt
+        name: mcpb-package
+        path: dist/*.mcpb
         retention-days: 5
 ```
 
@@ -136,15 +126,14 @@ jobs:
 Before deploying, always verify your package:
 
 ```bash
-dxt verify dist/your-package-name.dxt
+mcpb verify dist/database-operations-mcp.mcpb
 ```
 
 This will check:
 
 - Package integrity
-- Digital signatures
 - Manifest validity
-- Required files and dependencies
+- Required files and configuration
 
 ### Best Practices
 
@@ -156,42 +145,55 @@ This will check:
    - All project dependencies installed: `pip install -e .`
 
 ## Build Process
-   ```bash
-   # Navigate to the project root
-   cd /path/to/database-operations-mcp
-   
-   # Run the build script (Windows)
-   .\build.ps1
-   
-   # Or on Linux/macOS
-   pwsh build.ps1
-   ```
 
-   The build script will:
-   - Validate the manifest.json
-   - Create a DXT package in the `dist/` directory named `database-operations-mcp.dxt`
-   - Sign the package (optional, use `-NoSign` to skip)
-   - Validate the final package
+```bash
+# Navigate to the mcpb directory
+cd mcpb
+
+# Build the MCPB package
+mcpb pack . ../dist/database-operations-mcp.mcpb
+```
+
+The build process will:
+- Validate the `mcpb.json` and `manifest.json`
+- Create an MCPB package in the `dist/` directory named `database-operations-mcp.mcpb`
+- Validate the final package
 
 ## Manual Build (without script)
 
 ```bash
-# Basic package creation
-dxt pack . dist
+# Navigate to the mcpb directory
+cd mcpb
 
-# The above creates dist/package.dxt - you may want to rename it:
-mv dist/package.dxt dist/database-operations-mcp.dxt
+# Build the MCPB package
+mcpb pack . ../dist/database-operations-mcp.mcpb
 
-# Sign the package (requires signing key)
-dxt sign dist/database-operations-mcp.dxt
-
-# Publish to a DXT registry (if configured)
-dxt publish dist/database-operations-mcp.dxt
+# Verify the package
+mcpb verify ../dist/database-operations-mcp.mcpb
 ```
 
-## Build Script Options
+### Best Practices
 
-- `-NoSign`: Skip package signing
+1. **Versioning**: Always update the version in `mcpb.json` and `manifest.json` before creating a new package
+2. **Testing**: Test the package in a staging environment before production deployment
+3. **Documentation**: Update the README with any package-specific instructions
+4. **Dependencies**: Ensure all dependencies are properly specified in `pyproject.toml`
+   - All project dependencies installed: `pip install -e .`
+
+## Build Process
+
+```bash
+# Navigate to the mcpb directory
+cd mcpb
+
+# Build the MCPB package
+mcpb pack . ../dist/database-operations-mcp.mcpb
+```
+
+The build process will:
+- Validate the `mcpb.json` and `manifest.json`
+- Create an MCPB package in the `dist/` directory named `database-operations-mcp.mcpb`
+- Validate the final package
 
 Example:
 

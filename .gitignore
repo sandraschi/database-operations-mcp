@@ -74,8 +74,6 @@ coverage.xml
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# DXT Package Files (Large binary files)
-*.dxt
-dist/*.dxt
-dxt/*.dxt
-minimal_dxt/*.dxt
+# MCPB Package Files
+*.mcpb
+dist/*.mcpb
