@@ -175,7 +175,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                     raise ConnectionError("Failed to connect to SQLite database")
 
             cursor = self.connection.cursor()
-            cursor.execute("PRAGMA table_info(?)", (table_name,))
+            cursor.execute(f"PRAGMA table_info([{table_name}])")
             columns_info = cursor.fetchall()
 
             if not columns_info:
@@ -208,6 +208,73 @@ class SQLiteConnector(BaseDatabaseConnector):
         except Exception as e:
             logger.error(f"Error describing SQLite table {table_name}: {e}")
             raise QueryError(f"Failed to describe table: {e}") from e
+
+    async def list_databases(self) -> List[Dict[str, Any]]:
+        """List databases (SQLite only has one database per file)."""
+        try:
+            if not os.path.exists(self.database_path):
+                return []
+            
+            # SQLite only has one database per file
+            db_name = os.path.basename(self.database_path)
+            file_size = os.path.getsize(self.database_path)
+            
+            return [{
+                "database_name": db_name,
+                "path": self.database_path,
+                "size_bytes": file_size,
+                "type": "main",
+                "owner": "sqlite",
+                "collation": "BINARY",
+                "character_type": "UTF8",
+                "is_template": False,
+                "allow_connections": True
+            }]
+        except Exception as e:
+            logger.error(f"Error listing SQLite databases: {e}")
+            return []
+
+    async def list_tables(self, database: Optional[str] = None) -> List[Dict[str, Any]]:
+        """List tables in the SQLite database."""
+        try:
+            if not self.connection:
+                if not await self.connect():
+                    raise ConnectionError("Failed to connect to SQLite database")
+
+            cursor = self.connection.cursor()
+            cursor.execute("""
+                SELECT 
+                    name as table_name,
+                    'table' as table_type,
+                    'main' as schema_name,
+                    'sqlite' as owner
+                FROM sqlite_master 
+                WHERE type='table' 
+                AND name NOT LIKE 'sqlite_%'
+                ORDER BY name
+            """)
+            
+            tables = []
+            for row in cursor.fetchall():
+                # Get row count for each table
+                try:
+                    cursor.execute(f"SELECT COUNT(*) FROM [{row[0]}]")
+                    row_count = cursor.fetchone()[0]
+                except Exception:
+                    row_count = 0
+                
+                tables.append({
+                    "table_name": row[0],
+                    "table_type": row[1],
+                    "schema_name": row[2],
+                    "owner": row[3],
+                    "row_count": row_count
+                })
+            
+            return tables
+        except Exception as e:
+            logger.error(f"Error listing SQLite tables: {e}")
+            raise QueryError(f"Failed to list tables: {e}") from e
 
     async def health_check(self) -> Dict[str, Any]:
         """Perform comprehensive SQLite health check."""
