@@ -17,18 +17,28 @@ jobs:
       with:
         python-version: '3.11'
     
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install MCPB CLI
+      run: npm install -g @anthropic-ai/mcpb
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build dxt
+        pip install build
     
     - name: Build Python package
       run: python -m build
     
-    - name: Build DXT package
+    - name: Build MCPB package
       run: |
         mkdir -p dist
-        dxt pack -o dist/database-operations-mcp.dxt
+        cd mcpb
+        mcpb pack . ../dist/database-operations-mcp.mcpb
+        cd ..
     
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
@@ -36,7 +46,7 @@ jobs:
         files: |
           dist/*.whl
           dist/*.tar.gz
-          dist/*.dxt
+          dist/*.mcpb
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
