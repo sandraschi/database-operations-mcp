@@ -1,29 +1,29 @@
 """Core Firefox bookmark functionality with improved status checking."""
 
+import base64
 import configparser
 import logging
+import re
 import shutil
 import sqlite3
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import psutil
-
-logger = logging.getLogger(__name__)
+import aiohttp
+from bs4 import BeautifulSoup
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
 
 from ..help_tools import HelpSystem
+from .bookmark_manager import BookmarkManager
 from .curated_sources import CURATED_SOURCES, get_curated_source, list_curated_sources
+from .links import add_bookmark
+from .status import FirefoxStatusChecker
 from .utils import get_profile_directory, get_profiles_ini_path, parse_profiles_ini
 
-
-class FirefoxNotClosedError(Exception):
-    """Raised when Firefox is running and database access would be unsafe."""
-
-    pass
+logger = logging.getLogger(__name__)
 
 
 class FirefoxDatabaseUnlocker:
@@ -46,7 +46,7 @@ class FirefoxDatabaseUnlocker:
             if "temp_path" in locals():
                 try:
                     temp_path.unlink(missing_ok=True)
-                except:
+                except Exception:
                     pass
             return None
 
@@ -130,7 +130,7 @@ class FirefoxDatabaseUnlocker:
                 # Clean up temp file
                 try:
                     temp_db_path.unlink(missing_ok=True)
-                except:
+                except Exception:
                     pass
 
         # Method 3: Last resort - try with longer timeout
@@ -205,7 +205,7 @@ async def check_firefox_bruteforce_access() -> Dict[str, Any]:
                 if hasattr(conn, "temp_db_path"):
                     try:
                         conn.temp_db_path.unlink(missing_ok=True)
-                    except:
+                    except Exception:
                         pass
                 conn.close()
 
@@ -224,88 +224,9 @@ async def check_firefox_bruteforce_access() -> Dict[str, Any]:
         return {"status": "error", "message": f"Brute force access check failed: {str(e)}"}
 
 
-class FirefoxStatusChecker:
-    """Comprehensive Firefox status checking and profile management."""
-
-    @staticmethod
-    def is_firefox_running() -> Dict[str, Any]:
-        """Check if Firefox is running with detailed status."""
-        try:
-            firefox_processes = []
-            for proc in psutil.process_iter(["pid", "name", "cmdline"]):
-                try:
-                    if "firefox" in proc.info["name"].lower():
-                        firefox_processes.append(
-                            {
-                                "pid": proc.info["pid"],
-                                "name": proc.info["name"],
-                                "cmdline": proc.info["cmdline"][:3]
-                                if proc.info["cmdline"]
-                                else [],  # First 3 args only
-                            }
-                        )
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                    continue
-
-            is_running = len(firefox_processes) > 0
-            return {
-                "is_running": is_running,
-                "process_count": len(firefox_processes),
-                "processes": firefox_processes,
-                "message": f"Firefox is {'running' if is_running else 'not running'} ({len(firefox_processes)} processes)",
-            }
-        except Exception as e:
-            return {
-                "is_running": False,
-                "error": f"Could not check Firefox status: {str(e)}",
-                "message": "Unable to determine Firefox status",
-            }
-
-    @staticmethod
-    def check_database_access_safe(profile_path: Optional[Path] = None) -> Dict[str, Any]:
-        """Check if it's safe to access Firefox databases."""
-        status = FirefoxStatusChecker.is_firefox_running()
-
-        if status.get("error"):
-            return {
-                "safe": False,
-                "reason": "status_check_failed",
-                "message": status["message"],
-                "details": status,
-            }
-
-        if status["is_running"]:
-            return {
-                "safe": False,
-                "reason": "firefox_running",
-                "message": "Firefox is currently running. Close Firefox before accessing bookmark databases to prevent data corruption.",
-                "details": status,
-            }
-
-        # Check if profile path exists and is accessible
-        if profile_path:
-            if not profile_path.exists():
-                return {
-                    "safe": False,
-                    "reason": "profile_not_found",
-                    "message": f"Firefox profile not found at: {profile_path}",
-                    "details": {"profile_path": str(profile_path)},
-                }
-
-            places_db = profile_path / "places.sqlite"
-            if not places_db.exists():
-                return {
-                    "safe": False,
-                    "reason": "database_not_found",
-                    "message": f"Firefox places.sqlite database not found at: {places_db}",
-                    "details": {"database_path": str(places_db)},
-                }
-
-        return {"safe": True, "message": "Safe to access Firefox databases", "details": status}
-
-
 def is_firefox_running() -> bool:
     """Legacy function for backward compatibility."""
+    from .status import FirefoxStatusChecker
     return FirefoxStatusChecker.is_firefox_running()["is_running"]
 
 
@@ -337,7 +258,8 @@ async def create_loaded_profile_from_preset(
 
     Args:
         profile_name: Name for the new profile
-        preset_name: Name of the predefined bookmark collection (e.g., "developer_tools", "cooking", "ai_ml")
+        preset_name: Name of the predefined bookmark collection 
+        (e.g., "developer_tools", "cooking", "ai_ml")
         max_bookmarks: Maximum number of bookmarks to add
 
     Available presets:
@@ -356,7 +278,10 @@ async def create_loaded_profile_from_preset(
         available_presets = list(CURATED_SOURCES.keys())
         return {
             "status": "error",
-            "message": f"Preset '{preset_name}' not found. Available presets: {', '.join(available_presets)}",
+            "message": (
+                f"Preset '{preset_name}' not found. "
+                f"Available presets: {', '.join(available_presets)}"
+            ),
             "available_presets": available_presets,
         }
 
@@ -413,7 +338,10 @@ async def get_firefox_profiles() -> Dict[str, Any]:
         if not profiles:
             return {
                 "status": "error",
-                "message": "No Firefox profiles found. Make sure Firefox has been installed and run at least once.",
+                "message": (
+                    "No Firefox profiles found. Make sure Firefox has been "
+                    "installed and run at least once."
+                ),
                 "safety_check": safety_check,
             }
 
@@ -526,7 +454,10 @@ async def create_firefox_profile(
             "profile_name": profile_name,
             "profile_path": str(profile_path),
             "profile_section": section_name,
-            "note": "Firefox will initialize the profile when you first use it. Bookmarks will be empty initially.",
+            "note": (
+                "Firefox will initialize the profile when you first use it. "
+                "Bookmarks will be empty initially."
+            ),
         }
 
     except Exception as e:
@@ -571,8 +502,6 @@ async def delete_firefox_profile(
             }
 
         # Delete the profile directory
-        import shutil
-
         shutil.rmtree(profile_path)
 
         # Update profiles.ini
@@ -613,7 +542,8 @@ async def create_loaded_profile(
 
     Args:
         profile_name: Name for the new profile
-        source_type: Type of bookmark source ("current_collection", "web_list", "github_awesome", "custom_list")
+        source_type: Type of bookmark source 
+        ("current_collection", "web_list", "github_awesome", "custom_list")
         source_config: Configuration for the source (varies by source_type)
         max_bookmarks: Maximum number of bookmarks to add
 
@@ -635,7 +565,10 @@ async def create_loaded_profile(
         await create_loaded_profile("cooking", "web_list", {"url": "https://example.com/best-cooking-sites"})
 
         Create work profile from current collection:
-        await create_loaded_profile("work", "current_collection", {"from_profile": "default", "filter_tags": ["work"]})
+        await create_loaded_profile(
+            "work", "current_collection", 
+            {"from_profile": "default", "filter_tags": ["work"]}
+        )
     """
     safety_check = FirefoxStatusChecker.check_database_access_safe()
     if not safety_check["safe"]:
@@ -661,7 +594,10 @@ async def create_loaded_profile(
         if not bookmarks:
             return {
                 "status": "warning",
-                "message": f"Profile '{profile_name}' created but no bookmarks were loaded from source '{source_type}'",
+                "message": (
+                    f"Profile '{profile_name}' created but no bookmarks were "
+                    f"loaded from source '{source_type}'"
+                ),
                 "profile_name": profile_name,
                 "profile_path": str(profile_path),
                 "bookmarks_loaded": 0,
@@ -672,7 +608,10 @@ async def create_loaded_profile(
 
         return {
             "status": "success",
-            "message": f"Profile '{profile_name}' created and loaded with {bookmarks_added} bookmarks",
+            "message": (
+                f"Profile '{profile_name}' created and loaded with "
+                f"{bookmarks_added} bookmarks"
+            ),
             "profile_name": profile_name,
             "profile_path": str(profile_path),
             "source_type": source_type,
@@ -716,8 +655,6 @@ async def _fetch_from_current_collection(
         return []
 
     # Get bookmarks from the source profile
-    from database_operations_mcp.tools.firefox.bookmark_manager import BookmarkManager
-
     source_path = get_profile_directory(from_profile)
     if not source_path:
         return []
@@ -749,9 +686,6 @@ async def _fetch_from_web_list(config: Dict[str, Any], max_bookmarks: int) -> Li
         return []
 
     try:
-        import aiohttp
-        from bs4 import BeautifulSoup
-
         async with aiohttp.ClientSession() as session:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
                 if response.status != 200:
@@ -788,14 +722,12 @@ async def _fetch_from_github_awesome(
 ) -> List[Dict[str, str]]:
     """Fetch bookmarks from GitHub awesome-* repositories."""
     topic = config.get("topic", "").lower().replace(" ", "-")
-    language = config.get("language", "en")
+    config.get("language", "en")
 
     if not topic:
         return []
 
     try:
-        import aiohttp
-
         # Search for awesome repos
         search_url = (
             f"https://api.github.com/search/repositories?q=awesome+{topic}&sort=stars&order=desc"
@@ -819,15 +751,11 @@ async def _fetch_from_github_awesome(
                         ) as readme_response:
                             if readme_response.status == 200:
                                 readme_data = await readme_response.json()
-                                import base64
-
                                 readme_content = base64.b64decode(readme_data["content"]).decode(
                                     "utf-8"
                                 )
 
                                 # Extract links from README (simplified parsing)
-                                import re
-
                                 link_pattern = r"\[([^\]]+)\]\((https?://[^\s)]+)\)"
                                 matches = re.findall(link_pattern, readme_content)[
                                     : max_bookmarks // len(repos)
@@ -864,8 +792,6 @@ async def _populate_profile_with_bookmarks(
 ) -> int:
     """Add bookmarks to a Firefox profile database."""
     try:
-        from database_operations_mcp.tools.firefox.links import add_bookmark
-
         added_count = 0
         for bookmark in bookmarks:
             try:
@@ -915,7 +841,8 @@ async def create_portmanteau_profile(
         Create a comprehensive "work+news" profile:
         await create_portmanteau_profile("work-news", ["developer_tools", "news_media"])
 
-    Available presets: developer_tools, ai_ml, cooking, productivity, news_media, finance, entertainment, shopping
+    Available presets: developer_tools, ai_ml, cooking, productivity, 
+    news_media, finance, entertainment, shopping
     """
     safety_check = FirefoxStatusChecker.check_database_access_safe()
     if not safety_check["safe"]:
@@ -936,7 +863,10 @@ async def create_portmanteau_profile(
             available_presets = list(CURATED_SOURCES.keys())
             return {
                 "status": "error",
-                "message": f"Invalid presets: {', '.join(invalid_presets)}. Available: {', '.join(available_presets)}",
+                "message": (
+                    f"Invalid presets: {', '.join(invalid_presets)}. "
+                    f"Available: {', '.join(available_presets)}"
+                ),
                 "available_presets": available_presets,
             }
 
@@ -999,7 +929,10 @@ async def create_portmanteau_profile(
         if not all_bookmarks:
             return {
                 "status": "warning",
-                "message": f"Profile '{profile_name}' created but no bookmarks were collected from sources",
+                "message": (
+                    f"Profile '{profile_name}' created but no bookmarks were "
+                    f"collected from sources"
+                ),
                 "profile_name": profile_name,
                 "profile_path": str(profile_path),
                 "sources_attempted": valid_presets,
@@ -1015,7 +948,10 @@ async def create_portmanteau_profile(
 
         return {
             "status": "success",
-            "message": f"Portmanteau profile '{profile_name}' created with {portmanteau_desc} bookmarks",
+            "message": (
+                f"Portmanteau profile '{profile_name}' created with "
+                f"{portmanteau_desc} bookmarks"
+            ),
             "profile_name": profile_name,
             "profile_path": str(profile_path),
             "portmanteau_description": portmanteau_desc,

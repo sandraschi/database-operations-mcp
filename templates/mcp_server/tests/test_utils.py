@@ -58,7 +58,10 @@ def assert_dict_contains_subset(subset: Dict, dictionary: Dict) -> None:
     """
     for key, value in subset.items():
         assert key in dictionary, f"Key '{key}' not found in dictionary"
-        assert dictionary[key] == value, f"Value for key '{key}' does not match. Expected {value}, got {dictionary[key]}"
+        assert dictionary[key] == value, (
+            f"Value for key '{key}' does not match. "
+            f"Expected {value}, got {dictionary[key]}"
+        )
 
 
 class TestMCPClient:

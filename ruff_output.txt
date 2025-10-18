@@ -1,0 +1,1083 @@
+[1m[91mF401 [0m[1m`fastmcp.mcp_tool` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m check_fastmcp.py:11:29
+   [1m[94m|[0m
+[1m[94m 9 |[0m     # Check for specific imports
+[1m[94m10 |[0m     try:
+[1m[94m11 |[0m         from fastmcp import mcp_tool
+   [1m[94m|[0m                             [1m[91m^^^^^^^^[0m
+[1m[94m12 |[0m         print("Ô£à mcp_tool import: OK")
+[1m[94m13 |[0m     except ImportError as e:
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `fastmcp.mcp_tool`[0m
+
+[1m[91mF401 [0m[1m`fastmcp.FastMCP` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m check_fastmcp.py:17:29
+   [1m[94m|[0m
+[1m[94m16 |[0m     try:
+[1m[94m17 |[0m         from fastmcp import FastMCP
+   [1m[94m|[0m                             [1m[91m^^^^^^^[0m
+[1m[94m18 |[0m         print("Ô£à FastMCP class import: OK")
+[1m[94m19 |[0m     except ImportError as e:
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `fastmcp.FastMCP`[0m
+
+[1m[91mF401 [0m[1m`fastmcp.tool` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m check_fastmcp.py:23:29
+   [1m[94m|[0m
+[1m[94m22 |[0m     try:
+[1m[94m23 |[0m         from fastmcp import tool
+   [1m[94m|[0m                             [1m[91m^^^^[0m
+[1m[94m24 |[0m         print("Ô£à tool decorator import: OK")
+[1m[94m25 |[0m     except ImportError as e:
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `fastmcp.tool`[0m
+
+[1m[91mE501 [0m[1mLine too long (103 > 100)[0m
+  [1m[94m-->[0m scripts\fix_tool_imports.py:68:101
+   [1m[94m|[0m
+[1m[94m66 |[0m             )
+[1m[94m67 |[0m             print(
+[1m[94m68 |[0m                 f"Updated direct import in {file_path.name}: import {module} -> from . import {module}"
+   [1m[94m|[0m                                                                                                     [1m[91m^^^[0m
+[1m[94m69 |[0m             )
+   [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `Any`[0m
+  [1m[94m-->[0m src\database_operations_mcp\models\connection.py:45:24
+   [1m[94m|[0m
+[1m[94m43 |[0m     password: Optional[str] = None
+[1m[94m44 |[0m     database: Optional[str] = None
+[1m[94m45 |[0m     options: Dict[str, Any] = Field(default_factory=dict)
+   [1m[94m|[0m                        [1m[91m^^^[0m
+[1m[94m46 |[0m
+[1m[94m47 |[0m     class Config:
+   [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `Any`[0m
+  [1m[94m-->[0m src\database_operations_mcp\models\connection.py:83:22
+   [1m[94m|[0m
+[1m[94m81 |[0m     last_used: Optional[datetime] = None
+[1m[94m82 |[0m     error: Optional[str] = None
+[1m[94m83 |[0m     stats: Dict[str, Any] = Field(default_factory=dict)
+   [1m[94m|[0m                      [1m[91m^^^[0m
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (118 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\firefox\backup.py:89:101
+   [1m[94m|[0m
+[1m[94m87 |[0m             return {
+[1m[94m88 |[0m                 "status": "error",
+[1m[94m89 |[0m                 "message": f"Failed to create backup before restore: {backup_result.get('message', 'Unknown error')}",
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^[0m
+[1m[94m90 |[0m             }
+   [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `datetime`[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\firefox\bulk_operations.py:72:21
+   [1m[94m|[0m
+[1m[94m71 |[0m     if not output_file:
+[1m[94m72 |[0m         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+   [1m[94m|[0m                     [1m[91m^^^^^^^^[0m
+[1m[94m73 |[0m         output_file = f"bookmarks_{timestamp}.{output_format}"
+   [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `json`[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\firefox\bulk_operations.py:80:13
+   [1m[94m|[0m
+[1m[94m78 |[0m     if output_format == "json":
+[1m[94m79 |[0m         with open(output_path, "w", encoding="utf-8") as f:
+[1m[94m80 |[0m             json.dump(bookmarks, f, indent=2, default=str)
+   [1m[94m|[0m             [1m[91m^^^^[0m
+[1m[94m81 |[0m     elif output_format == "csv":
+[1m[94m82 |[0m         if bookmarks:
+   [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `csv`[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\firefox\bulk_operations.py:85:26
+   [1m[94m|[0m
+[1m[94m83 |[0m             fieldnames = bookmarks[0].keys()
+[1m[94m84 |[0m             with open(output_path, "w", newline="", encoding="utf-8") as f:
+[1m[94m85 |[0m                 writer = csv.DictWriter(f, fieldnames=fieldnames)
+   [1m[94m|[0m                          [1m[91m^^^[0m
+[1m[94m86 |[0m                 writer.writeheader()
+[1m[94m87 |[0m                 writer.writerows(bookmarks)
+   [1m[94m|[0m
+
+[1m[91mB018 [0m[1mFound useless expression. Either assign it to a variable or remove it.[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\bulk_operations.py:114:9
+    [1m[94m|[0m
+[1m[94m112 |[0m     for _old_tag, _new_tag in tag_mapping.items():
+[1m[94m113 |[0m         # Implementation remains the same
+[1m[94m114 |[0m         {{...}}
+    [1m[94m|[0m         [1m[91m^^^^^^^[0m
+[1m[94m115 |[0m
+[1m[94m116 |[0m     return {
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (123 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:261:101
+    [1m[94m|[0m
+[1m[94m259 |[0m                 "process_count": len(firefox_processes),
+[1m[94m260 |[0m                 "processes": firefox_processes,
+[1m[94m261 |[0m                 "message": f"Firefox is {'running' if is_running else 'not running'} ({len(firefox_processes)} processes)",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m262 |[0m             }
+[1m[94m263 |[0m         except Exception as e:
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (137 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:287:101
+    [1m[94m|[0m
+[1m[94m285 |[0m [1m[94mÔÇª[0m
+[1m[94m286 |[0m [1m[94mÔÇª[0m
+[1m[94m287 |[0m [1m[94mÔÇª[0ming. Close Firefox before accessing bookmark databases to prevent data corruption.",
+    [1m[94m|[0m                                                 [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m288 |[0m [1m[94mÔÇª[0m
+[1m[94m289 |[0m [1m[94mÔÇª[0m
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (109 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:346:101
+    [1m[94m|[0m
+[1m[94m344 |[0m     Args:
+[1m[94m345 |[0m         profile_name: Name for the new profile
+[1m[94m346 |[0m         preset_name: Name of the predefined bookmark collection (e.g., "developer_tools", "cooking", "ai_ml")
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^[0m
+[1m[94m347 |[0m         max_bookmarks: Maximum number of bookmarks to add
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (110 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:365:101
+    [1m[94m|[0m
+[1m[94m363 |[0m         return {
+[1m[94m364 |[0m             "status": "error",
+[1m[94m365 |[0m             "message": f"Preset '{preset_name}' not found. Available presets: {', '.join(available_presets)}",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^[0m
+[1m[94m366 |[0m             "available_presets": available_presets,
+[1m[94m367 |[0m         }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (116 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:422:101
+    [1m[94m|[0m
+[1m[94m420 |[0m             return {
+[1m[94m421 |[0m                 "status": "error",
+[1m[94m422 |[0m                 "message": "No Firefox profiles found. Make sure Firefox has been installed and run at least once.",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^[0m
+[1m[94m423 |[0m                 "safety_check": safety_check,
+[1m[94m424 |[0m             }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (116 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:535:101
+    [1m[94m|[0m
+[1m[94m533 |[0m             "profile_path": str(profile_path),
+[1m[94m534 |[0m             "profile_section": section_name,
+[1m[94m535 |[0m             "note": "Firefox will initialize the profile when you first use it. Bookmarks will be empty initially.",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^[0m
+[1m[94m536 |[0m         }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (112 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:620:101
+    [1m[94m|[0m
+[1m[94m618 |[0m     Args:
+[1m[94m619 |[0m         profile_name: Name for the new profile
+[1m[94m620 |[0m         source_type: Type of bookmark source ("current_collection", "web_list", "github_awesome", "custom_list")
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^[0m
+[1m[94m621 |[0m         source_config: Configuration for the source (varies by source_type)
+[1m[94m622 |[0m         max_bookmarks: Maximum number of bookmarks to add
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (119 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:642:101
+    [1m[94m|[0m
+[1m[94m641 |[0m         Create work profile from current collection:
+[1m[94m642 |[0m         await create_loaded_profile("work", "current_collection", {"from_profile": "default", "filter_tags": ["work"]})
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m643 |[0m     """
+[1m[94m644 |[0m     safety_check = FirefoxStatusChecker.check_database_access_safe()
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (120 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:668:101
+    [1m[94m|[0m
+[1m[94m666 |[0m             return {
+[1m[94m667 |[0m                 "status": "warning",
+[1m[94m668 |[0m                 "message": f"Profile '{profile_name}' created but no bookmarks were loaded from source '{source_type}'",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m669 |[0m                 "profile_name": profile_name,
+[1m[94m670 |[0m                 "profile_path": str(profile_path),
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (103 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:679:101
+    [1m[94m|[0m
+[1m[94m677 |[0m         return {
+[1m[94m678 |[0m             "status": "success",
+[1m[94m679 |[0m             "message": f"Profile '{profile_name}' created and loaded with {bookmarks_added} bookmarks",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^[0m
+[1m[94m680 |[0m             "profile_name": profile_name,
+[1m[94m681 |[0m             "profile_path": str(profile_path),
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (114 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:909:101
+    [1m[94m|[0m
+[1m[94m907 |[0m         await create_portmanteau_profile("work-news", ["developer_tools", "news_media"])
+[1m[94m908 |[0m
+[1m[94m909 |[0m     Available presets: developer_tools, ai_ml, cooking, productivity, news_media, finance, entertainment, shopping
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^[0m
+[1m[94m910 |[0m     """
+[1m[94m911 |[0m     safety_check = FirefoxStatusChecker.check_database_access_safe()
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (119 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:930:101
+    [1m[94m|[0m
+[1m[94m928 |[0m             return {
+[1m[94m929 |[0m                 "status": "error",
+[1m[94m930 |[0m                 "message": f"Invalid presets: {', '.join(invalid_presets)}. Available: {', '.join(available_presets)}",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m931 |[0m                 "available_presets": available_presets,
+[1m[94m932 |[0m             }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (108 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:993:101
+    [1m[94m|[0m
+[1m[94m991 |[0m             return {
+[1m[94m992 |[0m                 "status": "warning",
+[1m[94m993 |[0m                 "message": f"Profile '{profile_name}' created but no bookmarks were collected from sources",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^[0m
+[1m[94m994 |[0m                 "profile_name": profile_name,
+[1m[94m995 |[0m                 "profile_path": str(profile_path),
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (105 > 100)[0m
+    [1m[94m-->[0m src\database_operations_mcp\tools\firefox\core.py:1009:101
+     [1m[94m|[0m
+[1m[94m1007 |[0m         return {
+[1m[94m1008 |[0m             "status": "success",
+[1m[94m1009 |[0m             "message": f"Portmanteau profile '{profile_name}' created with {portmanteau_desc} bookmarks",
+     [1m[94m|[0m                                                                                                     [1m[91m^^^^^[0m
+[1m[94m1010 |[0m             "profile_name": profile_name,
+[1m[94m1011 |[0m             "profile_path": str(profile_path),
+     [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (109 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\firefox\links.py:35:101
+   [1m[94m|[0m
+[1m[94m33 |[0m         return {
+[1m[94m34 |[0m             "status": "error",
+[1m[94m35 |[0m             "message": f"Could not find Firefox bookmarks database for profile: {profile_name or 'default'}",
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^[0m
+[1m[94m36 |[0m         }
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (109 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\links.py:102:101
+    [1m[94m|[0m
+[1m[94m100 |[0m         return {
+[1m[94m101 |[0m             "status": "error",
+[1m[94m102 |[0m             "message": f"Could not find Firefox bookmarks database for profile: {profile_name or 'default'}",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^[0m
+[1m[94m103 |[0m         }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (104 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\links.py:150:101
+    [1m[94m|[0m
+[1m[94m148 |[0m                 cursor.execute(
+[1m[94m149 |[0m                     "SELECT id FROM moz_bookmarks "
+[1m[94m150 |[0m                     "WHERE parent = (SELECT id FROM moz_bookmarks WHERE title = 'tags' AND parent = 4) "
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^[0m
+[1m[94m151 |[0m                     "AND title = ?",
+[1m[94m152 |[0m                     (tag_name,),
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (104 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\links.py:162:101
+    [1m[94m|[0m
+[1m[94m160 |[0m                         "(type, parent, position, title, dateAdded, lastModified) "
+[1m[94m161 |[0m                         "SELECT 2, id, "
+[1m[94m162 |[0m                         "COALESCE((SELECT MAX(position) FROM moz_bookmarks WHERE parent = id), 0) + 1, "
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^[0m
+[1m[94m163 |[0m                         "?, ?, ? "
+[1m[94m164 |[0m                         "FROM moz_bookmarks WHERE title = 'tags' AND parent = 4",
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (109 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\links.py:219:101
+    [1m[94m|[0m
+[1m[94m217 |[0m         return {
+[1m[94m218 |[0m             "status": "error",
+[1m[94m219 |[0m             "message": f"Could not find Firefox bookmarks database for profile: {profile_name or 'default'}",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^[0m
+[1m[94m220 |[0m         }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (104 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\links.py:273:101
+    [1m[94m|[0m
+[1m[94m271 |[0m                 cursor.execute(
+[1m[94m272 |[0m                     "SELECT id FROM moz_bookmarks "
+[1m[94m273 |[0m                     "WHERE parent = (SELECT id FROM moz_bookmarks WHERE title = 'tags' AND parent = 4) "
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^[0m
+[1m[94m274 |[0m                     "AND title = ?",
+[1m[94m275 |[0m                     (tag_name,),
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (104 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\links.py:285:101
+    [1m[94m|[0m
+[1m[94m283 |[0m                         "(type, parent, position, title, dateAdded, lastModified) "
+[1m[94m284 |[0m                         "SELECT 2, id, "
+[1m[94m285 |[0m                         "COALESCE((SELECT MAX(position) FROM moz_bookmarks WHERE parent = id), 0) + 1, "
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^[0m
+[1m[94m286 |[0m                         "?, ?, ? "
+[1m[94m287 |[0m                         "FROM moz_bookmarks WHERE title = 'tags' AND parent = 4",
+    [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `FirefoxNotClosedError`[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\search_tools.py:108:23
+    [1m[94m|[0m
+[1m[94m106 |[0m             safety_check = self._ensure_safe_access()
+[1m[94m107 |[0m             if not safety_check["safe"]:
+[1m[94m108 |[0m                 raise FirefoxNotClosedError(safety_check["message"])
+    [1m[94m|[0m                       [1m[91m^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m109 |[0m             self.db = FirefoxDB(self.profile_path)
+[1m[94m110 |[0m         return self.db
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (103 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\search_tools.py:175:101
+    [1m[94m|[0m
+[1m[94m173 |[0m                         "matched_profile": None,
+[1m[94m174 |[0m                         "auto_detection": True,
+[1m[94m175 |[0m                         "note": f"Detected profile '{detected_profile}' but no matching profile found",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^[0m
+[1m[94m176 |[0m                     }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (111 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\search_tools.py:207:101
+    [1m[94m|[0m
+[1m[94m205 |[0m         if len(results) == 0:
+[1m[94m206 |[0m             response["note"] = (
+[1m[94m207 |[0m                 "No bookmarks found matching your query. Try different keywords or check if Firefox is closed."
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^[0m
+[1m[94m208 |[0m             )
+    [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `FirefoxNotClosedError`[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\firefox\search_tools.py:212:12
+    [1m[94m|[0m
+[1m[94m210 |[0m         return response
+[1m[94m211 |[0m
+[1m[94m212 |[0m     except FirefoxNotClosedError as e:
+    [1m[94m|[0m            [1m[91m^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m213 |[0m         return {
+[1m[94m214 |[0m             "status": "error",
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (107 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\fts_tools.py:64:101
+   [1m[94m|[0m
+[1m[94m62 |[0m                     [
+[1m[94m63 |[0m                         f'highlight({table}, {col}, "<b>", "</b>") as {col}_highlight',
+[1m[94m64 |[0m                         f'snippet({table}, {col}, "... ", " ...", "...", {snippet_size}) as {col}_snippet',
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^[0m
+[1m[94m65 |[0m                     ]
+[1m[94m66 |[0m                 )
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (112 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\help_tools.py:152:101
+    [1m[94m|[0m
+[1m[94m150 |[0m             - None: Show all tools
+[1m[94m151 |[0m             - 'database': Core database operations
+[1m[94m152 |[0m             - 'firefox': Firefox bookmark tools (profiles, bookmarks, curated collections, portmanteau profiles)
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^[0m
+[1m[94m153 |[0m             - 'calibre': Calibre library tools
+[1m[94m154 |[0m             - 'registry': Windows Registry tools
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (104 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\help_tools.py:185:101
+    [1m[94m|[0m
+[1m[94m183 |[0m             #             'description': 'Core database operations',
+[1m[94m184 |[0m             #             'tools': [
+[1m[94m185 |[0m             #                 {'name': 'execute_query', 'description': 'Execute SQL or NoSQL query...'},
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^[0m
+[1m[94m186 |[0m             #                 {'name': 'list_tables', 'description': 'List all tables/collections...'}
+[1m[94m187 |[0m             #             ]
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (102 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\help_tools.py:186:101
+    [1m[94m|[0m
+[1m[94m184 |[0m             #             'tools': [
+[1m[94m185 |[0m             #                 {'name': 'execute_query', 'description': 'Execute SQL or NoSQL query...'},
+[1m[94m186 |[0m             #                 {'name': 'list_tables', 'description': 'List all tables/collections...'}
+    [1m[94m|[0m                                                                                                     [1m[91m^^[0m
+[1m[94m187 |[0m             #             ]
+[1m[94m188 |[0m             #         },
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (117 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\init_tools.py:48:101
+   [1m[94m|[0m
+[1m[94m46 |[0m         connection_params: Database-specific connection parameters
+[1m[94m47 |[0m             - SQLite: {'database': '/path/to/file.db'}
+[1m[94m48 |[0m             - PostgreSQL: {'host': 'localhost', 'port': 5432, 'user': 'admin', 'password': 'pwd', 'database': 'mydb'}
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^[0m
+[1m[94m49 |[0m             - MongoDB: {'host': 'localhost', 'port': 27017, 'database': 'mydb'}
+[1m[94m50 |[0m             - ChromaDB: {'path': '/path/to/chroma', 'collection': 'mycoll'}
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (105 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\media_tools.py:303:101
+    [1m[94m|[0m
+[1m[94m301 |[0m PLEX_DB_PATHS = {
+[1m[94m302 |[0m     "windows": [
+[1m[94m303 |[0m         r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^[0m
+[1m[94m304 |[0m         r"C:\\Plex\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
+[1m[94m305 |[0m     ],
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (138 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\media_tools.py:307:101
+    [1m[94m|[0m
+[1m[94m305 |[0m [1m[94mÔÇª[0m
+[1m[94m306 |[0m [1m[94mÔÇª[0m
+[1m[94m307 |[0m [1m[94mÔÇª[0m Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+    [1m[94m|[0m                                                 [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m308 |[0m [1m[94mÔÇª[0mver/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+[1m[94m309 |[0m [1m[94mÔÇª[0m
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (115 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\media_tools.py:308:101
+    [1m[94m|[0m
+[1m[94m306 |[0m     "linux": [
+[1m[94m307 |[0m         "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library[1m[94mÔÇª[0m
+[1m[94m308 |[0m         "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^[0m
+[1m[94m309 |[0m     ],
+[1m[94m310 |[0m     "macos": [
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (114 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\media_tools.py:311:101
+    [1m[94m|[0m
+[1m[94m309 |[0m     ],
+[1m[94m310 |[0m     "macos": [
+[1m[94m311 |[0m         "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db"
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^[0m
+[1m[94m312 |[0m     ],
+[1m[94m313 |[0m }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (101 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\media_tools.py:348:101
+    [1m[94m|[0m
+[1m[94m347 |[0m                     f.write(
+[1m[94m348 |[0m                         f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(values)});\n"
+    [1m[94m|[0m                                                                                                     [1m[91m^[0m
+[1m[94m349 |[0m                     )
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (105 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\plex_tools.py:23:101
+   [1m[94m|[0m
+[1m[94m21 |[0m PLEX_DB_PATHS = {
+[1m[94m22 |[0m     "windows": [
+[1m[94m23 |[0m         r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^[0m
+[1m[94m24 |[0m         r"C:\\Plex\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
+[1m[94m25 |[0m     ],
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (115 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\plex_tools.py:27:101
+   [1m[94m|[0m
+[1m[94m25 |[0m     ],
+[1m[94m26 |[0m     "darwin": [
+[1m[94m27 |[0m         "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^[0m
+[1m[94m28 |[0m         "/var/lib/plex/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+[1m[94m29 |[0m     ],
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (138 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\plex_tools.py:32:101
+   [1m[94m|[0m
+[1m[94m30 |[0m [1m[94mÔÇª[0m
+[1m[94m31 |[0m [1m[94mÔÇª[0mport/Databases/com.plexapp.plugins.library.db",
+[1m[94m32 |[0m [1m[94mÔÇª[0m Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+   [1m[94m|[0m                                                 [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m33 |[0m [1m[94mÔÇª[0m
+[1m[94m34 |[0m [1m[94mÔÇª[0m
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (108 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\plex_tools.py:293:101
+    [1m[94m|[0m
+[1m[94m291 |[0m [1m[94mÔÇª[0m                             frames_per_second, audio_channels, audio_codec,
+[1m[94m292 |[0m [1m[94mÔÇª[0m                             video_codec, container, file_size, created_at, updated_at
+[1m[94m293 |[0m [1m[94mÔÇª[0m                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    [1m[94m|[0m                                                                                           [1m[91m^^^^^^^^[0m
+[1m[94m294 |[0m [1m[94mÔÇª[0m                     """,
+[1m[94m295 |[0m [1m[94mÔÇª[0m                         (
+    [1m[94m|[0m
+
+[1m[91mF811 [0m[1mRedefinition of unused `export_plex_library` from line 357[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\plex_tools.py:392:5
+    [1m[94m|[0m
+[1m[94m391 |[0m @mcp.tool()
+[1m[94m392 |[0m def export_plex_library(
+    [1m[94m|[0m     [1m[91m^^^^^^^^^^^^^^^^^^^[0m [1m[91m`export_plex_library` redefined here[0m
+[1m[94m393 |[0m     db_path: str | None = None, output_format: str = "json", output_path: str | None = None
+[1m[94m394 |[0m ) -> dict[str, Any]:
+    [1m[94m|[0m
+   [1m[94m:::[0m src\database_operations_mcp\tools\plex_tools.py:357:5
+    [1m[94m|[0m
+[1m[94m357 |[0m def export_plex_library(
+    [1m[94m|[0m     [1m[33m-------------------[0m [1m[33mprevious definition of `export_plex_library` here[0m
+[1m[94m358 |[0m     db_path: str | None = None,
+[1m[94m359 |[0m     output_format: str = "json",
+    [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove definition: `export_plex_library`[0m
+
+[1m[91mE501 [0m[1mLine too long (107 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\schema_tools.py:435:101
+    [1m[94m|[0m
+[1m[94m433 |[0m             #         ],
+[1m[94m434 |[0m             #         'type_differences': [
+[1m[94m435 |[0m             #             {'column': 'email', 'table1_type': 'varchar(100)', 'table2_type': 'varchar(255)'}
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^[0m
+[1m[94m436 |[0m             #         ]
+[1m[94m437 |[0m             #     }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (103 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:41:101
+   [1m[94m|[0m
+[1m[94m39 |[0m         ),
+[1m[94m40 |[0m         os.path.expandvars(
+[1m[94m41 |[0m             r"%USERPROFILE%\\AppData\\Local\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History"
+   [1m[94m|[0m                                                                                                     [1m[91m^^^[0m
+[1m[94m42 |[0m         ),
+[1m[94m43 |[0m     ],
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (108 > 100)[0m
+  [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:57:101
+   [1m[94m|[0m
+[1m[94m55 |[0m         r"C:\\Plex\\Plex Media Server\\Metadata",
+[1m[94m56 |[0m         os.path.expandvars(
+[1m[94m57 |[0m             r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db"
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^[0m
+[1m[94m58 |[0m         ),
+[1m[94m59 |[0m     ],
+   [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `FastMCP`[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:108:26
+    [1m[94m|[0m
+[1m[94m108 |[0m def register_tools(mcp: "FastMCP") -> None:
+    [1m[94m|[0m                          [1m[91m^^^^^^^[0m
+[1m[94m109 |[0m     """Register all Windows tools with the MCP server.
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (109 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:140:101
+    [1m[94m|[0m
+[1m[94m138 |[0m                         "error": "Firefox is running - database is locked",
+[1m[94m139 |[0m                         "firefox_status": firefox_status,
+[1m[94m140 |[0m                         "solution": "Close Firefox completely and try again, or set bruteforce_firefox=True",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^[0m
+[1m[94m141 |[0m                     }
+[1m[94m142 |[0m                     continue
+    [1m[94m|[0m
+
+[1m[91mE722 [0m[1mDo not use bare `except`[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:176:37
+    [1m[94m|[0m
+[1m[94m174 |[0m [1m[94mÔÇª[0m                         try:
+[1m[94m175 |[0m [1m[94mÔÇª[0m                             conn.temp_db_path.unlink(missing_ok=True)
+[1m[94m176 |[0m [1m[94mÔÇª[0m                         except:
+    [1m[94m|[0m                           [1m[91m^^^^^^[0m
+[1m[94m177 |[0m [1m[94mÔÇª[0m                             pass
+[1m[94m178 |[0m [1m[94mÔÇª[0m                     conn.close()
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (127 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:256:101
+    [1m[94m|[0m
+[1m[94m254 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 2) as shows,
+[1m[94m255 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4) as seasons,
+[1m[94m256 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_seasons,
+    [1m[94m|[0m                                                                                    [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m257 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_seasons,
+[1m[94m258 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE metadata[1m[94mÔÇª[0m
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (128 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:257:101
+    [1m[94m|[0m
+[1m[94m255 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4) as seasons,
+[1m[94m256 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_seasons,
+[1m[94m257 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_seasons,
+    [1m[94m|[0m                                                                                    [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m258 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE metadata[1m[94mÔÇª[0m
+[1m[94m259 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_episodes,
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (181 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:258:101
+    [1m[94m|[0m
+[1m[94m256 |[0m [1m[94mÔÇª[0mtype = 4 AND parent_id IS NULL) as orphaned_seasons,
+[1m[94m257 |[0m [1m[94mÔÇª[0mtype = 4 AND parent_id IS NOT NULL) as valid_seasons,
+[1m[94m258 |[0m [1m[94mÔÇª[0mtype = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE metadata_type = 2)) as invalid_seasons,
+    [1m[94m|[0m                           [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m259 |[0m [1m[94mÔÇª[0mtype = 4 AND parent_id IS NULL) as orphaned_episodes,
+[1m[94m260 |[0m [1m[94mÔÇª[0mtype = 4 AND parent_id IS NOT NULL) as valid_episodes,
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (128 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:259:101
+    [1m[94m|[0m
+[1m[94m257 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_seasons,
+[1m[94m258 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE metadata[1m[94mÔÇª[0m
+[1m[94m259 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_episodes,
+    [1m[94m|[0m                                                                                    [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m260 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_episodes,
+[1m[94m261 |[0m [1m[94mÔÇª[0m     (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE metadata[1m[94mÔÇª[0m
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (129 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:260:101
+    [1m[94m|[0m
+[1m[94m258 |[0m [1m[94mÔÇª[0m            (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE m[1m[94mÔÇª[0m
+[1m[94m259 |[0m [1m[94mÔÇª[0m            (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_episodes,
+[1m[94m260 |[0m [1m[94mÔÇª[0m            (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_episodes,
+    [1m[94m|[0m                                                                                           [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m261 |[0m [1m[94mÔÇª[0m            (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE m[1m[94mÔÇª[0m
+[1m[94m262 |[0m [1m[94mÔÇª[0m     FROM metadata_items
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (181 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:261:101
+    [1m[94m|[0m
+[1m[94m259 |[0m [1m[94mÔÇª[0mtype = 4 AND parent_id IS NULL) as orphaned_episodes,
+[1m[94m260 |[0m [1m[94mÔÇª[0mtype = 4 AND parent_id IS NOT NULL) as valid_episodes,
+[1m[94m261 |[0m [1m[94mÔÇª[0mtype = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE metadata_type = 4)) as invalid_episodes
+    [1m[94m|[0m                           [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m262 |[0m [1m[94mÔÇª[0m
+[1m[94m263 |[0m [1m[94mÔÇª[0m
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (121 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:269:101
+    [1m[94m|[0m
+[1m[94m267 |[0m             cursor.execute("""
+[1m[94m268 |[0m                 SELECT id, section_name, section_type, 
+[1m[94m269 |[0m                        (SELECT COUNT(*) FROM metadata_items WHERE library_section_id = library_sections.id) as item_count
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m270 |[0m                 FROM library_sections
+[1m[94m271 |[0m                 ORDER BY section_name
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (101 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:344:101
+    [1m[94m|[0m
+[1m[94m342 |[0m                 "message": "Firefox is running - database is locked",
+[1m[94m343 |[0m                 "firefox_status": firefox_status,
+[1m[94m344 |[0m                 "solution": "Close Firefox completely and try again, or set bruteforce_firefox=True",
+    [1m[94m|[0m                                                                                                     [1m[91m^[0m
+[1m[94m345 |[0m             }
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (101 > 100)[0m
+   [1m[94m-->[0m src\database_operations_mcp\tools\windows_tools.py:436:101
+    [1m[94m|[0m
+[1m[94m434 |[0m         action: Action to perform (vacuum, reindex, analyze)
+[1m[94m435 |[0m         backup: Whether to create a backup before cleaning
+[1m[94m436 |[0m         bruteforce_firefox: If True, attempt to access Firefox database even when locked (dangerous!)
+    [1m[94m|[0m                                                                                                     [1m[91m^[0m
+[1m[94m437 |[0m
+[1m[94m438 |[0m     Returns:
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (116 > 100)[0m
+  [1m[94m-->[0m templates\mcp_server\scripts\register_tools.py:56:101
+   [1m[94m|[0m
+[1m[94m54 |[0m         if not hasattr(tool_func, attr):
+[1m[94m55 |[0m             print(
+[1m[94m56 |[0m                 f"  Warning: Tool {getattr(tool_func, '__name__', 'unnamed')} is missing required attribute: {attr}"
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^[0m
+[1m[94m57 |[0m             )
+[1m[94m58 |[0m             return False
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (129 > 100)[0m
+   [1m[94m-->[0m templates\mcp_server\scripts\register_tools.py:105:101
+    [1m[94m|[0m
+[1m[94m103 |[0m         "from typing import Dict, Any, Callable\n",
+[1m[94m104 |[0m         "# This file is auto-generated by register_tools.py\n# Do not edit this file directly\n\n",
+[1m[94m105 |[0m         "# Dictionary of all registered tools\n# Format: {'tool_name': tool_function}\nTOOL_REGISTRY: Dict[str, Callable] = {\n",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m106 |[0m     ]
+    [1m[94m|[0m
+
+[1m[91minvalid-syntax: [0m[1mSimple statements must be separated by newlines or semicolons[0m
+   [1m[94m-->[0m templates\mcp_server\src\mcp_server\fastmcp_server.py:295:73
+    [1m[94m|[0m
+[1m[94m293 |[0m         except Exception as e:
+[1m[94m294 |[0m             logger.error(f"Error executing tool {tool_name}: {e}", exc_info=self.debug)
+[1m[94m295 |[0m             raise ValueError(f"Tool execution failed: {str(e)}") from e from e
+    [1m[94m|[0m                                                                         [1m[91m^^^^[0m
+[1m[94m296 |[0m
+[1m[94m297 |[0m     async def _handle_tool_list(
+    [1m[94m|[0m
+
+[1m[91minvalid-syntax: [0m[1mExpected 'import', found newline[0m
+   [1m[94m-->[0m templates\mcp_server\src\mcp_server\fastmcp_server.py:295:79
+    [1m[94m|[0m
+[1m[94m293 |[0m         except Exception as e:
+[1m[94m294 |[0m             logger.error(f"Error executing tool {tool_name}: {e}", exc_info=self.debug)
+[1m[94m295 |[0m             raise ValueError(f"Tool execution failed: {str(e)}") from e from e
+    [1m[94m|[0m                                                                               [1m[91m^[0m
+[1m[94m296 |[0m
+[1m[94m297 |[0m     async def _handle_tool_list(
+    [1m[94m|[0m
+
+[1m[91mF401 [0m[1m`mcp.types.Tool` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m templates\mcp_server\src\mcp_server\tool_discovery.py:16:27
+   [1m[94m|[0m
+[1m[94m14 |[0m try:
+[1m[94m15 |[0m     from mcp.server import FastMCPServer, FastMCPTool
+[1m[94m16 |[0m     from mcp.types import Tool, ToolCall, ToolDefinition, ToolError, ToolResult
+   [1m[94m|[0m                           [1m[91m^^^^[0m
+[1m[94m17 |[0m     from mcp.utils.logging import get_logger
+[1m[94m18 |[0m except ImportError:
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `mcp.types.Tool`[0m
+
+[1m[91mF401 [0m[1m`typing.Any` imported but unused[0m
+  [1m[94m-->[0m templates\mcp_server\src\mcp_server\tools\__init__.py:11:20
+   [1m[94m|[0m
+[1m[94m 9 |[0m import pkgutil
+[1m[94m10 |[0m from pathlib import Path
+[1m[94m11 |[0m from typing import Any, Dict, Optional, Type
+   [1m[94m|[0m                    [1m[91m^^^[0m
+[1m[94m12 |[0m
+[1m[94m13 |[0m from mcp import Tool
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `typing.Any`[0m
+
+[1m[91mF401 [0m[1m`mcp.types.Tool` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m templates\mcp_server\src\mcp_server\tools\fastmcp_help.py:16:27
+   [1m[94m|[0m
+[1m[94m14 |[0m try:
+[1m[94m15 |[0m     from mcp.server import FastMCPServer, FastMCPTool
+[1m[94m16 |[0m     from mcp.types import Tool, ToolCall, ToolDefinition, ToolError, ToolResult
+   [1m[94m|[0m                           [1m[91m^^^^[0m
+[1m[94m17 |[0m     from mcp.utils.logging import get_logger
+[1m[94m18 |[0m except ImportError:
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `mcp.types.Tool`[0m
+
+[1m[91mE501 [0m[1mLine too long (119 > 100)[0m
+  [1m[94m-->[0m templates\mcp_server\src\mcp_server\tools\fastmcp_help.py:74:101
+   [1m[94m|[0m
+[1m[94m72 |[0m                     "tool_name": {
+[1m[94m73 |[0m                         "type": "string",
+[1m[94m74 |[0m                         "description": "Name of the tool to get help for. If not provided, lists all available tools.",
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m75 |[0m                     },
+[1m[94m76 |[0m                     "search_term": {
+   [1m[94m|[0m
+
+[1m[91minvalid-syntax: [0m[1mCannot reuse outer quote character in f-strings on Python 3.10 (syntax was added in Python 3.12)[0m
+  [1m[94m-->[0m templates\mcp_server\src\mcp_server\tools\help.py:77:30
+   [1m[94m|[0m
+[1m[94m75 |[0m     # Handle Enum types
+[1m[94m76 |[0m     if isinstance(type_obj, type) and issubclass(type_obj, Enum):
+[1m[94m77 |[0m         return f"{'|'.join(f'"{e.value}"' for e in type_obj)}"
+   [1m[94m|[0m                              [1m[91m^[0m
+[1m[94m78 |[0m
+[1m[94m79 |[0m     # Handle regular types
+   [1m[94m|[0m
+
+[1m[91mF402 [0m[1mImport `tool` from line 14 shadowed by loop variable[0m
+   [1m[94m-->[0m templates\mcp_server\src\mcp_server\tools\help.py:318:9
+    [1m[94m|[0m
+[1m[94m316 |[0m     lines = ["Available Tools:", ""]
+[1m[94m317 |[0m
+[1m[94m318 |[0m     for tool in tools:
+    [1m[94m|[0m         [1m[91m^^^^[0m
+[1m[94m319 |[0m         name = tool["name"].ljust(max_name_length)
+[1m[94m320 |[0m         desc = tool["description"]
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (107 > 100)[0m
+   [1m[94m-->[0m templates\mcp_server\src\mcp_server\tools\help.py:332:101
+    [1m[94m|[0m
+[1m[94m330 |[0m         "tool_name": {
+[1m[94m331 |[0m             "type": "string",
+[1m[94m332 |[0m             "description": "Name of the tool to get help for. If not provided, lists all available tools.",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^[0m
+[1m[94m333 |[0m             "required": False,
+[1m[94m334 |[0m         },
+    [1m[94m|[0m
+
+[1m[91minvalid-syntax: [0m[1mCannot reuse outer quote character in f-strings on Python 3.10 (syntax was added in Python 3.12)[0m
+  [1m[94m-->[0m templates\mcp_server\src\mcp_server\tools\help_tool.py:54:30
+   [1m[94m|[0m
+[1m[94m52 |[0m     # Handle Enum types
+[1m[94m53 |[0m     if isinstance(type_obj, type) and issubclass(type_obj, Enum):
+[1m[94m54 |[0m         return f"{'|'.join(f'"{e.value}"' for e in type_obj)}"
+   [1m[94m|[0m                              [1m[91m^[0m
+[1m[94m55 |[0m
+[1m[94m56 |[0m     # Handle regular types
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (121 > 100)[0m
+  [1m[94m-->[0m templates\mcp_server\tests\test_utils.py:61:101
+   [1m[94m|[0m
+[1m[94m59 |[0m     for key, value in subset.items():
+[1m[94m60 |[0m         assert key in dictionary, f"Key '{key}' not found in dictionary"
+[1m[94m61 |[0m         assert dictionary[key] == value, f"Value for key '{key}' does not match. Expected {value}, got {dictionary[key]}"
+   [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^^^^^^^^^[0m
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (101 > 100)[0m
+   [1m[94m-->[0m tests\test_all_tools_fixed.py:134:101
+    [1m[94m|[0m
+[1m[94m132 |[0m             else:
+[1m[94m133 |[0m                 print(
+[1m[94m134 |[0m                     f"Found {len(functions)} functions in {module_name}: {[f[0] for f in functions]}"
+    [1m[94m|[0m                                                                                                     [1m[91m^[0m
+[1m[94m135 |[0m                 )
+    [1m[94m|[0m
+
+[1m[91mE721 [0m[1mUse `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks[0m
+   [1m[94m-->[0m tests\test_all_tools_fixed.py:346:12
+    [1m[94m|[0m
+[1m[94m345 |[0m         # Try to get a value based on type
+[1m[94m346 |[0m         if param_type == str:
+    [1m[94m|[0m            [1m[91m^^^^^^^^^^^^^^^^^[0m
+[1m[94m347 |[0m             return "test_string"
+[1m[94m348 |[0m         elif param_type == int:
+    [1m[94m|[0m
+
+[1m[91mE721 [0m[1mUse `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks[0m
+   [1m[94m-->[0m tests\test_all_tools_fixed.py:348:14
+    [1m[94m|[0m
+[1m[94m346 |[0m         if param_type == str:
+[1m[94m347 |[0m             return "test_string"
+[1m[94m348 |[0m         elif param_type == int:
+    [1m[94m|[0m              [1m[91m^^^^^^^^^^^^^^^^^[0m
+[1m[94m349 |[0m             return 1
+[1m[94m350 |[0m         elif param_type == bool:
+    [1m[94m|[0m
+
+[1m[91mE721 [0m[1mUse `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks[0m
+   [1m[94m-->[0m tests\test_all_tools_fixed.py:350:14
+    [1m[94m|[0m
+[1m[94m348 |[0m         elif param_type == int:
+[1m[94m349 |[0m             return 1
+[1m[94m350 |[0m         elif param_type == bool:
+    [1m[94m|[0m              [1m[91m^^^^^^^^^^^^^^^^^^[0m
+[1m[94m351 |[0m             return True
+[1m[94m352 |[0m         elif param_type == list:
+    [1m[94m|[0m
+
+[1m[91mE721 [0m[1mUse `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks[0m
+   [1m[94m-->[0m tests\test_all_tools_fixed.py:352:14
+    [1m[94m|[0m
+[1m[94m350 |[0m         elif param_type == bool:
+[1m[94m351 |[0m             return True
+[1m[94m352 |[0m         elif param_type == list:
+    [1m[94m|[0m              [1m[91m^^^^^^^^^^^^^^^^^^[0m
+[1m[94m353 |[0m             return []
+[1m[94m354 |[0m         elif param_type == dict:
+    [1m[94m|[0m
+
+[1m[91mE721 [0m[1mUse `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks[0m
+   [1m[94m-->[0m tests\test_all_tools_fixed.py:354:14
+    [1m[94m|[0m
+[1m[94m352 |[0m         elif param_type == list:
+[1m[94m353 |[0m             return []
+[1m[94m354 |[0m         elif param_type == dict:
+    [1m[94m|[0m              [1m[91m^^^^^^^^^^^^^^^^^^[0m
+[1m[94m355 |[0m             return {}
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (112 > 100)[0m
+   [1m[94m-->[0m tests\test_all_tools_fixed.py:387:101
+    [1m[94m|[0m
+[1m[94m385 |[0m             else:
+[1m[94m386 |[0m                 report.append(
+[1m[94m387 |[0m                     f"  Tests: {module_results['tests_passed']} passed, {module_results['tests_failed']} failed"
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^[0m
+[1m[94m388 |[0m                 )
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (113 > 100)[0m
+   [1m[94m-->[0m tests\test_comprehensive.py:159:101
+    [1m[94m|[0m
+[1m[94m157 |[0m                     analysis["fastmcp_compliance"] = "non_compliant"
+[1m[94m158 |[0m                     analysis["compliance_issues"] = [
+[1m[94m159 |[0m                         f"MCP decorators on lines {[d['line'] for d in bad_decorators]} are incorrectly indented"
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^^^[0m
+[1m[94m160 |[0m                     ]
+[1m[94m161 |[0m                 else:
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (111 > 100)[0m
+   [1m[94m-->[0m tests\test_comprehensive.py:295:101
+    [1m[94m|[0m
+[1m[94m293 |[0m             recommendations.extend(
+[1m[94m294 |[0m                 [
+[1m[94m295 |[0m                     "Fix indentation: MCP decorators (@mcp.tool()) should be at module level (no indentation)",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^^[0m
+[1m[94m296 |[0m                     "Fix function definitions: Functions should be defined at module level after decorators",
+[1m[94m297 |[0m                     "Fix imports: Use absolute imports instead of relative imports where possible",
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (109 > 100)[0m
+   [1m[94m-->[0m tests\test_comprehensive.py:296:101
+    [1m[94m|[0m
+[1m[94m294 |[0m                 [
+[1m[94m295 |[0m                     "Fix indentation: MCP decorators (@mcp.tool()) should be at module level (no indentation)",
+[1m[94m296 |[0m                     "Fix function definitions: Functions should be defined at module level after decorators",
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^[0m
+[1m[94m297 |[0m                     "Fix imports: Use absolute imports instead of relative imports where possible",
+[1m[94m298 |[0m                     "Ensure proper FastMCP 2.10.1+ structure",
+    [1m[94m|[0m
+
+[1m[91mF401 [0m[1m`database_operations_mcp` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m tests\unit\test_import_only.py:15:12
+   [1m[94m|[0m
+[1m[94m14 |[0m     # Test basic imports
+[1m[94m15 |[0m     import database_operations_mcp
+   [1m[94m|[0m            [1m[91m^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m16 |[0m
+[1m[94m17 |[0m     print("Ô£à Package imported successfully!")
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `database_operations_mcp`[0m
+
+[1m[91mF401 [0m[1m`database_operations_mcp.main.main` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m tests\unit\test_import_only.py:20:46
+   [1m[94m|[0m
+[1m[94m19 |[0m     # Test main module
+[1m[94m20 |[0m     from database_operations_mcp.main import main
+   [1m[94m|[0m                                              [1m[91m^^^^[0m
+[1m[94m21 |[0m
+[1m[94m22 |[0m     print("Ô£à Main module imported successfully!")
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `database_operations_mcp.main.main`[0m
+
+[1m[91mF401 [0m[1m`database_operations` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m tests\unit\test_imports_quick.py:10:12
+   [1m[94m|[0m
+[1m[94m 8 |[0m try:
+[1m[94m 9 |[0m     print("Testing database_operations import...")
+[1m[94m10 |[0m     import database_operations
+   [1m[94m|[0m            [1m[91m^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m11 |[0m
+[1m[94m12 |[0m     print("Ô£à database_operations package imported successfully")
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `database_operations`[0m
+
+[1m[91mF401 [0m[1m`database_operations.main.main` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m tests\unit\test_imports_quick.py:15:42
+   [1m[94m|[0m
+[1m[94m14 |[0m     print("Testing main module import...")
+[1m[94m15 |[0m     from database_operations.main import main
+   [1m[94m|[0m                                          [1m[91m^^^^[0m
+[1m[94m16 |[0m
+[1m[94m17 |[0m     print("Ô£à main function imported successfully")
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `database_operations.main.main`[0m
+
+[1m[91mF401 [0m[1m`database_operations.database_manager.BaseDatabaseConnector` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m tests\unit\test_imports_quick.py:20:54
+   [1m[94m|[0m
+[1m[94m19 |[0m     print("Testing database_manager import...")
+[1m[94m20 |[0m     from database_operations.database_manager import BaseDatabaseConnector, DatabaseType
+   [1m[94m|[0m                                                      [1m[91m^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m21 |[0m
+[1m[94m22 |[0m     print("Ô£à database_manager classes imported successfully")
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import[0m
+
+[1m[91mF401 [0m[1m`database_operations.database_manager.DatabaseType` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m tests\unit\test_imports_quick.py:20:77
+   [1m[94m|[0m
+[1m[94m19 |[0m     print("Testing database_manager import...")
+[1m[94m20 |[0m     from database_operations.database_manager import BaseDatabaseConnector, DatabaseType
+   [1m[94m|[0m                                                                             [1m[91m^^^^^^^^^^^^[0m
+[1m[94m21 |[0m
+[1m[94m22 |[0m     print("Ô£à database_manager classes imported successfully")
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import[0m
+
+[1m[91mF401 [0m[1m`database_operations.handlers.connection_tools` imported but unused; consider using `importlib.util.find_spec` to test for availability[0m
+  [1m[94m-->[0m tests\unit\test_imports_quick.py:25:46
+   [1m[94m|[0m
+[1m[94m24 |[0m     print("Testing handlers import...")
+[1m[94m25 |[0m     from database_operations.handlers import connection_tools
+   [1m[94m|[0m                                              [1m[91m^^^^^^^^^^^^^^^^[0m
+[1m[94m26 |[0m
+[1m[94m27 |[0m     print("Ô£à handlers imported successfully")
+   [1m[94m|[0m
+[1m[96mhelp[0m: [1mRemove unused import: `database_operations.handlers.connection_tools`[0m
+
+[1m[91mE501 [0m[1mLine too long (139 > 100)[0m
+  [1m[94m-->[0m tests\unit\test_mongodb.py:44:101
+   [1m[94m|[0m
+[1m[94m42 |[0m [1m[94mÔÇª[0mto avoid too much output
+[1m[94m43 |[0m [1m[94mÔÇª[0m
+[1m[94m44 |[0m [1m[94mÔÇª[0mb.get('collections', []))}, size: {db.get('size_on_disk', 0) / (1024 * 1024):.2f} MB)"
+   [1m[94m|[0m                                                 [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1m[94m45 |[0m [1m[94mÔÇª[0m
+   [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (110 > 100)[0m
+   [1m[94m-->[0m tests\unit\test_plex_tools.py:107:101
+    [1m[94m|[0m
+[1m[94m105 |[0m         """Test automatic database detection on Windows."""
+[1m[94m106 |[0m         mock_system.return_value = "Windows"
+[1m[94m107 |[0m         test_path = r"C:\\Plex\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db"
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^^^^[0m
+[1m[94m108 |[0m         mock_exists.side_effect = lambda x: x == test_path
+    [1m[94m|[0m
+
+[1m[91mE501 [0m[1mLine too long (107 > 100)[0m
+   [1m[94m-->[0m tests\unit\test_plex_tools.py:180:101
+    [1m[94m|[0m
+[1m[94m178 |[0m         )
+[1m[94m179 |[0m         cursor.execute(
+[1m[94m180 |[0m             "INSERT INTO media_items (id, library_section_id, media_item_title) VALUES (1, 1, 'Test Item')"
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^^[0m
+[1m[94m181 |[0m         )
+[1m[94m182 |[0m         db.conn.commit()
+    [1m[94m|[0m
+
+[1m[91mF821 [0m[1mUndefined name `connection_config`[0m
+  [1m[94m-->[0m tests\unit\test_postgresql.py:34:38
+   [1m[94m|[0m
+[1m[94m33 |[0m             # List tables in the current database
+[1m[94m34 |[0m             print(f"\n=== Tables in {connection_config['database']} ===")
+   [1m[94m|[0m                                      [1m[91m^^^^^^^^^^^^^^^^^[0m
+[1m[94m35 |[0m             tables = connector.list_tables()
+[1m[94m36 |[0m             for table in tables:
+   [1m[94m|[0m
+
+Found 100 errors.

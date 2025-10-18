@@ -9,7 +9,7 @@ from . import mcp  # Import the mcp instance from __init__
 from .utils import get_profile_directory
 
 
-@mcp.tool
+@mcp.tool()
 async def backup_firefox_data(
     backup_dir: Optional[str] = None, profile_name: Optional[str] = None
 ) -> Dict[str, Any]:
@@ -56,7 +56,7 @@ async def backup_firefox_data(
         return {"status": "error", "message": f"Backup failed: {str(e)}"}
 
 
-@mcp.tool
+@mcp.tool()
 async def restore_firefox_data(
     backup_path: str, profile_name: Optional[str] = None
 ) -> Dict[str, Any]:
@@ -86,7 +86,10 @@ async def restore_firefox_data(
         if backup_result["status"] != "success":
             return {
                 "status": "error",
-                "message": f"Failed to create backup before restore: {backup_result.get('message', 'Unknown error')}",
+                "message": (  # noqa: E501
+                    f"Failed to create backup before restore: "
+                    f"{backup_result.get('message', 'Unknown error')}"
+                ),
             }
 
         # Restore from backup

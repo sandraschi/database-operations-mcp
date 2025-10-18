@@ -23,7 +23,7 @@ def generate_session_id(username: str) -> str:
     return f"{username}:{timestamp}:{signature}"
 
 
-@mcp.tool
+@mcp.tool()
 async def create_session(username: str, password: str) -> Dict[str, Any]:
     """Create a new authenticated session."""
     if not username or not password:

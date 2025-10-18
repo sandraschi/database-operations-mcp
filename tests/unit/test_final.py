@@ -1,10 +1,10 @@
+import runpy
+
 print("✅ database_operations module imported")
 
 print("✅ main function imported")
 
 # Test the -m execution
-import runpy
-
 print("✅ Testing -m database_operations execution...")
 try:
     runpy.run_module("database_operations", run_name="__main__")

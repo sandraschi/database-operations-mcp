@@ -79,7 +79,7 @@ async def test_mcp_server():
 
     finally:
         # Clean up
-        if server_process.poll() is None:
+        if hasattr(server_process, 'poll') and server_process.poll() is None:
             server_process.terminate()
             try:
                 await asyncio.wait_for(server_process.wait(), timeout=2)

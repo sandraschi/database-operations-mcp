@@ -6,6 +6,7 @@ and manages tool registration and execution.
 """
 
 import asyncio
+import inspect
 import json
 import logging
 import signal
@@ -15,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 # Import FastMCP types
 try:
     from mcp.server import FastMCPServer, FastMCPTool
-    from mcp.types import Tool, ToolCall, ToolDefinition, ToolError, ToolResult
+    from mcp.types import ToolCall, ToolDefinition, ToolError, ToolResult
     from mcp.utils.logging import get_logger
 except ImportError:
     # Fallback for development
@@ -291,7 +292,7 @@ class FastMCP13Server(FastMCPServer):
 
         except Exception as e:
             logger.error(f"Error executing tool {tool_name}: {e}", exc_info=self.debug)
-            raise ValueError(f"Tool execution failed: {str(e)}")
+            raise ValueError(f"Tool execution failed: {str(e)}") from e
 
     async def _handle_tool_list(
         self, params: JsonRpcParams, request_id: JsonRpcId

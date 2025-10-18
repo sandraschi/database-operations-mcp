@@ -20,16 +20,20 @@ logger = logging.getLogger(__name__)
 # Default Plex database locations
 PLEX_DB_PATHS = {
     "windows": [
-        r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
+        r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\"
+        r"Databases\\com.plexapp.plugins.library.db",
         r"C:\\Plex\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
     ],
     "darwin": [
-        "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+        "~/Library/Application Support/Plex Media Server/"
+        "Plug-in Support/Databases/com.plexapp.plugins.library.db",
         "/var/lib/plex/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
     ],
     "linux": [
         "~/.local/share/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
-        "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+        "/var/lib/plexmediaserver/Library/Application Support/"
+        "Plex Media Server/Plug-in Support/Databases/"
+        "com.plexapp.plugins.library.db",
     ],
 }
 
@@ -290,7 +294,9 @@ class PlexDatabase:
                                         last_viewed_at, duration, bitrate, width, height,
                                         frames_per_second, audio_channels, audio_codec,
                                         video_codec, container, file_size, created_at, updated_at
-                                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    ) VALUES (
+                                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                                    )
                                 """,
                                     (
                                         item["id"],
@@ -354,32 +360,6 @@ class PlexDatabase:
             }
 
 
-def export_plex_library(
-    db_path: str | None = None,
-    output_format: str = "json",
-    output_path: str | Path | None = None,
-) -> dict[str, Any]:
-    """Convenience function to export Plex library.
-
-    Args:
-        db_path: Path to Plex database. If None, will attempt to find it automatically.
-        output_format: Output format ('json', 'csv', or 'sqlite').
-        output_path: Path to save the exported file. If None, returns the data.
-
-    Returns:
-        Dictionary with export results.
-    """
-    try:
-        with PlexDatabase(db_path) as plex_db:
-            return plex_db.export_library(output_format=output_format, output_path=output_path)
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Failed to export Plex library: {str(e)}",
-            "error": str(e),
-        }
-
-
 def register_tools(mcp):
     """Register Plex Media Server tools with the MCP server.
 
@@ -387,41 +367,6 @@ def register_tools(mcp):
         mcp: The MCP server instance to register tools with.
     """
 
-
-@mcp.tool()
-def export_plex_library(
-    db_path: str | None = None, output_format: str = "json", output_path: str | None = None
-) -> dict[str, Any]:
-    """Export Plex Media Server library to a file.
-
-    This tool exports the Plex library metadata to various formats including
-    JSON, CSV, or SQLite. It can automatically locate the Plex database
-    or use a specified path.
-
-    Args:
-        db_path: Path to the Plex database file. If not provided, will attempt
-               to find it automatically.
-        output_format: The output format ('json', 'csv', or 'sqlite').
-        output_path: Path where to save the exported file. If not provided,
-                   returns the data directly.
-
-    Returns:
-        A dictionary containing the export results or the exported data.
-
-    Example:
-        Export Plex library to a JSON file:
-        ```
-        result = export_plex_library(
-            output_format='json',
-            output_path='/path/to/export.json'
-        )
-        ```
-    """
-    from .plex_tools import export_plex_library as _export_plex_library
-
-    return _export_plex_library(
-        db_path=db_path, output_format=output_format, output_path=output_path
-    )
 
 
 @mcp.tool()

@@ -66,7 +66,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
                 version_info = {"heartbeat": "unknown"}
 
             try:
-                temp_collection = test_client.create_collection("test_connection_temp")
+                test_client.create_collection("test_connection_temp")
                 test_client.delete_collection("test_connection_temp")
                 write_permissions = True
             except Exception:
@@ -142,7 +142,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error listing ChromaDB databases: {e}")
-            raise QueryError(f"Failed to list databases: {e}")
+            raise QueryError(f"Failed to list databases: {e}") from e
 
     def list_tables(self, database: Optional[str] = None) -> List[Dict[str, Any]]:
         """List collections (tables) in ChromaDB."""
@@ -173,7 +173,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error listing ChromaDB collections: {e}")
-            raise QueryError(f"Failed to list collections: {e}")
+            raise QueryError(f"Failed to list collections: {e}") from e
 
     def describe_table(self, table_name: str, database: Optional[str] = None) -> Dict[str, Any]:
         """Get collection schema and metadata."""
@@ -185,7 +185,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             try:
                 collection = self.client.get_collection(table_name)
             except Exception:
-                raise QueryError(f"Collection '{table_name}' not found")
+                raise QueryError(f"Collection '{table_name}' not found") from None
 
             document_count = collection.count()
 
@@ -216,7 +216,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error describing ChromaDB collection {table_name}: {e}")
-            raise QueryError(f"Failed to describe collection: {e}")
+            raise QueryError(f"Failed to describe collection: {e}") from e
 
     def _get_embedding_dimension(self, collection) -> Optional[int]:
         """Get embedding dimension from collection."""
@@ -256,7 +256,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error executing ChromaDB query: {e}")
-            raise QueryError(f"Query execution failed: {e}")
+            raise QueryError(f"Query execution failed: {e}") from e
 
     def _execute_search_query(
         self, query: str, parameters: Optional[Dict] = None
@@ -287,7 +287,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             }
 
         except Exception as e:
-            raise QueryError(f"Search query failed: {e}")
+            raise QueryError(f"Search query failed: {e}") from e
 
     def _execute_insert_query(
         self, query: str, parameters: Optional[Dict] = None
@@ -324,7 +324,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             }
 
         except Exception as e:
-            raise QueryError(f"Insert query failed: {e}")
+            raise QueryError(f"Insert query failed: {e}") from e
 
     def _execute_delete_query(
         self, query: str, parameters: Optional[Dict] = None
@@ -360,7 +360,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             }
 
         except Exception as e:
-            raise QueryError(f"Delete query failed: {e}")
+            raise QueryError(f"Delete query failed: {e}") from e
 
     def get_performance_metrics(self) -> Dict[str, Any]:
         """Get ChromaDB performance metrics."""

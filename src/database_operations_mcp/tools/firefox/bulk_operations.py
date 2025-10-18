@@ -3,6 +3,9 @@ Bulk operations for Firefox bookmarks.
 Provides tools for batch processing of bookmarks.
 """
 
+import csv
+import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -48,7 +51,7 @@ class BulkOperations:
         # Add other formats as needed
 
 
-@mcp.tool
+@mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def export_bookmarks(
     output_format: str = "json",
@@ -91,7 +94,7 @@ async def export_bookmarks(
     return {"status": "success", "output_file": str(output_path), "bookmark_count": len(bookmarks)}
 
 
-@mcp.tool
+@mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def batch_update_tags(
     tag_mapping: Dict[str, str], dry_run: bool = True, profile_path: Optional[str] = None
@@ -106,12 +109,13 @@ async def batch_update_tags(
     Returns:
         Dictionary with update results
     """
-    db = FirefoxDB(Path(profile_path) if profile_path else None)
+    _db = FirefoxDB(Path(profile_path) if profile_path else None)
     changes = []
 
-    for old_tag, new_tag in tag_mapping.items():
+    for _old_tag, _new_tag in tag_mapping.items():
         # Implementation remains the same
-        {{...}}
+        # TODO: Implement tag update logic
+        pass
 
     return {
         "status": "success" if not dry_run else "dry_run",

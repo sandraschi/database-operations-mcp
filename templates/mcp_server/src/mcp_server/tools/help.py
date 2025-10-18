@@ -74,7 +74,8 @@ def format_type_name(type_obj: Type) -> str:
 
     # Handle Enum types
     if isinstance(type_obj, type) and issubclass(type_obj, Enum):
-        return f"{'|'.join(f'"{e.value}"' for e in type_obj)}"
+        values = [f'"{e.value}"' for e in type_obj]
+        return "|".join(values)
 
     # Handle regular types
     return type_obj.__name__
@@ -310,14 +311,14 @@ def format_tool_list(tools: List[Dict[str, Any]]) -> str:
     tools = sorted(tools, key=lambda x: x["name"])
 
     # Find the maximum name length for alignment
-    max_name_length = max(len(tool["name"]) for tool in tools) + 2  # +2 for padding
+    max_name_length = max(len(tool_info["name"]) for tool_info in tools) + 2  # +2 for padding
 
     # Build the tool list
     lines = ["Available Tools:", ""]
 
-    for tool in tools:
-        name = tool["name"].ljust(max_name_length)
-        desc = tool["description"]
+    for tool_info in tools:
+        name = tool_info["name"].ljust(max_name_length)
+        desc = tool_info["description"]
         lines.append(f"  {name} {desc}")
 
     return "\n".join(lines)
@@ -329,7 +330,10 @@ def format_tool_list(tools: List[Dict[str, Any]]) -> str:
     parameters={
         "tool_name": {
             "type": "string",
-            "description": "Name of the tool to get help for. If not provided, lists all available tools.",
+            "description": (
+                "Name of the tool to get help for. "
+                "If not provided, lists all available tools."
+            ),
             "required": False,
         },
         "search_term": {
@@ -347,7 +351,8 @@ async def help_tool(tool_name: Optional[str] = None, search_term: Optional[str] 
     including their parameters, return values, and usage examples.
 
     Args:
-        tool_name: Name of the tool to get help for. If not provided, lists all available tools.
+        tool_name: Name of the tool to get help for. 
+        If not provided, lists all available tools.
         search_term: Search term to filter tools by name or description.
 
     Returns:

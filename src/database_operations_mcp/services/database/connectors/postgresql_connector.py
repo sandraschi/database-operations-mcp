@@ -224,7 +224,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error listing PostgreSQL databases: {e}")
-            raise QueryError(f"Failed to list databases: {e}")
+            raise QueryError(f"Failed to list databases: {e}") from e
 
     def list_tables(self, database: Optional[str] = None) -> List[Dict[str, Any]]:
         """List tables in the PostgreSQL database."""
@@ -277,7 +277,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error listing PostgreSQL tables: {e}")
-            raise QueryError(f"Failed to list tables: {e}")
+            raise QueryError(f"Failed to list tables: {e}") from e
 
     def describe_table(self, table_name: str, database: Optional[str] = None) -> Dict[str, Any]:
         """Get table schema and metadata."""
@@ -414,7 +414,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error describing PostgreSQL table {table_name}: {e}")
-            raise QueryError(f"Failed to describe table: {e}")
+            raise QueryError(f"Failed to describe table: {e}") from e
 
     def execute_query(self, query: str, parameters: Optional[Dict] = None) -> Dict[str, Any]:
         """Execute query and return results."""
@@ -463,7 +463,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             if self.connection:
                 self.connection.rollback()
             logger.error(f"Error executing PostgreSQL query: {e}")
-            raise QueryError(f"Query execution failed: {e}")
+            raise QueryError(f"Query execution failed: {e}") from e
 
     def get_performance_metrics(self) -> Dict[str, Any]:
         """Get PostgreSQL performance metrics."""
@@ -490,8 +490,10 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                         max_conn - used - res_for_super as available
                     FROM 
                         (SELECT count(*) used FROM pg_stat_activity) q1,
-                        (SELECT setting::int res_for_super FROM pg_settings WHERE name = 'superuser_reserved_connections') q2,
-                        (SELECT setting::int max_conn FROM pg_settings WHERE name = 'max_connections') q3
+                        (SELECT setting::int res_for_super FROM pg_settings 
+                         WHERE name = 'superuser_reserved_connections') q2,
+                        (SELECT setting::int max_conn FROM pg_settings 
+                         WHERE name = 'max_connections') q3
                 """)
 
                 conn_stats = cursor.fetchone()
@@ -505,7 +507,8 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                 # Cache hit ratio
                 cursor.execute("""
                     SELECT 
-                        sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read)) as cache_hit_ratio
+                        sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read)) 
+                        as cache_hit_ratio
                     FROM pg_statio_user_tables
                 """)
 

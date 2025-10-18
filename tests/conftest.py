@@ -4,7 +4,8 @@ Pytest configuration and fixtures for database operations MCP tests.
 
 import os
 import sys
-from typing import Dict, Any
+from typing import Any, Dict
+
 import pytest
 
 # Add the src directory to the Python path

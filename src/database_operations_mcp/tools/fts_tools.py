@@ -61,7 +61,8 @@ async def fts_search(
                 select_columns.extend(
                     [
                         f'highlight({table}, {col}, "<b>", "</b>") as {col}_highlight',
-                        f'snippet({table}, {col}, "... ", " ...", "...", {snippet_size}) as {col}_snippet',
+                        f'snippet({table}, {col}, "... ", " ...", "...", '
+                        f'{snippet_size}) as {col}_snippet',
                     ]
                 )
 

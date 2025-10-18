@@ -10,19 +10,9 @@ This module provides functionality for managing database connections, including:
 It supports various database backends through a unified interface.
 """
 
-"""
-Database Connection Management Tools.
-
-This module provides functionality for managing database connections, including:
-- Listing supported database types
-- Creating and testing connections
-- Managing connection pools
-- Handling connection lifecycle events
-
-It supports various database backends through a unified interface.
-"""
-
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from time import time
 from typing import Any, TypedDict
 
 # Import the global MCP instance
@@ -291,7 +281,7 @@ def list_database_connections() -> dict[str, Any]:
         }
 
 
-@mcp.tool()
+@mcp.tool
 def test_database_connection(connection_name: str) -> dict[str, Any]:
     """Test connectivity for a specific database connection.
 
@@ -410,7 +400,7 @@ def test_database_connection(connection_name: str) -> dict[str, Any]:
         }
 
 
-@mcp.tool()
+@mcp.tool
 def test_all_database_connections(
     parallel: bool = True, timeout: float | None = 10.0
 ) -> dict[str, Any]:
@@ -486,8 +476,6 @@ def test_all_database_connections(
         }
         ```
     """
-    from time import time
-
     start_time = time()
 
     try:
@@ -519,9 +507,6 @@ def test_all_database_connections(
         test_results = {}
 
         if parallel:
-            # Import here to avoid circular imports
-            from concurrent.futures import ThreadPoolExecutor, as_completed
-
             # Create a thread pool for parallel testing
             with ThreadPoolExecutor(max_workers=min(10, len(connection_names))) as executor:
                 # Start all tests

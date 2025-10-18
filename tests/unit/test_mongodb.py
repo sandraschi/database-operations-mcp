@@ -8,7 +8,6 @@ import json
 import logging
 import os
 import sys
-from typing import Any, Dict
 
 # Add parent directory to path to import from database_operations_mcp
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
@@ -42,7 +41,8 @@ def test_mongodb_connection(mongodb_config):
         dbs = connector.list_databases()
         for db in dbs[:5]:  # Show first 5 databases to avoid too much output
             logger.info(
-                f"- {db['name']} (collections: {len(db.get('collections', []))}, size: {db.get('size_on_disk', 0) / (1024 * 1024):.2f} MB)"
+                f"- {db['name']} (collections: {len(db.get('collections', []))}, "
+                f"size: {db.get('size_on_disk', 0) / (1024 * 1024):.2f} MB)"
             )
 
         # Get the first available database with collections

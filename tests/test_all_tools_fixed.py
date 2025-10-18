@@ -131,7 +131,8 @@ class ToolTester:
                 print(f"No testable functions found in {module_name}")
             else:
                 print(
-                    f"Found {len(functions)} functions in {module_name}: {[f[0] for f in functions]}"
+                    f"Found {len(functions)} functions in {module_name}: "
+                    f"{[f[0] for f in functions]}"
                 )
 
             return functions
@@ -343,15 +344,15 @@ class ToolTester:
             return test_values[param_name]
 
         # Try to get a value based on type
-        if param_type == str:
+        if param_type is str:
             return "test_string"
-        elif param_type == int:
+        elif param_type is int:
             return 1
-        elif param_type == bool:
+        elif param_type is bool:
             return True
-        elif param_type == list:
+        elif param_type is list:
             return []
-        elif param_type == dict:
+        elif param_type is dict:
             return {}
 
         # Default fallback
@@ -384,7 +385,8 @@ class ToolTester:
                 report.append(f"  Import Error: {module_results['import_error']}")
             else:
                 report.append(
-                    f"  Tests: {module_results['tests_passed']} passed, {module_results['tests_failed']} failed"
+                    f"  Tests: {module_results['tests_passed']} passed, "
+                    f"{module_results['tests_failed']} failed"
                 )
 
                 # Add function-level details for failed tests

@@ -23,7 +23,7 @@ def test_fastmcp_import():
 
         # Test creating a FastMCP instance
         logger.info("Testing FastMCP initialization...")
-        mcp = fastmcp.FastMCP(name="test-mcp", description="Test MCP instance", version="0.1.0")
+        fastmcp.FastMCP(name="test-mcp", description="Test MCP instance", version="0.1.0")
         logger.info("FastMCP instance created successfully")
         return True
 

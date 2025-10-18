@@ -1,8 +1,5 @@
 """Firefox bookmark management tools."""
 
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
-
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
 
@@ -17,11 +14,7 @@ from .folder_based_tagging import batch_tag_from_folder, tag_from_folder
 
 # Import other tools
 from .link_checker import find_broken_links
-from .links import add_bookmark
-from .links import get_bookmark as bm_get_bookmark
-
-# Import bookmark management
-from .links import list_bookmarks as bm_list_bookmarks
+from .links import add_bookmark, get_bookmark, list_bookmarks
 
 # Import search functionality
 from .search_tools import BookmarkSearcher, find_duplicates, search_bookmarks

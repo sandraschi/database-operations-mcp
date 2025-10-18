@@ -5,6 +5,7 @@ Run the MCP Server
 This script starts the MCP server with proper configuration and error handling.
 """
 
+import argparse
 import asyncio
 import logging
 import os
@@ -14,6 +15,9 @@ from pathlib import Path
 
 import uvicorn
 from dotenv import load_dotenv
+
+# Import MCP server after setting up logging and environment
+from mcp_server.main import app, mcp
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent
@@ -31,9 +35,6 @@ logger = logging.getLogger("mcp_server")
 dotenv_path = project_root / ".env"
 if dotenv_path.exists():
     load_dotenv(dotenv_path=dotenv_path)
-
-# Import MCP server after setting up logging and environment
-from mcp_server.main import app, mcp
 
 
 class MCPServer:
@@ -138,8 +139,6 @@ class MCPServer:
 def main():
     """Main entry point for the MCP server."""
     # Parse command line arguments
-    import argparse
-
     parser = argparse.ArgumentParser(description="Run the MCP Server")
     parser.add_argument(
         "--host", type=str, default=os.getenv("HOST", "0.0.0.0"), help="Host to bind the server to"

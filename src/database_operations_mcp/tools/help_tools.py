@@ -149,7 +149,8 @@ async def help(category: Optional[str] = None) -> Dict[str, Any]:
         category: Category filter (default: None)
             - None: Show all tools
             - 'database': Core database operations
-            - 'firefox': Firefox bookmark tools (profiles, bookmarks, curated collections, portmanteau profiles)
+            - 'firefox': Firefox bookmark tools (profiles, bookmarks, 
+              curated collections, portmanteau profiles)
             - 'calibre': Calibre library tools
             - 'registry': Windows Registry tools
             - 'help': Help and documentation tools
@@ -182,8 +183,10 @@ async def help(category: Optional[str] = None) -> Dict[str, Any]:
             #         'database': {
             #             'description': 'Core database operations',
             #             'tools': [
-            #                 {'name': 'execute_query', 'description': 'Execute SQL or NoSQL query...'},
-            #                 {'name': 'list_tables', 'description': 'List all tables/collections...'}
+            #                 {'name': 'execute_query', 
+            #                  'description': 'Execute SQL or NoSQL query...'},
+            #                 {'name': 'list_tables', 
+            #                  'description': 'List all tables/collections...'}
             #             ]
             #         },
             #         'firefox': {...}

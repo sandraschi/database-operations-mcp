@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from . import mcp  # Import the mcp instance from __init__
-from .core import FirefoxNotClosedError, FirefoxStatusChecker
 from .db import FirefoxDB
+from .exceptions import FirefoxNotClosedError
+from .status import FirefoxStatusChecker
 from .utils import get_profile_directory
 
 

@@ -226,7 +226,6 @@ class DatabaseOperationsMCP:
         Returns:
             int: Exit code (0 for success, non-zero for error)
         """
-        exit_code = 0
         try:
             # Configure logging for FastMCP
             import logging

@@ -8,7 +8,7 @@ Tools are automatically discovered and registered when the server starts.
 import importlib
 import pkgutil
 from pathlib import Path
-from typing import Any, Dict, Optional, Type
+from typing import Dict, Optional, Type
 
 from mcp import Tool
 

@@ -51,7 +51,8 @@ def format_type_name(type_obj: Type) -> str:
 
     # Handle Enum types
     if isinstance(type_obj, type) and issubclass(type_obj, Enum):
-        return f"{'|'.join(f'"{e.value}"' for e in type_obj)}"
+        values = [f'"{e.value}"' for e in type_obj]
+        return "|".join(values)
 
     # Handle regular types
     return type_obj.__name__
@@ -60,13 +61,11 @@ def format_type_name(type_obj: Type) -> str:
 def format_parameter_doc(param_name: str, param: Parameter, default: Any = Parameter.empty) -> str:
     """Format a parameter's documentation with its type and default value."""
     # Get type annotation
-    param_type = "Any"
     if param.annotation != Parameter.empty:
-        param_type = format_type_name(param.annotation)
+        format_type_name(param.annotation)
 
     # Format the parameter line
-    param_line = f"{param_name}: {param_type}"
 
     # Add default value if present
     if default != Parameter.empty:
-        default_str = f"'{default}'"
+        pass

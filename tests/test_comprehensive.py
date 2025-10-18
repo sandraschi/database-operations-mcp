@@ -96,7 +96,7 @@ class ToolTester:
 
             # Try to parse the AST
             try:
-                tree = ast.parse(source)
+                ast.parse(source)
                 analysis["syntax_valid"] = True
             except SyntaxError as e:
                 analysis["syntax_error"] = str(e)
@@ -107,8 +107,6 @@ class ToolTester:
             lines = source.split("\n")
 
             # Look for MCP decorators and function definitions
-            in_function = False
-            current_indent = 0
 
             for i, line in enumerate(lines, 1):
                 stripped = line.strip()
@@ -158,7 +156,8 @@ class ToolTester:
                 if bad_decorators:
                     analysis["fastmcp_compliance"] = "non_compliant"
                     analysis["compliance_issues"] = [
-                        f"MCP decorators on lines {[d['line'] for d in bad_decorators]} are incorrectly indented"
+                        f"MCP decorators on lines {[d['line'] for d in bad_decorators]} "
+                        f"are incorrectly indented"
                     ]
                 else:
                     analysis["fastmcp_compliance"] = "compliant"
@@ -294,8 +293,10 @@ class ToolTester:
         if issues:
             recommendations.extend(
                 [
-                    "Fix indentation: MCP decorators (@mcp.tool()) should be at module level (no indentation)",
-                    "Fix function definitions: Functions should be defined at module level after decorators",
+                    "Fix indentation: MCP decorators (@mcp.tool()) should be at "
+                    "module level (no indentation)",
+                    "Fix function definitions: Functions should be defined at "
+                    "module level after decorators",
                     "Fix imports: Use absolute imports instead of relative imports where possible",
                     "Ensure proper FastMCP 2.10.1+ structure",
                     "Test each module individually after fixes",

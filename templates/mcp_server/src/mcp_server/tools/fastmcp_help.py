@@ -13,7 +13,7 @@ from typing import Any, Callable, Dict, Optional
 # Import FastMCP types
 try:
     from mcp.server import FastMCPServer, FastMCPTool
-    from mcp.types import Tool, ToolCall, ToolDefinition, ToolError, ToolResult
+    from mcp.types import ToolCall, ToolDefinition, ToolError, ToolResult
     from mcp.utils.logging import get_logger
 except ImportError:
     # Fallback for development
@@ -71,7 +71,10 @@ class FastMCPHelpTool(FastMCPTool):
                 "properties": {
                     "tool_name": {
                         "type": "string",
-                        "description": "Name of the tool to get help for. If not provided, lists all available tools.",
+                        "description": (
+                            "Name of the tool to get help for. "
+                            "If not provided, lists all available tools."
+                        ),
                     },
                     "search_term": {
                         "type": "string",

@@ -284,7 +284,7 @@ class ToolTester:
         recommendations = []
 
         # Check for common patterns
-        syntax_issues = self.results["summary"]["syntax_issues"]
+        self.results["summary"]["syntax_issues"]
         import_failures = self.results["summary"]["import_failures"]
         tools_with_issues = self.results["summary"]["tools_with_issues"]
 

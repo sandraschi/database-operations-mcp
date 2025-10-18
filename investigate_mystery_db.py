@@ -10,11 +10,11 @@ import os
 import sys
 from pathlib import Path
 
+from database_operations_mcp.connectors.sqlite_connector import SQLiteConnector
+
 # Add the database operations module to path
 repo_path = Path(__file__).parent
 sys.path.insert(0, str(repo_path))
-
-from database_operations_mcp.connectors.sqlite_connector import SQLiteConnector
 
 
 def investigate_mystery_database():
@@ -42,8 +42,10 @@ def investigate_mystery_database():
         if connection_test["success"]:
             print("✅ Connection successful!")
             print(f"   SQLite Version: {connection_test['sqlite_version']}")
+            file_size_mb = connection_test['file_size_bytes'] / 1024 / 1024
             print(
-                f"   File Size: {connection_test['file_size_bytes']:,} bytes ({connection_test['file_size_bytes'] / 1024 / 1024:.2f} MB)"
+                f"   File Size: {connection_test['file_size_bytes']:,} bytes "
+                f"({file_size_mb:.2f} MB)"
             )
             print()
         else:

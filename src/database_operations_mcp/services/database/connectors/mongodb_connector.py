@@ -216,7 +216,7 @@ class MongoDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"MongoDB query failed: {e}")
-            raise QueryError(f"MongoDB operation failed: {e}")
+            raise QueryError(f"MongoDB operation failed: {e}") from e
 
     def list_databases(self) -> List[Dict[str, Any]]:
         """List all databases on the MongoDB server."""
@@ -249,7 +249,7 @@ class MongoDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Failed to list MongoDB databases: {e}")
-            raise QueryError(f"Failed to list databases: {e}")
+            raise QueryError(f"Failed to list databases: {e}") from e
 
     def list_collections(self, database_name: str = None) -> List[Dict[str, Any]]:
         """List collections in a database.
@@ -273,7 +273,7 @@ class MongoDBConnector(BaseDatabaseConnector):
 
             collections = []
             for coll_name in db.list_collection_names():
-                coll = db[coll_name]
+                db[coll_name]
                 stats = db.command("collstats", coll_name)
 
                 collections.append(
@@ -292,7 +292,7 @@ class MongoDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Failed to list collections in database {database_name}: {e}")
-            raise QueryError(f"Failed to list collections: {e}")
+            raise QueryError(f"Failed to list collections: {e}") from e
 
     def get_collection_stats(self, database_name: str, collection_name: str) -> Dict[str, Any]:
         """Get statistics for a specific collection."""
@@ -330,7 +330,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(
                 f"Failed to get stats for collection {database_name}.{collection_name}: {e}"
             )
-            raise QueryError(f"Failed to get collection stats: {e}")
+            raise QueryError(f"Failed to get collection stats: {e}") from e
 
     def health_check(self) -> Dict[str, Any]:
         """Perform a health check on the MongoDB connection."""
@@ -420,7 +420,7 @@ class MongoDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Failed to get MongoDB performance metrics: {e}")
-            raise QueryError(f"Failed to get performance metrics: {e}")
+            raise QueryError(f"Failed to get performance metrics: {e}") from e
 
     def test_connection(self) -> Dict[str, Any]:
         """Test the MongoDB connection."""

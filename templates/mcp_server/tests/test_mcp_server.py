@@ -4,12 +4,11 @@ Tests for the FastMCP server.
 These tests verify the core functionality of the MCP server, including tool registration,
 tool execution, and error handling.
 """
-import json
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from .test_utils import TestMCPClient, mock_mcp_tool
+from .test_utils import mock_mcp_tool
 
 
 def test_server_health_check():

@@ -1,12 +1,11 @@
 """
-Unit tests for the monitor_registry function in registry_tools.py
+Unit tests for the registry tools in registry_tools.py
 """
 
-from unittest.mock import ANY, MagicMock, patch
+import winreg
+from unittest.mock import MagicMock, patch
 
 import pytest
-
-# Import the function to test
 
 # Test data
 TEST_REGISTRY_PATH = r"HKEY_CURRENT_USER\\Software\\TestKey"
@@ -22,150 +21,109 @@ def reset_monitors():
     _active_monitors.clear()
 
 
-@patch("database_operations_mcp.tools.registry_tools.RegistryMonitor")
-def test_start_monitoring(mock_registry_monitor):
-    """Test starting registry monitoring."""
+@patch("database_operations_mcp.tools.registry_tools.winreg.OpenKey")
+@patch("database_operations_mcp.tools.registry_tools.winreg.QueryValueEx")
+def test_read_registry_value(mock_query_value, mock_open_key):
+    """Test reading a registry value."""
     # Setup
-    mock_instance = MagicMock()
-    mock_registry_monitor.return_value = mock_instance
-
-    # Test
-    result = monitor_registry(
-        path=TEST_REGISTRY_PATH, action="start", callback_url=TEST_CALLBACK_URL
-    )
-
-    # Verify
-    assert result["status"] == "success"
-    assert result["monitoring"] is True
-    assert "monitor_id" in result
-    assert TEST_REGISTRY_PATH in _active_monitors
-    mock_registry_monitor.assert_called_once_with(
-        path=TEST_REGISTRY_PATH,
-        callback=ANY,  # We'll verify the callback separately
-    )
-    mock_instance.start.assert_called_once()
-
-
-@patch("database_operations_mcp.handlers.registry_tools.RegistryMonitor")
-def test_start_monitoring_already_running(mock_registry_monitor):
-    """Test starting monitoring when already monitoring the path."""
-    # Setup - Add a monitor for the test path
-    mock_monitor = MagicMock()
-    _active_monitors[TEST_REGISTRY_PATH] = mock_monitor
-
-    # Test
-    result = monitor_registry(
-        path=TEST_REGISTRY_PATH, action="start", callback_url=TEST_CALLBACK_URL
-    )
-
-    # Verify
-    assert result["status"] == "error"
-    assert "already monitoring" in result["message"].lower()
-    assert result["monitoring"] is True
-    mock_registry_monitor.assert_not_called()
+    mock_key = MagicMock()
+    mock_open_key.return_value = mock_key
+    mock_query_value.return_value = ("test_value", winreg.REG_SZ)
+    
+    # Import the function
+    from database_operations_mcp.tools.registry_tools import read_registry_value
+    if hasattr(read_registry_value, 'fn'):
+        actual_function = read_registry_value.fn
+    else:
+        actual_function = read_registry_value
+    
+    # Act
+    result = actual_function(TEST_REGISTRY_PATH, "test_value")
+    
+    # Assert
+    assert result["success"] is True
+    assert result["value"] == "test_value"
+    assert result["type"] == "REG_SZ"
 
 
-@patch("database_operations_mcp.handlers.registry_tools.RegistryMonitor")
-def test_stop_monitoring(mock_registry_monitor):
-    """Test stopping registry monitoring."""
-    # Setup - Add a monitor for the test path
-    mock_monitor = MagicMock()
-    _active_monitors[TEST_REGISTRY_PATH] = mock_monitor
-
-    # Test
-    result = monitor_registry(path=TEST_REGISTRY_PATH, action="stop")
-
-    # Verify
-    assert result["status"] == "success"
-    assert result["monitoring"] is False
-    assert TEST_REGISTRY_PATH not in _active_monitors
-    mock_monitor.stop.assert_called_once()
-
-
-@patch("database_operations_mcp.handlers.registry_tools.RegistryMonitor")
-def test_stop_monitoring_not_running(mock_registry_monitor):
-    """Test stopping monitoring when no monitor exists for the path."""
-    # Test
-    result = monitor_registry(path=TEST_REGISTRY_PATH, action="stop")
-
-    # Verify
-    assert result["status"] == "error"
-    assert "no active monitor" in result["message"].lower()
-    assert result["monitoring"] is False
-    mock_registry_monitor.assert_not_called()
-
-
-def test_monitor_registry_invalid_action():
-    """Test with an invalid action."""
-    result = monitor_registry(path=TEST_REGISTRY_PATH, action="invalid_action")
-
-    assert result["status"] == "error"
-    assert "invalid action" in result["message"].lower()
-    assert result["monitoring"] is False
-
-
-@patch("database_operations_mcp.handlers.registry_tools.RegistryMonitor")
-def test_monitor_registry_callback_error_handling(mock_registry_monitor, caplog):
-    """Test error handling in the callback function."""
+@patch("database_operations_mcp.tools.registry_tools.winreg.OpenKey")
+@patch("database_operations_mcp.tools.registry_tools.winreg.SetValueEx")
+def test_write_registry_value(mock_set_value, mock_open_key):
+    """Test writing a registry value."""
     # Setup
-    mock_instance = MagicMock()
-    mock_registry_monitor.return_value = mock_instance
-
-    # Create a mock callback that will raise an exception
-    def mock_callback(changes):
-        raise Exception("Test error in callback")
-
-    # Replace the callback creation to return our mock
-    with patch(
-        "database_operations_mcp.handlers.registry_tools.create_callback",
-        return_value=mock_callback,
-    ):
-        # This should not raise an exception
-        result = monitor_registry(
-            path=TEST_REGISTRY_PATH, action="start", callback_url=TEST_CALLBACK_URL
-        )
-
-    # Verify the monitor was still started
-    assert result["status"] == "success"
-    assert result["monitoring"] is True
-
-    # The error should be logged but not propagated
-    assert "Error in registry change callback" in caplog.text
+    mock_key = MagicMock()
+    mock_open_key.return_value = mock_key
+    
+    # Import the function
+    from database_operations_mcp.tools.registry_tools import write_registry_value
+    if hasattr(write_registry_value, 'fn'):
+        actual_function = write_registry_value.fn
+    else:
+        actual_function = write_registry_value
+    
+    # Act
+    result = actual_function(TEST_REGISTRY_PATH, "test_value", "test_data")
+    
+    # Assert
+    assert result["success"] is True
+    assert "Value written successfully" in result["message"]
 
 
-@patch("database_operations_mcp.handlers.registry_tools.RegistryMonitor")
-def test_monitor_registry_start_error(mock_registry_monitor):
-    """Test error handling when starting the monitor fails."""
+@patch("database_operations_mcp.tools.registry_tools.winreg.OpenKey")
+@patch("database_operations_mcp.tools.registry_tools.winreg.EnumKey")
+def test_list_registry_keys(mock_enum_key, mock_open_key):
+    """Test listing registry keys."""
     # Setup
-    mock_instance = MagicMock()
-    mock_instance.start.side_effect = Exception("Failed to start monitoring")
-    mock_registry_monitor.return_value = mock_instance
+    mock_key = MagicMock()
+    mock_open_key.return_value = mock_key
+    # Create OSError with winerror attribute
+    no_more_data_error = OSError(259, "No more data")
+    no_more_data_error.winerror = 259
+    mock_enum_key.side_effect = ["key1", "key2", "key3", no_more_data_error]
+    
+    # Import the function
+    from database_operations_mcp.tools.registry_tools import list_registry_keys
+    if hasattr(list_registry_keys, 'fn'):
+        actual_function = list_registry_keys.fn
+    else:
+        actual_function = list_registry_keys
+    
+    # Act
+    result = actual_function(TEST_REGISTRY_PATH)
+    
+    # Assert
+    assert result["success"] is True
+    assert "subkeys" in result
+    assert len(result["subkeys"]) == 3
 
-    # Test
-    result = monitor_registry(
-        path=TEST_REGISTRY_PATH, action="start", callback_url=TEST_CALLBACK_URL
-    )
 
-    # Verify
-    assert result["status"] == "error"
-    assert "failed to start monitoring" in result["message"].lower()
-    assert result["monitoring"] is False
-    assert TEST_REGISTRY_PATH not in _active_monitors
-
-
-@patch("database_operations_mcp.handlers.registry_tools.RegistryMonitor")
-def test_monitor_registry_stop_error(mock_registry_monitor):
-    """Test error handling when stopping the monitor fails."""
-    # Setup - Add a monitor that will raise an exception when stopped
-    mock_monitor = MagicMock()
-    mock_monitor.stop.side_effect = Exception("Failed to stop monitoring")
-    _active_monitors[TEST_REGISTRY_PATH] = mock_monitor
-
-    # Test
-    result = monitor_registry(path=TEST_REGISTRY_PATH, action="stop")
-
-    # Verify
-    assert result["status"] == "error"
-    assert "error stopping monitor" in result["message"].lower()
-    # The monitor should still be removed from active monitors
-    assert TEST_REGISTRY_PATH not in _active_monitors
+@patch("database_operations_mcp.tools.registry_tools.winreg.OpenKey")
+@patch("database_operations_mcp.tools.registry_tools.winreg.EnumValue")
+def test_list_registry_values(mock_enum_value, mock_open_key):
+    """Test listing registry values."""
+    # Setup
+    mock_key = MagicMock()
+    mock_open_key.return_value = mock_key
+    # Create OSError with winerror attribute
+    no_more_data_error = OSError(259, "No more data")
+    no_more_data_error.winerror = 259
+    mock_enum_value.side_effect = [
+        ("value1", "data1", winreg.REG_SZ),
+        ("value2", "data2", winreg.REG_DWORD),
+        no_more_data_error
+    ]
+    
+    # Import the function
+    from database_operations_mcp.tools.registry_tools import list_registry_values
+    if hasattr(list_registry_values, 'fn'):
+        actual_function = list_registry_values.fn
+    else:
+        actual_function = list_registry_values
+    
+    # Act
+    result = actual_function(TEST_REGISTRY_PATH)
+    
+    # Assert
+    assert result["success"] is True
+    assert "values" in result
+    assert len(result["values"]) == 2

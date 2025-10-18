@@ -10,10 +10,13 @@ import shutil
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ..config.mcp_config import mcp
-from ..tools.firefox.core import FirefoxStatusChecker
+
+if TYPE_CHECKING:
+    from fastmcp import FastMCP
+from ..tools.firefox.status import FirefoxStatusChecker
 from .help_tools import HelpSystem
 
 # Common Windows database locations
@@ -38,7 +41,8 @@ WINDOWS_DB_PATHS = {
             r"%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History"
         ),
         os.path.expandvars(
-            r"%USERPROFILE%\\AppData\\Local\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History"
+            r"%USERPROFILE%\\AppData\\Local\\BraveSoftware\\Brave-Browser\\"
+            r"User Data\\Default\\History"
         ),
     ],
     "outlook": [
@@ -54,7 +58,8 @@ PLEX_PATHS = {
         os.path.expandvars(r"%LOCALAPPDATA%\\Plex Media Server\\Metadata"),
         r"C:\\Plex\\Plex Media Server\\Metadata",
         os.path.expandvars(
-            r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db"
+            r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\"
+            r"Databases\\com.plexapp.plugins.library.db"
         ),
     ],
     "cache": [
@@ -137,7 +142,10 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
                         "exists": False,
                         "error": "Firefox is running - database is locked",
                         "firefox_status": firefox_status,
-                        "solution": "Close Firefox completely and try again, or set bruteforce_firefox=True",
+                        "solution": (
+                            "Close Firefox completely and try again, "
+                            "or set bruteforce_firefox=True"
+                        ),
                     }
                     continue
                 elif firefox_status["is_running"] and bruteforce_firefox:
@@ -173,7 +181,7 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
                                 if hasattr(conn, "temp_db_path"):
                                     try:
                                         conn.temp_db_path.unlink(missing_ok=True)
-                                    except:
+                                    except Exception:
                                         pass
                                 conn.close()
                         else:
@@ -253,12 +261,20 @@ async def manage_plex_metadata(
                        (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 1) as movies,
                        (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 2) as shows,
                        (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4) as seasons,
-                       (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_seasons,
-                       (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_seasons,
-                       (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE metadata_type = 2)) as invalid_seasons,
-                       (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_episodes,
-                       (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_episodes,
-                       (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4 AND parent_id NOT IN (SELECT id FROM metadata_items WHERE metadata_type = 4)) as invalid_episodes
+                       (SELECT COUNT(*) FROM metadata_items 
+                        WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_seasons,
+                       (SELECT COUNT(*) FROM metadata_items 
+                        WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_seasons,
+                       (SELECT COUNT(*) FROM metadata_items 
+                        WHERE metadata_type = 4 AND parent_id NOT IN 
+                        (SELECT id FROM metadata_items WHERE metadata_type = 2)) as invalid_seasons,
+                       (SELECT COUNT(*) FROM metadata_items 
+                        WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_episodes,
+                       (SELECT COUNT(*) FROM metadata_items 
+                        WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_episodes,
+                       (SELECT COUNT(*) FROM metadata_items 
+                        WHERE metadata_type = 4 AND parent_id NOT IN 
+                        (SELECT id FROM metadata_items WHERE metadata_type = 4)) as invalid_episodes
                 FROM metadata_items
             """)
             stats = dict(cursor.fetchone())
@@ -266,7 +282,8 @@ async def manage_plex_metadata(
             # Add library section information
             cursor.execute("""
                 SELECT id, section_name, section_type, 
-                       (SELECT COUNT(*) FROM metadata_items WHERE library_section_id = library_sections.id) as item_count
+                       (SELECT COUNT(*) FROM metadata_items 
+                        WHERE library_section_id = library_sections.id) as item_count
                 FROM library_sections
                 ORDER BY section_name
             """)
@@ -341,7 +358,9 @@ async def query_windows_database(
                 "status": "error",
                 "message": "Firefox is running - database is locked",
                 "firefox_status": firefox_status,
-                "solution": "Close Firefox completely and try again, or set bruteforce_firefox=True",
+                "solution": (  # noqa: E501
+                    "Close Firefox completely and try again, or set bruteforce_firefox=True"
+                ),
             }
 
     db_path = _find_windows_db(db_type)
@@ -433,7 +452,8 @@ async def clean_windows_database(
         db_type: Type of database to clean
         action: Action to perform (vacuum, reindex, analyze)
         backup: Whether to create a backup before cleaning
-        bruteforce_firefox: If True, attempt to access Firefox database even when locked (dangerous!)
+        bruteforce_firefox: If True, attempt to access Firefox database 
+        even when locked (dangerous!)
 
     Returns:
         Dictionary with cleaning results

@@ -4,22 +4,21 @@ FastMCP 2.13 Server
 This module provides the command-line interface for the FastMCP 2.13 server.
 """
 
+import argparse
 import asyncio
 import logging
 import sys
 from pathlib import Path
 
+from mcp_server.fastmcp_server import create_fastmcp_server
+
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from mcp_server.fastmcp_server import create_fastmcp_server
-
 
 def main() -> int:
     """Main entry point for the FastMCP server."""
-    import argparse
-
     # Set up argument parsing
     parser = argparse.ArgumentParser(description="FastMCP 2.13 Server")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")

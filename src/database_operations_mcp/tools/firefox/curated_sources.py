@@ -2,6 +2,8 @@
 
 from typing import Any, Dict
 
+from database_operations_mcp.config.mcp_config import mcp
+
 # Predefined curated bookmark collections
 CURATED_SOURCES = {
     "developer_tools": {
@@ -181,13 +183,28 @@ CURATED_SOURCES = {
 }
 
 
+@mcp.tool()
 def get_curated_source(source_name: str) -> Dict[str, Any]:
-    """Get a predefined curated source by name."""
+    """
+    Get a predefined curated source by name.
+    
+    Args:
+        source_name: Name of the curated source to retrieve
+        
+    Returns:
+        Dict containing the curated source information or None if not found
+    """
     return CURATED_SOURCES.get(source_name)
 
 
+@mcp.tool()
 def list_curated_sources() -> Dict[str, Any]:
-    """List all available curated sources."""
+    """
+    List all available curated sources.
+    
+    Returns:
+        Dict containing all available curated sources with metadata
+    """
     return {
         "sources": {
             name: {

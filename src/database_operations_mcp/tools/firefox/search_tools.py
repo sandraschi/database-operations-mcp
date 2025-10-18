@@ -7,8 +7,9 @@ from typing import Any, Dict, List, Optional
 from database_operations_mcp.config.mcp_config import mcp
 
 from ..help_tools import HelpSystem
-from .core import FirefoxStatusChecker
 from .db import FirefoxDB
+from .exceptions import FirefoxNotClosedError
+from .status import FirefoxStatusChecker
 from .utils import get_profile_directory, parse_profiles_ini
 
 
@@ -172,7 +173,10 @@ async def search_bookmarks(
                         "detected_from_query": detected_profile,
                         "matched_profile": None,
                         "auto_detection": True,
-                        "note": f"Detected profile '{detected_profile}' but no matching profile found",
+                        "note": (
+                            f"Detected profile '{detected_profile}' but no "
+                            f"matching profile found"
+                        ),
                     }
 
         # Get profile path if we have a profile name
@@ -204,7 +208,8 @@ async def search_bookmarks(
 
         if len(results) == 0:
             response["note"] = (
-                "No bookmarks found matching your query. Try different keywords or check if Firefox is closed."
+                "No bookmarks found matching your query. Try different keywords "
+                "or check if Firefox is closed."
             )
 
         return response

@@ -45,7 +45,7 @@ def test_imports():
         tools = get_tools(mcp)
         logger.info(f"Successfully registered {len(tools)} tools")
 
-        for tool_name, tool_info in tools.items():
+        for tool_name, _tool_info in tools.items():
             logger.info(f"Tool: {tool_name}")
 
         return True

@@ -300,15 +300,20 @@ async def get_plex_library_stats(
 # Common Plex database locations for different OS
 PLEX_DB_PATHS = {
     "windows": [
-        r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
+        r"%LOCALAPPDATA%\\Plex Media Server\\Plug-in Support\\"
+        r"Databases\\com.plexapp.plugins.library.db",
         r"C:\\Plex\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
     ],
     "linux": [
-        "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
-        "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
+        "/var/lib/plexmediaserver/Library/Application Support/"
+        "Plex Media Server/Plug-in Support/Databases/"
+        "com.plexapp.plugins.library.db",
+        "~/Library/Application Support/Plex Media Server/"
+        "Plug-in Support/Databases/com.plexapp.plugins.library.db",
     ],
     "macos": [
-        "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db"
+        "~/Library/Application Support/Plex Media Server/"
+        "Plug-in Support/Databases/com.plexapp.plugins.library.db"
     ],
 }
 
@@ -345,7 +350,8 @@ def _export_to_sql(cursor, tables, output_file, include_data):
                             values.append(f"'{escaped_value}'")
 
                     f.write(
-                        f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(values)});\n"
+                        f"INSERT INTO {table} ({', '.join(columns)}) "
+                        f"VALUES ({', '.join(values)});\n"
                     )
 
                 f.write("\n")

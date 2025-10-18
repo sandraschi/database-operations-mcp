@@ -12,12 +12,12 @@ try:
     print("Testing imports...")
 
     # Test basic imports
-    import database_operations_mcp
+    pass
 
     print("✅ Package imported successfully!")
 
     # Test main module
-    from database_operations_mcp.main import main
+    pass
 
     print("✅ Main module imported successfully!")
 

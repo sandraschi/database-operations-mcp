@@ -32,7 +32,10 @@ async def list_bookmarks(
     if not places_db or not places_db.exists():
         return {
             "status": "error",
-            "message": f"Could not find Firefox bookmarks database for profile: {profile_name or 'default'}",
+            "message": (
+                f"Could not find Firefox bookmarks database for profile: "
+                f"{profile_name or 'default'}"
+            ),
         }
 
     try:
@@ -99,7 +102,10 @@ async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> 
     if not places_db or not places_db.exists():
         return {
             "status": "error",
-            "message": f"Could not find Firefox bookmarks database for profile: {profile_name or 'default'}",
+            "message": (
+                f"Could not find Firefox bookmarks database for profile: "
+                f"{profile_name or 'default'}"
+            ),
         }
 
     try:
@@ -147,7 +153,8 @@ async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> 
                 # Get or create tag
                 cursor.execute(
                     "SELECT id FROM moz_bookmarks "
-                    "WHERE parent = (SELECT id FROM moz_bookmarks WHERE title = 'tags' AND parent = 4) "
+                    "WHERE parent = (SELECT id FROM moz_bookmarks "
+                    "WHERE title = 'tags' AND parent = 4) "
                     "AND title = ?",
                     (tag_name,),
                 )
@@ -159,7 +166,8 @@ async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> 
                         "INSERT INTO moz_bookmarks "
                         "(type, parent, position, title, dateAdded, lastModified) "
                         "SELECT 2, id, "
-                        "COALESCE((SELECT MAX(position) FROM moz_bookmarks WHERE parent = id), 0) + 1, "
+                        "COALESCE((SELECT MAX(position) FROM moz_bookmarks "
+                        "WHERE parent = id), 0) + 1, "
                         "?, ?, ? "
                         "FROM moz_bookmarks WHERE title = 'tags' AND parent = 4",
                         (tag_name, datetime.now(), datetime.now()),
@@ -216,7 +224,10 @@ async def add_bookmark(
     if not places_db or not places_db.exists():
         return {
             "status": "error",
-            "message": f"Could not find Firefox bookmarks database for profile: {profile_name or 'default'}",
+            "message": (
+                f"Could not find Firefox bookmarks database for profile: "
+                f"{profile_name or 'default'}"
+            ),
         }
 
     try:
@@ -270,7 +281,8 @@ async def add_bookmark(
                 # Get or create tag
                 cursor.execute(
                     "SELECT id FROM moz_bookmarks "
-                    "WHERE parent = (SELECT id FROM moz_bookmarks WHERE title = 'tags' AND parent = 4) "
+                    "WHERE parent = (SELECT id FROM moz_bookmarks "
+                    "WHERE title = 'tags' AND parent = 4) "
                     "AND title = ?",
                     (tag_name,),
                 )
@@ -282,7 +294,8 @@ async def add_bookmark(
                         "INSERT INTO moz_bookmarks "
                         "(type, parent, position, title, dateAdded, lastModified) "
                         "SELECT 2, id, "
-                        "COALESCE((SELECT MAX(position) FROM moz_bookmarks WHERE parent = id), 0) + 1, "
+                        "COALESCE((SELECT MAX(position) FROM moz_bookmarks "
+                        "WHERE parent = id), 0) + 1, "
                         "?, ?, ? "
                         "FROM moz_bookmarks WHERE title = 'tags' AND parent = 4",
                         (tag_name, now, now),

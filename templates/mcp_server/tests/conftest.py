@@ -1,14 +1,14 @@
 """Pytest configuration and fixtures for MCP server tests."""
 import asyncio
-import os
+
+# Add the project root to the Python path
+import sys
 from pathlib import Path
 from typing import AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
 
-# Add the project root to the Python path
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from mcp_server.main import app, mcp

@@ -64,8 +64,9 @@ def update_file_imports(file_path: Path):
             new_content = re.sub(
                 pattern, f"from . import {module}", new_content, flags=re.MULTILINE
             )
-            print(
-                f"Updated direct import in {file_path.name}: import {module} -> from . import {module}"
+            print(  # noqa: E501
+                f"Updated direct import in {file_path.name}: "
+                f"import {module} -> from . import {module}"
             )
 
     # Write the updated content back to the file

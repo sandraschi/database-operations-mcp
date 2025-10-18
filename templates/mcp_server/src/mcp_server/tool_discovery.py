@@ -13,7 +13,7 @@ from typing import Any, Callable, Dict, Optional, Type, TypeVar
 # Import FastMCP types
 try:
     from mcp.server import FastMCPServer, FastMCPTool
-    from mcp.types import Tool, ToolCall, ToolDefinition, ToolError, ToolResult
+    from mcp.types import ToolCall, ToolDefinition, ToolError, ToolResult
     from mcp.utils.logging import get_logger
 except ImportError:
     # Fallback for development
@@ -80,7 +80,7 @@ def discover_tools(
             package_dir = base_dir / "src" / package_path.replace(".", "/")
 
         # Find all Python modules in the package
-        for _, module_name, is_pkg in pkgutil.iter_modules([str(package_dir)]):
+        for _, module_name, _is_pkg in pkgutil.iter_modules([str(package_dir)]):
             if module_name.startswith("_") or module_name == "fastmcp_help":
                 continue
 
@@ -91,7 +91,7 @@ def discover_tools(
                 module = importlib.import_module(module_path)
 
                 # Find all FastMCPTool subclasses in the module
-                for name, obj in inspect.getmembers(module, inspect.isclass):
+                for _name, obj in inspect.getmembers(module, inspect.isclass):
                     if (
                         issubclass(obj, FastMCPTool)
                         and obj != FastMCPTool
@@ -200,7 +200,7 @@ def register_tools(
     loaded_tools = load_tools(tool_classes, server, *args, **kwargs)
 
     # Register all tools with the server
-    for name, tool in loaded_tools.items():
+    for _name, tool in loaded_tools.items():
         server.register_tool(tool)
 
     # Add the help tool to the result

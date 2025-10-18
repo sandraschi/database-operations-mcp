@@ -143,7 +143,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             }
         except Exception as e:
             logger.error(f"Error getting SQLite schema: {e}")
-            raise QueryError(f"Failed to get schema: {e}")
+            raise QueryError(f"Failed to get schema: {e}") from e
 
     async def get_tables(self, **kwargs: Any) -> List[str]:
         """Get list of tables in the database."""
@@ -165,7 +165,7 @@ class SQLiteConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error listing SQLite tables: {e}")
-            raise QueryError(f"Failed to list tables: {e}")
+            raise QueryError(f"Failed to list tables: {e}") from e
 
     async def get_table_schema(self, table_name: str, **kwargs: Any) -> Dict[str, Any]:
         """Get schema information for a specific table."""
@@ -207,7 +207,7 @@ class SQLiteConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error describing SQLite table {table_name}: {e}")
-            raise QueryError(f"Failed to describe table: {e}")
+            raise QueryError(f"Failed to describe table: {e}") from e
 
     async def health_check(self) -> Dict[str, Any]:
         """Perform comprehensive SQLite health check."""
