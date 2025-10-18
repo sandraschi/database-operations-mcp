@@ -163,6 +163,9 @@ class SQLiteConnector(BaseDatabaseConnector):
 
             return [row[0] for row in cursor.fetchall()]
 
+        except ConnectionError:
+            # Re-raise connection errors as-is
+            raise
         except Exception as e:
             logger.error(f"Error listing SQLite tables: {e}")
             raise QueryError(f"Failed to list tables: {e}") from e
@@ -205,6 +208,9 @@ class SQLiteConnector(BaseDatabaseConnector):
                 "column_count": len(columns),
             }
 
+        except ConnectionError:
+            # Re-raise connection errors as-is
+            raise
         except Exception as e:
             logger.error(f"Error describing SQLite table {table_name}: {e}")
             raise QueryError(f"Failed to describe table: {e}") from e
@@ -272,6 +278,9 @@ class SQLiteConnector(BaseDatabaseConnector):
                 })
             
             return tables
+        except ConnectionError:
+            # Re-raise connection errors as-is
+            raise
         except Exception as e:
             logger.error(f"Error listing SQLite tables: {e}")
             raise QueryError(f"Failed to list tables: {e}") from e

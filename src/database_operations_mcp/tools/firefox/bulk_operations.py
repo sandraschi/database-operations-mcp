@@ -109,17 +109,116 @@ async def batch_update_tags(
     Returns:
         Dictionary with update results
     """
-    _db = FirefoxDB(Path(profile_path) if profile_path else None)
+    db = FirefoxDB(Path(profile_path) if profile_path else None)
     changes = []
+    total_affected = 0
 
-    for _old_tag, _new_tag in tag_mapping.items():
-        # Implementation remains the same
-        # TODO: Implement tag update logic
-        pass
+    try:
+        # Get all bookmarks with their current tags
+        bookmarks = await db.get_all_bookmarks()
+        
+        for bookmark in bookmarks:
+            bookmark_id = bookmark["id"]
+            current_tags = await db.get_bookmark_tags(bookmark_id)
+            
+            # Check if any tags need updating
+            updated_tags = []
+            bookmark_changed = False
+            
+            for tag in current_tags:
+                if tag in tag_mapping:
+                    new_tag = tag_mapping[tag]
+                    updated_tags.append(new_tag)
+                    bookmark_changed = True
+                    changes.append({
+                        "bookmark_id": bookmark_id,
+                        "bookmark_title": bookmark["title"],
+                        "old_tag": tag,
+                        "new_tag": new_tag
+                    })
+                else:
+                    updated_tags.append(tag)
+            
+            # Update the bookmark if changes were made
+            if bookmark_changed and not dry_run:
+                await db.update_bookmark_tags(bookmark_id, updated_tags)
+                total_affected += 1
+            elif bookmark_changed and dry_run:
+                total_affected += 1
 
-    return {
-        "status": "success" if not dry_run else "dry_run",
-        "changes": changes,
-        "change_count": len(changes),
-        "dry_run": dry_run,
-    }
+        return {
+            "status": "success" if not dry_run else "dry_run",
+            "changes": changes,
+            "change_count": len(changes),
+            "affected_bookmarks": total_affected,
+            "dry_run": dry_run,
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "changes": changes,
+            "change_count": len(changes),
+            "affected_bookmarks": total_affected,
+            "dry_run": dry_run,
+        }
+
+
+@mcp.tool()
+@HelpSystem.register_tool(category="firefox")
+async def remove_unused_tags(
+    dry_run: bool = True, profile_path: Optional[str] = None
+) -> Dict[str, Any]:
+    """Remove tags that are not associated with any bookmarks.
+
+    Args:
+        dry_run: If True, only show what would be removed
+        profile_path: Path to the Firefox profile directory
+
+    Returns:
+        Dictionary with removal results
+    """
+    db = FirefoxDB(Path(profile_path) if profile_path else None)
+    removed_tags = []
+    
+    try:
+        # Get all tags
+        all_tags = await db.get_all_tags()
+        
+        # Get all bookmarks with their tags
+        bookmarks = await db.get_all_bookmarks()
+        used_tags = set()
+        
+        for bookmark in bookmarks:
+            bookmark_tags = await db.get_bookmark_tags(bookmark["id"])
+            used_tags.update(bookmark_tags)
+        
+        # Find unused tags
+        unused_tags = [tag for tag in all_tags if tag not in used_tags]
+        
+        # Remove unused tags if not dry run
+        if not dry_run:
+            for tag in unused_tags:
+                await db.delete_tag(tag)
+                removed_tags.append(tag)
+        
+        return {
+            "status": "success" if not dry_run else "dry_run",
+            "unused_tags": unused_tags,
+            "removed_tags": removed_tags,
+            "unused_count": len(unused_tags),
+            "removed_count": len(removed_tags),
+            "dry_run": dry_run,
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "unused_tags": [],
+            "removed_tags": removed_tags,
+            "unused_count": 0,
+            "removed_count": len(removed_tags),
+            "dry_run": dry_run,
+        }
