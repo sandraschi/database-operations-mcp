@@ -1,5 +1,7 @@
 # Database-Operations-MCP: Comprehensive Testing & Release Infrastructure Assessment
 
+> **⚠️ OUTDATED**: This document contains references to DXT packaging which has been replaced by MCPB packaging. The current MCPB packaging system is different from the DXT system described here.
+
 **Date**: 2025-09-07 18:15  
 **Status**: EXCELLENT FOUNDATION - Repository in outstanding shape!  
 **Project**: database-operations-mcp  

@@ -1,8 +1,10 @@
 # MCP Server Builder: Automated DXT Server Creation
 
+> **⚠️ OUTDATED**: This document describes DXT server creation which has been replaced by MCPB packaging. The current MCPB system is different from the DXT system described here.
+
 ## Overview
 
-The MCP Server Builder is an AI-powered tool that creates custom DXT servers from natural language descriptions. It handles the entire process from initial request to deployment-ready code.
+> **⚠️ OUTDATED**: The MCP Server Builder described here uses DXT packaging which has been replaced by MCPB packaging.
 
 ## How It Works
 

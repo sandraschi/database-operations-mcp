@@ -1,5 +1,7 @@
 # MCPB Extension Building - Complete Guide for MCP Servers
 
+> **⚠️ OUTDATED**: This document contains references to DXT packaging which has been replaced by MCPB packaging. The current MCPB packaging system is different from the DXT system described here.
+
 **Version:** 3.1.0  
 **Date:** 2025-01-15  
 **Applies to:** ALL MCP server repositories  
@@ -7,7 +9,7 @@
 
 ## 🚨 IMPORTANT: DXT is now MCPB
 
-**BREAKING CHANGE:** As of January 2025, DXT (Deployment eXtension Toolkit) has been renamed to **MCPB (MCP Bundle)**. This is more than just a name change - it reflects the evolution of the toolkit into a more comprehensive MCP packaging solution.
+> **⚠️ OUTDATED**: This section describes the DXT to MCPB transition, but the current MCPB system is different from what's described here.
 
 ### Migration Summary
 

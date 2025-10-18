@@ -1,5 +1,7 @@
 # The MCP Revolution: A Comprehensive Guide to Model Control Protocol
 
+> **⚠️ OUTDATED**: This document contains references to DXT packaging which has been replaced by MCPB packaging. The current MCPB packaging system is different from the DXT system described here.
+
 ## 1. Origins and History
 
 ### The Birth of MCP

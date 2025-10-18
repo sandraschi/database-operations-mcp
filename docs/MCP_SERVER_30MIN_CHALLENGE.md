@@ -1,8 +1,10 @@
 # 🚀 MCP Server in 30 Minutes: From Zero to Hero
 
+> **⚠️ OUTDATED**: This document contains references to DXT packaging which has been replaced by MCPB packaging. The current MCPB packaging system is different from the DXT system described here.
+
 ## 📋 Overview
 
-This guide provides a complete, step-by-step process to build, test, package, release, and promote an MCP (Model Control Protocol) server in just 30 minutes. Whether you're creating a new MCP server or enhancing an existing one, this challenge will help you ship production-ready code quickly.
+> **⚠️ OUTDATED**: This guide describes DXT packaging which has been replaced by MCPB packaging.
 
 ### 🎯 Key Objectives
 - Build a fully functional MCP server

@@ -1,5 +1,7 @@
 # 🚀 MCP Server Standards & Best Practices
 
+> **⚠️ OUTDATED**: This document contains references to DXT packaging which has been replaced by MCPB packaging. See the MCPB Building Guide for current packaging instructions.
+
 ## 📋 Table of Contents
 
 1. [MCP Server Selection Criteria](#-mcp-server-selection-criteria)
@@ -922,5 +924,5 @@ async def bad_example():
 
 ## 📚 Additional Resources
 - [FastMCP 2.13 Documentation](https://fastmcp.anthropic.com/docs/2.13/)
-- [DXT Packaging Guide](./DXT_BUILDING_GUIDE.md)
+- [MCPB Building Guide](./../mcpb-packaging/MCPB_BUILDING_GUIDE.md)
 - [Database Operations MCP Architecture](./ARCHITECTURE.md)

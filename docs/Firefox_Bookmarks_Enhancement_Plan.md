@@ -1,5 +1,7 @@
 # Firefox Bookmarks Enhancement Plan for Database Operations MCP
 
+> **⚠️ OUTDATED**: This document contains references to DXT packaging which has been replaced by MCPB packaging.
+
 **Date:** 2025-09-05  
 **Status:** Planning Phase  
 **Priority:** Medium  
@@ -7,7 +9,7 @@
 
 ## Overview
 
-Extending the database-operations-mcp with Firefox bookmark management capabilities based on our analysis of the Firefox `places.sqlite` database structure. This enhancement leverages existing database infrastructure and adds specialized Firefox-specific tools.
+> **⚠️ OUTDATED**: This plan references DXT packaging which has been replaced by MCPB packaging.
 
 ## Current State Assessment
 
