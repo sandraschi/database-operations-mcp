@@ -8,11 +8,9 @@ pytest-cov>=4.0.0
 pytest-mock>=3.10.0
 aiohttp>=3.8.0  # For async HTTP requests in tests
 
-# Code quality
-black>=23.0.0
-isort>=5.12.0
+# Code quality (modern, replaces flake8, black, isort, pyupgrade)
+ruff>=0.13.0
 mypy>=1.0.0
-flake8>=6.0.0
 
 # Documentation
 sphinx>=6.0.0
