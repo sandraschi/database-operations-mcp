@@ -98,9 +98,9 @@ class FirefoxStatusChecker:
 def is_firefox_running() -> Dict[str, Any]:
     """
     Check if Firefox is currently running.
-    
+
     Returns detailed status information about Firefox processes.
-    
+
     Returns:
         Dict containing Firefox running status, process count, and details
     """
@@ -111,10 +111,10 @@ def is_firefox_running() -> Dict[str, Any]:
 def check_firefox_database_access_safe(profile_path: Optional[str] = None) -> Dict[str, Any]:
     """
     Check if it's safe to access Firefox bookmark databases.
-    
+
     Args:
         profile_path: Optional path to Firefox profile directory
-        
+
     Returns:
         Dict containing safety status and recommendations
     """

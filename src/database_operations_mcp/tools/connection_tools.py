@@ -1,14 +1,10 @@
-"""
-Database Connection Management Tools.
-
-This module provides functionality for managing database connections, including:
-- Listing supported database types
-- Creating and testing connections
-- Managing connection pools
-- Handling connection lifecycle events
-
-It supports various database backends through a unified interface.
-"""
+# Database Connection Management Tools.
+# This module provides functionality for managing database connections, including:
+# - Listing supported database types
+# - Creating and testing connections
+# - Managing connection pools
+# - Handling connection lifecycle events
+# It supports various database backends through a unified interface.
 
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -16,13 +12,13 @@ from time import time
 from typing import Any, TypedDict
 
 # Import the global MCP instance
-from ..config.mcp_config import mcp
-from ..database_manager import (
+from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.database_manager import (
     create_connector,
     db_manager,
     get_supported_databases,
 )
-from ..tools.help_tools import HelpSystem
+from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +64,6 @@ async def list_supported_databases() -> dict[str, Any]:
         - error: Error message if the operation failed
 
     Example:
-        ```python
         {
             "success": True,
             "databases_by_category": {
@@ -80,13 +75,11 @@ async def list_supported_databases() -> dict[str, Any]:
                         "default_port": 5432,
                         "supports_ssl": True
                     }
-                ],
-                # ... other categories
+                ]
             },
             "total_supported": 8,
             "categories": ["SQL", "NoSQL", "Vector"]
         }
-        ```
     """
     try:
         databases: list[DatabaseInfo] = get_supported_databases()
@@ -148,7 +141,6 @@ def register_database_connection(
         - error: Error message if the operation failed
 
     Example:
-        ```python
         # Register a PostgreSQL connection
         result = register_database_connection(
             connection_name="my_postgres",
@@ -162,7 +154,6 @@ def register_database_connection(
                 "sslmode": "prefer"
             }
         )
-        ```
 
     Raises:
         ValueError: If any required parameters are missing or invalid
@@ -247,7 +238,6 @@ def list_database_connections() -> dict[str, Any]:
         - last_activity: Timestamp of last activity (if available)
 
     Example:
-        ```python
         {
             "success": True,
             "connections": {
@@ -264,7 +254,6 @@ def list_database_connections() -> dict[str, Any]:
             },
             "total_connections": 1
         }
-        ```
     """
     try:
         connections = db_manager.list_connectors()

@@ -37,6 +37,22 @@ from . import (
     registry_tools,
     schema_tools,
     windows_tools,
+    # New portmanteau tools
+    db_connection,
+    db_operations,
+    db_schema,
+    db_management,
+    db_fts,
+    firefox_bookmarks,
+    firefox_profiles,
+    firefox_utils,
+    firefox_tagging,
+    firefox_curated,
+    firefox_backup,
+    media_library,
+    windows_system,
+    help_system,
+    system_init,
 )
 
 # Export the main tool modules
@@ -55,4 +71,20 @@ __all__ = [
     "registry_tools",
     "schema_tools",
     "windows_tools",
+    # New portmanteau tools
+    "db_connection",
+    "db_operations",
+    "db_schema",
+    "db_management",
+    "db_fts",
+    "firefox_bookmarks",
+    "firefox_profiles",
+    "firefox_utils",
+    "firefox_tagging",
+    "firefox_curated",
+    "firefox_backup",
+    "media_library",
+    "windows_system",
+    "help_system",
+    "system_init",
 ]

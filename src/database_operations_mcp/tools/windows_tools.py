@@ -143,8 +143,7 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
                         "error": "Firefox is running - database is locked",
                         "firefox_status": firefox_status,
                         "solution": (
-                            "Close Firefox completely and try again, "
-                            "or set bruteforce_firefox=True"
+                            "Close Firefox completely and try again, or set bruteforce_firefox=True"
                         ),
                     }
                     continue
@@ -452,7 +451,7 @@ async def clean_windows_database(
         db_type: Type of database to clean
         action: Action to perform (vacuum, reindex, analyze)
         backup: Whether to create a backup before cleaning
-        bruteforce_firefox: If True, attempt to access Firefox database 
+        bruteforce_firefox: If True, attempt to access Firefox database
         even when locked (dangerous!)
 
     Returns:

@@ -220,22 +220,24 @@ class SQLiteConnector(BaseDatabaseConnector):
         try:
             if not os.path.exists(self.database_path):
                 return []
-            
+
             # SQLite only has one database per file
             db_name = os.path.basename(self.database_path)
             file_size = os.path.getsize(self.database_path)
-            
-            return [{
-                "database_name": db_name,
-                "path": self.database_path,
-                "size_bytes": file_size,
-                "type": "main",
-                "owner": "sqlite",
-                "collation": "BINARY",
-                "character_type": "UTF8",
-                "is_template": False,
-                "allow_connections": True
-            }]
+
+            return [
+                {
+                    "database_name": db_name,
+                    "path": self.database_path,
+                    "size_bytes": file_size,
+                    "type": "main",
+                    "owner": "sqlite",
+                    "collation": "BINARY",
+                    "character_type": "UTF8",
+                    "is_template": False,
+                    "allow_connections": True,
+                }
+            ]
         except Exception as e:
             logger.error(f"Error listing SQLite databases: {e}")
             return []
@@ -259,7 +261,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                 AND name NOT LIKE 'sqlite_%'
                 ORDER BY name
             """)
-            
+
             tables = []
             for row in cursor.fetchall():
                 # Get row count for each table
@@ -268,15 +270,17 @@ class SQLiteConnector(BaseDatabaseConnector):
                     row_count = cursor.fetchone()[0]
                 except Exception:
                     row_count = 0
-                
-                tables.append({
-                    "table_name": row[0],
-                    "table_type": row[1],
-                    "schema_name": row[2],
-                    "owner": row[3],
-                    "row_count": row_count
-                })
-            
+
+                tables.append(
+                    {
+                        "table_name": row[0],
+                        "table_type": row[1],
+                        "schema_name": row[2],
+                        "owner": row[3],
+                        "row_count": row_count,
+                    }
+                )
+
             return tables
         except ConnectionError:
             # Re-raise connection errors as-is

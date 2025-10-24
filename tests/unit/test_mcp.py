@@ -15,7 +15,7 @@ def test_mcp_server():
     """Test the MCP server by sending a list_tools request."""
     # Skip this test due to Windows subprocess stdin issues
     pytest.skip("Skipping due to Windows subprocess stdin issues")
-    
+
     # Start the MCP server as a subprocess
     server = subprocess.Popen(
         [sys.executable, "-m", "database_operations_mcp.main"],

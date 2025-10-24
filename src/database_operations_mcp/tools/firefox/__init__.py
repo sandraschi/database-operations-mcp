@@ -12,6 +12,9 @@ from .bulk_operations import batch_update_tags, export_bookmarks
 from .core import get_firefox_profiles
 from .folder_based_tagging import batch_tag_from_folder, tag_from_folder
 
+# Import AI portmanteau tool
+from .ai_portmanteau import ai_bookmark_portmanteau
+
 # Import other tools
 from .link_checker import find_broken_links
 from .links import add_bookmark, get_bookmark, list_bookmarks
@@ -53,5 +56,6 @@ __all__ = [
     "merge_tags",
     "clean_up_tags",
     "find_duplicates",
+    "ai_bookmark_portmanteau",  # AI portmanteau tool
     "mcp",  # Export the mcp instance
 ]

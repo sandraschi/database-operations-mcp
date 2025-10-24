@@ -42,32 +42,27 @@ def test_connection():
     """Test basic connection to the MCP server."""
     # Skip this test due to Windows subprocess stdin issues
     pytest.skip("Skipping due to Windows subprocess stdin issues")
-    
+
     import json
     import subprocess
-    
+
     # Start the MCP server process
     server_process = subprocess.Popen(
         ["python", "-m", "database_operations_mcp.main"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
-    
+
     try:
         # Send a test request
-        request = {
-            "jsonrpc": "2.0",
-            "method": "test_connection",
-            "params": {},
-            "id": 1
-        }
-        
+        request = {"jsonrpc": "2.0", "method": "test_connection", "params": {}, "id": 1}
+
         # Send request
         server_process.stdin.write(json.dumps(request) + "\n")
         server_process.stdin.flush()
-        
+
         # Read response
         response_line = server_process.stdout.readline()
         if response_line:
@@ -77,7 +72,7 @@ def test_connection():
             assert True  # Test passed
         else:
             raise AssertionError("No response received from server")
-        
+
     finally:
         # Clean up
         server_process.terminate()

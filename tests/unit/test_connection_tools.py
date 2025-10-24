@@ -78,36 +78,36 @@ def test_connection_tools_are_registered(mock_mcp):
 @patch("database_operations_mcp.config.mcp_config.mcp")
 @patch("database_operations_mcp.tools.connection_tools.db_manager")
 def test_list_supported_databases(mock_mcp, mock_db_manager):
-        """Test listing supported databases."""
-        import asyncio
+    """Test listing supported databases."""
+    import asyncio
 
-        # Mock the tool decorator to not wrap the function
-        mock_mcp.tool.side_effect = lambda func: func
+    # Mock the tool decorator to not wrap the function
+    mock_mcp.tool.side_effect = lambda func: func
 
-        # Arrange
-        with patch(
-            "database_operations_mcp.tools.connection_tools.get_supported_databases",
-            return_value=SAMPLE_DATABASES,
-        ):
-            # Import the module to register tools via decorators
-            import database_operations_mcp.tools.connection_tools  # noqa: F401
+    # Arrange
+    with patch(
+        "database_operations_mcp.tools.connection_tools.get_supported_databases",
+        return_value=SAMPLE_DATABASES,
+    ):
+        # Import the module to register tools via decorators
+        import database_operations_mcp.tools.connection_tools  # noqa: F401
 
-            # Get the actual function from the module
-            from database_operations_mcp.tools.connection_tools import list_supported_databases
+        # Get the actual function from the module
+        from database_operations_mcp.tools.connection_tools import list_supported_databases
 
-            # Act - run the async function (access the underlying function if it's wrapped)
-            actual_function = list_supported_databases
-            if hasattr(actual_function, '__wrapped__'):
-                actual_function = actual_function.__wrapped__
-            elif hasattr(actual_function, 'fn'):
-                actual_function = actual_function.fn
-            
-            result = asyncio.run(actual_function())
+        # Act - run the async function (access the underlying function if it's wrapped)
+        actual_function = list_supported_databases
+        if hasattr(actual_function, "__wrapped__"):
+            actual_function = actual_function.__wrapped__
+        elif hasattr(actual_function, "fn"):
+            actual_function = actual_function.fn
 
-        # Assert
-        assert result["success"] is True
-        assert "databases_by_category" in result
-        assert result["total_supported"] == len(SAMPLE_DATABASES)
+        result = asyncio.run(actual_function())
+
+    # Assert
+    assert result["success"] is True
+    assert "databases_by_category" in result
+    assert result["total_supported"] == len(SAMPLE_DATABASES)
 
 
 @patch("database_operations_mcp.config.mcp_config.mcp")

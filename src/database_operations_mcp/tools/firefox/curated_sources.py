@@ -187,10 +187,10 @@ CURATED_SOURCES = {
 def get_curated_source(source_name: str) -> Dict[str, Any]:
     """
     Get a predefined curated source by name.
-    
+
     Args:
         source_name: Name of the curated source to retrieve
-        
+
     Returns:
         Dict containing the curated source information or None if not found
     """
@@ -201,7 +201,7 @@ def get_curated_source(source_name: str) -> Dict[str, Any]:
 def list_curated_sources() -> Dict[str, Any]:
     """
     List all available curated sources.
-    
+
     Returns:
         Dict containing all available curated sources with metadata
     """

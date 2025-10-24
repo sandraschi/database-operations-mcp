@@ -8,13 +8,14 @@ It provides information about available tools and their usage.
 import asyncio
 import inspect
 import json
+import logging
 from typing import Any, Callable, Dict, Optional
 
 # Import FastMCP types
 try:
-    from mcp.server import FastMCPServer, FastMCPTool
-    from mcp.types import ToolCall, ToolDefinition, ToolError, ToolResult
-    from mcp.utils.logging import get_logger
+    from mcp.server.fastmcp import FastMCP
+    from mcp.server.fastmcp.server import get_logger
+    from mcp.types import ToolCall, ToolDefinition, ToolError, ToolResult, Tool as MCPTool
 except ImportError:
     # Fallback for development
     from typing import Any, TypedDict
@@ -37,7 +38,7 @@ except ImportError:
         description: str
         parameters: Dict[str, Any]
 
-    class FastMCPTool:
+    class MCPTool:
         def __init__(self, name: str, description: str, parameters: Dict[str, Any], func: Callable):
             self.name = name
             self.description = description
@@ -48,13 +49,13 @@ except ImportError:
             return await self.func(**kwargs)
 
 
-logger = get_logger(__name__)
+logger = get_logger(__name__) if "get_logger" in globals() else logging.getLogger(__name__)
 
 
-class FastMCPHelpTool(FastMCPTool):
+class FastMCPHelpTool(MCPTool):
     """FastMCP 2.13 compliant help tool."""
 
-    def __init__(self, server: "FastMCPServer"):
+    def __init__(self, server: "FastMCP"):
         """Initialize the help tool.
 
         Args:
@@ -207,7 +208,7 @@ class FastMCPHelpTool(FastMCPTool):
         return result
 
 
-def register_tool(server: "FastMCPServer") -> FastMCPTool:
+def register_tool(server: "FastMCP") -> MCPTool:
     """Register the help tool with the FastMCP server.
 
     This function is called by the FastMCP server to register the tool.

@@ -432,7 +432,7 @@ async def get_schema_diff(
             #             {'column': 'phone', 'status': 'only_in_table2'}
             #         ],
             #         'type_differences': [
-            #             {'column': 'email', 'table1_type': 'varchar(100)', 
+            #             {'column': 'email', 'table1_type': 'varchar(100)',
             #              'table2_type': 'varchar(255)'}
             #         ]
             #     }

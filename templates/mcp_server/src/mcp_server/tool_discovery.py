@@ -6,6 +6,7 @@ This module provides functionality to discover and load FastMCP 2.13 compliant t
 
 import importlib
 import inspect
+import logging
 import pkgutil
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Type, TypeVar
@@ -14,7 +15,9 @@ from typing import Any, Callable, Dict, Optional, Type, TypeVar
 try:
     from mcp.server import FastMCPServer, FastMCPTool
     from mcp.types import ToolCall, ToolDefinition, ToolError, ToolResult
-    from mcp.utils.logging import get_logger
+
+    # Use standard logging since mcp.server.logging may not exist
+    get_logger = None
 except ImportError:
     # Fallback for development
     from typing import Any, Callable, Dict, Optional, Type, TypedDict, TypeVar
@@ -47,8 +50,14 @@ except ImportError:
         async def __call__(self, **kwargs) -> Any:
             return await self.func(**kwargs)
 
+    get_logger = None
 
-logger = get_logger(__name__)
+
+# Initialize logger with proper fallback
+if get_logger is not None:
+    logger = get_logger(__name__)
+else:
+    logger = logging.getLogger(__name__)
 
 # Type variable for tool classes
 T = TypeVar("T", bound=FastMCPTool)

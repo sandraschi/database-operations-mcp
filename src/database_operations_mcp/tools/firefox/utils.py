@@ -86,34 +86,30 @@ def get_places_db_path(profile_name: Optional[str] = None) -> Optional[Path]:
 def get_firefox_platform() -> Dict[str, Any]:
     """
     Get the current platform identifier for Firefox operations.
-    
+
     Returns:
         Dict containing platform information
     """
     platform = get_platform()
-    return {
-        "platform": platform,
-        "os_name": os.name,
-        "message": f"Detected platform: {platform}"
-    }
+    return {"platform": platform, "os_name": os.name, "message": f"Detected platform: {platform}"}
 
 
 @mcp.tool()
 def get_firefox_profiles() -> Dict[str, Any]:
     """
     Get all available Firefox profiles.
-    
+
     Returns:
         Dict containing profile information and paths
     """
     profiles = parse_profiles_ini()
     profiles_ini_path = get_profiles_ini_path()
-    
+
     return {
         "profiles": profiles,
         "profiles_ini_path": str(profiles_ini_path) if profiles_ini_path else None,
         "count": len(profiles),
-        "message": f"Found {len(profiles)} Firefox profiles"
+        "message": f"Found {len(profiles)} Firefox profiles",
     }
 
 
@@ -121,27 +117,27 @@ def get_firefox_profiles() -> Dict[str, Any]:
 def get_firefox_profile_directory(profile_name: Optional[str] = None) -> Dict[str, Any]:
     """
     Get the directory path for a Firefox profile.
-    
+
     Args:
         profile_name: Name of the profile (optional, uses default if not provided)
-        
+
     Returns:
         Dict containing profile directory information
     """
     profile_dir = get_profile_directory(profile_name)
-    
+
     if not profile_dir:
         return {
             "success": False,
             "message": f"Profile '{profile_name or 'default'}' not found",
-            "profile_directory": None
+            "profile_directory": None,
         }
-    
+
     return {
         "success": True,
         "profile_name": profile_name,
         "profile_directory": str(profile_dir),
-        "message": f"Found profile directory: {profile_dir}"
+        "message": f"Found profile directory: {profile_dir}",
     }
 
 
@@ -149,26 +145,26 @@ def get_firefox_profile_directory(profile_name: Optional[str] = None) -> Dict[st
 def get_firefox_places_db_path(profile_name: Optional[str] = None) -> Dict[str, Any]:
     """
     Get the path to the places.sqlite file for a Firefox profile.
-    
+
     Args:
         profile_name: Name of the profile (optional, uses default if not provided)
-        
+
     Returns:
         Dict containing database path information
     """
     db_path = get_places_db_path(profile_name)
-    
+
     if not db_path:
         return {
             "success": False,
             "message": f"Could not find places.sqlite for profile '{profile_name or 'default'}'",
-            "database_path": None
+            "database_path": None,
         }
-    
+
     return {
         "success": True,
         "profile_name": profile_name,
         "database_path": str(db_path),
         "exists": db_path.exists(),
-        "message": f"Found places.sqlite at: {db_path}"
+        "message": f"Found places.sqlite at: {db_path}",
     }

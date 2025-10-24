@@ -34,6 +34,7 @@ class DatabaseOperationsMCP:
         self._shutdown_event = asyncio.Event()
 
         # Import all tool modules to ensure @mcp.tool decorators are executed
+        self._import_all_tools()
 
     async def _register_handlers(self) -> None:
         """Import all handler modules to register tools via decorators.
@@ -70,6 +71,19 @@ class DatabaseOperationsMCP:
             # Windows signal handling
             signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self._shutdown()))
             signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self._shutdown()))
+
+    def _import_all_tools(self) -> None:
+        """Import comprehensive portmanteau tools for all categories to avoid tool explosion."""
+        try:
+            # Import comprehensive portmanteau tools covering all categories
+            # These imports are intentionally unused - they trigger @mcp.tool() decorators
+            from . import comprehensive_portmanteau_tools  # noqa: F401
+            
+            logger.info("Comprehensive portmanteau tools imported successfully - covering all categories!")
+            
+        except ImportError as e:
+            logger.error(f"Failed to import tool modules: {e}")
+            raise
 
     def _import_handlers(self) -> None:
         """Import handler modules to trigger @mcp.tool decorators."""
@@ -154,7 +168,7 @@ class DatabaseOperationsMCP:
 
             # Run the stdio server
             logger.info("Starting stdio server...")
-            self.mcp.run_stdio_async()
+            await self.mcp.run_stdio_async()
 
             return 0
 

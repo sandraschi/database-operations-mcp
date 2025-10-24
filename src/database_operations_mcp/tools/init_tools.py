@@ -45,7 +45,7 @@ async def init_database(
 
         connection_params: Database-specific connection parameters
             - SQLite: {'database': '/path/to/file.db'}
-            - PostgreSQL: {'host': 'localhost', 'port': 5432, 'user': 'admin', 
+            - PostgreSQL: {'host': 'localhost', 'port': 5432, 'user': 'admin',
               'password': 'pwd', 'database': 'mydb'}
             - MongoDB: {'host': 'localhost', 'port': 27017, 'database': 'mydb'}
             - ChromaDB: {'path': '/path/to/chroma', 'collection': 'mycoll'}

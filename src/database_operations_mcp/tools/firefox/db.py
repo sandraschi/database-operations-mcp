@@ -59,36 +59,36 @@ class FirefoxDB:
 def test_firefox_database_connection(profile_path: str) -> Dict[str, Any]:
     """
     Test connection to Firefox bookmark database.
-    
+
     Args:
         profile_path: Path to Firefox profile directory
-        
+
     Returns:
         Dict containing connection test results
     """
     try:
         profile_path_obj = Path(profile_path)
         db = FirefoxDB(profile_path_obj)
-        
+
         if db.connect():
             db.close()
             return {
                 "success": True,
                 "message": f"Successfully connected to Firefox database at {profile_path}",
-                "database_path": str(profile_path_obj / "places.sqlite")
+                "database_path": str(profile_path_obj / "places.sqlite"),
             }
         else:
             return {
                 "success": False,
                 "message": f"Failed to connect to Firefox database at {profile_path}",
-                "database_path": str(profile_path_obj / "places.sqlite")
+                "database_path": str(profile_path_obj / "places.sqlite"),
             }
-            
+
     except Exception as e:
         return {
             "success": False,
             "error": str(e),
-            "message": f"Error testing Firefox database connection: {e}"
+            "message": f"Error testing Firefox database connection: {e}",
         }
 
 
@@ -96,37 +96,37 @@ def test_firefox_database_connection(profile_path: str) -> Dict[str, Any]:
 def get_firefox_database_info(profile_path: str) -> Dict[str, Any]:
     """
     Get information about Firefox bookmark database.
-    
+
     Args:
         profile_path: Path to Firefox profile directory
-        
+
     Returns:
         Dict containing database information
     """
     try:
         profile_path_obj = Path(profile_path)
         db = FirefoxDB(profile_path_obj)
-        
+
         if not db.connect():
             return {
                 "success": False,
-                "message": f"Cannot connect to Firefox database at {profile_path}"
+                "message": f"Cannot connect to Firefox database at {profile_path}",
             }
-        
+
         # Get database schema info
         cursor = db.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tables = [row[0] for row in cursor.fetchall()]
-        
+
         # Get bookmark count
         cursor = db.execute("SELECT COUNT(*) as count FROM moz_bookmarks")
         bookmark_count = cursor.fetchone()[0]
-        
+
         # Get URL count
         cursor = db.execute("SELECT COUNT(*) as count FROM moz_places")
         url_count = cursor.fetchone()[0]
-        
+
         db.close()
-        
+
         return {
             "success": True,
             "profile_path": str(profile_path_obj),
@@ -134,12 +134,12 @@ def get_firefox_database_info(profile_path: str) -> Dict[str, Any]:
             "tables": tables,
             "bookmark_count": bookmark_count,
             "url_count": url_count,
-            "message": f"Database contains {bookmark_count} bookmarks and {url_count} URLs"
+            "message": f"Database contains {bookmark_count} bookmarks and {url_count} URLs",
         }
-        
+
     except Exception as e:
         return {
             "success": False,
             "error": str(e),
-            "message": f"Error getting Firefox database info: {e}"
+            "message": f"Error getting Firefox database info: {e}",
         }

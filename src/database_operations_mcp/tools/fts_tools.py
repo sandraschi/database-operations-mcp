@@ -62,7 +62,7 @@ async def fts_search(
                     [
                         f'highlight({table}, {col}, "<b>", "</b>") as {col}_highlight',
                         f'snippet({table}, {col}, "... ", " ...", "...", '
-                        f'{snippet_size}) as {col}_snippet',
+                        f"{snippet_size}) as {col}_snippet",
                     ]
                 )
 

@@ -331,8 +331,7 @@ def format_tool_list(tools: List[Dict[str, Any]]) -> str:
         "tool_name": {
             "type": "string",
             "description": (
-                "Name of the tool to get help for. "
-                "If not provided, lists all available tools."
+                "Name of the tool to get help for. If not provided, lists all available tools."
             ),
             "required": False,
         },
@@ -351,7 +350,7 @@ async def help_tool(tool_name: Optional[str] = None, search_term: Optional[str] 
     including their parameters, return values, and usage examples.
 
     Args:
-        tool_name: Name of the tool to get help for. 
+        tool_name: Name of the tool to get help for.
         If not provided, lists all available tools.
         search_term: Search term to filter tools by name or description.
 

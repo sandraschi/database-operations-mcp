@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from ..help_tools import HelpSystem
+from database_operations_mcp.tools.help_tools import HelpSystem
 from . import mcp  # Import the mcp instance from __init__
 from .db import FirefoxDB
 
@@ -116,29 +116,31 @@ async def batch_update_tags(
     try:
         # Get all bookmarks with their current tags
         bookmarks = await db.get_all_bookmarks()
-        
+
         for bookmark in bookmarks:
             bookmark_id = bookmark["id"]
             current_tags = await db.get_bookmark_tags(bookmark_id)
-            
+
             # Check if any tags need updating
             updated_tags = []
             bookmark_changed = False
-            
+
             for tag in current_tags:
                 if tag in tag_mapping:
                     new_tag = tag_mapping[tag]
                     updated_tags.append(new_tag)
                     bookmark_changed = True
-                    changes.append({
-                        "bookmark_id": bookmark_id,
-                        "bookmark_title": bookmark["title"],
-                        "old_tag": tag,
-                        "new_tag": new_tag
-                    })
+                    changes.append(
+                        {
+                            "bookmark_id": bookmark_id,
+                            "bookmark_title": bookmark["title"],
+                            "old_tag": tag,
+                            "new_tag": new_tag,
+                        }
+                    )
                 else:
                     updated_tags.append(tag)
-            
+
             # Update the bookmark if changes were made
             if bookmark_changed and not dry_run:
                 await db.update_bookmark_tags(bookmark_id, updated_tags)
@@ -181,28 +183,28 @@ async def remove_unused_tags(
     """
     db = FirefoxDB(Path(profile_path) if profile_path else None)
     removed_tags = []
-    
+
     try:
         # Get all tags
         all_tags = await db.get_all_tags()
-        
+
         # Get all bookmarks with their tags
         bookmarks = await db.get_all_bookmarks()
         used_tags = set()
-        
+
         for bookmark in bookmarks:
             bookmark_tags = await db.get_bookmark_tags(bookmark["id"])
             used_tags.update(bookmark_tags)
-        
+
         # Find unused tags
         unused_tags = [tag for tag in all_tags if tag not in used_tags]
-        
+
         # Remove unused tags if not dry run
         if not dry_run:
             for tag in unused_tags:
                 await db.delete_tag(tag)
                 removed_tags.append(tag)
-        
+
         return {
             "status": "success" if not dry_run else "dry_run",
             "unused_tags": unused_tags,

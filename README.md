@@ -4,11 +4,15 @@
 
 A comprehensive MCP server supporting SQLite, PostgreSQL, and ChromaDB operations.
 
-[![FastMCP](https://img.shields.io/badge/FastMCP-2.12.0-blue.svg)](https://github.com/jlowin/fastmcp)
+[![FastMCP](https://img.shields.io/badge/FastMCP-2.12.4-blue.svg)](https://github.com/jlowin/fastmcp)
+[![MCP](https://img.shields.io/badge/MCP-Compliant-green.svg)](https://modelcontextprotocol.io/)
 [![GLAMA.ai](https://glama.ai/mcp/servers/database-operations-mcp/badge)](https://glama.ai/mcp/servers/database-operations-mcp)
 [![PyPI](https://img.shields.io/pypi/v/database-operations-mcp)](https://pypi.org/project/database-operations-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Tools](https://img.shields.io/badge/Tools-15%20Portmanteau-orange.svg)](#-available-tools)
+[![Databases](https://img.shields.io/badge/Databases-SQLite%20%7C%20PostgreSQL%20%7C%20ChromaDB-purple.svg)](#supported-database-types)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](#installation)
 
 ## Overview
 

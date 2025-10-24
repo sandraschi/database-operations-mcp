@@ -10,29 +10,24 @@ import sys
 
 def test_mcp_server():
     """Test MCP server communication."""
-    
+
     # Start the MCP server process
     server_process = subprocess.Popen(
         ["python", "-m", "database_operations_mcp.main"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
-    
+
     try:
         # Send a test request
-        request = {
-            "jsonrpc": "2.0",
-            "method": "list_tools",
-            "params": {},
-            "id": 1
-        }
-        
+        request = {"jsonrpc": "2.0", "method": "list_tools", "params": {}, "id": 1}
+
         # Send request
         server_process.stdin.write(json.dumps(request) + "\n")
         server_process.stdin.flush()
-        
+
         # Read response
         response_line = server_process.stdout.readline()
         if response_line:
@@ -40,7 +35,7 @@ def test_mcp_server():
             assert response["id"] == 1
             assert "result" in response or "error" in response
             assert True  # Test passed
-        
+
     finally:
         # Clean up
         server_process.terminate()

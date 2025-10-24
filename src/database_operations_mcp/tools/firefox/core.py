@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
 
-from ..help_tools import HelpSystem
+from database_operations_mcp.tools.help_tools import HelpSystem
 from .bookmark_manager import BookmarkManager
 from .curated_sources import CURATED_SOURCES, get_curated_source, list_curated_sources
 from .links import add_bookmark
@@ -227,6 +227,7 @@ async def check_firefox_bruteforce_access() -> Dict[str, Any]:
 def is_firefox_running() -> bool:
     """Legacy function for backward compatibility."""
     from .status import FirefoxStatusChecker
+
     return FirefoxStatusChecker.is_firefox_running()["is_running"]
 
 
@@ -258,7 +259,7 @@ async def create_loaded_profile_from_preset(
 
     Args:
         profile_name: Name for the new profile
-        preset_name: Name of the predefined bookmark collection 
+        preset_name: Name of the predefined bookmark collection
         (e.g., "developer_tools", "cooking", "ai_ml")
         max_bookmarks: Maximum number of bookmarks to add
 
@@ -542,7 +543,7 @@ async def create_loaded_profile(
 
     Args:
         profile_name: Name for the new profile
-        source_type: Type of bookmark source 
+        source_type: Type of bookmark source
         ("current_collection", "web_list", "github_awesome", "custom_list")
         source_config: Configuration for the source (varies by source_type)
         max_bookmarks: Maximum number of bookmarks to add
@@ -566,7 +567,7 @@ async def create_loaded_profile(
 
         Create work profile from current collection:
         await create_loaded_profile(
-            "work", "current_collection", 
+            "work", "current_collection",
             {"from_profile": "default", "filter_tags": ["work"]}
         )
     """
@@ -609,8 +610,7 @@ async def create_loaded_profile(
         return {
             "status": "success",
             "message": (
-                f"Profile '{profile_name}' created and loaded with "
-                f"{bookmarks_added} bookmarks"
+                f"Profile '{profile_name}' created and loaded with {bookmarks_added} bookmarks"
             ),
             "profile_name": profile_name,
             "profile_path": str(profile_path),
@@ -841,7 +841,7 @@ async def create_portmanteau_profile(
         Create a comprehensive "work+news" profile:
         await create_portmanteau_profile("work-news", ["developer_tools", "news_media"])
 
-    Available presets: developer_tools, ai_ml, cooking, productivity, 
+    Available presets: developer_tools, ai_ml, cooking, productivity,
     news_media, finance, entertainment, shopping
     """
     safety_check = FirefoxStatusChecker.check_database_access_safe()
@@ -930,8 +930,7 @@ async def create_portmanteau_profile(
             return {
                 "status": "warning",
                 "message": (
-                    f"Profile '{profile_name}' created but no bookmarks were "
-                    f"collected from sources"
+                    f"Profile '{profile_name}' created but no bookmarks were collected from sources"
                 ),
                 "profile_name": profile_name,
                 "profile_path": str(profile_path),
@@ -949,8 +948,7 @@ async def create_portmanteau_profile(
         return {
             "status": "success",
             "message": (
-                f"Portmanteau profile '{profile_name}' created with "
-                f"{portmanteau_desc} bookmarks"
+                f"Portmanteau profile '{profile_name}' created with {portmanteau_desc} bookmarks"
             ),
             "profile_name": profile_name,
             "profile_path": str(profile_path),

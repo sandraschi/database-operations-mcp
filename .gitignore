@@ -77,3 +77,6 @@ coverage.xml
 # MCPB Package Files
 *.mcpb
 dist/*.mcpb
+
+# Private documentation (internal dev notes, not for public)
+docs-private/

@@ -368,7 +368,6 @@ def register_tools(mcp):
     """
 
 
-
 @mcp.tool()
 def get_plex_library_sections(db_path: str | None = None) -> list[dict[str, Any]]:
     """Get a list of all library sections from Plex.

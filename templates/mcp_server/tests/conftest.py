@@ -1,4 +1,5 @@
 """Pytest configuration and fixtures for MCP server tests."""
+
 import asyncio
 
 # Add the project root to the Python path
@@ -42,12 +43,12 @@ async def reset_mcp() -> AsyncGenerator[None, None]:
     """
     # Save any existing tools
     original_tools = mcp.tools.copy()
-    
+
     # Clear all tools before test
     mcp.tools.clear()
-    
+
     yield  # Run the test
-    
+
     # Restore original tools after test
     mcp.tools.clear()
     mcp.tools.update(original_tools)
@@ -60,19 +61,21 @@ def mock_tool():
     Returns:
         A function to create mock tools with specified behavior.
     """
+
     def _mock_tool(name: str, return_value=None, side_effect=None):
         """Create a mock tool with the given name and behavior."""
+
         async def tool_func(*args, **kwargs):
             if side_effect is not None:
                 if isinstance(side_effect, Exception):
                     raise side_effect
                 return side_effect(*args, **kwargs)
             return return_value
-            
+
         # Add tool to MCP
         mcp.tools[name] = tool_func
         return tool_func
-        
+
     return _mock_tool
 
 
@@ -91,14 +94,14 @@ def set_test_env(monkeypatch):
     """Set up test environment variables."""
     monkeypatch.setenv("ENV", "test")
     monkeypatch.setenv("LOG_LEVEL", "DEBUG")
-    
+
     # Set a temporary directory for test outputs
     test_dir = Path(__file__).parent / "tmp"
     test_dir.mkdir(exist_ok=True)
     monkeypatch.setenv("TEMP_DIR", str(test_dir.absolute()))
-    
+
     yield
-    
+
     # Clean up test directory
     for file in test_dir.glob("*"):
         if file.is_file():

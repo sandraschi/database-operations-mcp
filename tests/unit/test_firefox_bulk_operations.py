@@ -19,6 +19,7 @@ class TestFirefoxBulkOperations:
         """Create a mock FirefoxDB instance."""
         mock_db = AsyncMock()
         mock_db.get_all_bookmarks = AsyncMock()
+        mock_db.get_bookmarks = AsyncMock()  # Add this method
         mock_db.get_bookmark_tags = AsyncMock()
         mock_db.update_bookmark_tags = AsyncMock()
         mock_db.get_all_tags = AsyncMock()
@@ -82,11 +83,29 @@ class TestFirefoxBulkOperations:
     @pytest.mark.asyncio
     async def test_bulk_operations_process_in_batches(self, mock_db):
         """Test BulkOperations process_in_batches method."""
-        # Mock data
-        mock_db.get_bookmarks.return_value = [
-            {"id": 1, "title": "Bookmark 1", "url": "http://example.com", "date_added": "2024-01-01", "last_modified": "2024-01-01"},
-            {"id": 2, "title": "Bookmark 2", "url": "http://test.com", "date_added": "2024-01-02", "last_modified": "2024-01-02"},
+        # Mock data - first batch returns data, second batch returns empty list
+        mock_bookmarks = [
+            {
+                "id": 1,
+                "title": "Bookmark 1",
+                "url": "http://example.com",
+                "date_added": "2024-01-01",
+                "last_modified": "2024-01-01",
+            },
+            {
+                "id": 2,
+                "title": "Bookmark 2",
+                "url": "http://test.com",
+                "date_added": "2024-01-02",
+                "last_modified": "2024-01-02",
+            },
         ]
+
+        # Mock get_bookmarks to return data on first call, empty on second call
+        mock_db.get_bookmarks = AsyncMock(side_effect=[mock_bookmarks, []])
+
+        # Mock get_bookmark_tags method
+        mock_db.get_bookmark_tags = AsyncMock(return_value=["tag1", "tag2"])
 
         bulk_ops = BulkOperations()
         bulk_ops.db = mock_db

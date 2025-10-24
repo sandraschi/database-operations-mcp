@@ -42,7 +42,7 @@ def investigate_mystery_database():
         if connection_test["success"]:
             print("✅ Connection successful!")
             print(f"   SQLite Version: {connection_test['sqlite_version']}")
-            file_size_mb = connection_test['file_size_bytes'] / 1024 / 1024
+            file_size_mb = connection_test["file_size_bytes"] / 1024 / 1024
             print(
                 f"   File Size: {connection_test['file_size_bytes']:,} bytes "
                 f"({file_size_mb:.2f} MB)"
