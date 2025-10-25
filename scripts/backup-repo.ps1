@@ -107,8 +107,20 @@ $exclusions = @(
     "sandboxes",
     "quarantine",
     "analysis",
-    "backups"
+    "backups",
+    "*.dxt"        # Old DXT package format
 )
+
+# Large test files that should be excluded (can be regenerated)
+# Note: Use forward slashes or double backslashes for regex compatibility
+$excludeLargeTestFiles = @(
+    "samples/metadata.db",      # Large Calibre test database (3.9 MB)
+    "samples/test_library.db",  # Large test libraries  
+    "test_data/*.db"            # Test data in any test_data directory
+)
+
+# Combine exclusions
+$exclusions += $excludeLargeTestFiles
 
 if (-not $IncludeBuild) {
     $exclusions += @("dist", "build", "*.whl", "*.tar.gz")

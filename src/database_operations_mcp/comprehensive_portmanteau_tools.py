@@ -827,7 +827,7 @@ async def db_fts(
 
 
 # ============================================================================
-# FIREFOX BOOKMARKS PORTMANTEAU
+# FIREFOX BOOKMARKS PORTMANTEAU (CONSOLIDATED)
 # ============================================================================
 
 @mcp.tool()
@@ -841,15 +841,33 @@ async def firefox_bookmarks(
     tags: Optional[List[str]] = None,
     search_query: Optional[str] = None,
     limit: int = 100,
+    # Tagging parameters
+    folder_path: Optional[str] = None,
+    year: Optional[int] = None,
+    tag_prefix: Optional[str] = None,
+    batch_size: int = 100,
+    include_subfolders: bool = True,
+    dry_run: bool = False,
+    # Curated parameters
+    category: Optional[str] = None,
+    source_name: Optional[str] = None,
+    include_metadata: bool = True,
+    # Backup parameters
+    backup_path: Optional[str] = None,
+    restore_path: Optional[str] = None,
+    include_bookmarks: bool = True,
+    include_settings: bool = True,
+    include_passwords: bool = False,
 ) -> Dict[str, Any]:
-    """Firefox bookmark management portmanteau tool.
+    """Firefox bookmark management portmanteau tool (CONSOLIDATED).
 
-    Comprehensive Firefox bookmark management consolidating all bookmark operations
-    into a single interface. Provides complete bookmark lifecycle management with
-    advanced search, organization, and analysis capabilities.
+    Comprehensive Firefox bookmark management consolidating ALL bookmark-related
+    operations into a single interface. Includes bookmarks, tagging, curated sources,
+    and backup operations for complete bookmark lifecycle management.
 
     Parameters:
         operation: Bookmark operation to perform
+            # Core bookmark operations
             - 'list_bookmarks': List bookmarks with filtering and pagination
             - 'get_bookmark': Get specific bookmark by ID
             - 'add_bookmark': Add new bookmark to specified folder
@@ -860,6 +878,30 @@ async def firefox_bookmarks(
             - 'import': Import bookmarks from external sources
             - 'organize': Organize bookmarks by categories or tags
             - 'analyze': Analyze bookmark usage and patterns
+            
+            # Tagging operations
+            - 'tag_from_folder': Generate tags based on folder structure
+            - 'batch_tag_from_folder': Batch tag generation from folders
+            - 'tag_from_year': Generate tags based on bookmark creation year
+            - 'batch_tag_from_year': Batch tag generation by year
+            - 'list_tags': List all tags used in profile
+            - 'merge_tags': Merge similar or duplicate tags
+            - 'clean_up_tags': Remove unused or redundant tags
+            - 'suggest_tags': Suggest tags for untagged bookmarks
+            
+            # Curated sources operations
+            - 'get_curated_source': Get specific curated source by name
+            - 'list_curated_sources': List all available curated sources
+            - 'list_curated_bookmark_sources': List bookmark-specific sources
+            - 'create_from_curated': Create bookmarks from curated source
+            - 'search_curated': Search curated sources by topic or category
+            - 'import_curated': Import curated collection to profile
+            
+            # Backup operations
+            - 'backup_firefox_data': Create complete profile backup
+            - 'restore_firefox_data': Restore profile from backup
+            - 'list_backups': List available backup files
+            - 'verify_backup': Verify backup integrity and completeness
 
         profile_name: Firefox profile name (required for most operations)
             - Target Firefox profile for bookmark operations
@@ -1028,7 +1070,7 @@ async def firefox_bookmarks(
 
 
 # ============================================================================
-# FIREFOX PROFILES PORTMANTEAU
+# FIREFOX PROFILES PORTMANTEAU (CONSOLIDATED)
 # ============================================================================
 
 @mcp.tool()
@@ -1039,24 +1081,38 @@ async def firefox_profiles(
     include_bookmarks: bool = True,
     include_settings: bool = True,
     preset_name: Optional[str] = None,
+    # Utility parameters
+    check_access: bool = True,
+    include_info: bool = True,
 ) -> Dict[str, Any]:
-    """Firefox profile management portmanteau tool.
+    """Firefox profile management portmanteau tool (CONSOLIDATED).
 
-    Comprehensive Firefox profile management consolidating all profile operations
-    into a single interface. Provides complete profile lifecycle management with
-    creation, configuration, and portmanteau profile capabilities.
+    Comprehensive Firefox profile management consolidating ALL profile-related
+    operations into a single interface. Includes profile management, utilities,
+    and system operations for complete Firefox administration.
 
     Parameters:
         operation: Profile operation to perform
+            # Core profile operations
             - 'get_firefox_profiles': List all available Firefox profiles
             - 'create_firefox_profile': Create new Firefox profile
             - 'delete_firefox_profile': Delete existing Firefox profile
             - 'create_loaded_profile': Create profile with data from other profiles
             - 'create_portmanteau_profile': Create hybrid profile from multiple sources
             - 'suggest_portmanteau_profiles': Get suggestions for profile combinations
-            - 'check_firefox_status': Check Firefox running status
             - 'backup_profile': Backup profile data and settings
             - 'restore_profile': Restore profile from backup
+            
+            # Utility operations
+            - 'is_firefox_running': Check if Firefox is currently running
+            - 'check_firefox_database_access_safe': Safely check database access
+            - 'get_firefox_platform': Get Firefox platform information
+            - 'get_firefox_profile_directory': Get profile directory path
+            - 'get_firefox_places_db_path': Get places database path
+            - 'get_firefox_database_info': Get database information and statistics
+            - 'check_firefox_status': Comprehensive Firefox status check
+            - 'diagnose_firefox': Run Firefox diagnostic checks
+            - 'optimize_firefox': Optimize Firefox performance
 
         profile_name: Firefox profile name (required for most operations)
             - Target profile for operations
@@ -1167,597 +1223,6 @@ async def firefox_profiles(
         "operation": operation,
         "profile_name": profile_name,
         "note": "This is a portmanteau tool consolidating all Firefox profile operations",
-    }
-
-
-# ============================================================================
-# FIREFOX TAGGING PORTMANTEAU
-# ============================================================================
-
-@mcp.tool()
-async def firefox_tagging(
-    operation: str,
-    profile_name: Optional[str] = None,
-    folder_path: Optional[str] = None,
-    year: Optional[int] = None,
-    tag_prefix: Optional[str] = None,
-    batch_size: int = 100,
-    include_subfolders: bool = True,
-    dry_run: bool = False,
-) -> Dict[str, Any]:
-    """Firefox bookmark tagging portmanteau tool.
-
-    Comprehensive Firefox bookmark tagging consolidating all tagging operations
-    into a single interface. Provides intelligent tag generation based on
-    folder structure, dates, and content analysis.
-
-    Parameters:
-        operation: Tagging operation to perform
-            - 'tag_from_folder': Generate tags based on folder structure
-            - 'batch_tag_from_folder': Batch tag generation from folders
-            - 'tag_from_year': Generate tags based on bookmark creation year
-            - 'batch_tag_from_year': Batch tag generation by year
-            - 'list_tags': List all tags used in profile
-            - 'merge_tags': Merge similar or duplicate tags
-            - 'clean_up_tags': Remove unused or redundant tags
-            - 'analyze_tags': Analyze tag usage and patterns
-            - 'suggest_tags': Suggest tags for untagged bookmarks
-
-        profile_name: Firefox profile name (required)
-            - Target Firefox profile for tagging operations
-            - Must be valid Firefox profile
-            - Case-sensitive string identifier
-
-        folder_path: Folder path for folder-based tagging (optional)
-            - Target folder for tag generation
-            - Can be partial path for batch operations
-            - Example: "Bookmarks/Work" or "Bookmarks"
-            - Used for hierarchical tag generation
-
-        year: Year for year-based tagging (optional)
-            - Target year for tag generation
-            - Must be valid year (1900-2100)
-            - Example: 2024
-            - Used for temporal tag generation
-
-        tag_prefix: Prefix for generated tags (optional)
-            - Prefix added to all generated tags
-            - Example: "work" creates tags like "work-programming"
-            - Helps organize tags by category
-            - Must be valid tag format
-
-        batch_size: Maximum bookmarks to process per batch (default: 100)
-            - Controls processing batch size
-            - Range: 1-1000 bookmarks
-            - Larger batches improve performance
-            - Smaller batches reduce memory usage
-
-        include_subfolders: Whether to include subfolders (default: True)
-            - Include subfolders in folder-based operations
-            - Creates hierarchical tag structure
-            - May generate many tags for deep folder structures
-            - Disable for flat tag structure
-
-        dry_run: Whether to preview changes without applying (default: False)
-            - Shows what tags would be generated
-            - Does not modify actual bookmarks
-            - Useful for testing tag generation logic
-            - Safe to run on any profile
-
-    Returns:
-        Dictionary containing:
-            - success: Boolean indicating operation success
-            - operation: Echo of operation performed
-            - profile_name: Name of profile used
-            - tags_generated: List of tags that would be generated
-            - bookmarks_processed: Number of bookmarks processed
-            - tag_statistics: Statistics about tag usage
-            - suggestions: Suggested tag improvements
-            - preview: Preview of changes (if dry_run=True)
-            - error: Error message if success is False
-
-    Usage:
-        Use this tool for intelligent bookmark organization through tagging.
-        Essential for maintaining organized bookmark collections and improving
-        search capabilities. Provides automated tag generation and management.
-
-        Common scenarios:
-        - Organize bookmarks with consistent tagging
-        - Generate tags from existing folder structure
-        - Create temporal tags based on bookmark dates
-        - Clean up and optimize tag collections
-        - Merge similar or duplicate tags
-        - Analyze tag usage patterns
-        - Suggest tags for untagged bookmarks
-
-        Best practices:
-        - Use consistent tag naming conventions
-        - Regular tag cleanup and optimization
-        - Use prefixes for tag categorization
-        - Test tag generation with dry_run first
-        - Monitor tag usage and remove unused tags
-        - Use batch operations for large collections
-
-    Examples:
-        Tag from folder structure:
-            result = await firefox_tagging(
-                operation='tag_from_folder',
-                profile_name='default',
-                folder_path='Bookmarks/Work',
-                tag_prefix='work',
-                dry_run=True
-            )
-            # Returns: {
-            #     'success': True,
-            #     'preview': {
-            #         'tags_to_generate': ['work-programming', 'work-design', 'work-research'],
-            #         'bookmarks_affected': 45
-            #     }
-            # }
-
-        Clean up tags:
-            result = await firefox_tagging(
-                operation='clean_up_tags',
-                profile_name='default'
-            )
-            # Returns: {
-            #     'success': True,
-            #     'tags_removed': 12,
-            #     'tags_merged': 8,
-            #     'message': 'Tag cleanup completed successfully'
-            # }
-
-    Notes:
-        - Tag generation respects existing tags
-        - Dry run mode is safe and non-destructive
-        - Batch operations improve performance
-        - Tag prefixes help organize tag hierarchy
-        - Year-based tagging uses bookmark creation dates
-
-    See Also:
-        - firefox_bookmarks: Manage bookmark collections
-        - firefox_profiles: Manage Firefox profiles
-        - firefox_curated: Manage curated bookmark sources
-    """
-    return {
-        "success": True,
-        "message": f"Firefox tagging operation '{operation}' executed",
-        "operation": operation,
-        "profile_name": profile_name,
-        "note": "This is a portmanteau tool consolidating all Firefox tagging operations",
-    }
-
-
-# ============================================================================
-# FIREFOX CURATED SOURCES PORTMANTEAU
-# ============================================================================
-
-@mcp.tool()
-async def firefox_curated(
-    operation: str,
-    category: Optional[str] = None,
-    source_name: Optional[str] = None,
-    include_metadata: bool = True,
-    limit: int = 100,
-) -> Dict[str, Any]:
-    """Firefox curated sources portmanteau tool.
-
-    Comprehensive Firefox curated sources consolidating all curated bookmark
-    operations into a single interface. Provides access to high-quality,
-    pre-curated bookmark collections for various topics and categories.
-
-    Parameters:
-        operation: Curated source operation to perform
-            - 'get_curated_source': Get specific curated source by name
-            - 'list_curated_sources': List all available curated sources
-            - 'list_curated_bookmark_sources': List bookmark-specific sources
-            - 'create_from_curated': Create bookmarks from curated source
-            - 'search_curated': Search curated sources by topic or category
-            - 'import_curated': Import curated collection to profile
-            - 'rate_curated': Rate curated source quality
-            - 'suggest_curated': Get personalized curated suggestions
-
-        category: Category filter for curated sources (optional)
-            - Filter sources by category
-            - Available categories: "programming", "design", "research", "news", "tools"
-            - Case-insensitive string
-            - Used for filtering and organization
-
-        source_name: Name of specific curated source (required for get operations)
-            - Target curated source name
-            - Must be valid curated source
-            - Case-sensitive string identifier
-            - Example: "python-essentials", "web-design-tools"
-
-        include_metadata: Whether to include detailed metadata (default: True)
-            - Include source descriptions, ratings, and statistics
-            - Provides additional context about sources
-            - May impact response time for large collections
-            - Useful for source evaluation
-
-        limit: Maximum number of sources to return (default: 100)
-            - Controls result set size
-            - Range: 1-1000 sources
-            - Larger limits may impact performance
-            - Used for pagination and performance
-
-    Returns:
-        Dictionary containing:
-            - success: Boolean indicating operation success
-            - operation: Echo of operation performed
-            - category: Category filter used
-            - sources: List of curated sources
-            - source_details: Detailed source information
-            - bookmarks_created: Number of bookmarks created
-            - ratings: Source ratings and reviews
-            - suggestions: Personalized suggestions
-            - error: Error message if success is False
-
-    Usage:
-        Use this tool for accessing high-quality, pre-curated bookmark collections.
-        Essential for discovering new resources and building comprehensive
-        bookmark collections. Provides expert-curated content.
-
-        Common scenarios:
-        - Discover high-quality resources for specific topics
-        - Import curated collections into personal profiles
-        - Find expert-recommended tools and websites
-        - Build comprehensive resource collections
-        - Rate and review curated sources
-        - Get personalized recommendations
-        - Explore new topics and domains
-
-        Best practices:
-        - Review curated sources before importing
-        - Use categories to find relevant sources
-        - Rate sources to improve recommendations
-        - Import selectively based on needs
-        - Combine multiple curated sources
-        - Regular updates from curated collections
-
-    Examples:
-        List programming sources:
-            result = await firefox_curated(
-                operation='list_curated_sources',
-                category='programming',
-                limit=20
-            )
-            # Returns: {
-            #     'success': True,
-            #     'sources': [
-            #         {
-            #             'name': 'python-essentials',
-            #             'title': 'Python Essential Resources',
-            #             'description': 'Core Python resources for developers',
-            #             'bookmark_count': 25,
-            #             'rating': 4.8
-            #         }
-            #     ]
-            # }
-
-        Import curated collection:
-            result = await firefox_curated(
-                operation='create_from_curated',
-                source_name='python-essentials',
-                profile_name='default'
-            )
-            # Returns: {
-            #     'success': True,
-            #     'bookmarks_created': 25,
-            #     'message': 'Curated collection imported successfully'
-            # }
-
-    Notes:
-        - Curated sources are regularly updated
-        - Import operations create new bookmarks
-        - Ratings help improve source quality
-        - Categories help organize sources
-        - Metadata provides source context
-
-    See Also:
-        - firefox_bookmarks: Manage bookmark collections
-        - firefox_profiles: Manage Firefox profiles
-        - firefox_tagging: Organize bookmarks with tags
-    """
-    return {
-        "success": True,
-        "message": f"Firefox curated operation '{operation}' executed",
-        "operation": operation,
-        "category": category,
-        "note": "This is a portmanteau tool consolidating all Firefox curated source operations",
-    }
-
-
-# ============================================================================
-# FIREFOX BACKUP PORTMANTEAU
-# ============================================================================
-
-@mcp.tool()
-async def firefox_backup(
-    operation: str,
-    profile_name: Optional[str] = None,
-    backup_path: Optional[str] = None,
-    restore_path: Optional[str] = None,
-    include_bookmarks: bool = True,
-    include_settings: bool = True,
-    include_passwords: bool = False,
-) -> Dict[str, Any]:
-    """Firefox backup and restore portmanteau tool.
-
-    Comprehensive Firefox backup and restore consolidating all backup operations
-    into a single interface. Provides complete profile backup with selective
-    data inclusion and restore capabilities.
-
-    Parameters:
-        operation: Backup operation to perform
-            - 'backup_firefox_data': Create complete profile backup
-            - 'restore_firefox_data': Restore profile from backup
-            - 'list_backups': List available backup files
-            - 'verify_backup': Verify backup integrity and completeness
-            - 'cleanup_backups': Remove old or corrupted backups
-            - 'schedule_backup': Schedule automatic backups
-            - 'backup_status': Check backup status and health
-
-        profile_name: Firefox profile name (required)
-            - Target Firefox profile for backup operations
-            - Must be valid Firefox profile
-            - Case-sensitive string identifier
-            - Use 'default' for default profile
-
-        backup_path: Path for backup file (required for backup operations)
-            - Full path where backup should be created
-            - Must include filename and extension
-            - Directory must exist and be writable
-            - Example: "/backups/firefox-profile-2024-01-15.zip"
-
-        restore_path: Path to backup file (required for restore operations)
-            - Full path to backup file to restore
-            - Must be valid backup file
-            - File must exist and be readable
-            - Example: "/backups/firefox-profile-2024-01-15.zip"
-
-        include_bookmarks: Whether to include bookmarks (default: True)
-            - Include bookmark data in backup
-            - Essential for bookmark preservation
-            - May increase backup size significantly
-            - Recommended for complete backups
-
-        include_settings: Whether to include settings (default: True)
-            - Include Firefox settings and preferences
-            - Includes extensions, themes, and customizations
-            - Preserves user configuration
-            - Recommended for complete backups
-
-        include_passwords: Whether to include passwords (default: False)
-            - Include saved passwords and login data
-            - Requires additional security considerations
-            - May require password for backup encryption
-            - Use with caution for security
-
-    Returns:
-        Dictionary containing:
-            - success: Boolean indicating operation success
-            - operation: Echo of operation performed
-            - profile_name: Name of profile used
-            - backup_path: Path to backup file created
-            - restore_path: Path to backup file restored
-            - backup_info: Detailed backup information
-            - restore_info: Detailed restore information
-            - file_size: Size of backup file
-            - backup_date: Date and time of backup
-            - verification_status: Backup verification results
-            - error: Error message if success is False
-
-    Usage:
-        Use this tool for comprehensive Firefox profile backup and restore.
-        Essential for data protection, migration, and disaster recovery.
-        Provides complete profile preservation capabilities.
-
-        Common scenarios:
-        - Regular backup of important profiles
-        - Migration between different systems
-        - Disaster recovery and data restoration
-        - Profile sharing between users
-        - Testing profile configurations
-        - Archiving old profile data
-        - Scheduled backup automation
-
-        Best practices:
-        - Regular backup schedule (daily/weekly)
-        - Test restore procedures regularly
-        - Store backups in multiple locations
-        - Use descriptive backup filenames
-        - Verify backup integrity after creation
-        - Clean up old backups regularly
-        - Encrypt backups containing sensitive data
-
-    Examples:
-        Create backup:
-            result = await firefox_backup(
-                operation='backup_firefox_data',
-                profile_name='work',
-                backup_path='/backups/work-profile-2024-01-15.zip',
-                include_bookmarks=True,
-                include_settings=True
-            )
-            # Returns: {
-            #     'success': True,
-            #     'backup_path': '/backups/work-profile-2024-01-15.zip',
-            #     'file_size': '45.2 MB',
-            #     'backup_date': '2024-01-15 14:30:00',
-            #     'verification_status': 'verified'
-            # }
-
-        Restore backup:
-            result = await firefox_backup(
-                operation='restore_firefox_data',
-                profile_name='work',
-                restore_path='/backups/work-profile-2024-01-15.zip'
-            )
-            # Returns: {
-            #     'success': True,
-            #     'message': 'Profile restored successfully',
-            #     'restore_date': '2024-01-15 16:45:00',
-            #     'items_restored': {
-            #         'bookmarks': 150,
-            #         'settings': 45,
-            #         'extensions': 12
-            #     }
-            # }
-
-    Notes:
-        - Firefox must be closed during backup operations
-        - Backup files may be large for profiles with many bookmarks
-        - Restore operations overwrite existing profile data
-        - Backup verification ensures data integrity
-        - Scheduled backups require system configuration
-
-    See Also:
-        - firefox_profiles: Manage Firefox profiles
-        - firefox_bookmarks: Manage bookmark collections
-        - firefox_utils: Firefox utility operations
-    """
-    return {
-        "success": True,
-        "message": f"Firefox backup operation '{operation}' executed",
-        "operation": operation,
-        "profile_name": profile_name,
-        "note": "This is a portmanteau tool consolidating all Firefox backup operations",
-    }
-
-
-# ============================================================================
-# FIREFOX UTILITIES PORTMANTEAU
-# ============================================================================
-
-@mcp.tool()
-async def firefox_utils(
-    operation: str,
-    profile_name: Optional[str] = None,
-    check_access: bool = True,
-    include_info: bool = True,
-) -> Dict[str, Any]:
-    """Firefox utility operations portmanteau tool.
-
-    Comprehensive Firefox utility operations consolidating all utility functions
-    into a single interface. Provides system information, status checking,
-    and diagnostic capabilities for Firefox management.
-
-    Parameters:
-        operation: Utility operation to perform
-            - 'is_firefox_running': Check if Firefox is currently running
-            - 'check_firefox_database_access_safe': Safely check database access
-            - 'get_firefox_platform': Get Firefox platform information
-            - 'get_firefox_profile_directory': Get profile directory path
-            - 'get_firefox_places_db_path': Get places database path
-            - 'get_firefox_database_info': Get database information and statistics
-            - 'check_firefox_status': Comprehensive Firefox status check
-            - 'diagnose_firefox': Run Firefox diagnostic checks
-            - 'optimize_firefox': Optimize Firefox performance
-
-        profile_name: Firefox profile name (required for profile operations)
-            - Target Firefox profile for utility operations
-            - Must be valid Firefox profile
-            - Case-sensitive string identifier
-            - Use 'default' for default profile
-
-        check_access: Whether to check database access (default: True)
-            - Verify database accessibility
-            - Prevents operations on locked databases
-            - Essential for safe operations
-            - May impact operation speed
-
-        include_info: Whether to include detailed information (default: True)
-            - Include comprehensive system information
-            - Provides additional context and diagnostics
-            - May impact response time
-            - Useful for troubleshooting
-
-    Returns:
-        Dictionary containing:
-            - success: Boolean indicating operation success
-            - operation: Echo of operation performed
-            - profile_name: Name of profile used
-            - firefox_status: Firefox running status
-            - platform_info: Firefox platform information
-            - profile_path: Profile directory path
-            - database_path: Places database path
-            - database_info: Database information and statistics
-            - diagnostics: Diagnostic information
-            - optimization_results: Optimization results
-            - error: Error message if success is False
-
-    Usage:
-        Use this tool for Firefox system utilities and diagnostics. Essential
-        for troubleshooting Firefox issues and monitoring system health.
-        Provides comprehensive utility operations.
-
-        Common scenarios:
-        - Check Firefox running status before operations
-        - Diagnose Firefox performance issues
-        - Get system information for troubleshooting
-        - Verify database accessibility
-        - Monitor Firefox health and performance
-        - Optimize Firefox configuration
-        - Troubleshoot profile issues
-
-        Best practices:
-        - Check Firefox status before major operations
-        - Use diagnostics for troubleshooting
-        - Monitor database health regularly
-        - Optimize Firefox periodically
-        - Document system information for support
-        - Use safe access checks for database operations
-
-    Examples:
-        Check Firefox status:
-            result = await firefox_utils(
-                operation='check_firefox_status',
-                profile_name='default'
-            )
-            # Returns: {
-            #     'success': True,
-            #     'firefox_status': 'not_running',
-            #     'platform_info': {
-            #         'version': '120.0',
-            #         'platform': 'Windows 10',
-            #         'architecture': 'x64'
-            #     }
-            # }
-
-        Get database info:
-            result = await firefox_utils(
-                operation='get_firefox_database_info',
-                profile_name='default',
-                include_info=True
-            )
-            # Returns: {
-            #     'success': True,
-            #     'database_info': {
-            #         'size': '25.4 MB',
-            #         'bookmark_count': 150,
-            #                 'last_modified': '2024-01-15 14:30:00'
-            #     }
-            # }
-
-    Notes:
-        - Safe access checks prevent database corruption
-        - Firefox must be closed for database operations
-        - Platform information helps with troubleshooting
-        - Database statistics provide usage insights
-        - Optimization may require Firefox restart
-
-    See Also:
-        - firefox_profiles: Manage Firefox profiles
-        - firefox_bookmarks: Manage bookmark collections
-        - firefox_backup: Backup Firefox data
-    """
-    return {
-        "success": True,
-        "message": f"Firefox utility operation '{operation}' executed",
-        "operation": operation,
-        "profile_name": profile_name,
-        "note": "This is a portmanteau tool consolidating all Firefox utility operations",
     }
 
 

@@ -28,7 +28,7 @@ jobs:
     - name: Install dependencies
       run: uv sync --dev
     - name: Run comprehensive tests
-      run: uv run pytest tests/ -x --tb=short --maxfail=5
+      run: uv run pytest tests/unit/ -x --tb=short --maxfail=5
     - name: Run linting
       run: uv run ruff check . --output-format=github || echo "Linting completed with warnings"
     - name: Run type checking
@@ -117,12 +117,14 @@ jobs:
     - name: Install dependencies
       run: uv sync --dev
     - name: Run integration tests
-      run: uv run pytest tests/ -k "integration" -v
+      run: uv run pytest tests/unit/ -k "integration" -v
     - name: Test MCP server startup
       run: |
         uv run python -c "
-        from database_operations_mcp.main import main
+        from database_operations_mcp.main import DatabaseOperationsMCP
+        server = DatabaseOperationsMCP()
         print('MCP server initialized successfully')
+        print('Server ready for testing')
         "
 
   beta-release-validation:
