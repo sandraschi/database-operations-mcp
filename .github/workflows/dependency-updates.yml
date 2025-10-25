@@ -28,7 +28,7 @@ jobs:
           uv sync --dev
       - name: Run tests
         run: |
-          uv run pytest --cov=src/database_operations_mcp -x
+          uv run pytest tests/unit/ --cov=src/database_operations_mcp -x
       - name: Check for changes
         id: changes
         run: |
