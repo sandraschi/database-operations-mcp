@@ -8,9 +8,11 @@ Similar to firefox_bookmarks but optimized for Chrome's JSON-based storage.
 
 from typing import Any, Dict, List, Optional
 
-from mcp import mcp
+from mcp.server.fastmcp import FastMCP
 
 from database_operations_mcp.services.browser.chrome_core import ChromeManager
+
+mcp = FastMCP()
 
 # Initialize Chrome manager
 _chrome_manager = ChromeManager()

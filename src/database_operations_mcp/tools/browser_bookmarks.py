@@ -8,8 +8,9 @@ appropriate browser-specific manager.
 
 from typing import Any, Dict, List, Optional
 
-from mcp import mcp
+from mcp.server.fastmcp import FastMCP
 
+mcp = FastMCP()
 
 @mcp.tool()
 async def browser_bookmarks(

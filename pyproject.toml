@@ -29,7 +29,8 @@ dependencies = [
     "python-multipart>=0.0.5",
     "psutil>=5.9.0",
     "click>=8.0.0",
-    "rich>=13.0.0"
+    "rich>=13.0.0",
+    "aiosqlite>=0.21.0",
 ]
 
 classifiers = [

@@ -7,7 +7,9 @@ MySQL, Redis, DuckDB, MongoDB, and more.
 
 from typing import Any, Dict, Optional
 
-from mcp import mcp
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP()
 
 
 @mcp.tool()

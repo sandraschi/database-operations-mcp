@@ -8,9 +8,11 @@ instead of SQLite-based profiles like Firefox.
 
 from typing import Any, Dict, Optional
 
-from mcp import mcp
+from mcp.server.fastmcp import FastMCP
 
 from database_operations_mcp.services.browser.chrome_core import ChromeManager
+
+mcp = FastMCP()
 
 # Initialize Chrome manager
 _chrome_manager = ChromeManager()
