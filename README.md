@@ -10,7 +10,7 @@ A comprehensive MCP server supporting SQLite, PostgreSQL, and ChromaDB operation
 [![PyPI](https://img.shields.io/pypi/v/database-operations-mcp)](https://pypi.org/project/database-operations-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tools](https://img.shields.io/badge/Tools-15%20Portmanteau-orange.svg)](#-available-tools)
+[![Tools](https://img.shields.io/badge/Tools-11%20Portmanteau-orange.svg)](#-available-tools)
 [![Databases](https://img.shields.io/badge/Databases-SQLite%20%7C%20PostgreSQL%20%7C%20ChromaDB-purple.svg)](#supported-database-types)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](#installation)
 
@@ -396,46 +396,74 @@ Interact with the Windows Registry as a hierarchical database:
 - `get_tool_help` - Get detailed documentation for a specific tool
 - `get_quick_start` - Get a quick start guide for using MCP tools
 
-### Firefox Bookmark Tools
+### Firefox Tools (Consolidated Portmanteau)
 
-Manage and analyze Firefox bookmarks with these specialized tools. **Important**: Firefox must be completely closed before using any bookmark tools, as Firefox locks its database files when running.
+Manage and analyze Firefox bookmarks, profiles, and configurations through two comprehensive portmanteau tools. **Important**: Firefox must be completely closed before using any Firefox tools, as Firefox locks its database files when running.
 
-### Status & Safety
-- `check_firefox_status` - Check if Firefox is running and if it's safe to access databases
-- `get_firefox_profiles` - List all available Firefox profiles with detailed information
+#### `firefox_bookmarks` - Complete Bookmark Management
 
-### Profile Management
-- `create_firefox_profile` - Create a new Firefox profile
-- `delete_firefox_profile` - Delete a Firefox profile and all its data (requires confirmation)
-- **`create_loaded_profile`** - Create a profile pre-loaded with curated bookmarks from various sources
-- **`create_loaded_profile_from_preset`** - Create a profile using predefined curated collections
-- **`create_portmanteau_profile`** - Create hybrid profiles combining multiple bookmark collections
-- **`suggest_portmanteau_profiles`** - Get suggestions for interesting profile combinations
-- **`list_curated_bookmark_sources`** - List available predefined bookmark collections
+A comprehensive tool covering all bookmark operations:
 
-### Bookmark Management
+**Core Bookmark Operations:**
 - `list_bookmarks` - List all bookmarks from a specific profile
-- `search_bookmarks` - Search bookmarks with **smart profile detection**
-  - Automatically detects profile from queries like "immich bookmarks" or "work gitlab"
-  - Supports manual profile selection
-- `find_duplicates` - Find duplicate bookmarks by URL or title
+- `get_bookmark` - Get specific bookmark by ID
+- `add_bookmark` - Add new bookmark to specified folder
+- `search` - Advanced bookmark search with multiple criteria
+- `find_duplicates` - Find duplicate bookmarks by URL or content
+- `find_broken_links` - Check bookmarks for broken or inaccessible URLs
+- `export` - Export bookmarks to various formats (HTML, JSON, CSV)
+- `import` - Import bookmarks from external sources
+- `organize` - Organize bookmarks by categories or tags
+- `analyze` - Analyze bookmark usage and patterns
 
-### Tag Management
-- `list_tags` - List all tags used in bookmarks
-- `tag_from_folder` - Generate tags based on folder hierarchy
-- `batch_tag_from_folder` - Batch process bookmarks to add folder-based tags
-- `tag_from_year` - Add year-based tags to bookmarks
-- `batch_tag_from_year` - Batch process bookmarks to add year-based tags
-- `batch_update_tags` - Update tags for multiple bookmarks at once
+**Tagging Operations:**
+- `tag_from_folder` - Generate tags based on folder structure
+- `batch_tag_from_folder` - Batch tag generation from folders
+- `tag_from_year` - Generate tags based on bookmark creation year
+- `batch_tag_from_year` - Batch tag generation by year
+- `list_tags` - List all tags used in profile
+- `merge_tags` - Merge similar or duplicate tags
+- `clean_up_tags` - Remove unused or redundant tags
+- `suggest_tags` - Suggest tags for untagged bookmarks
 
-### Analysis Tools
-- `find_broken_links` - Identify broken or inaccessible bookmarks
-- `find_old_bookmarks` - Find bookmarks older than a specified number of days
-- `get_bookmark_stats` - Get statistics about bookmarks (count by folder, tag, etc.)
+**Curated Sources:**
+- `get_curated_source` - Get specific curated source by name
+- `list_curated_sources` - List all available curated sources
+- `list_curated_bookmark_sources` - List bookmark-specific sources
+- `create_from_curated` - Create bookmarks from curated source
+- `search_curated` - Search curated sources by topic or category
+- `import_curated` - Import curated collection to profile
 
-### Backup & Restore
-- `backup_firefox_data` - Create a backup of Firefox bookmarks
-- `restore_firefox_data` - Restore bookmarks from a backup
+**Backup Operations:**
+- `backup_firefox_data` - Create complete profile backup
+- `restore_firefox_data` - Restore profile from backup
+- `list_backups` - List available backup files
+- `verify_backup` - Verify backup integrity and completeness
+
+#### `firefox_profiles` - Complete Profile Management
+
+A comprehensive tool covering all profile operations:
+
+**Core Profile Operations:**
+- `get_firefox_profiles` - List all available Firefox profiles
+- `create_firefox_profile` - Create new Firefox profile
+- `delete_firefox_profile` - Delete existing Firefox profile
+- `create_loaded_profile` - Create profile with data from other profiles
+- `create_portmanteau_profile` - Create hybrid profile from multiple sources
+- `suggest_portmanteau_profiles` - Get suggestions for profile combinations
+- `backup_profile` - Backup profile data and settings
+- `restore_profile` - Restore profile from backup
+
+**Utility Operations:**
+- `is_firefox_running` - Check if Firefox is currently running
+- `check_firefox_database_access_safe` - Safely check database access
+- `get_firefox_platform` - Get Firefox platform information
+- `get_firefox_profile_directory` - Get profile directory path
+- `get_firefox_places_db_path` - Get places database path
+- `get_firefox_database_info` - Get database information and statistics
+- `check_firefox_status` - Comprehensive Firefox status check
+- `diagnose_firefox` - Run Firefox diagnostic checks
+- `optimize_firefox` - Optimize Firefox performance
 
 ### Smart Profile Detection Examples
 The search tool automatically detects which profile to use:
