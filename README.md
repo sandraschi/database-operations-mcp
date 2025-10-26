@@ -20,8 +20,9 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 
 ## Features
 
-- **Multi-Database Support**: PostgreSQL, MongoDB, ChromaDB, and SQLite
-- **Unified API**: Consistent interface across different database systems
+- **Multi-Browser Bookmarks**: Firefox and Chrome bookmark management (Edge, Brave, Safari coming soon)
+- **Multi-Database Support**: PostgreSQL, MongoDB, ChromaDB, SQLite, MySQL, Redis (expanding)
+- **Unified API**: Consistent interface across different database systems and browsers
 - **Security First**: Secure credential storage, role-based access control
 - **FastMCP 2.12.4**: Modern, efficient MCP implementation
 - **Dual Transport**: Stdio for MCP clients, HTTP for web dashboards and APIs
@@ -29,11 +30,14 @@ Database Operations MCP is a comprehensive Model Context Protocol server that pr
 - **Containerized**: Easy deployment with Docker
 - **MCPB Packaging**: Easy packaging and distribution with MCPB
 
-## 📦 Latest Release: v1.0.0
+## 📦 Latest Release: v1.3.0 (In Development)
 
-- 🆕 Initial stable release
-- ✨ Supports SQLite, PostgreSQL, and ChromaDB
-- 🚀 Ready for production use
+- 🆕 Multi-browser bookmark support (Firefox, Chrome)
+- 🆕 Chrome bookmark management portmanteau tool
+- 🆕 Base browser interface for extensibility
+- ✨ Supports SQLite, PostgreSQL, ChromaDB, and MongoDB
+- ✨ Database analysis tools coming soon
+- 🚀 Production-ready core functionality
 
 ## 📚 Documentation
 
