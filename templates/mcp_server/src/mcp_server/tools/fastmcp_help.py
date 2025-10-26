@@ -15,7 +15,8 @@ from typing import Any, Callable, Dict, Optional
 try:
     from mcp.server.fastmcp import FastMCP
     from mcp.server.fastmcp.server import get_logger
-    from mcp.types import ToolCall, ToolDefinition, ToolError, ToolResult, Tool as MCPTool
+    from mcp.types import Tool as MCPTool
+    from mcp.types import ToolCall, ToolDefinition, ToolError, ToolResult
 except ImportError:
     # Fallback for development
     from typing import Any, TypedDict

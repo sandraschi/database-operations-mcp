@@ -78,8 +78,15 @@ class DatabaseOperationsMCP:
             # Import comprehensive portmanteau tools covering all categories
             # These imports are intentionally unused - they trigger @mcp.tool() decorators
             from . import comprehensive_portmanteau_tools  # noqa: F401
+            from .tools import (  # noqa: F401
+                browser_bookmarks,
+                chrome_bookmarks,
+                chrome_profiles,
+                db_analysis,
+                db_operations_extended,
+            )
             
-            logger.info("Comprehensive portmanteau tools imported successfully - covering all categories!")
+            logger.info("All portmanteau tools imported successfully - covering all categories!")
             
         except ImportError as e:
             logger.error(f"Failed to import tool modules: {e}")

@@ -3,7 +3,6 @@
 Test script to verify the package can be imported and MCP server can be initialized.
 """
 
-import pytest
 import database_operations_mcp
 from database_operations_mcp.main import DatabaseOperationsMCP
 

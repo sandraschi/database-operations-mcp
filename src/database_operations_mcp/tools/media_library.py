@@ -2,7 +2,7 @@
 # Consolidates Calibre, Plex, and media operations into a single interface.
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp

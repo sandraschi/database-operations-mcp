@@ -31,8 +31,12 @@ async def db_connection(
     """Database connection management portmanteau tool.
 
     Comprehensive database connection management consolidating all connection operations
-    into a single interface. Supports SQL (PostgreSQL, SQLite), NoSQL (MongoDB), and
-    Vector (ChromaDB) databases with unified connection lifecycle management.
+    into a single interface. Supports:
+    - SQL: PostgreSQL, SQLite, MySQL/MariaDB, DuckDB
+    - NoSQL: MongoDB
+    - Vector: ChromaDB
+    - Key-Value: Redis
+    With unified connection lifecycle management across all types.
 
     Parameters:
         operation: Connection operation to perform
@@ -827,12 +831,13 @@ async def db_fts(
 
 
 # ============================================================================
-# FIREFOX BOOKMARKS PORTMANTEAU (CONSOLIDATED)
+# BROWSER BOOKMARKS PORTMANTEAU (UNIFIED - FIREFOX + CHROME + EDGE + BRAVE)
 # ============================================================================
 
 @mcp.tool()
-async def firefox_bookmarks(
+async def browser_bookmarks(
     operation: str,
+    browser: str,
     profile_name: Optional[str] = None,
     folder_id: Optional[int] = None,
     bookmark_id: Optional[int] = None,
@@ -859,11 +864,12 @@ async def firefox_bookmarks(
     include_settings: bool = True,
     include_passwords: bool = False,
 ) -> Dict[str, Any]:
-    """Firefox bookmark management portmanteau tool (CONSOLIDATED).
+    """Universal browser bookmark management portmanteau tool.
 
-    Comprehensive Firefox bookmark management consolidating ALL bookmark-related
-    operations into a single interface. Includes bookmarks, tagging, curated sources,
-    and backup operations for complete bookmark lifecycle management.
+    Comprehensive bookmark management across ALL supported browsers (Firefox, Chrome,
+    Edge, Brave, Safari) with unified interface. Automatically detects browser type
+    and routes to browser-specific implementation. Includes bookmarks, tagging, curated
+    sources, and backup operations for complete bookmark lifecycle management.
 
     Parameters:
         operation: Bookmark operation to perform
@@ -903,11 +909,16 @@ async def firefox_bookmarks(
             - 'list_backups': List available backup files
             - 'verify_backup': Verify backup integrity and completeness
 
-        profile_name: Firefox profile name (required for most operations)
-            - Target Firefox profile for bookmark operations
-            - Must be valid Firefox profile
-            - Case-sensitive string identifier
-            - Use 'default' for default profile
+        browser: Browser type (required)
+            - Must be one of: 'firefox', 'chrome', 'edge', 'brave', 'safari'
+            - Determines which browser implementation to use
+            - Auto-routes to browser-specific handler
+
+        profile_name: Browser profile name (required for most operations)
+            - Firefox: 'default', 'work', 'personal'
+            - Chrome/Edge/Brave: 'Default', 'Profile 1', 'Profile 2'
+            - Safari: Profile identifiers
+            - Use browser default if not provided
 
         folder_id: Folder ID for bookmark operations (optional)
             - Target folder for bookmark operations
@@ -1048,24 +1059,28 @@ async def firefox_bookmarks(
             # }
 
     Notes:
-        - Firefox must be closed during bookmark operations
+        - Browser must be completely closed during bookmark operations
+        - Supported browsers: Firefox (SQLite), Chrome/Edge/Brave (JSON), Safari (SQLite)
         - Large bookmark collections may take longer to process
         - Search operations support fuzzy matching
         - Duplicate detection compares URLs and titles
         - Broken link checking requires internet connectivity
         - Export operations support multiple formats
+        - Chrome/Edge/Brave share same JSON format (Chromium-based)
+        - Safari support is limited due to different database schema
 
     See Also:
         - firefox_profiles: Manage Firefox profiles
-        - firefox_tagging: Organize bookmarks with tags
-        - firefox_backup: Backup Firefox data
+        - chrome_profiles: Manage Chrome profiles
+        - db_operations: Database query and manipulation operations
     """
     return {
         "success": True,
-        "message": f"Firefox bookmark operation '{operation}' executed",
+        "message": f"Browser bookmark operation '{operation}' executed for {browser}",
         "operation": operation,
+        "browser": browser,
         "profile_name": profile_name,
-        "note": "This is a portmanteau tool consolidating all Firefox bookmark operations",
+        "note": "Unified portmanteau tool supporting Firefox, Chrome, Edge, Brave, Safari",
     }
 
 

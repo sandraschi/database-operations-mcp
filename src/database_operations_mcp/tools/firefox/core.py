@@ -15,8 +15,8 @@ from bs4 import BeautifulSoup
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-
 from database_operations_mcp.tools.help_tools import HelpSystem
+
 from .bookmark_manager import BookmarkManager
 from .curated_sources import CURATED_SOURCES, get_curated_source, list_curated_sources
 from .links import add_bookmark

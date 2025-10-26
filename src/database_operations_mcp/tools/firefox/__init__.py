@@ -5,15 +5,15 @@ from database_operations_mcp.config.mcp_config import mcp
 
 from .age_analyzer import find_old_bookmarks, get_bookmark_stats
 
+# Import AI portmanteau tool
+from .ai_portmanteau import ai_bookmark_portmanteau
+
 # Import bulk operations
 from .bulk_operations import batch_update_tags, export_bookmarks
 
 # Import core functionality
 from .core import get_firefox_profiles
 from .folder_based_tagging import batch_tag_from_folder, tag_from_folder
-
-# Import AI portmanteau tool
-from .ai_portmanteau import ai_bookmark_portmanteau
 
 # Import other tools
 from .link_checker import find_broken_links

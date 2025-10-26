@@ -2,15 +2,15 @@
 # Consolidates Firefox curated sources operations into a single interface.
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
 from database_operations_mcp.tools.firefox.curated_sources import (
     get_curated_source,
     list_curated_sources,
 )
+from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 

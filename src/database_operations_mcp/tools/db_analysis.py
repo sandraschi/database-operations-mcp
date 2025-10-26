@@ -8,8 +8,7 @@ error detection, health checking, and report generation.
 
 from typing import Any, Dict, Optional
 
-from mcp.server.fastmcp import FastMCP
-
+from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.services.analysis import (
     ContentAnalyzer,
     ErrorDetector,
@@ -17,8 +16,6 @@ from database_operations_mcp.services.analysis import (
     ReportGenerator,
     StructureAnalyzer,
 )
-
-mcp = FastMCP()
 
 # Initialize analyzers
 _structure_analyzer = StructureAnalyzer()

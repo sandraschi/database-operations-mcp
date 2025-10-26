@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from database_operations_mcp.tools.help_tools import HelpSystem
+
 from . import mcp  # Import the mcp instance from __init__
 from .db import FirefoxDB
 

@@ -7,6 +7,7 @@ consistent registration and configuration.
 """
 
 import os
+
 from fastmcp import FastMCP
 
 # Create a single FastMCP instance for the entire application

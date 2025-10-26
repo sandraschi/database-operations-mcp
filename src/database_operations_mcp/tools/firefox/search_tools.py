@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-
 from database_operations_mcp.tools.help_tools import HelpSystem
+
 from .db import FirefoxDB
 from .exceptions import FirefoxNotClosedError
 from .status import FirefoxStatusChecker

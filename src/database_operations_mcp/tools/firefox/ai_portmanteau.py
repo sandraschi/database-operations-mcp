@@ -2,26 +2,23 @@
 # This portmanteau tool consolidates multiple AI bookmark features into a single, powerful interface,
 # following the Advanced Memory pattern of consolidated tools (adn_content, adn_search, etc.).
 
-import asyncio
 import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import aiohttp
 from bs4 import BeautifulSoup
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-
 from database_operations_mcp.tools.help_tools import HelpSystem
-from .bookmark_manager import BookmarkManager
-from .curated_sources import CURATED_SOURCES, get_curated_source
+
 from .db import FirefoxDB
 from .exceptions import FirefoxNotClosedError
 from .status import FirefoxStatusChecker
-from .utils import get_profile_directory, parse_profiles_ini
+from .utils import get_profile_directory
 
 
 class AIBookmarkAnalyzer:
@@ -638,7 +635,7 @@ class AIBookmarkPortmanteau:
             html_content += f"<p>Total bookmarks: {len(bookmarks)}</p>"
 
             for bookmark in bookmarks:
-                html_content += f'<div class="bookmark">'
+                html_content += '<div class="bookmark">'
                 html_content += f'<h3><a href="{bookmark["url"]}">{bookmark["title"]}</a></h3>'
                 html_content += f"<p>URL: {bookmark['url']}</p>"
 

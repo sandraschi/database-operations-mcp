@@ -2,7 +2,7 @@
 # Consolidates data manipulation and query execution operations.
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp

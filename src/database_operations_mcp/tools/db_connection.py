@@ -4,7 +4,7 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp

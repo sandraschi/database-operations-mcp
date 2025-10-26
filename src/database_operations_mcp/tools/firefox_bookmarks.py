@@ -6,16 +6,16 @@ from typing import Any, Dict, List, Optional
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
-from database_operations_mcp.tools.firefox.bookmark_manager import BookmarkManager
-from database_operations_mcp.tools.firefox.bulk_operations import BulkOperations
-from database_operations_mcp.tools.firefox.search_tools import BookmarkSearcher
-from database_operations_mcp.tools.firefox.tag_manager import TagManager
 from database_operations_mcp.tools.firefox.age_analyzer import (
     find_old_bookmarks,
     get_bookmark_stats,
 )
+from database_operations_mcp.tools.firefox.bookmark_manager import BookmarkManager
+from database_operations_mcp.tools.firefox.bulk_operations import BulkOperations
 from database_operations_mcp.tools.firefox.link_checker import LinkChecker
+from database_operations_mcp.tools.firefox.search_tools import BookmarkSearcher
+from database_operations_mcp.tools.firefox.tag_manager import TagManager
+from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +230,7 @@ async def _add_bookmark(
 
         return {
             "success": True,
-            "message": f"Bookmark added successfully",
+            "message": "Bookmark added successfully",
             "profile_name": profile_name,
             "bookmark_id": bookmark_id,
             "url": url,
