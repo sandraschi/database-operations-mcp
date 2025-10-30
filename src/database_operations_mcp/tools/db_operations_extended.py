@@ -5,7 +5,7 @@ Provides unified operations across multiple database types: SQLite, PostgreSQL,
 MySQL, Redis, DuckDB, MongoDB, and more.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 
@@ -14,13 +14,13 @@ from database_operations_mcp.config.mcp_config import mcp
 async def db_operations_extended(
     database_type: str,
     operation: str,
-    connection_string: Optional[str] = None,
-    query: Optional[str] = None,
-    table_name: Optional[str] = None,
-    key: Optional[str] = None,
-    value: Optional[str] = None,
-    parameters: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    connection_string: str | None = None,
+    query: str | None = None,
+    table_name: str | None = None,
+    key: str | None = None,
+    value: str | None = None,
+    parameters: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Extended database operations across multiple database types.
 
     Provides a unified interface for database operations across SQLite,

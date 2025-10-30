@@ -8,7 +8,7 @@ Supports multiple database types including SQLite, PostgreSQL, MySQL, MongoDB.
 
 import sqlite3
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import aiosqlite
 
@@ -70,7 +70,7 @@ class StructureAnalyzer:
         except Exception as e:
             raise ValueError(f"Error detecting database type: {e}") from e
 
-    async def analyze_schema(self, db_path: str) -> Dict[str, Any]:
+    async def analyze_schema(self, db_path: str) -> dict[str, Any]:
         """Extract complete database schema information.
 
         Analyzes the database structure to extract all schema elements including
@@ -111,7 +111,7 @@ class StructureAnalyzer:
         else:
             raise ValueError(f"Schema analysis for {db_type} not yet implemented")
 
-    async def _analyze_sqlite_schema(self, db_path: str) -> Dict[str, Any]:
+    async def _analyze_sqlite_schema(self, db_path: str) -> dict[str, Any]:
         """Analyze SQLite database schema.
 
         Extracts comprehensive schema information from SQLite database including
@@ -167,7 +167,7 @@ class StructureAnalyzer:
                 },
             }
 
-    async def _analyze_table(self, conn: aiosqlite.Connection, table_name: str) -> Dict[str, Any]:
+    async def _analyze_table(self, conn: aiosqlite.Connection, table_name: str) -> dict[str, Any]:
         """Analyze individual table structure.
 
         Extracts detailed information about a table including columns, indexes,
@@ -253,7 +253,7 @@ class StructureAnalyzer:
         except Exception:
             return 0
 
-    async def get_database_info(self, db_path: str) -> Dict[str, Any]:
+    async def get_database_info(self, db_path: str) -> dict[str, Any]:
         """Get basic database information and statistics.
 
         Args:

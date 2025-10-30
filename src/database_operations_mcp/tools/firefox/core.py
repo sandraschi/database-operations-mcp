@@ -8,7 +8,7 @@ import shutil
 import sqlite3
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -30,7 +30,7 @@ class FirefoxDatabaseUnlocker:
     """Dirty tricks to access Firefox database even when locked."""
 
     @staticmethod
-    def copy_database_to_temp(db_path: Path) -> Optional[Path]:
+    def copy_database_to_temp(db_path: Path) -> Path | None:
         """Copy the locked database to a temporary location for reading."""
         try:
             with tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False) as temp_file:
@@ -51,7 +51,7 @@ class FirefoxDatabaseUnlocker:
             return None
 
     @staticmethod
-    def try_sqlite_tricks(db_path: Path) -> Optional[sqlite3.Connection]:
+    def try_sqlite_tricks(db_path: Path) -> sqlite3.Connection | None:
         """Try various SQLite connection tricks to access locked database."""
 
         connection_attempts = [
@@ -92,7 +92,7 @@ class FirefoxDatabaseUnlocker:
     @staticmethod
     def get_database_connection_bruteforce(
         db_path: Path,
-    ) -> Tuple[Optional[sqlite3.Connection], str]:
+    ) -> tuple[sqlite3.Connection | None, str]:
         """
         Use dirty tricks to access Firefox database even when locked.
 
@@ -153,7 +153,7 @@ class FirefoxDatabaseUnlocker:
 
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
-async def check_firefox_bruteforce_access() -> Dict[str, Any]:
+async def check_firefox_bruteforce_access() -> dict[str, Any]:
     """Check if Firefox database can be accessed using brute force methods.
 
     This tool attempts various "dirty tricks" to access Firefox's places.sqlite
@@ -231,14 +231,14 @@ def is_firefox_running() -> bool:
     return FirefoxStatusChecker.is_firefox_running()["is_running"]
 
 
-def get_default_profile_path() -> Optional[Path]:
+def get_default_profile_path() -> Path | None:
     """Get the path to the default Firefox profile."""
     return get_profile_directory()
 
 
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
-async def list_curated_bookmark_sources() -> Dict[str, Any]:
+async def list_curated_bookmark_sources() -> dict[str, Any]:
     """List available curated bookmark sources for profile creation.
 
     Returns a list of predefined bookmark collections that can be used to create
@@ -251,7 +251,7 @@ async def list_curated_bookmark_sources() -> Dict[str, Any]:
 @HelpSystem.register_tool(category="firefox")
 async def create_loaded_profile_from_preset(
     profile_name: str, preset_name: str, max_bookmarks: int = 50
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create a Firefox profile loaded with bookmarks from a predefined curated collection.
 
     This is a simplified version of create_loaded_profile that uses predefined collections
@@ -297,7 +297,7 @@ async def create_loaded_profile_from_preset(
 
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
-async def check_firefox_status() -> Dict[str, Any]:
+async def check_firefox_status() -> dict[str, Any]:
     """Check Firefox running status and database access safety.
 
     This tool helps determine if it's safe to access Firefox bookmark databases.
@@ -318,7 +318,7 @@ async def check_firefox_status() -> Dict[str, Any]:
 
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
-async def get_firefox_profiles() -> Dict[str, Any]:
+async def get_firefox_profiles() -> dict[str, Any]:
     """List all available Firefox profiles with detailed information.
 
     Returns profile names, paths, and bookmark database locations.
@@ -381,8 +381,8 @@ async def get_firefox_profiles() -> Dict[str, Any]:
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def create_firefox_profile(
-    profile_name: str, template_profile: Optional[str] = None
-) -> Dict[str, Any]:
+    profile_name: str, template_profile: str | None = None
+) -> dict[str, Any]:
     """Create a new Firefox profile.
 
     Args:
@@ -469,7 +469,7 @@ async def create_firefox_profile(
 @HelpSystem.register_tool(category="firefox")
 async def delete_firefox_profile(
     profile_name: str, confirm_deletion: bool = False
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Delete a Firefox profile and all its data.
 
     Args:
@@ -534,8 +534,8 @@ async def delete_firefox_profile(
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def create_loaded_profile(
-    profile_name: str, source_type: str, source_config: Dict[str, Any], max_bookmarks: int = 50
-) -> Dict[str, Any]:
+    profile_name: str, source_type: str, source_config: dict[str, Any], max_bookmarks: int = 50
+) -> dict[str, Any]:
     """Create a new Firefox profile pre-loaded with curated bookmarks.
 
     This tool creates a new Firefox profile and populates it with bookmarks from various sources,
@@ -624,8 +624,8 @@ async def create_loaded_profile(
 
 
 async def _fetch_bookmarks_from_source(
-    source_type: str, config: Dict[str, Any], max_bookmarks: int
-) -> List[Dict[str, str]]:
+    source_type: str, config: dict[str, Any], max_bookmarks: int
+) -> list[dict[str, str]]:
     """Fetch bookmarks from various sources."""
     try:
         if source_type == "current_collection":
@@ -645,8 +645,8 @@ async def _fetch_bookmarks_from_source(
 
 
 async def _fetch_from_current_collection(
-    config: Dict[str, Any], max_bookmarks: int
-) -> List[Dict[str, str]]:
+    config: dict[str, Any], max_bookmarks: int
+) -> list[dict[str, str]]:
     """Fetch bookmarks from existing profiles."""
     from_profile = config.get("from_profile")
     filter_tags = config.get("filter_tags", [])
@@ -677,7 +677,7 @@ async def _fetch_from_current_collection(
     return [{"title": bm["title"], "url": bm["url"]} for bm in filtered_bookmarks]
 
 
-async def _fetch_from_web_list(config: Dict[str, Any], max_bookmarks: int) -> List[Dict[str, str]]:
+async def _fetch_from_web_list(config: dict[str, Any], max_bookmarks: int) -> list[dict[str, str]]:
     """Fetch bookmarks from curated web pages."""
     url = config.get("url")
     selector = config.get("selector", "a[href]")
@@ -718,8 +718,8 @@ async def _fetch_from_web_list(config: Dict[str, Any], max_bookmarks: int) -> Li
 
 
 async def _fetch_from_github_awesome(
-    config: Dict[str, Any], max_bookmarks: int
-) -> List[Dict[str, str]]:
+    config: dict[str, Any], max_bookmarks: int
+) -> list[dict[str, str]]:
     """Fetch bookmarks from GitHub awesome-* repositories."""
     topic = config.get("topic", "").lower().replace(" ", "-")
     config.get("language", "en")
@@ -775,7 +775,7 @@ async def _fetch_from_github_awesome(
         return []
 
 
-def _fetch_from_custom_list(config: Dict[str, Any], max_bookmarks: int) -> List[Dict[str, str]]:
+def _fetch_from_custom_list(config: dict[str, Any], max_bookmarks: int) -> list[dict[str, str]]:
     """Fetch bookmarks from user-provided custom list."""
     bookmarks_data = config.get("bookmarks", [])
 
@@ -788,7 +788,7 @@ def _fetch_from_custom_list(config: Dict[str, Any], max_bookmarks: int) -> List[
 
 
 async def _populate_profile_with_bookmarks(
-    profile_name: str, bookmarks: List[Dict[str, str]]
+    profile_name: str, bookmarks: list[dict[str, str]]
 ) -> int:
     """Add bookmarks to a Firefox profile database."""
     try:
@@ -816,10 +816,10 @@ async def _populate_profile_with_bookmarks(
 @HelpSystem.register_tool(category="firefox")
 async def create_portmanteau_profile(
     profile_name: str,
-    preset_combinations: List[str],
+    preset_combinations: list[str],
     max_bookmarks_per_source: int = 10,
     deduplicate: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create a Firefox profile that combines multiple bookmark collections (portmanteau style).
 
     This tool creates hybrid profiles by blending bookmarks from multiple preset collections,
@@ -967,7 +967,7 @@ async def create_portmanteau_profile(
 
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
-async def suggest_portmanteau_profiles() -> Dict[str, Any]:
+async def suggest_portmanteau_profiles() -> dict[str, Any]:
     """Suggest interesting portmanteau profile combinations.
 
     Returns a list of recommended profile combinations that blend different types

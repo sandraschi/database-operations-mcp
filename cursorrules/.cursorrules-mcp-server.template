@@ -1,0 +1,153 @@
+# MCP Server Cursor Rules Template
+
+**Copy this to your MCP server repo and adapt the repository-specific sections.**
+
+## 🎯 Repository Purpose
+
+**[REPO_NAME]** - FastMCP 2.13 compliant MCP server for [DESCRIPTION].
+
+### 🚨 **CRITICAL: Consults Central Docs First**
+
+**REQUIRED**: All repository .cursorrules files MUST include the following statement:
+
+> **📚 CONSULT CENTRAL DOCS FIRST**: Before creating new documentation, standards, or patterns, consult the central docs repository (`D:\Dev\repos\mcp-central-docs\`) for existing documentation and standards. This ensures consistency and avoids duplication across all MCP repositories.
+
+## 🚨 CRITICAL: Chat Output & PowerShell Syntax
+
+**REQUIRED**: ALL chat output MUST begin with "hi!" as a test.
+
+**🚫 FORBIDDEN in PowerShell:**
+- `&&` (command chaining) - Use `;` or separate commands
+- `||` (logical OR) - Use PowerShell syntax
+- `mkdir`, `rmdir`, `ls` - Use `New-Item`, `Remove-Item`, `Get-ChildItem`
+- `head`, `tail` - Use PowerShell cmdlets
+- Linux path separators - Use backslash `\` on Windows
+
+---
+
+## Code Standards
+
+### Modern Python Stack
+- **Linter**: ruff (replaces flake8, black, isort)
+- **Package Manager**: uv (replaces pip)
+- **Testing**: pytest with pytest-cov
+- **Type Hints**: Required for all functions
+- **Async**: MCP tools must be async
+
+### Commands
+```bash
+uv run ruff check .
+uv run ruff format .
+uv run python -m pytest -v
+```
+
+## FastMCP 2.13 Standards
+
+### Tool Decorators
+```python
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP()
+
+@mcp.tool()
+async def my_tool(param: str) -> dict:
+    """Tool description following FastMCP 2.13 docstring standards.
+    
+    Parameters:
+        param: Parameter description
+        
+    Returns:
+        dict: Result dictionary
+        
+    Usage:
+        Use cases and examples
+        
+    Examples:
+        Example usage
+        
+    Notes:
+        Important notes
+        
+    See Also:
+        Related tools
+    """
+    pass
+```
+
+### Docstring Requirements
+- Parameters: All parameters described
+- Returns: Return type and structure
+- Usage: Common use cases
+- Examples: Code examples
+- Notes: Important information
+- See Also: Related tools
+- NO triple-quoted strings inside docstrings
+
+## File Structure
+
+```
+[REPO_NAME]/
+├── src/
+│   └── [package_name]/
+│       ├── mcp_server.py
+│       └── tools/
+├── tests/
+├── docs/
+└── README.md
+```
+
+## Development Workflow
+
+### Before Committing
+```bash
+# Run linter
+uv run ruff check .
+uv run ruff format .
+
+# Run tests
+uv run pytest
+
+# Check types
+uv run mypy src/
+```
+
+### Commit Message Format
+```
+feat: Add new feature
+fix: Resolve bug
+docs: Update documentation
+refactor: Improve code structure
+```
+
+## Testing Requirements
+
+- **Coverage**: Minimum 90%
+- **Async Tests**: Use pytest-asyncio
+- **Fixtures**: Reusable test data
+- **Integration Tests**: Test real integrations
+
+## MCP Server Configuration
+
+```python
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("[Project Name]")
+
+# Register tools
+@mcp.tool()
+async def my_tool(...):
+    pass
+
+# Run server
+if __name__ == "__main__":
+    mcp.run()
+```
+
+## References
+
+- FastMCP 2.13: Latest MCP standards
+- Testing: pytest documentation
+- Ruff: Python linter and formatter
+
+**Last Updated**: 2025-10-26
+

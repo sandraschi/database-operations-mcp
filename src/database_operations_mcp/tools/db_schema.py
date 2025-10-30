@@ -2,7 +2,7 @@
 # Consolidates all database schema operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 async def db_schema(
     operation: str,
     connection_name: str,
-    database_name: Optional[str] = None,
-    table_name: Optional[str] = None,
-    schema_name: Optional[str] = None,
+    database_name: str | None = None,
+    table_name: str | None = None,
+    schema_name: str | None = None,
     include_metadata: bool = True,
     include_indexes: bool = True,
     include_constraints: bool = True,
-    compare_with: Optional[str] = None,
-) -> Dict[str, Any]:
+    compare_with: str | None = None,
+) -> dict[str, Any]:
     """Database schema management portmanteau tool.
 
     This tool consolidates all database schema operations into a single interface,
@@ -89,7 +89,7 @@ async def db_schema(
         }
 
 
-async def _list_databases(connection_name: str) -> Dict[str, Any]:
+async def _list_databases(connection_name: str) -> dict[str, Any]:
     """List all databases available on the connection."""
     try:
         if not connection_name:
@@ -121,8 +121,8 @@ async def _list_databases(connection_name: str) -> Dict[str, Any]:
 
 
 async def _list_tables(
-    connection_name: str, database_name: Optional[str], schema_name: Optional[str]
-) -> Dict[str, Any]:
+    connection_name: str, database_name: str | None, schema_name: str | None
+) -> dict[str, Any]:
     """List all tables in a database or across all databases."""
     try:
         if not connection_name:
@@ -162,7 +162,7 @@ async def _describe_table(
     include_metadata: bool,
     include_indexes: bool,
     include_constraints: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get detailed information about a specific table."""
     try:
         if not connection_name:
@@ -201,7 +201,7 @@ async def _describe_table(
         }
 
 
-async def _get_schema_diff(connection_name: str, compare_with: Optional[str]) -> Dict[str, Any]:
+async def _get_schema_diff(connection_name: str, compare_with: str | None) -> dict[str, Any]:
     """Compare schemas between two databases or connections."""
     try:
         if not connection_name:
@@ -255,7 +255,7 @@ async def _get_schema_diff(connection_name: str, compare_with: Optional[str]) ->
         }
 
 
-async def _compare_schemas(schema1: Dict[str, Any], schema2: Dict[str, Any]) -> Dict[str, Any]:
+async def _compare_schemas(schema1: dict[str, Any], schema2: dict[str, Any]) -> dict[str, Any]:
     """Compare two schemas and return differences."""
     tables1 = {table["name"]: table for table in schema1.get("tables", [])}
     tables2 = {table["name"]: table for table in schema2.get("tables", [])}
@@ -314,3 +314,6 @@ async def _compare_schemas(schema1: Dict[str, Any], schema2: Dict[str, Any]) -> 
         "tables_removed": tables_removed,
         "tables_modified": tables_modified,
     }
+
+
+

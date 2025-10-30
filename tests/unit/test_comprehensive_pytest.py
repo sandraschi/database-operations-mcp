@@ -14,7 +14,7 @@ import inspect
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -46,10 +46,10 @@ def get_tool_modules():
     return tool_modules
 
 
-def analyze_mcp_decorators(file_path: Path) -> Dict[str, Any]:
+def analyze_mcp_decorators(file_path: Path) -> dict[str, Any]:
     """Analyze MCP decorators in a Python file."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         tree = ast.parse(content)

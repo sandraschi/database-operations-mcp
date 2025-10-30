@@ -4,7 +4,7 @@ Identifies broken or redirected URLs.
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import aiohttp
 
@@ -18,7 +18,7 @@ from .db import FirefoxDB
 class LinkChecker:
     """Handles link validation and checking."""
 
-    def __init__(self, profile_path: Optional[Path] = None):
+    def __init__(self, profile_path: Path | None = None):
         self.db = FirefoxDB(profile_path)
         self.session = None
 
@@ -30,7 +30,7 @@ class LinkChecker:
         if self.session:
             await self.session.close()
 
-    async def check_link(self, url: str) -> Dict[str, Any]:
+    async def check_link(self, url: str) -> dict[str, Any]:
         """Check if a URL is accessible."""
         if not self.session:
             raise RuntimeError("LinkChecker must be used as a context manager")
@@ -51,8 +51,8 @@ class LinkChecker:
 @HelpSystem.register_tool(category="firefox")
 @HelpSystem.register_tool(category="firefox")
 async def find_broken_links(
-    profile_path: Optional[str] = None, timeout: int = 10, concurrent_requests: int = 10
-) -> Dict[str, Any]:
+    profile_path: str | None = None, timeout: int = 10, concurrent_requests: int = 10
+) -> dict[str, Any]:
     """Find broken or redirected links in bookmarks.
 
     Args:

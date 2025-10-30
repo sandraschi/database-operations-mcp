@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -39,12 +39,12 @@ class QueryResult(BaseDBModel):
 
     query_id: str
     status: QueryStatus = QueryStatus.PENDING
-    data: List[Dict[str, Any]] = Field(default_factory=list)
-    columns: Optional[List[str]] = None
+    data: list[dict[str, Any]] = Field(default_factory=list)
+    columns: list[str] | None = None
     rowcount: int = 0
-    execution_time: Optional[float] = None  # in seconds
-    error: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    execution_time: float | None = None  # in seconds
+    error: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class DatabaseQuery(BaseDBModel):
@@ -52,12 +52,12 @@ class DatabaseQuery(BaseDBModel):
 
     query: str
     query_type: QueryType
-    parameters: Optional[Dict[str, Any]] = None
+    parameters: dict[str, Any] | None = None
     connection_id: str
     status: QueryStatus = QueryStatus.PENDING
-    result: Optional[QueryResult] = None
-    executed_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    result: QueryResult | None = None
+    executed_at: datetime | None = None
+    completed_at: datetime | None = None
 
     class Config:
         """Pydantic config."""

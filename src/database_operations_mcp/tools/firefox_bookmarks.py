@@ -2,7 +2,7 @@
 # Consolidates all Firefox bookmark operations into a single interface.
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -24,21 +24,21 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="firefox")
 async def firefox_bookmarks(
     operation: str,
-    profile_name: Optional[str] = None,
-    folder_id: Optional[int] = None,
-    bookmark_id: Optional[int] = None,
-    url: Optional[str] = None,
-    title: Optional[str] = None,
-    tags: Optional[List[str]] = None,
-    search_query: Optional[str] = None,
+    profile_name: str | None = None,
+    folder_id: int | None = None,
+    bookmark_id: int | None = None,
+    url: str | None = None,
+    title: str | None = None,
+    tags: list[str] | None = None,
+    search_query: str | None = None,
     search_type: str = "all",
     export_format: str = "json",
-    export_path: Optional[str] = None,
+    export_path: str | None = None,
     batch_size: int = 100,
     similarity_threshold: float = 0.85,
     age_days: int = 365,
     check_links: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Firefox bookmark management portmanteau tool.
 
     This tool consolidates all Firefox bookmark operations into a single interface,
@@ -164,7 +164,7 @@ async def firefox_bookmarks(
         }
 
 
-async def _list_bookmarks(profile_name: Optional[str], folder_id: Optional[int]) -> Dict[str, Any]:
+async def _list_bookmarks(profile_name: str | None, folder_id: int | None) -> dict[str, Any]:
     """List bookmarks from a profile or folder."""
     try:
         manager = BookmarkManager(profile_name)
@@ -190,7 +190,7 @@ async def _list_bookmarks(profile_name: Optional[str], folder_id: Optional[int])
         }
 
 
-async def _get_bookmark(bookmark_id: Optional[int], profile_name: Optional[str]) -> Dict[str, Any]:
+async def _get_bookmark(bookmark_id: int | None, profile_name: str | None) -> dict[str, Any]:
     """Get details for a specific bookmark."""
     try:
         if not bookmark_id:
@@ -218,8 +218,8 @@ async def _get_bookmark(bookmark_id: Optional[int], profile_name: Optional[str])
 
 
 async def _add_bookmark(
-    profile_name: Optional[str], url: Optional[str], title: Optional[str], tags: Optional[List[str]]
-) -> Dict[str, Any]:
+    profile_name: str | None, url: str | None, title: str | None, tags: list[str] | None
+) -> dict[str, Any]:
     """Add a new bookmark to the profile."""
     try:
         if not url:
@@ -249,8 +249,8 @@ async def _add_bookmark(
 
 
 async def _search_bookmarks(
-    profile_name: Optional[str], search_query: Optional[str], search_type: str
-) -> Dict[str, Any]:
+    profile_name: str | None, search_query: str | None, search_type: str
+) -> dict[str, Any]:
     """Search bookmarks using various criteria."""
     try:
         if not search_query:
@@ -282,8 +282,8 @@ async def _search_bookmarks(
 
 
 async def _find_duplicates(
-    profile_name: Optional[str], similarity_threshold: float
-) -> Dict[str, Any]:
+    profile_name: str | None, similarity_threshold: float
+) -> dict[str, Any]:
     """Find duplicate bookmarks based on URL or content."""
     try:
         searcher = BookmarkSearcher(profile_name)
@@ -310,8 +310,8 @@ async def _find_duplicates(
 
 
 async def _export_bookmarks(
-    profile_name: Optional[str], export_format: str, export_path: Optional[str]
-) -> Dict[str, Any]:
+    profile_name: str | None, export_format: str, export_path: str | None
+) -> dict[str, Any]:
     """Export bookmarks to various formats."""
     try:
         bulk_ops = BulkOperations(profile_name)
@@ -337,8 +337,8 @@ async def _export_bookmarks(
 
 
 async def _batch_update_tags(
-    profile_name: Optional[str], tags: Optional[List[str]], batch_size: int
-) -> Dict[str, Any]:
+    profile_name: str | None, tags: list[str] | None, batch_size: int
+) -> dict[str, Any]:
     """Update tags for multiple bookmarks."""
     try:
         if not tags:
@@ -366,7 +366,7 @@ async def _batch_update_tags(
         }
 
 
-async def _remove_unused_tags(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _remove_unused_tags(profile_name: str | None) -> dict[str, Any]:
     """Remove tags that are no longer used."""
     try:
         bulk_ops = BulkOperations(profile_name)
@@ -388,7 +388,7 @@ async def _remove_unused_tags(profile_name: Optional[str]) -> Dict[str, Any]:
         }
 
 
-async def _list_tags(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _list_tags(profile_name: str | None) -> dict[str, Any]:
     """List all tags used in bookmarks."""
     try:
         tag_manager = TagManager(profile_name)
@@ -413,7 +413,7 @@ async def _list_tags(profile_name: Optional[str]) -> Dict[str, Any]:
         }
 
 
-async def _find_similar_tags(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _find_similar_tags(profile_name: str | None) -> dict[str, Any]:
     """Find tags with similar names."""
     try:
         tag_manager = TagManager(profile_name)
@@ -438,7 +438,7 @@ async def _find_similar_tags(profile_name: Optional[str]) -> Dict[str, Any]:
         }
 
 
-async def _merge_tags(profile_name: Optional[str], tags: Optional[List[str]]) -> Dict[str, Any]:
+async def _merge_tags(profile_name: str | None, tags: list[str] | None) -> dict[str, Any]:
     """Merge similar tags into a single tag."""
     try:
         if not tags or len(tags) < 2:
@@ -465,7 +465,7 @@ async def _merge_tags(profile_name: Optional[str], tags: Optional[List[str]]) ->
         }
 
 
-async def _clean_up_tags(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _clean_up_tags(profile_name: str | None) -> dict[str, Any]:
     """Clean up and standardize tag names."""
     try:
         tag_manager = TagManager(profile_name)
@@ -487,7 +487,7 @@ async def _clean_up_tags(profile_name: Optional[str]) -> Dict[str, Any]:
         }
 
 
-async def _find_old_bookmarks(profile_name: Optional[str], age_days: int) -> Dict[str, Any]:
+async def _find_old_bookmarks(profile_name: str | None, age_days: int) -> dict[str, Any]:
     """Find bookmarks older than specified days."""
     try:
         result = await find_old_bookmarks(profile_name, age_days)
@@ -513,7 +513,7 @@ async def _find_old_bookmarks(profile_name: Optional[str], age_days: int) -> Dic
         }
 
 
-async def _get_bookmark_stats(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _get_bookmark_stats(profile_name: str | None) -> dict[str, Any]:
     """Get statistics about bookmark collection."""
     try:
         result = await get_bookmark_stats(profile_name)
@@ -535,7 +535,7 @@ async def _get_bookmark_stats(profile_name: Optional[str]) -> Dict[str, Any]:
         }
 
 
-async def _find_broken_links(profile_name: Optional[str], check_links: bool) -> Dict[str, Any]:
+async def _find_broken_links(profile_name: str | None, check_links: bool) -> dict[str, Any]:
     """Find bookmarks with broken or inaccessible URLs."""
     try:
         link_checker = LinkChecker(profile_name)
@@ -559,3 +559,6 @@ async def _find_broken_links(profile_name: Optional[str], check_links: bool) -> 
             "broken_links": [],
             "count": 0,
         }
+
+
+

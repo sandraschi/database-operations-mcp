@@ -7,7 +7,7 @@ machine learning workflows. Perfect for RAG systems and AI applications.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import chromadb
 
@@ -30,7 +30,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         """Return the database type."""
         return DatabaseType.CHROMADB
 
-    def __init__(self, connection_config: Dict[str, Any]):
+    def __init__(self, connection_config: dict[str, Any]):
         """Initialize ChromaDB connector."""
         super().__init__(connection_config)
 
@@ -45,7 +45,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         self.client = None
         self.connection = None
 
-    def test_connection(self) -> Dict[str, Any]:
+    def test_connection(self) -> dict[str, Any]:
         """Test ChromaDB connectivity."""
         try:
             if self.persist_directory:
@@ -122,7 +122,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from ChromaDB: {e}")
             return False
 
-    def list_databases(self) -> List[Dict[str, Any]]:
+    def list_databases(self) -> list[dict[str, Any]]:
         """List databases (ChromaDB instance info)."""
         try:
             if not self.client:
@@ -144,7 +144,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error listing ChromaDB databases: {e}")
             raise QueryError(f"Failed to list databases: {e}") from e
 
-    def list_tables(self, database: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_tables(self, database: str | None = None) -> list[dict[str, Any]]:
         """List collections (tables) in ChromaDB."""
         try:
             if not self.client:
@@ -175,7 +175,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error listing ChromaDB collections: {e}")
             raise QueryError(f"Failed to list collections: {e}") from e
 
-    def describe_table(self, table_name: str, database: Optional[str] = None) -> Dict[str, Any]:
+    def describe_table(self, table_name: str, database: str | None = None) -> dict[str, Any]:
         """Get collection schema and metadata."""
         try:
             if not self.client:
@@ -218,7 +218,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error describing ChromaDB collection {table_name}: {e}")
             raise QueryError(f"Failed to describe collection: {e}") from e
 
-    def _get_embedding_dimension(self, collection) -> Optional[int]:
+    def _get_embedding_dimension(self, collection) -> int | None:
         """Get embedding dimension from collection."""
         try:
             sample = collection.get(limit=1, include=["embeddings"])
@@ -228,7 +228,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             pass
         return None
 
-    def execute_query(self, query: str, parameters: Optional[Dict] = None) -> Dict[str, Any]:
+    def execute_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
         """Execute ChromaDB operations (similarity search, etc.)."""
         try:
             if not self.client:
@@ -259,8 +259,8 @@ class ChromaDBConnector(BaseDatabaseConnector):
             raise QueryError(f"Query execution failed: {e}") from e
 
     def _execute_search_query(
-        self, query: str, parameters: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+        self, query: str, parameters: dict | None = None
+    ) -> dict[str, Any]:
         """Execute similarity search."""
         try:
             params = parameters or {}
@@ -290,8 +290,8 @@ class ChromaDBConnector(BaseDatabaseConnector):
             raise QueryError(f"Search query failed: {e}") from e
 
     def _execute_insert_query(
-        self, query: str, parameters: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+        self, query: str, parameters: dict | None = None
+    ) -> dict[str, Any]:
         """Execute document insertion."""
         try:
             params = parameters or {}
@@ -327,8 +327,8 @@ class ChromaDBConnector(BaseDatabaseConnector):
             raise QueryError(f"Insert query failed: {e}") from e
 
     def _execute_delete_query(
-        self, query: str, parameters: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+        self, query: str, parameters: dict | None = None
+    ) -> dict[str, Any]:
         """Execute document deletion."""
         try:
             params = parameters or {}
@@ -362,7 +362,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         except Exception as e:
             raise QueryError(f"Delete query failed: {e}") from e
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get ChromaDB performance metrics."""
         try:
             if not self.client:
@@ -403,7 +403,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error getting ChromaDB performance metrics: {e}")
             return {"error": str(e), "timestamp": datetime.now().isoformat()}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Perform ChromaDB health check."""
         try:
             health_status = "healthy"

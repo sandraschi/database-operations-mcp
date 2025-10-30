@@ -6,7 +6,7 @@ pattern detection, data distributions, value statistics, and content sampling.
 """
 
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 import aiosqlite
 
@@ -33,7 +33,7 @@ class ContentAnalyzer:
 
     async def sample_content(
         self, db_path: str, table_name: str, limit: int = 10
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get sample data from a table.
 
         Retrieves a representative sample of rows from the table for analysis
@@ -84,7 +84,7 @@ class ContentAnalyzer:
                 "column_statistics": column_stats,
             }
 
-    async def detect_patterns(self, db_path: str, table_name: str) -> Dict[str, Any]:
+    async def detect_patterns(self, db_path: str, table_name: str) -> dict[str, Any]:
         """Detect data patterns in table columns.
 
         Analyzes column values to detect common patterns like emails, URLs,
@@ -121,7 +121,7 @@ class ContentAnalyzer:
 
         return patterns
 
-    async def analyze_distributions(self, db_path: str, table_name: str) -> Dict[str, Any]:
+    async def analyze_distributions(self, db_path: str, table_name: str) -> dict[str, Any]:
         """Analyze value distributions in table.
 
         Provides statistics about value distributions including unique counts,
@@ -150,7 +150,7 @@ class ContentAnalyzer:
 
         return distributions
 
-    async def infer_relationships(self, db_path: str) -> List[Dict[str, Any]]:
+    async def infer_relationships(self, db_path: str) -> list[dict[str, Any]]:
         """Infer relationships between tables.
 
         Attempts to detect potential foreign key relationships by analyzing

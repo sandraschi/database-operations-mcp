@@ -2,7 +2,7 @@
 # Consolidates Windows registry and system operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -15,17 +15,17 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="windows")
 async def windows_system(
     operation: str,
-    registry_key: Optional[str] = None,
-    registry_value: Optional[str] = None,
-    value_data: Optional[Any] = None,
-    database_path: Optional[str] = None,
-    query: Optional[str] = None,
-    plex_server_url: Optional[str] = None,
-    plex_token: Optional[str] = None,
+    registry_key: str | None = None,
+    registry_value: str | None = None,
+    value_data: Any | None = None,
+    database_path: str | None = None,
+    query: str | None = None,
+    plex_server_url: str | None = None,
+    plex_token: str | None = None,
     include_metadata: bool = True,
     clean_database: bool = False,
     optimize_performance: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Windows system management portmanteau tool.
 
     This tool consolidates all Windows system operations into a single interface,
@@ -121,7 +121,7 @@ async def windows_system(
         }
 
 
-async def _list_windows_databases() -> Dict[str, Any]:
+async def _list_windows_databases() -> dict[str, Any]:
     """List Windows databases (Plex, etc.)."""
     try:
         return {
@@ -156,8 +156,8 @@ async def _list_windows_databases() -> Dict[str, Any]:
 
 
 async def _manage_plex_metadata(
-    plex_server_url: Optional[str], plex_token: Optional[str], optimize_performance: bool
-) -> Dict[str, Any]:
+    plex_server_url: str | None, plex_token: str | None, optimize_performance: bool
+) -> dict[str, Any]:
     """Manage Plex metadata on Windows."""
     try:
         if not plex_server_url:
@@ -187,8 +187,8 @@ async def _manage_plex_metadata(
 
 
 async def _query_windows_database(
-    database_path: Optional[str], query: Optional[str], include_metadata: bool
-) -> Dict[str, Any]:
+    database_path: str | None, query: str | None, include_metadata: bool
+) -> dict[str, Any]:
     """Query Windows-specific databases."""
     try:
         if not database_path:
@@ -220,8 +220,8 @@ async def _query_windows_database(
 
 
 async def _clean_windows_database(
-    database_path: Optional[str], clean_database: bool
-) -> Dict[str, Any]:
+    database_path: str | None, clean_database: bool
+) -> dict[str, Any]:
     """Clean and optimize Windows databases."""
     try:
         if not database_path:
@@ -251,8 +251,8 @@ async def _clean_windows_database(
 
 
 async def _read_registry_value(
-    registry_key: Optional[str], registry_value: Optional[str]
-) -> Dict[str, Any]:
+    registry_key: str | None, registry_value: str | None
+) -> dict[str, Any]:
     """Read a value from Windows Registry."""
     try:
         if not registry_key:
@@ -282,8 +282,8 @@ async def _read_registry_value(
 
 
 async def _write_registry_value(
-    registry_key: Optional[str], registry_value: Optional[str], value_data: Optional[Any]
-) -> Dict[str, Any]:
+    registry_key: str | None, registry_value: str | None, value_data: Any | None
+) -> dict[str, Any]:
     """Write a value to Windows Registry."""
     try:
         if not registry_key:
@@ -313,7 +313,7 @@ async def _write_registry_value(
         }
 
 
-async def _list_registry_keys(registry_key: Optional[str]) -> Dict[str, Any]:
+async def _list_registry_keys(registry_key: str | None) -> dict[str, Any]:
     """List registry keys in a path."""
     try:
         if not registry_key:
@@ -339,7 +339,7 @@ async def _list_registry_keys(registry_key: Optional[str]) -> Dict[str, Any]:
         }
 
 
-async def _list_registry_values(registry_key: Optional[str]) -> Dict[str, Any]:
+async def _list_registry_values(registry_key: str | None) -> dict[str, Any]:
     """List registry values in a key."""
     try:
         if not registry_key:
@@ -363,3 +363,6 @@ async def _list_registry_values(registry_key: Optional[str]) -> Dict[str, Any]:
             "values": [],
             "count": 0,
         }
+
+
+

@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -14,10 +14,10 @@ from .db import FirefoxDB
 class TagManager:
     """Handles tag operations for Firefox bookmarks."""
 
-    def __init__(self, profile_path: Optional[Path] = None):
+    def __init__(self, profile_path: Path | None = None):
         self.db = FirefoxDB(profile_path)
 
-    def get_tag_stats(self) -> Dict[str, Any]:
+    def get_tag_stats(self) -> dict[str, Any]:
         """Get statistics about tags."""
         query = """
             SELECT t.title as tag, COUNT(*) as count
@@ -34,8 +34,8 @@ class TagManager:
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def list_tags(
-    profile_path: Optional[str] = None, min_count: int = 0, max_count: int = 1000
-) -> Dict[str, Any]:
+    profile_path: str | None = None, min_count: int = 0, max_count: int = 1000
+) -> dict[str, Any]:
     """List all tags in the Firefox bookmarks database.
 
     Args:
@@ -66,8 +66,8 @@ async def list_tags(
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def find_similar_tags(
-    search_pattern: str, profile_path: Optional[str] = None
-) -> Dict[str, Any]:
+    search_pattern: str, profile_path: str | None = None
+) -> dict[str, Any]:
     """Find tags similar to the search pattern.
 
     Args:
@@ -90,11 +90,11 @@ async def find_similar_tags(
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def merge_tags(
-    source_tags: List[str],
+    source_tags: list[str],
     target_tag: str,
-    profile_path: Optional[str] = None,
+    profile_path: str | None = None,
     dry_run: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Merge multiple tags into a single tag.
 
     Args:
@@ -143,8 +143,8 @@ async def merge_tags(
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def clean_up_tags(
-    min_count: int = 1, profile_path: Optional[str] = None, dry_run: bool = True
-) -> Dict[str, Any]:
+    min_count: int = 1, profile_path: str | None = None, dry_run: bool = True
+) -> dict[str, Any]:
     """Clean up rarely used tags.
 
     Args:

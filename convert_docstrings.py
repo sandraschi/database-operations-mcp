@@ -7,7 +7,7 @@ from pathlib import Path
 
 def convert_file_docstrings(filepath):
     """Convert all docstrings in a file from triple double to single quotes."""
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     # Replace docstrings after function definitions

@@ -2,7 +2,7 @@
 # Consolidates data manipulation and query execution operations.
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -16,16 +16,16 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="database")
 async def db_operations(
     operation: str,
-    connection_name: Optional[str] = None,
-    query: Optional[str] = None,
-    params: Optional[Dict[str, Any]] = None,
-    data: Optional[List[Dict[str, Any]]] = None,
-    table_name: Optional[str] = None,
+    connection_name: str | None = None,
+    query: str | None = None,
+    params: dict[str, Any] | None = None,
+    data: list[dict[str, Any]] | None = None,
+    table_name: str | None = None,
     batch_size: int = 1000,
     output_format: str = "json",
-    output_path: Optional[str] = None,
+    output_path: str | None = None,
     limit: int = 100,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Database operations portmanteau tool.
 
     This tool consolidates all database data manipulation and query execution operations
@@ -111,8 +111,8 @@ async def db_operations(
 
 
 async def _execute_transaction(
-    connection_name: str, query: str, params: Optional[Dict[str, Any]]
-) -> Dict[str, Any]:
+    connection_name: str, query: str, params: dict[str, Any] | None
+) -> dict[str, Any]:
     """Execute a database transaction with multiple operations."""
     try:
         if not connection_name:
@@ -144,8 +144,8 @@ async def _execute_transaction(
 
 
 async def _execute_write(
-    connection_name: str, query: str, params: Optional[Dict[str, Any]]
-) -> Dict[str, Any]:
+    connection_name: str, query: str, params: dict[str, Any] | None
+) -> dict[str, Any]:
     """Execute write operations (INSERT, UPDATE, DELETE)."""
     try:
         if not connection_name:
@@ -177,8 +177,8 @@ async def _execute_write(
 
 
 async def _batch_insert(
-    connection_name: str, table_name: str, data: List[Dict[str, Any]], batch_size: int
-) -> Dict[str, Any]:
+    connection_name: str, table_name: str, data: list[dict[str, Any]], batch_size: int
+) -> dict[str, Any]:
     """Insert multiple records in batches for better performance."""
     try:
         if not connection_name:
@@ -214,8 +214,8 @@ async def _batch_insert(
 
 
 async def _execute_query(
-    connection_name: str, query: str, params: Optional[Dict[str, Any]], limit: int
-) -> Dict[str, Any]:
+    connection_name: str, query: str, params: dict[str, Any] | None, limit: int
+) -> dict[str, Any]:
     """Execute read-only queries (SELECT)."""
     try:
         if not connection_name:
@@ -247,7 +247,7 @@ async def _execute_query(
         }
 
 
-async def _quick_data_sample(connection_name: str, table_name: str, limit: int) -> Dict[str, Any]:
+async def _quick_data_sample(connection_name: str, table_name: str, limit: int) -> dict[str, Any]:
     """Get a quick sample of data from a table."""
     try:
         if not connection_name:
@@ -285,10 +285,10 @@ async def _quick_data_sample(connection_name: str, table_name: str, limit: int) 
 async def _export_query_results(
     connection_name: str,
     query: str,
-    params: Optional[Dict[str, Any]],
+    params: dict[str, Any] | None,
     output_format: str,
-    output_path: Optional[str],
-) -> Dict[str, Any]:
+    output_path: str | None,
+) -> dict[str, Any]:
     """Export query results to various formats."""
     try:
         if not connection_name:
@@ -349,3 +349,6 @@ async def _export_query_results(
             "connection_name": connection_name,
             "output_format": output_format,
         }
+
+
+

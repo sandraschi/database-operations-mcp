@@ -11,7 +11,7 @@ import json
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 # Configuration
 OUTPUT_DIR = Path("test_reports")
@@ -62,7 +62,7 @@ class ToolTester:
         }
         self.package_dir, self.tools_dir = setup_python_path()
 
-    def get_tool_modules(self) -> List[str]:
+    def get_tool_modules(self) -> list[str]:
         """Get list of all tool modules to test."""
         try:
             modules = []
@@ -88,7 +88,7 @@ class ToolTester:
             traceback.print_exc()
             return []
 
-    def get_tool_functions(self, module_name: str) -> List[Tuple[str, callable]]:
+    def get_tool_functions(self, module_name: str) -> list[tuple[str, callable]]:
         """Get all testable functions from a tool module.
 
         Args:
@@ -207,7 +207,7 @@ class ToolTester:
         module_results["status"] = "complete"
         self.results["summary"]["tools_tested"] += 1
 
-    def test_function(self, module_name: str, func_name: str, func: callable) -> Dict[str, Any]:
+    def test_function(self, module_name: str, func_name: str, func: callable) -> dict[str, Any]:
         """Test a single tool function with basic parameter analysis."""
         print(f"Testing {module_name}.{func_name}...", end=" ")
         result = {"status": "PASS", "error": None, "error_type": None, "signature": None}
@@ -241,7 +241,7 @@ class ToolTester:
 
     def test_function_with_mock_params(
         self, module_name: str, func_name: str, func: callable
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Test a single tool function with mock parameters (alternative approach)."""
         print(f"Testing {module_name}.{func_name}...", end=" ")
         result = {

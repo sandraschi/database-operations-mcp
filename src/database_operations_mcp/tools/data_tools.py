@@ -6,7 +6,7 @@ across various database backends through a unified interface.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 @HelpSystem.register_tool
 async def execute_transaction(
-    queries: List[Dict[str, Any]], connection_name: str = "default"
-) -> Dict[str, Any]:
+    queries: list[dict[str, Any]], connection_name: str = "default"
+) -> dict[str, Any]:
     """Execute multiple queries in a transaction.
 
     Args:
@@ -110,9 +110,9 @@ async def execute_transaction(
 @HelpSystem.register_tool
 async def execute_write(
     query: str,
-    parameters: Optional[Union[Dict[str, Any], List[Any]]] = None,
+    parameters: dict[str, Any] | list[Any] | None = None,
     connection_name: str = "default",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute a write operation (INSERT, UPDATE, DELETE, etc.) on the database.
 
     Args:
@@ -152,8 +152,8 @@ async def execute_write(
 @mcp.tool()
 @HelpSystem.register_tool
 async def batch_insert(
-    table: str, data: List[Dict[str, Any]], connection_name: str = "default", batch_size: int = 1000
-) -> Dict[str, Any]:
+    table: str, data: list[dict[str, Any]], connection_name: str = "default", batch_size: int = 1000
+) -> dict[str, Any]:
     """Insert multiple rows into a table in batches.
 
     Args:

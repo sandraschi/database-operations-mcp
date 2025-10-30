@@ -6,7 +6,7 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -24,7 +24,7 @@ from .utils import get_profile_directory
 class AIBookmarkAnalyzer:
     """AI-powered bookmark analysis and processing."""
 
-    def __init__(self, profile_path: Optional[Path] = None):
+    def __init__(self, profile_path: Path | None = None):
         self.profile_path = profile_path
         self.db = None
 
@@ -37,7 +37,7 @@ class AIBookmarkAnalyzer:
             self.db = FirefoxDB(self.profile_path)
         return self.db
 
-    async def analyze_bookmark_content(self, url: str) -> Dict[str, Any]:
+    async def analyze_bookmark_content(self, url: str) -> dict[str, Any]:
         """Analyze bookmark content using web scraping and basic AI techniques."""
         try:
             async with aiohttp.ClientSession() as session:
@@ -162,7 +162,7 @@ class SemanticSimilarityEngine:
 
         return len(intersection) / len(union) if union else 0.0
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         """Basic tokenization."""
         if not text:
             return []
@@ -188,7 +188,7 @@ class AIBookmarkPortmanteau:
         auto_categorize: bool = True,
         confidence_threshold: float = 0.8,
         dry_run: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """AI-powered bookmark categorization."""
         try:
             profile_path = get_profile_directory(profile_name)
@@ -245,7 +245,7 @@ class AIBookmarkPortmanteau:
 
     async def smart_deduplication(
         self, profile_name: str, similarity_threshold: float = 0.85, dry_run: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """AI-powered smart deduplication using semantic similarity."""
         try:
             profile_path = get_profile_directory(profile_name)
@@ -313,12 +313,12 @@ class AIBookmarkPortmanteau:
 
     async def generate_portmanteau(
         self,
-        source_profiles: List[str],
+        source_profiles: list[str],
         blend_style: str = "semantic",
         blend_ratio: float = 0.3,
         generate_name: bool = True,
         max_bookmarks: int = 50,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate AI-powered portmanteau profile."""
         try:
             if not source_profiles or len(source_profiles) < 2:
@@ -381,7 +381,7 @@ class AIBookmarkPortmanteau:
         except Exception as e:
             return {"status": "error", "message": f"Portmanteau generation failed: {str(e)}"}
 
-    def _generate_portmanteau_name(self, profiles: List[str]) -> str:
+    def _generate_portmanteau_name(self, profiles: list[str]) -> str:
         """Generate a portmanteau name from profile names."""
         if len(profiles) == 2:
             # Simple two-word portmanteau
@@ -393,10 +393,10 @@ class AIBookmarkPortmanteau:
     async def curate_from_sources(
         self,
         curate_from: str,
-        topics: List[str],
+        topics: list[str],
         max_bookmarks: int = 50,
-        profile_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        profile_name: str | None = None,
+    ) -> dict[str, Any]:
         """Curate bookmarks from external sources."""
         try:
             curated_bookmarks = []
@@ -423,8 +423,8 @@ class AIBookmarkPortmanteau:
             return {"status": "error", "message": f"Curation failed: {str(e)}"}
 
     async def _curate_from_awesome_repos(
-        self, topics: List[str], max_bookmarks: int
-    ) -> List[Dict[str, str]]:
+        self, topics: list[str], max_bookmarks: int
+    ) -> list[dict[str, str]]:
         """Curate bookmarks from GitHub awesome repositories."""
         curated_bookmarks = []
 
@@ -479,15 +479,15 @@ class AIBookmarkPortmanteau:
         return curated_bookmarks
 
     async def _curate_from_web_sources(
-        self, topics: List[str], max_bookmarks: int
-    ) -> List[Dict[str, str]]:
+        self, topics: list[str], max_bookmarks: int
+    ) -> list[dict[str, str]]:
         """Curate bookmarks from web sources (placeholder implementation)."""
         # This would implement web scraping from curated lists
         return []
 
     async def _curate_from_trending(
-        self, topics: List[str], max_bookmarks: int
-    ) -> List[Dict[str, str]]:
+        self, topics: list[str], max_bookmarks: int
+    ) -> list[dict[str, str]]:
         """Curate bookmarks from trending sources (placeholder implementation)."""
         # This would implement trending content discovery
         return []
@@ -495,10 +495,10 @@ class AIBookmarkPortmanteau:
     async def maintain_bookmarks(
         self,
         profile_name: str,
-        cleanup_actions: List[str],
+        cleanup_actions: list[str],
         auto_fix: bool = False,
         dry_run: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """AI-powered bookmark maintenance."""
         try:
             profile_path = get_profile_directory(profile_name)
@@ -550,7 +550,7 @@ class AIBookmarkPortmanteau:
         except Exception as e:
             return {"status": "error", "message": f"Maintenance failed: {str(e)}"}
 
-    async def _check_broken_links(self, bookmarks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _check_broken_links(self, bookmarks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Check for broken links."""
         broken_links = []
 
@@ -574,13 +574,13 @@ class AIBookmarkPortmanteau:
         return broken_links
 
     async def _check_outdated_content(
-        self, bookmarks: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, bookmarks: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """Check for outdated content."""
         # Placeholder implementation
         return []
 
-    async def _check_low_quality(self, bookmarks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _check_low_quality(self, bookmarks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Check for low quality bookmarks."""
         # Placeholder implementation
         return []
@@ -591,7 +591,7 @@ class AIBookmarkPortmanteau:
         export_format: str = "html",
         include_ai_summaries: bool = False,
         verbose: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Enhanced export with AI summaries."""
         try:
             profile_path = get_profile_directory(profile_name)
@@ -626,7 +626,7 @@ class AIBookmarkPortmanteau:
             return {"status": "error", "message": f"Export failed: {str(e)}"}
 
     def _generate_export_content(
-        self, bookmarks: List[Dict[str, Any]], export_format: str, ai_summaries: Dict[str, Any]
+        self, bookmarks: list[dict[str, Any]], export_format: str, ai_summaries: dict[str, Any]
     ) -> str:
         """Generate export content in specified format."""
         if export_format == "html":
@@ -673,8 +673,8 @@ ai_portmanteau = AIBookmarkPortmanteau()
 async def ai_bookmark_portmanteau(
     operation: str,
     # Core parameters
-    profile_name: Optional[str] = None,
-    source_profiles: Optional[List[str]] = None,
+    profile_name: str | None = None,
+    source_profiles: list[str] | None = None,
     # Categorization parameters
     auto_categorize: bool = False,
     confidence_threshold: float = 0.8,
@@ -682,18 +682,18 @@ async def ai_bookmark_portmanteau(
     smart_dedupe: bool = False,
     similarity_threshold: float = 0.85,
     # Curation parameters
-    curate_from: Optional[str] = None,  # "awesome_repos", "web_sources", "trending"
-    topics: Optional[List[str]] = None,
+    curate_from: str | None = None,  # "awesome_repos", "web_sources", "trending"
+    topics: list[str] | None = None,
     max_bookmarks: int = 50,
     # Portmanteau generation parameters
     blend_style: str = "semantic",  # "semantic", "thematic", "usage_based"
     blend_ratio: float = 0.3,
     generate_name: bool = True,
     # Maintenance parameters
-    cleanup_actions: Optional[List[str]] = None,
+    cleanup_actions: list[str] | None = None,
     auto_fix: bool = False,
     # Export parameters
-    export_format: Optional[str] = None,  # "html", "csv", "json"
+    export_format: str | None = None,  # "html", "csv", "json"
     include_ai_summaries: bool = False,
     # Learning parameters
     learn_from_usage: bool = False,
@@ -701,7 +701,7 @@ async def ai_bookmark_portmanteau(
     # General parameters
     dry_run: bool = False,
     verbose: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """AI-powered bookmark portmanteau tool - unified interface for all AI bookmark operations.
 
     This portmanteau tool consolidates multiple AI bookmark features into a single, powerful interface,

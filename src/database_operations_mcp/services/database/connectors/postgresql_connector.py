@@ -7,7 +7,7 @@ and complex queries. Perfect for production applications and development.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import psycopg2
 import psycopg2.extras
@@ -31,7 +31,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
         """Return the database type."""
         return DatabaseType.POSTGRESQL
 
-    def __init__(self, connection_config: Dict[str, Any]):
+    def __init__(self, connection_config: dict[str, Any]):
         """Initialize PostgreSQL connector.
 
         Args:
@@ -60,7 +60,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
         self.connection = None
 
-    def test_connection(self) -> Dict[str, Any]:
+    def test_connection(self) -> dict[str, Any]:
         """Test PostgreSQL database connectivity."""
         try:
             # Build connection string
@@ -180,7 +180,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             f"sslmode={self.sslmode}"
         )
 
-    def list_databases(self) -> List[Dict[str, Any]]:
+    def list_databases(self) -> list[dict[str, Any]]:
         """List all databases on the PostgreSQL server."""
         try:
             if not self.connection:
@@ -226,7 +226,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error listing PostgreSQL databases: {e}")
             raise QueryError(f"Failed to list databases: {e}") from e
 
-    def list_tables(self, database: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_tables(self, database: str | None = None) -> list[dict[str, Any]]:
         """List tables in the PostgreSQL database."""
         try:
             if not self.connection:
@@ -279,7 +279,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error listing PostgreSQL tables: {e}")
             raise QueryError(f"Failed to list tables: {e}") from e
 
-    def describe_table(self, table_name: str, database: Optional[str] = None) -> Dict[str, Any]:
+    def describe_table(self, table_name: str, database: str | None = None) -> dict[str, Any]:
         """Get table schema and metadata."""
         try:
             if not self.connection:
@@ -416,7 +416,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error describing PostgreSQL table {table_name}: {e}")
             raise QueryError(f"Failed to describe table: {e}") from e
 
-    def execute_query(self, query: str, parameters: Optional[Dict] = None) -> Dict[str, Any]:
+    def execute_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
         """Execute query and return results."""
         try:
             if not self.connection:
@@ -465,7 +465,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error executing PostgreSQL query: {e}")
             raise QueryError(f"Query execution failed: {e}") from e
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get PostgreSQL performance metrics."""
         try:
             if not self.connection:
@@ -544,7 +544,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error getting PostgreSQL performance metrics: {e}")
             return {"error": str(e), "timestamp": datetime.now().isoformat()}
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Perform comprehensive PostgreSQL health check."""
         try:
             health_status = "healthy"

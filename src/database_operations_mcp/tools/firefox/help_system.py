@@ -1,6 +1,7 @@
 """Help system for Firefox bookmark tools."""
 
-from typing import Any, Callable, Dict, Optional
+from collections.abc import Callable
+from typing import Any, Optional
 
 
 class HelpSystem:
@@ -11,7 +12,7 @@ class HelpSystem:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._tools: Dict[str, Dict[str, Any]] = {}
+            cls._instance._tools: dict[str, dict[str, Any]] = {}
         return cls._instance
 
     @classmethod
@@ -41,7 +42,7 @@ class HelpSystem:
         return decorator
 
     @classmethod
-    def get_help(cls, tool_name: str) -> Optional[Dict[str, Any]]:
+    def get_help(cls, tool_name: str) -> dict[str, Any] | None:
         """Get help information for a specific tool.
 
         Args:
@@ -53,7 +54,7 @@ class HelpSystem:
         return cls()._tools.get(tool_name)
 
     @classmethod
-    def list_tools(cls, category: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
+    def list_tools(cls, category: str | None = None) -> dict[str, dict[str, Any]]:
         """List all registered tools, optionally filtered by category.
 
         Args:

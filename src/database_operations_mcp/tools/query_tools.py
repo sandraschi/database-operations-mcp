@@ -5,7 +5,7 @@ Handles SQL queries, data retrieval, and result formatting.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 @HelpSystem.register_tool
 async def execute_query(
-    connection_name: str, query: str, parameters: Optional[Dict[str, Any]] = None, limit: int = 1000
-) -> Dict[str, Any]:
+    connection_name: str, query: str, parameters: dict[str, Any] | None = None, limit: int = 1000
+) -> dict[str, Any]:
     """Execute SQL or NoSQL query on specified database connection.
 
     Executes queries on registered database connections with automatic limit enforcement,
@@ -197,11 +197,11 @@ async def execute_query(
 async def quick_data_sample(
     connection_name: str,
     table_name: str,
-    database_name: Optional[str] = None,
+    database_name: str | None = None,
     sample_size: int = 10,
-    include_columns: Optional[List[str]] = None,
-    exclude_columns: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    include_columns: list[str] | None = None,
+    exclude_columns: list[str] | None = None,
+) -> dict[str, Any]:
     """Get quick data sample from table without writing queries.
 
     Retrieves a small sample of data from any table/collection for quick inspection,
@@ -359,10 +359,10 @@ async def export_query_results(
     connection_name: str,
     query: str,
     export_format: str = "json",
-    output_file: Optional[str] = None,
-    parameters: Optional[Dict[str, Any]] = None,
+    output_file: str | None = None,
+    parameters: dict[str, Any] | None = None,
     limit: int = 1000,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute query and export results in multiple formats.
 
     Runs database query and formats results as JSON, CSV, or Excel. Useful for
@@ -497,7 +497,7 @@ async def export_query_results(
         return {"success": False, "error": str(e)}
 
 
-def _apply_query_limit(query: str, limit: Optional[int], database_type) -> str:
+def _apply_query_limit(query: str, limit: int | None, database_type) -> str:
     """Apply LIMIT clause to query based on database type."""
     if not limit:
         return query
@@ -517,7 +517,7 @@ def _apply_query_limit(query: str, limit: Optional[int], database_type) -> str:
 
 
 def _generate_sample_query(
-    database_type, table_name: str, database_name: Optional[str], sample_size: int
+    database_type, table_name: str, database_name: str | None, sample_size: int
 ) -> str:
     """Generate appropriate sample query based on database type."""
     if database_type in [DatabaseType.POSTGRESQL, DatabaseType.SQLITE]:
@@ -533,7 +533,7 @@ def _generate_sample_query(
         return f"/* Sample query for {table_name} */"
 
 
-def _format_export_data(result: Dict[str, Any], export_format: str) -> Any:
+def _format_export_data(result: dict[str, Any], export_format: str) -> Any:
     """Format query results for export."""
     rows = result.get("rows", [])
     columns = result.get("columns", [])

@@ -6,7 +6,7 @@ to prevent tool explosion in Claude Desktop.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -17,13 +17,13 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 async def db_connection_clean(
     operation: str,
-    connection_name: Optional[str] = None,
-    database_type: Optional[str] = None,
-    connection_config: Optional[Dict[str, Any]] = None,
+    connection_name: str | None = None,
+    database_type: str | None = None,
+    connection_config: dict[str, Any] | None = None,
     test_connection: bool = True,
-    timeout: Optional[float] = None,
+    timeout: float | None = None,
     parallel: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Clean database connection management portmanteau tool.
 
     This is a simplified version that doesn't import individual tools
@@ -49,16 +49,16 @@ async def db_connection_clean(
 @mcp.tool()
 async def db_operations_clean(
     operation: str,
-    connection_name: Optional[str] = None,
-    query: Optional[str] = None,
-    params: Optional[Dict[str, Any]] = None,
-    data: Optional[List[Dict[str, Any]]] = None,
-    table_name: Optional[str] = None,
+    connection_name: str | None = None,
+    query: str | None = None,
+    params: dict[str, Any] | None = None,
+    data: list[dict[str, Any]] | None = None,
+    table_name: str | None = None,
     batch_size: int = 1000,
     output_format: str = "json",
-    output_path: Optional[str] = None,
+    output_path: str | None = None,
     limit: int = 100,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Clean database operations portmanteau tool.
 
     This is a simplified version that doesn't import individual tools
@@ -83,15 +83,15 @@ async def db_operations_clean(
 @mcp.tool()
 async def firefox_bookmarks_clean(
     operation: str,
-    profile_name: Optional[str] = None,
-    folder_id: Optional[int] = None,
-    bookmark_id: Optional[int] = None,
-    url: Optional[str] = None,
-    title: Optional[str] = None,
-    tags: Optional[List[str]] = None,
-    search_query: Optional[str] = None,
+    profile_name: str | None = None,
+    folder_id: int | None = None,
+    bookmark_id: int | None = None,
+    url: str | None = None,
+    title: str | None = None,
+    tags: list[str] | None = None,
+    search_query: str | None = None,
     limit: int = 100,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Clean Firefox bookmark management portmanteau tool.
 
     This is a simplified version that doesn't import individual tools
@@ -115,7 +115,7 @@ async def firefox_bookmarks_clean(
 
 
 @mcp.tool()
-async def help_clean(category: Optional[str] = None) -> Dict[str, Any]:
+async def help_clean(category: str | None = None) -> dict[str, Any]:
     """Clean help system that always works."""
     return {
         "success": True,

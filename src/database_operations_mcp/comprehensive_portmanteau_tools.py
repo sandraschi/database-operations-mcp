@@ -6,7 +6,7 @@ to prevent tool explosion in Claude Desktop while maintaining full functionality
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -21,13 +21,13 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 async def db_connection(
     operation: str,
-    connection_name: Optional[str] = None,
-    database_type: Optional[str] = None,
-    connection_config: Optional[Dict[str, Any]] = None,
+    connection_name: str | None = None,
+    database_type: str | None = None,
+    connection_config: dict[str, Any] | None = None,
     test_connection: bool = True,
-    timeout: Optional[float] = None,
+    timeout: float | None = None,
     parallel: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Database connection management portmanteau tool.
 
     Comprehensive database connection management consolidating all connection operations
@@ -181,16 +181,16 @@ async def db_connection(
 @mcp.tool()
 async def db_operations(
     operation: str,
-    connection_name: Optional[str] = None,
-    query: Optional[str] = None,
-    params: Optional[Dict[str, Any]] = None,
-    data: Optional[List[Dict[str, Any]]] = None,
-    table_name: Optional[str] = None,
+    connection_name: str | None = None,
+    query: str | None = None,
+    params: dict[str, Any] | None = None,
+    data: list[dict[str, Any]] | None = None,
+    table_name: str | None = None,
     batch_size: int = 1000,
     output_format: str = "json",
-    output_path: Optional[str] = None,
+    output_path: str | None = None,
     limit: int = 100,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Database operations portmanteau tool.
 
     Comprehensive database operations consolidating all data manipulation and query
@@ -375,12 +375,12 @@ async def db_operations(
 @mcp.tool()
 async def db_schema(
     operation: str,
-    connection_name: Optional[str] = None,
-    table_name: Optional[str] = None,
-    schema_name: Optional[str] = None,
+    connection_name: str | None = None,
+    table_name: str | None = None,
+    schema_name: str | None = None,
     include_metadata: bool = True,
     detailed: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Database schema inspection portmanteau tool.
 
     Comprehensive database schema inspection consolidating all schema-related
@@ -517,11 +517,11 @@ async def db_schema(
 @mcp.tool()
 async def db_management(
     operation: str,
-    connection_name: Optional[str] = None,
-    maintenance_type: Optional[str] = None,
+    connection_name: str | None = None,
+    maintenance_type: str | None = None,
     include_metrics: bool = True,
     verbose: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Database management and administration portmanteau tool.
 
     Comprehensive database management consolidating all administration and
@@ -660,15 +660,15 @@ async def db_management(
 @mcp.tool()
 async def db_fts(
     operation: str,
-    connection_name: Optional[str] = None,
+    connection_name: str | None = None,
     table: str = "fts_index",
-    query: Optional[str] = None,
-    columns: Optional[List[str]] = None,
+    query: str | None = None,
+    columns: list[str] | None = None,
     limit: int = 20,
     offset: int = 0,
     highlight: bool = True,
     snippet_size: int = 3,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Full-text search portmanteau tool.
 
     Comprehensive full-text search consolidating all FTS operations into a single
@@ -838,32 +838,32 @@ async def db_fts(
 async def browser_bookmarks(
     operation: str,
     browser: str,
-    profile_name: Optional[str] = None,
-    folder_id: Optional[int] = None,
-    bookmark_id: Optional[int] = None,
-    url: Optional[str] = None,
-    title: Optional[str] = None,
-    tags: Optional[List[str]] = None,
-    search_query: Optional[str] = None,
+    profile_name: str | None = None,
+    folder_id: int | None = None,
+    bookmark_id: int | None = None,
+    url: str | None = None,
+    title: str | None = None,
+    tags: list[str] | None = None,
+    search_query: str | None = None,
     limit: int = 100,
     # Tagging parameters
-    folder_path: Optional[str] = None,
-    year: Optional[int] = None,
-    tag_prefix: Optional[str] = None,
+    folder_path: str | None = None,
+    year: int | None = None,
+    tag_prefix: str | None = None,
     batch_size: int = 100,
     include_subfolders: bool = True,
     dry_run: bool = False,
     # Curated parameters
-    category: Optional[str] = None,
-    source_name: Optional[str] = None,
+    category: str | None = None,
+    source_name: str | None = None,
     include_metadata: bool = True,
     # Backup parameters
-    backup_path: Optional[str] = None,
-    restore_path: Optional[str] = None,
+    backup_path: str | None = None,
+    restore_path: str | None = None,
     include_bookmarks: bool = True,
     include_settings: bool = True,
     include_passwords: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Universal browser bookmark management portmanteau tool.
 
     Comprehensive bookmark management across ALL supported browsers (Firefox, Chrome,
@@ -884,7 +884,6 @@ async def browser_bookmarks(
             - 'import': Import bookmarks from external sources
             - 'organize': Organize bookmarks by categories or tags
             - 'analyze': Analyze bookmark usage and patterns
-            
             # Tagging operations
             - 'tag_from_folder': Generate tags based on folder structure
             - 'batch_tag_from_folder': Batch tag generation from folders
@@ -894,7 +893,6 @@ async def browser_bookmarks(
             - 'merge_tags': Merge similar or duplicate tags
             - 'clean_up_tags': Remove unused or redundant tags
             - 'suggest_tags': Suggest tags for untagged bookmarks
-            
             # Curated sources operations
             - 'get_curated_source': Get specific curated source by name
             - 'list_curated_sources': List all available curated sources
@@ -902,7 +900,6 @@ async def browser_bookmarks(
             - 'create_from_curated': Create bookmarks from curated source
             - 'search_curated': Search curated sources by topic or category
             - 'import_curated': Import curated collection to profile
-            
             # Backup operations
             - 'backup_firefox_data': Create complete profile backup
             - 'restore_firefox_data': Restore profile from backup
@@ -1091,15 +1088,15 @@ async def browser_bookmarks(
 @mcp.tool()
 async def firefox_profiles(
     operation: str,
-    profile_name: Optional[str] = None,
-    source_profiles: Optional[List[str]] = None,
+    profile_name: str | None = None,
+    source_profiles: list[str] | None = None,
     include_bookmarks: bool = True,
     include_settings: bool = True,
-    preset_name: Optional[str] = None,
+    preset_name: str | None = None,
     # Utility parameters
     check_access: bool = True,
     include_info: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Firefox profile management portmanteau tool (CONSOLIDATED).
 
     Comprehensive Firefox profile management consolidating ALL profile-related
@@ -1117,7 +1114,6 @@ async def firefox_profiles(
             - 'suggest_portmanteau_profiles': Get suggestions for profile combinations
             - 'backup_profile': Backup profile data and settings
             - 'restore_profile': Restore profile from backup
-            
             # Utility operations
             - 'is_firefox_running': Check if Firefox is currently running
             - 'check_firefox_database_access_safe': Safely check database access
@@ -1248,14 +1244,14 @@ async def firefox_profiles(
 @mcp.tool()
 async def media_library(
     operation: str,
-    library_path: Optional[str] = None,
-    book_title: Optional[str] = None,
-    author: Optional[str] = None,
-    search_query: Optional[str] = None,
+    library_path: str | None = None,
+    book_title: str | None = None,
+    author: str | None = None,
+    search_query: str | None = None,
     include_metadata: bool = True,
-    plex_server_url: Optional[str] = None,
-    plex_token: Optional[str] = None,
-) -> Dict[str, Any]:
+    plex_server_url: str | None = None,
+    plex_token: str | None = None,
+) -> dict[str, Any]:
     """Media library management portmanteau tool (Calibre & Plex).
 
     Comprehensive media library management consolidating all Calibre and Plex
@@ -1413,12 +1409,12 @@ async def media_library(
 @mcp.tool()
 async def windows_system(
     operation: str,
-    registry_key: Optional[str] = None,
-    registry_value: Optional[str] = None,
-    value_data: Optional[str] = None,
-    database_path: Optional[str] = None,
+    registry_key: str | None = None,
+    registry_value: str | None = None,
+    value_data: str | None = None,
+    database_path: str | None = None,
     clean_database: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Windows system operations portmanteau tool.
 
     Comprehensive Windows system operations consolidating all Windows-specific
@@ -1559,14 +1555,14 @@ async def windows_system(
 @mcp.tool()
 async def system_init(
     operation: str,
-    database_type: Optional[str] = None,
-    connection_config: Optional[Dict[str, Any]] = None,
+    database_type: str | None = None,
+    connection_config: dict[str, Any] | None = None,
     test_connection: bool = True,
     create_tables: bool = True,
     initialize_data: bool = False,
     setup_help_system: bool = True,
     verbose: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """System initialization portmanteau tool.
 
     Comprehensive system initialization consolidating all initialization
@@ -1731,10 +1727,10 @@ async def system_init(
 @mcp.tool()
 async def help_system(
     operation: str,
-    category: Optional[str] = None,
-    tool_name: Optional[str] = None,
+    category: str | None = None,
+    tool_name: str | None = None,
     detailed: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Help system portmanteau tool.
 
     Comprehensive help system consolidating all help and documentation

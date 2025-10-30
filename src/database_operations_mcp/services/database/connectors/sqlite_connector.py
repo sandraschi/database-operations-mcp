@@ -9,7 +9,7 @@ import logging
 import os
 import sqlite3
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ....database_manager import (
     BaseDatabaseConnector,
@@ -31,7 +31,7 @@ class SQLiteConnector(BaseDatabaseConnector):
         """Return the database type."""
         return DatabaseType.SQLITE
 
-    def __init__(self, connection_config: Dict[str, Any]):
+    def __init__(self, connection_config: dict[str, Any]):
         """Initialize SQLite connector."""
         super().__init__(connection_config)
         self.database_path = connection_config.get("database_path")
@@ -81,7 +81,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             return False
 
     async def execute_query(
-        self, query: str, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any
     ) -> QueryResult:
         """Execute query and return results."""
         try:
@@ -128,7 +128,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             logger.error(f"Error executing SQLite query: {e}")
             return QueryResult(success=False, data=[], message=f"Query execution failed: {e}")
 
-    async def get_schema(self, **kwargs: Any) -> Dict[str, Any]:
+    async def get_schema(self, **kwargs: Any) -> dict[str, Any]:
         """Get the database schema."""
         try:
             if not self.connection:
@@ -145,7 +145,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             logger.error(f"Error getting SQLite schema: {e}")
             raise QueryError(f"Failed to get schema: {e}") from e
 
-    async def get_tables(self, **kwargs: Any) -> List[str]:
+    async def get_tables(self, **kwargs: Any) -> list[str]:
         """Get list of tables in the database."""
         try:
             if not self.connection:
@@ -170,7 +170,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             logger.error(f"Error listing SQLite tables: {e}")
             raise QueryError(f"Failed to list tables: {e}") from e
 
-    async def get_table_schema(self, table_name: str, **kwargs: Any) -> Dict[str, Any]:
+    async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
         """Get schema information for a specific table."""
         try:
             if not self.connection:
@@ -215,7 +215,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             logger.error(f"Error describing SQLite table {table_name}: {e}")
             raise QueryError(f"Failed to describe table: {e}") from e
 
-    async def list_databases(self) -> List[Dict[str, Any]]:
+    async def list_databases(self) -> list[dict[str, Any]]:
         """List databases (SQLite only has one database per file)."""
         try:
             if not os.path.exists(self.database_path):
@@ -242,7 +242,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             logger.error(f"Error listing SQLite databases: {e}")
             return []
 
-    async def list_tables(self, database: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def list_tables(self, database: str | None = None) -> list[dict[str, Any]]:
         """List tables in the SQLite database."""
         try:
             if not self.connection:
@@ -289,7 +289,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             logger.error(f"Error listing SQLite tables: {e}")
             raise QueryError(f"Failed to list tables: {e}") from e
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform comprehensive SQLite health check."""
         try:
             health_status = "healthy"

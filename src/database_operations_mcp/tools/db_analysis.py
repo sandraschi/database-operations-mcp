@@ -6,7 +6,7 @@ single unified interface. Supports structure discovery, content analysis,
 error detection, health checking, and report generation.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.services.analysis import (
@@ -33,9 +33,9 @@ async def db_analysis(
     include_sample_data: bool = True,
     detect_errors: bool = True,
     suggest_fixes: bool = True,
-    table_name: Optional[str] = None,
+    table_name: str | None = None,
     limit: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Comprehensive database analysis and diagnostics.
 
     Examines a database file to understand its structure, contents, health,

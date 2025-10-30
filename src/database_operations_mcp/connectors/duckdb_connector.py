@@ -1,6 +1,6 @@
 """DuckDB database connector."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import duckdb
@@ -17,9 +17,9 @@ class DuckDBConnector:
 
     def __init__(self):
         """Initialize DuckDB connector."""
-        self.conn: Optional[Any] = None
+        self.conn: Any | None = None
 
-    async def connect(self, db_path: Optional[str] = None) -> Any:
+    async def connect(self, db_path: str | None = None) -> Any:
         """Connect to DuckDB database.
 
         Args:
@@ -42,8 +42,8 @@ class DuckDBConnector:
         return self.conn
 
     async def execute_query(
-        self, query: str, parameters: Optional[Dict] = None
-    ) -> List[Dict[str, Any]]:
+        self, query: str, parameters: dict | None = None
+    ) -> list[dict[str, Any]]:
         """Execute SELECT query.
 
         Args:
@@ -62,7 +62,7 @@ class DuckDBConnector:
 
         return [dict(zip(columns, row, strict=False)) for row in results]
 
-    async def execute_non_query(self, query: str, parameters: Optional[Dict] = None) -> int:
+    async def execute_non_query(self, query: str, parameters: dict | None = None) -> int:
         """Execute non-SELECT query (INSERT, UPDATE, DELETE).
 
         Args:
@@ -78,7 +78,7 @@ class DuckDBConnector:
         cursor = self.conn.execute(query, parameters or {})
         return cursor.rowcount
 
-    async def read_parquet(self, file_path: str, table_name: Optional[str] = None) -> int:
+    async def read_parquet(self, file_path: str, table_name: str | None = None) -> int:
         """Read Parquet file into DuckDB.
 
         Args:
@@ -99,7 +99,7 @@ class DuckDBConnector:
 
         return cursor.rowcount
 
-    async def get_tables(self) -> List[str]:
+    async def get_tables(self) -> list[str]:
         """Get list of tables in database.
 
         Returns:
@@ -112,7 +112,7 @@ class DuckDBConnector:
         results = await self.execute_query(query)
         return [row.get("name", "") for row in results if "name" in row]
 
-    async def get_table_structure(self, table_name: str) -> List[Dict[str, Any]]:
+    async def get_table_structure(self, table_name: str) -> list[dict[str, Any]]:
         """Get table structure information.
 
         Args:

@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 # Type variable for the connection type
 T = TypeVar("T")
@@ -39,11 +39,11 @@ class QueryResult:
     """Container for query results."""
 
     success: bool
-    data: List[Dict[str, Any]]
-    columns: Optional[List[str]] = None
+    data: list[dict[str, Any]]
+    columns: list[str] | None = None
     rowcount: int = 0
-    message: Optional[str] = None
-    execution_time: Optional[float] = None
+    message: str | None = None
+    execution_time: float | None = None
     timestamp: datetime = None
 
     def __post_init__(self):
@@ -77,12 +77,12 @@ class BaseDatabaseConnector(ABC, Generic[T]):
     must implement to be used with the database operations MCP.
     """
 
-    def __init__(self, connection_config: Dict[str, Any]):
+    def __init__(self, connection_config: dict[str, Any]):
         """Initialize the database connector with connection configuration."""
         self.connection_config = connection_config
-        self.connection: Optional[T] = None
+        self.connection: T | None = None
         self.status: ConnectionStatus = ConnectionStatus.DISCONNECTED
-        self.last_error: Optional[str] = None
+        self.last_error: str | None = None
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @property
@@ -103,28 +103,28 @@ class BaseDatabaseConnector(ABC, Generic[T]):
 
     @abstractmethod
     async def execute_query(
-        self, query: str, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any
     ) -> QueryResult:
         """Execute a query and return the results."""
         pass
 
     @abstractmethod
-    async def get_schema(self, **kwargs: Any) -> Dict[str, Any]:
+    async def get_schema(self, **kwargs: Any) -> dict[str, Any]:
         """Get the database schema."""
         pass
 
     @abstractmethod
-    async def get_tables(self, **kwargs: Any) -> List[str]:
+    async def get_tables(self, **kwargs: Any) -> list[str]:
         """Get list of tables in the database."""
         pass
 
     @abstractmethod
-    async def get_table_schema(self, table_name: str, **kwargs: Any) -> Dict[str, Any]:
+    async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
         """Get schema information for a specific table."""
         pass
 
     @abstractmethod
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform a health check of the database connection."""
         pass
 
@@ -149,7 +149,7 @@ class DatabaseManager:
     """Centralized database connection manager."""
 
     def __init__(self):
-        self.connectors: Dict[str, BaseDatabaseConnector] = {}
+        self.connectors: dict[str, BaseDatabaseConnector] = {}
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def register_connector(self, name: str, connector: BaseDatabaseConnector) -> bool:
@@ -162,11 +162,11 @@ class DatabaseManager:
             self.logger.error(f"Failed to register connector {name}: {e}")
             return False
 
-    def get_connector(self, name: str) -> Optional[BaseDatabaseConnector]:
+    def get_connector(self, name: str) -> BaseDatabaseConnector | None:
         """Get a registered connector by name."""
         return self.connectors.get(name)
 
-    def list_connectors(self) -> Dict[str, Dict[str, Any]]:
+    def list_connectors(self) -> dict[str, dict[str, Any]]:
         """List all registered connectors."""
         result = {}
         for name, connector in self.connectors.items():
@@ -178,7 +178,7 @@ class DatabaseManager:
             }
         return result
 
-    def test_all_connections(self) -> Dict[str, Dict[str, Any]]:
+    def test_all_connections(self) -> dict[str, dict[str, Any]]:
         """Test all registered connections."""
         results = {}
         for name, connector in self.connectors.items():
@@ -201,7 +201,7 @@ class DatabaseManager:
         return results
 
 
-def get_supported_databases() -> List[Dict[str, Any]]:
+def get_supported_databases() -> list[dict[str, Any]]:
     """Get list of supported database types."""
     return [
         {
@@ -232,8 +232,8 @@ def get_supported_databases() -> List[Dict[str, Any]]:
 
 
 def create_connector(
-    database_type: str, connection_config: Dict[str, Any]
-) -> Optional[BaseDatabaseConnector]:
+    database_type: str, connection_config: dict[str, Any]
+) -> BaseDatabaseConnector | None:
     """Create a database connector instance."""
     from .services.database.connectors import AVAILABLE_CONNECTORS
 

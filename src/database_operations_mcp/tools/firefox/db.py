@@ -3,7 +3,7 @@
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 
@@ -11,7 +11,7 @@ from database_operations_mcp.config.mcp_config import mcp
 class FirefoxDB:
     """Manages SQLite connections to Firefox bookmarks database."""
 
-    def __init__(self, profile_path: Optional[Path] = None):
+    def __init__(self, profile_path: Path | None = None):
         self.profile_path = profile_path
         self.conn = None
         self.logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class FirefoxDB:
 
 
 @mcp.tool()
-def test_firefox_database_connection(profile_path: str) -> Dict[str, Any]:
+def test_firefox_database_connection(profile_path: str) -> dict[str, Any]:
     """
     Test connection to Firefox bookmark database.
 
@@ -93,7 +93,7 @@ def test_firefox_database_connection(profile_path: str) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def get_firefox_database_info(profile_path: str) -> Dict[str, Any]:
+def get_firefox_database_info(profile_path: str) -> dict[str, Any]:
     """
     Get information about Firefox bookmark database.
 

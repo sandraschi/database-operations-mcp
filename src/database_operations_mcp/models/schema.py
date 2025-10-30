@@ -1,7 +1,7 @@
 """Database schema models."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -42,9 +42,9 @@ class ColumnConstraint(BaseDBModel):
 
     name: str
     constraint_type: ConstraintType
-    value: Optional[Any] = None
-    reference_table: Optional[str] = None
-    reference_column: Optional[str] = None
+    value: Any | None = None
+    reference_table: str | None = None
+    reference_column: str | None = None
 
 
 class TableColumn(BaseDBModel):
@@ -52,12 +52,12 @@ class TableColumn(BaseDBModel):
 
     name: str
     data_type: ColumnType
-    max_length: Optional[int] = None
+    max_length: int | None = None
     nullable: bool = True
-    default: Optional[Any] = None
-    constraints: List[ColumnConstraint] = Field(default_factory=list)
-    description: Optional[str] = None
-    custom_type: Optional[str] = None
+    default: Any | None = None
+    constraints: list[ColumnConstraint] = Field(default_factory=list)
+    description: str | None = None
+    custom_type: str | None = None
 
     @property
     def is_primary_key(self) -> bool:
@@ -74,23 +74,23 @@ class TableIndex(BaseDBModel):
     """Database table index definition."""
 
     name: str
-    columns: List[str]
+    columns: list[str]
     unique: bool = False
-    method: Optional[str] = None  # e.g., 'btree', 'hash', 'gist', etc.
+    method: str | None = None  # e.g., 'btree', 'hash', 'gist', etc.
 
 
 class TableSchema(BaseDBModel):
     """Database table schema definition."""
 
     name: str
-    columns: Dict[str, TableColumn] = Field(default_factory=dict)
-    indexes: List[TableIndex] = Field(default_factory=list)
-    primary_key: List[str] = Field(default_factory=list)
-    foreign_keys: Dict[str, Dict[str, str]] = Field(
+    columns: dict[str, TableColumn] = Field(default_factory=dict)
+    indexes: list[TableIndex] = Field(default_factory=list)
+    primary_key: list[str] = Field(default_factory=list)
+    foreign_keys: dict[str, dict[str, str]] = Field(
         default_factory=dict
     )  # {column: {table: ref_column}}
-    description: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    description: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     def add_column(self, column: TableColumn) -> None:
         """Add a column to the table."""
@@ -112,10 +112,10 @@ class DatabaseSchema(BaseDBModel):
     """Complete database schema."""
 
     name: str
-    tables: Dict[str, TableSchema] = Field(default_factory=dict)
-    views: Dict[str, str] = Field(default_factory=dict)  # view_name: view_definition
-    functions: Dict[str, str] = Field(default_factory=dict)  # function_name: function_definition
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    tables: dict[str, TableSchema] = Field(default_factory=dict)
+    views: dict[str, str] = Field(default_factory=dict)  # view_name: view_definition
+    functions: dict[str, str] = Field(default_factory=dict)  # function_name: function_definition
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     def add_table(self, table: TableSchema) -> None:
         """Add a table to the schema."""

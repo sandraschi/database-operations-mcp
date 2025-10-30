@@ -6,7 +6,7 @@ that consolidates all Chrome bookmark operations into a single interface.
 Similar to firefox_bookmarks but optimized for Chrome's JSON-based storage.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.services.browser.chrome_core import ChromeManager
@@ -18,32 +18,32 @@ _chrome_manager = ChromeManager()
 @mcp.tool()
 async def chrome_bookmarks(
     operation: str,
-    profile_name: Optional[str] = None,
-    folder_id: Optional[int] = None,
-    bookmark_id: Optional[int] = None,
-    url: Optional[str] = None,
-    title: Optional[str] = None,
-    tags: Optional[List[str]] = None,
-    search_query: Optional[str] = None,
+    profile_name: str | None = None,
+    folder_id: int | None = None,
+    bookmark_id: int | None = None,
+    url: str | None = None,
+    title: str | None = None,
+    tags: list[str] | None = None,
+    search_query: str | None = None,
     limit: int = 100,
     # Tagging parameters
-    folder_path: Optional[str] = None,
-    year: Optional[int] = None,
-    tag_prefix: Optional[str] = None,
+    folder_path: str | None = None,
+    year: int | None = None,
+    tag_prefix: str | None = None,
     batch_size: int = 100,
     include_subfolders: bool = True,
     dry_run: bool = False,
     # Curated parameters
-    category: Optional[str] = None,
-    source_name: Optional[str] = None,
+    category: str | None = None,
+    source_name: str | None = None,
     include_metadata: bool = True,
     # Backup parameters
-    backup_path: Optional[str] = None,
-    restore_path: Optional[str] = None,
+    backup_path: str | None = None,
+    restore_path: str | None = None,
     include_bookmarks: bool = True,
     include_settings: bool = True,
     include_passwords: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Chrome bookmark management portmanteau tool.
 
     Comprehensive Chrome bookmark management consolidating ALL bookmark-related

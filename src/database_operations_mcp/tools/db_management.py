@@ -2,7 +2,7 @@
 # Consolidates database initialization, health checks, and management operations.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="database")
 async def db_management(
     operation: str,
-    connection_name: Optional[str] = None,
-    database_type: Optional[str] = None,
-    connection_config: Optional[Dict[str, Any]] = None,
+    connection_name: str | None = None,
+    database_type: str | None = None,
+    connection_config: dict[str, Any] | None = None,
     test_connection: bool = True,
     include_metrics: bool = True,
     vacuum_mode: str = "full",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Database management portmanteau tool.
 
     This tool consolidates all database management operations into a single interface,
@@ -118,9 +118,9 @@ async def db_management(
 async def _init_database(
     connection_name: str,
     database_type: str,
-    connection_config: Dict[str, Any],
+    connection_config: dict[str, Any],
     test_connection: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Initialize a new database connection."""
     try:
         if not connection_name:
@@ -170,7 +170,7 @@ async def _init_database(
         }
 
 
-async def _list_connections() -> Dict[str, Any]:
+async def _list_connections() -> dict[str, Any]:
     """List all registered database connections."""
     try:
         connections = db_manager.list_connectors()
@@ -192,7 +192,7 @@ async def _list_connections() -> Dict[str, Any]:
         }
 
 
-async def _close_connection(connection_name: str) -> Dict[str, Any]:
+async def _close_connection(connection_name: str) -> dict[str, Any]:
     """Close a specific database connection."""
     try:
         if not connection_name:
@@ -220,7 +220,7 @@ async def _close_connection(connection_name: str) -> Dict[str, Any]:
         }
 
 
-async def _test_connection(connection_name: str) -> Dict[str, Any]:
+async def _test_connection(connection_name: str) -> dict[str, Any]:
     """Test connectivity for a specific connection."""
     try:
         if not connection_name:
@@ -248,7 +248,7 @@ async def _test_connection(connection_name: str) -> Dict[str, Any]:
         }
 
 
-async def _get_connection_info(connection_name: str) -> Dict[str, Any]:
+async def _get_connection_info(connection_name: str) -> dict[str, Any]:
     """Get detailed information about a connection."""
     try:
         if not connection_name:
@@ -276,7 +276,7 @@ async def _get_connection_info(connection_name: str) -> Dict[str, Any]:
         }
 
 
-async def _database_health_check(connection_name: str, include_metrics: bool) -> Dict[str, Any]:
+async def _database_health_check(connection_name: str, include_metrics: bool) -> dict[str, Any]:
     """Perform comprehensive health check on database."""
     try:
         if not connection_name:
@@ -307,7 +307,7 @@ async def _database_health_check(connection_name: str, include_metrics: bool) ->
         }
 
 
-async def _get_database_metrics(connection_name: str) -> Dict[str, Any]:
+async def _get_database_metrics(connection_name: str) -> dict[str, Any]:
     """Get performance and usage metrics."""
     try:
         if not connection_name:
@@ -336,7 +336,7 @@ async def _get_database_metrics(connection_name: str) -> Dict[str, Any]:
         }
 
 
-async def _vacuum_database(connection_name: str, vacuum_mode: str) -> Dict[str, Any]:
+async def _vacuum_database(connection_name: str, vacuum_mode: str) -> dict[str, Any]:
     """Perform database maintenance (vacuum/optimize)."""
     try:
         if not connection_name:
@@ -366,7 +366,7 @@ async def _vacuum_database(connection_name: str, vacuum_mode: str) -> Dict[str, 
         }
 
 
-async def _disconnect_database(connection_name: str) -> Dict[str, Any]:
+async def _disconnect_database(connection_name: str) -> dict[str, Any]:
     """Disconnect from database and clean up resources."""
     try:
         if not connection_name:
@@ -392,3 +392,6 @@ async def _disconnect_database(connection_name: str) -> Dict[str, Any]:
             "error": f"Failed to disconnect database: {str(e)}",
             "connection_name": connection_name,
         }
+
+
+

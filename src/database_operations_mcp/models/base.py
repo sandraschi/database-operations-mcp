@@ -1,7 +1,8 @@
 """Base model definitions for database operations."""
 
+import builtins
 from datetime import datetime
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -11,7 +12,7 @@ T = TypeVar("T", bound="BaseDBModel")
 class BaseDBModel(BaseModel):
     """Base model for all database models."""
 
-    id: Optional[str] = Field(default=None, alias="_id")
+    id: str | None = Field(default=None, alias="_id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -29,7 +30,7 @@ class BaseDBModel(BaseModel):
                 setattr(self, field, value)
         self.updated_at = datetime.utcnow()
 
-    def dict(self, *args, **kwargs) -> Dict[str, Any]:
+    def dict(self, *args, **kwargs) -> dict[str, Any]:
         """Convert model to dictionary."""
         data = super().dict(*args, **kwargs)
         if "_id" in data and "id" not in data:
@@ -37,7 +38,7 @@ class BaseDBModel(BaseModel):
         return data
 
     @classmethod
-    def from_dict(cls: Type[T], data: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], data: builtins.dict[str, Any]) -> T:
         """Create model from dictionary."""
         if "id" in data and "_id" not in data:
             data["_id"] = data.pop("id")

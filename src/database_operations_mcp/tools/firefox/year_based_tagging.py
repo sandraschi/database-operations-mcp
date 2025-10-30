@@ -5,7 +5,7 @@ Adds creation/edit years as tags for time-based organization.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -17,12 +17,12 @@ from .db import FirefoxDB
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def batch_tag_from_year(
-    profile_path: Optional[str] = None,
+    profile_path: str | None = None,
     use_last_modified: bool = False,
     prefix: str = "year:",
     batch_size: int = 100,
     dry_run: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Batch process bookmarks to add year-based tags.
 
@@ -112,11 +112,11 @@ async def batch_tag_from_year(
 @mcp.tool
 @HelpSystem.register_tool(category="firefox")
 async def tag_from_year(
-    profile_path: Optional[str] = None,
+    profile_path: str | None = None,
     use_last_modified: bool = False,
     prefix: str = "year:",
     dry_run: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Add year-based tags to bookmarks.
 

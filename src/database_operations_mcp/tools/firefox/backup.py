@@ -3,7 +3,7 @@
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from . import mcp  # Import the mcp instance from __init__
 from .utils import get_profile_directory
@@ -11,8 +11,8 @@ from .utils import get_profile_directory
 
 @mcp.tool()
 async def backup_firefox_data(
-    backup_dir: Optional[str] = None, profile_name: Optional[str] = None
-) -> Dict[str, Any]:
+    backup_dir: str | None = None, profile_name: str | None = None
+) -> dict[str, Any]:
     """Create a backup of Firefox bookmarks and profile data.
 
     Args:
@@ -58,8 +58,8 @@ async def backup_firefox_data(
 
 @mcp.tool()
 async def restore_firefox_data(
-    backup_path: str, profile_name: Optional[str] = None
-) -> Dict[str, Any]:
+    backup_path: str, profile_name: str | None = None
+) -> dict[str, Any]:
     """Restore Firefox bookmarks from a backup.
 
     Args:

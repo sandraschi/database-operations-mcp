@@ -2,7 +2,7 @@
 # Consolidates Firefox utility operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="firefox")
 async def firefox_utils(
     operation: str,
-    profile_name: Optional[str] = None,
+    profile_name: str | None = None,
     check_access: bool = True,
     include_info: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Firefox utilities portmanteau tool.
 
     This tool consolidates all Firefox utility operations into a single interface,
@@ -96,7 +96,7 @@ async def firefox_utils(
         }
 
 
-async def _get_firefox_platform() -> Dict[str, Any]:
+async def _get_firefox_platform() -> dict[str, Any]:
     """Get the current Firefox platform information."""
     try:
         return {
@@ -118,7 +118,7 @@ async def _get_firefox_platform() -> Dict[str, Any]:
         }
 
 
-async def _get_firefox_profile_directory() -> Dict[str, Any]:
+async def _get_firefox_profile_directory() -> dict[str, Any]:
     """Get the directory path for Firefox profiles."""
     try:
         return {
@@ -137,7 +137,7 @@ async def _get_firefox_profile_directory() -> Dict[str, Any]:
         }
 
 
-async def _get_firefox_places_db_path(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _get_firefox_places_db_path(profile_name: str | None) -> dict[str, Any]:
     """Get the path to the places.sqlite database."""
     try:
         if not profile_name:
@@ -161,7 +161,7 @@ async def _get_firefox_places_db_path(profile_name: Optional[str]) -> Dict[str, 
         }
 
 
-async def _is_firefox_running() -> Dict[str, Any]:
+async def _is_firefox_running() -> dict[str, Any]:
     """Check if Firefox is currently running."""
     try:
         status_checker = FirefoxStatusChecker()
@@ -183,8 +183,8 @@ async def _is_firefox_running() -> Dict[str, Any]:
 
 
 async def _check_firefox_database_access_safe(
-    profile_name: Optional[str], check_access: bool
-) -> Dict[str, Any]:
+    profile_name: str | None, check_access: bool
+) -> dict[str, Any]:
     """Safely check database access without locking."""
     try:
         if not profile_name:
@@ -212,7 +212,7 @@ async def _check_firefox_database_access_safe(
         }
 
 
-async def _test_firefox_database_connection(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _test_firefox_database_connection(profile_name: str | None) -> dict[str, Any]:
     """Test connection to Firefox database."""
     try:
         if not profile_name:
@@ -239,8 +239,8 @@ async def _test_firefox_database_connection(profile_name: Optional[str]) -> Dict
 
 
 async def _get_firefox_database_info(
-    profile_name: Optional[str], include_info: bool
-) -> Dict[str, Any]:
+    profile_name: str | None, include_info: bool
+) -> dict[str, Any]:
     """Get information about the Firefox database."""
     try:
         if not profile_name:

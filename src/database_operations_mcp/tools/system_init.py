@@ -2,7 +2,7 @@
 # Consolidates initialization and setup operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="system")
 async def system_init(
     operation: str,
-    database_type: Optional[str] = None,
-    connection_config: Optional[Dict[str, Any]] = None,
+    database_type: str | None = None,
+    connection_config: dict[str, Any] | None = None,
     test_connection: bool = True,
     create_tables: bool = False,
     initialize_data: bool = False,
     setup_help_system: bool = True,
     verbose: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """System initialization portmanteau tool.
 
     This tool consolidates all system initialization and setup operations into a single interface,
@@ -108,12 +108,12 @@ async def system_init(
 
 
 async def _init_database(
-    database_type: Optional[str],
-    connection_config: Optional[Dict[str, Any]],
+    database_type: str | None,
+    connection_config: dict[str, Any] | None,
     test_connection: bool,
     create_tables: bool,
     initialize_data: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Initialize a new database connection."""
     try:
         if not database_type:
@@ -149,7 +149,7 @@ async def _init_database(
 
 async def _setup_system(
     create_tables: bool, initialize_data: bool, setup_help_system: bool, verbose: bool
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Set up the entire system with default configurations."""
     try:
         return {
@@ -173,7 +173,7 @@ async def _setup_system(
         return {"success": False, "error": f"Failed to setup system: {str(e)}", "setup_result": {}}
 
 
-async def _verify_installation(verbose: bool) -> Dict[str, Any]:
+async def _verify_installation(verbose: bool) -> dict[str, Any]:
     """Verify that all components are properly installed."""
     try:
         return {
@@ -198,7 +198,7 @@ async def _verify_installation(verbose: bool) -> Dict[str, Any]:
         }
 
 
-async def _create_default_config() -> Dict[str, Any]:
+async def _create_default_config() -> dict[str, Any]:
     """Create default configuration files."""
     try:
         return {
@@ -224,7 +224,7 @@ async def _create_default_config() -> Dict[str, Any]:
         }
 
 
-async def _initialize_help_system() -> Dict[str, Any]:
+async def _initialize_help_system() -> dict[str, Any]:
     """Initialize the help system."""
     try:
         return {
@@ -247,7 +247,7 @@ async def _initialize_help_system() -> Dict[str, Any]:
         }
 
 
-async def _run_system_checks(verbose: bool) -> Dict[str, Any]:
+async def _run_system_checks(verbose: bool) -> dict[str, Any]:
     """Run comprehensive system health checks."""
     try:
         return {
@@ -273,7 +273,7 @@ async def _run_system_checks(verbose: bool) -> Dict[str, Any]:
         }
 
 
-async def _reset_system() -> Dict[str, Any]:
+async def _reset_system() -> dict[str, Any]:
     """Reset system to default state."""
     try:
         return {
@@ -291,3 +291,6 @@ async def _reset_system() -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error resetting system: {e}", exc_info=True)
         return {"success": False, "error": f"Failed to reset system: {str(e)}", "reset_result": {}}
+
+
+

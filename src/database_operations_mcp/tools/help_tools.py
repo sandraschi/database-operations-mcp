@@ -5,7 +5,8 @@ Provides interactive help and documentation for all available tools.
 
 import inspect
 import re
-from typing import Any, Callable, Dict, Optional, TypeVar, Union
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -28,8 +29,8 @@ class HelpSystem:
 
     @classmethod
     def register_tool(
-        cls, tool_func: Optional[F] = None, *, category: str = "database"
-    ) -> Union[Callable[[F], F], F]:
+        cls, tool_func: F | None = None, *, category: str = "database"
+    ) -> Callable[[F], F] | F:
         """Register a tool with its documentation.
 
         Args:
@@ -74,7 +75,7 @@ class HelpSystem:
         return decorator(tool_func) if tool_func else decorator
 
     @classmethod
-    def get_help(cls, category: Optional[str] = None) -> Dict[str, Any]:
+    def get_help(cls, category: str | None = None) -> dict[str, Any]:
         """Get help for all tools or filter by category.
 
         Args:
@@ -107,7 +108,7 @@ class HelpSystem:
         return {"status": "success", "categories": categorized, "total_tools": len(tools)}
 
     @classmethod
-    def get_tool_help(cls, tool_name: str) -> Dict[str, Any]:
+    def get_tool_help(cls, tool_name: str) -> dict[str, Any]:
         """Get detailed help for a specific tool.
 
         Args:
@@ -139,7 +140,7 @@ class HelpSystem:
 
 @mcp.tool()
 @HelpSystem.register_tool(category="help")
-async def help(category: Optional[str] = None) -> Dict[str, Any]:
+async def help(category: str | None = None) -> dict[str, Any]:
     """Get hierarchical help for all tools or specific category.
 
     Provides comprehensive help documentation for all available MCP tools,
@@ -217,7 +218,7 @@ async def help(category: Optional[str] = None) -> Dict[str, Any]:
 
 @mcp.tool()
 @HelpSystem.register_tool(category="help")
-async def tool_help(tool_name: str) -> Dict[str, Any]:
+async def tool_help(tool_name: str) -> dict[str, Any]:
     """Get detailed documentation for specific tool.
 
     Retrieves complete documentation for a single tool including description,

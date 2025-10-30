@@ -1,7 +1,7 @@
 """Firefox status checking utilities."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import psutil
 
@@ -12,7 +12,7 @@ class FirefoxStatusChecker:
     """Comprehensive Firefox status checking and profile management."""
 
     @staticmethod
-    def is_firefox_running() -> Dict[str, Any]:
+    def is_firefox_running() -> dict[str, Any]:
         """Check if Firefox is running with detailed status."""
         try:
             firefox_processes = []
@@ -49,7 +49,7 @@ class FirefoxStatusChecker:
             }
 
     @staticmethod
-    def check_database_access_safe(profile_path: Optional[Path] = None) -> Dict[str, Any]:
+    def check_database_access_safe(profile_path: Path | None = None) -> dict[str, Any]:
         """Check if it's safe to access Firefox databases."""
         status = FirefoxStatusChecker.is_firefox_running()
 
@@ -95,7 +95,7 @@ class FirefoxStatusChecker:
 
 
 @mcp.tool()
-def is_firefox_running() -> Dict[str, Any]:
+def is_firefox_running() -> dict[str, Any]:
     """
     Check if Firefox is currently running.
 
@@ -108,7 +108,7 @@ def is_firefox_running() -> Dict[str, Any]:
 
 
 @mcp.tool()
-def check_firefox_database_access_safe(profile_path: Optional[str] = None) -> Dict[str, Any]:
+def check_firefox_database_access_safe(profile_path: str | None = None) -> dict[str, Any]:
     """
     Check if it's safe to access Firefox bookmark databases.
 

@@ -1,3 +1,11 @@
+## 1.3.0 - 2025-10-30
+- Add Chrome/Edge/Brave write tools and cross-browser sync writes
+- Descriptive Firefox write failure errors ("error. firefox must be closed")
+- README restructured: database first, bookmark tools second; badges on top
+- Add MCPB package installation instructions; dual stdio/HTTP docs
+- Ruff config updated; all lint checks pass
+- Tests updated; all tests pass on Windows
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

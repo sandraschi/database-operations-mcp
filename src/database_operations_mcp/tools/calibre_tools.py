@@ -6,8 +6,9 @@ including full-text search within book content.
 """
 
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -19,7 +20,7 @@ F = TypeVar("F", bound=Callable[..., Any])
 logger = logging.getLogger(__name__)
 
 
-def _get_fts_db_path(library_path: Union[str, Path]) -> Path:
+def _get_fts_db_path(library_path: str | Path) -> Path:
     """Get the path to the full-text search database."""
     lib_path = Path(library_path)
     return lib_path / "full-text-search.db"
@@ -30,10 +31,10 @@ def _get_fts_db_path(library_path: Union[str, Path]) -> Path:
 async def search_calibre_library(
     query: str,
     library_path: str,
-    search_fields: Optional[List[str]] = None,
+    search_fields: list[str] | None = None,
     limit: int = 20,
     offset: int = 0,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Search a Calibre library for books matching the query.
 
     Args:
@@ -67,7 +68,7 @@ async def search_calibre_library(
 
 @mcp.tool()
 @HelpSystem.register_tool
-async def get_calibre_book_metadata(book_id: int, library_path: str) -> Dict[str, Any]:
+async def get_calibre_book_metadata(book_id: int, library_path: str) -> dict[str, Any]:
     """Get metadata for a specific Calibre book.
 
     Args:
@@ -98,7 +99,7 @@ async def get_calibre_book_metadata(book_id: int, library_path: str) -> Dict[str
 @HelpSystem.register_tool
 async def search_calibre_fts(
     query: str, library_path: str, highlight: bool = True, limit: int = 20, offset: int = 0
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Perform a full-text search in a Calibre library.
 
     Args:

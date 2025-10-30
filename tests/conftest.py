@@ -4,7 +4,7 @@ Pytest configuration and fixtures for database operations MCP tests.
 
 import os
 import sys
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../s
 
 
 @pytest.fixture
-def connection_config() -> Dict[str, Any]:
+def connection_config() -> dict[str, Any]:
     """Provide a sample database connection configuration for testing."""
     return {
         "name": "test_connection",
@@ -31,7 +31,7 @@ def connection_config() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def mongodb_config() -> Dict[str, Any]:
+def mongodb_config() -> dict[str, Any]:
     """Provide a sample MongoDB connection configuration for testing."""
     return {
         "name": "test_mongodb",
@@ -48,7 +48,7 @@ def mongodb_config() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def postgresql_config() -> Dict[str, Any]:
+def postgresql_config() -> dict[str, Any]:
     """Provide a sample PostgreSQL connection configuration for testing."""
     return {
         "name": "test_postgresql",
@@ -64,13 +64,13 @@ def postgresql_config() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def sqlite_config() -> Dict[str, Any]:
+def sqlite_config() -> dict[str, Any]:
     """Provide a sample SQLite connection configuration for testing."""
     return {"name": "test_sqlite", "type": "sqlite", "database": ":memory:", "timeout": 30}
 
 
 @pytest.fixture
-def chromadb_config() -> Dict[str, Any]:
+def chromadb_config() -> dict[str, Any]:
     """Provide a sample ChromaDB connection configuration for testing."""
     return {
         "name": "test_chromadb",

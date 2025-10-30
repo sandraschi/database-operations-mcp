@@ -2,7 +2,7 @@
 # Consolidates Firefox backup and auth operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="firefox")
 async def firefox_backup(
     operation: str,
-    profile_name: Optional[str] = None,
-    backup_path: Optional[str] = None,
+    profile_name: str | None = None,
+    backup_path: str | None = None,
     include_bookmarks: bool = True,
     include_settings: bool = True,
     include_passwords: bool = False,
-    restore_path: Optional[str] = None,
+    restore_path: str | None = None,
     create_session: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Firefox backup and authentication portmanteau tool.
 
     This tool consolidates all Firefox backup and authentication operations into a single interface,
@@ -80,12 +80,12 @@ async def firefox_backup(
 
 
 async def _backup_firefox_data(
-    profile_name: Optional[str],
-    backup_path: Optional[str],
+    profile_name: str | None,
+    backup_path: str | None,
     include_bookmarks: bool,
     include_settings: bool,
     include_passwords: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create a backup of Firefox profile data."""
     try:
         if not profile_name:
@@ -116,8 +116,8 @@ async def _backup_firefox_data(
 
 
 async def _restore_firefox_data(
-    profile_name: Optional[str], restore_path: Optional[str]
-) -> Dict[str, Any]:
+    profile_name: str | None, restore_path: str | None
+) -> dict[str, Any]:
     """Restore Firefox profile data from backup."""
     try:
         if not profile_name:
@@ -144,7 +144,7 @@ async def _restore_firefox_data(
         }
 
 
-async def _create_session(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _create_session(profile_name: str | None) -> dict[str, Any]:
     """Create a new Firefox session for authentication."""
     try:
         if not profile_name:

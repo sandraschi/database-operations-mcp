@@ -1,7 +1,7 @@
 """Core bookmark management functionality with enhanced safety checks."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from . import mcp  # Import the mcp instance from __init__
 from .db import FirefoxDB
@@ -13,11 +13,11 @@ from .utils import get_profile_directory
 class BookmarkManager:
     """Handles bookmark operations with safety checks."""
 
-    def __init__(self, profile_path: Optional[Path] = None):
+    def __init__(self, profile_path: Path | None = None):
         self.profile_path = profile_path
         self.db = None
 
-    def _ensure_safe_access(self) -> Dict[str, Any]:
+    def _ensure_safe_access(self) -> dict[str, Any]:
         """Ensure it's safe to access the database."""
         return FirefoxStatusChecker.check_database_access_safe(self.profile_path)
 
@@ -30,7 +30,7 @@ class BookmarkManager:
             self.db = FirefoxDB(self.profile_path)
         return self.db
 
-    def get_bookmarks(self, folder_id: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_bookmarks(self, folder_id: int | None = None) -> list[dict[str, Any]]:
         """Retrieve bookmarks, optionally filtered by folder."""
         db = self._get_db_connection()
         query = """
@@ -50,8 +50,8 @@ class BookmarkManager:
 
 @mcp.tool()
 async def list_bookmarks(
-    profile_name: Optional[str] = None, folder_id: Optional[int] = None
-) -> Dict[str, Any]:
+    profile_name: str | None = None, folder_id: int | None = None
+) -> dict[str, Any]:
     """List bookmarks with optional folder filtering.
 
     Args:

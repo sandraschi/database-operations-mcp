@@ -10,7 +10,7 @@ import logging
 import os
 import signal
 import sys
-from typing import Literal, Optional
+from typing import Literal
 
 # Import our centralized MCP configuration
 from .config.mcp_config import get_mcp
@@ -48,7 +48,7 @@ class DatabaseOperationsMCP:
         # Log that tools have been registered
         logger.info("All tool handlers imported and registered via decorators")
 
-    async def _shutdown(self, signal: Optional[signal.Signals] = None) -> None:
+    async def _shutdown(self, signal: signal.Signals | None = None) -> None:
         """Handle server shutdown."""
         if signal:
             logger.info(f"Received exit signal {signal.name}...")
@@ -85,9 +85,9 @@ class DatabaseOperationsMCP:
                 db_analysis,
                 db_operations_extended,
             )
-            
+
             logger.info("All portmanteau tools imported successfully - covering all categories!")
-            
+
         except ImportError as e:
             logger.error(f"Failed to import tool modules: {e}")
             raise

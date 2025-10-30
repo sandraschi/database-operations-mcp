@@ -2,7 +2,7 @@
 # Consolidates help and documentation operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -15,15 +15,15 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="help")
 async def help_system(
     operation: str,
-    topic: Optional[str] = None,
-    category: Optional[str] = None,
-    tool_name: Optional[str] = None,
+    topic: str | None = None,
+    category: str | None = None,
+    tool_name: str | None = None,
     include_examples: bool = True,
     include_parameters: bool = True,
     format_output: str = "markdown",
-    search_query: Optional[str] = None,
+    search_query: str | None = None,
     max_results: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Help system portmanteau tool.
 
     This tool consolidates all help and documentation operations into a single interface,
@@ -109,12 +109,12 @@ async def help_system(
 
 
 async def _get_help(
-    topic: Optional[str],
-    category: Optional[str],
+    topic: str | None,
+    category: str | None,
     include_examples: bool,
     include_parameters: bool,
     format_output: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get help for a specific topic or tool."""
     try:
         if not topic:
@@ -143,8 +143,8 @@ async def _get_help(
 
 
 async def _get_tool_help(
-    tool_name: Optional[str], include_examples: bool, include_parameters: bool, format_output: str
-) -> Dict[str, Any]:
+    tool_name: str | None, include_examples: bool, include_parameters: bool, format_output: str
+) -> dict[str, Any]:
     """Get detailed help for a specific tool."""
     try:
         if not tool_name:
@@ -175,7 +175,7 @@ async def _get_tool_help(
         }
 
 
-async def _list_categories() -> Dict[str, Any]:
+async def _list_categories() -> dict[str, Any]:
     """List all available help categories."""
     try:
         return {
@@ -201,7 +201,7 @@ async def _list_categories() -> Dict[str, Any]:
         }
 
 
-async def _search_help(search_query: Optional[str], max_results: int) -> Dict[str, Any]:
+async def _search_help(search_query: str | None, max_results: int) -> dict[str, Any]:
     """Search help documentation."""
     try:
         if not search_query:
@@ -235,7 +235,7 @@ async def _search_help(search_query: Optional[str], max_results: int) -> Dict[st
         }
 
 
-async def _get_tool_examples(tool_name: Optional[str]) -> Dict[str, Any]:
+async def _get_tool_examples(tool_name: str | None) -> dict[str, Any]:
     """Get usage examples for tools."""
     try:
         if not tool_name:
@@ -267,7 +267,7 @@ async def _get_tool_examples(tool_name: Optional[str]) -> Dict[str, Any]:
         }
 
 
-async def _get_parameter_info(tool_name: Optional[str]) -> Dict[str, Any]:
+async def _get_parameter_info(tool_name: str | None) -> dict[str, Any]:
     """Get parameter information for tools."""
     try:
         if not tool_name:
@@ -306,7 +306,7 @@ async def _get_parameter_info(tool_name: Optional[str]) -> Dict[str, Any]:
         }
 
 
-async def _format_help_output(topic: Optional[str], format_output: str) -> Dict[str, Any]:
+async def _format_help_output(topic: str | None, format_output: str) -> dict[str, Any]:
     """Format help output in different formats."""
     try:
         if not topic:
@@ -330,3 +330,6 @@ async def _format_help_output(topic: Optional[str], format_output: str) -> Dict[
             "format_output": format_output,
             "formatted_content": "",
         }
+
+
+

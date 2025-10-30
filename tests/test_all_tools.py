@@ -11,7 +11,7 @@ import json
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Configuration
 OUTPUT_DIR = Path("test_reports")
@@ -68,7 +68,7 @@ class ToolTester:
         }
         self.package_dir, self.tools_dir = setup_python_path()
 
-    def get_tool_modules(self) -> List[str]:
+    def get_tool_modules(self) -> list[str]:
         """Get list of all tool modules to test."""
         try:
             modules = []
@@ -94,7 +94,7 @@ class ToolTester:
             traceback.print_exc()
             return []
 
-    def test_module_syntax_and_structure(self, module_name: str) -> Dict[str, Any]:
+    def test_module_syntax_and_structure(self, module_name: str) -> dict[str, Any]:
         """Test module syntax and analyze structure without importing."""
         module_path = self.tools_dir / f"{module_name}.py"
         if not module_path.exists():
@@ -118,7 +118,7 @@ class ToolTester:
             return result
 
         try:
-            with open(module_path, "r", encoding="utf-8") as f:
+            with open(module_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Check syntax by trying to compile
@@ -160,7 +160,7 @@ class ToolTester:
             result["issues"].append(f"Error analyzing file: {e}")
             return result
 
-    def attempt_module_import(self, module_name: str) -> Dict[str, Any]:
+    def attempt_module_import(self, module_name: str) -> dict[str, Any]:
         """Attempt to import module and extract what we can."""
         result = {
             "import_success": False,

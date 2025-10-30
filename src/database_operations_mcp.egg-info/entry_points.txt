@@ -1,0 +1,6 @@
+[console_scripts]
+database-operations-mcp = database_operations_mcp.main:main
+mcp-db = database_operations_mcp.cli:cli
+
+[mcps]
+database-operations = database_operations_mcp.main:main

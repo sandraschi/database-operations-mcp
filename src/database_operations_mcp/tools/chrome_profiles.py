@@ -6,7 +6,7 @@ profile operations into a single interface. Chrome uses User Data folders
 instead of SQLite-based profiles like Firefox.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.services.browser.chrome_core import ChromeManager
@@ -18,10 +18,10 @@ _chrome_manager = ChromeManager()
 @mcp.tool()
 async def chrome_profiles(
     operation: str,
-    profile_name: Optional[str] = None,
+    profile_name: str | None = None,
     check_access: bool = True,
     include_info: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Chrome profile management portmanteau tool.
 
     Comprehensive Chrome profile management consolidating ALL profile-related

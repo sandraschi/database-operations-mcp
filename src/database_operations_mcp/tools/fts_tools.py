@@ -6,7 +6,7 @@ Provides tools for querying and managing SQLite FTS5/4 virtual tables.
 
 import logging
 import sqlite3
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -25,12 +25,12 @@ async def fts_search(
     query: str,
     connection_name: str = "default",
     table: str = "fts_index",
-    columns: Optional[List[str]] = None,
+    columns: list[str] | None = None,
     limit: int = 20,
     offset: int = 0,
     highlight: bool = True,
     snippet_size: int = 3,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute a full-text search query on an SQLite FTS table.
 
     Args:
@@ -117,7 +117,7 @@ async def fts_search(
 
 @mcp.tool()
 @HelpSystem.register_tool
-async def fts_tables(connection_name: str = "default") -> Dict[str, Any]:
+async def fts_tables(connection_name: str = "default") -> dict[str, Any]:
     """List all FTS virtual tables in the database.
 
     Args:
@@ -171,7 +171,7 @@ async def fts_suggest(
     table: str = "fts_index",
     column: str = "content",
     limit: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get search suggestions based on a prefix (for autocomplete).
 
     Args:

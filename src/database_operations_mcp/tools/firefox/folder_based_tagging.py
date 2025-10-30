@@ -4,7 +4,7 @@ Adds tags based on the bookmark's position in the folder hierarchy.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -13,7 +13,7 @@ from database_operations_mcp.tools.help_tools import HelpSystem
 from .db import FirefoxDB
 
 
-async def get_folder_path(db: FirefoxDB, folder_id: int) -> List[Dict[str, Any]]:
+async def get_folder_path(db: FirefoxDB, folder_id: int) -> list[dict[str, Any]]:
     """Get the full path of a folder as a list of folder names."""
     path = []
     current_id = folder_id
@@ -31,12 +31,12 @@ async def get_folder_path(db: FirefoxDB, folder_id: int) -> List[Dict[str, Any]]
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def batch_tag_from_folder(
-    profile_path: Optional[str] = None,
+    profile_path: str | None = None,
     include_ancestors: bool = True,
-    exclude_folders: Optional[List[str]] = None,
+    exclude_folders: list[str] | None = None,
     batch_size: int = 100,
     dry_run: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Batch process bookmarks to add tags based on folder hierarchy.
 
@@ -136,11 +136,11 @@ async def batch_tag_from_folder(
 @mcp.tool
 @HelpSystem.register_tool(category="firefox")
 async def tag_from_folder(
-    profile_path: Optional[str] = None,
+    profile_path: str | None = None,
     include_ancestors: bool = True,
-    exclude_folders: Optional[List[str]] = None,
+    exclude_folders: list[str] | None = None,
     dry_run: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Add tags based on bookmark folder hierarchy.
 

@@ -2,7 +2,7 @@
 # Consolidates all full-text search operations into a single interface.
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 async def db_fts(
     operation: str,
     connection_name: str = "default",
-    search_query: Optional[str] = None,
-    table_name: Optional[str] = None,
-    columns: Optional[List[str]] = None,
+    search_query: str | None = None,
+    table_name: str | None = None,
+    columns: list[str] | None = None,
     limit: int = 100,
     offset: int = 0,
     highlight: bool = True,
     include_metadata: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Database full-text search portmanteau tool.
 
     This tool consolidates all full-text search operations into a single interface,
@@ -92,13 +92,13 @@ async def db_fts(
 async def _fts_search(
     connection_name: str,
     search_query: str,
-    table_name: Optional[str],
-    columns: Optional[List[str]],
+    table_name: str | None,
+    columns: list[str] | None,
     limit: int,
     offset: int,
     highlight: bool,
     include_metadata: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Perform full-text search across tables and columns."""
     try:
         if not connection_name:
@@ -155,7 +155,7 @@ async def _fts_search(
         }
 
 
-async def _fts_tables(connection_name: str) -> Dict[str, Any]:
+async def _fts_tables(connection_name: str) -> dict[str, Any]:
     """List all tables that have full-text search indexes."""
     try:
         if not connection_name:
@@ -186,7 +186,7 @@ async def _fts_tables(connection_name: str) -> Dict[str, Any]:
         }
 
 
-async def _fts_suggest(connection_name: str, search_query: str, limit: int) -> Dict[str, Any]:
+async def _fts_suggest(connection_name: str, search_query: str, limit: int) -> dict[str, Any]:
     """Get search suggestions based on partial input."""
     try:
         if not connection_name:
@@ -219,3 +219,6 @@ async def _fts_suggest(connection_name: str, search_query: str, limit: int) -> D
             "suggestions": [],
             "count": 0,
         }
+
+
+

@@ -3,7 +3,7 @@
 import configparser
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 
@@ -18,7 +18,7 @@ def get_platform() -> str:
     return "linux"
 
 
-def get_profiles_ini_path() -> Optional[Path]:
+def get_profiles_ini_path() -> Path | None:
     """Get the path to profiles.ini based on the platform."""
     platform = get_platform()
     if platform == "windows":
@@ -29,7 +29,7 @@ def get_profiles_ini_path() -> Optional[Path]:
         return Path.home() / ".mozilla" / "firefox" / "profiles.ini"
 
 
-def parse_profiles_ini() -> Dict[str, Dict[str, Any]]:
+def parse_profiles_ini() -> dict[str, dict[str, Any]]:
     """Parse Firefox profiles.ini and return profile information."""
     profiles_ini = get_profiles_ini_path()
     if not profiles_ini or not profiles_ini.exists():
@@ -47,7 +47,7 @@ def parse_profiles_ini() -> Dict[str, Dict[str, Any]]:
     return profiles
 
 
-def get_profile_directory(profile_name: Optional[str] = None) -> Optional[Path]:
+def get_profile_directory(profile_name: str | None = None) -> Path | None:
     """Get the directory path for a Firefox profile."""
     profiles = parse_profiles_ini()
     if not profiles:
@@ -74,7 +74,7 @@ def get_profile_directory(profile_name: Optional[str] = None) -> Optional[Path]:
         return Path(profile["Path"])
 
 
-def get_places_db_path(profile_name: Optional[str] = None) -> Optional[Path]:
+def get_places_db_path(profile_name: str | None = None) -> Path | None:
     """Get the path to the places.sqlite file for a profile."""
     profile_dir = get_profile_directory(profile_name)
     if not profile_dir:
@@ -83,7 +83,7 @@ def get_places_db_path(profile_name: Optional[str] = None) -> Optional[Path]:
 
 
 @mcp.tool()
-def get_firefox_platform() -> Dict[str, Any]:
+def get_firefox_platform() -> dict[str, Any]:
     """
     Get the current platform identifier for Firefox operations.
 
@@ -95,7 +95,7 @@ def get_firefox_platform() -> Dict[str, Any]:
 
 
 @mcp.tool()
-def get_firefox_profiles() -> Dict[str, Any]:
+def get_firefox_profiles() -> dict[str, Any]:
     """
     Get all available Firefox profiles.
 
@@ -114,7 +114,7 @@ def get_firefox_profiles() -> Dict[str, Any]:
 
 
 @mcp.tool()
-def get_firefox_profile_directory(profile_name: Optional[str] = None) -> Dict[str, Any]:
+def get_firefox_profile_directory(profile_name: str | None = None) -> dict[str, Any]:
     """
     Get the directory path for a Firefox profile.
 
@@ -142,7 +142,7 @@ def get_firefox_profile_directory(profile_name: Optional[str] = None) -> Dict[st
 
 
 @mcp.tool()
-def get_firefox_places_db_path(profile_name: Optional[str] = None) -> Dict[str, Any]:
+def get_firefox_places_db_path(profile_name: str | None = None) -> dict[str, Any]:
     """
     Get the path to the places.sqlite file for a Firefox profile.
 

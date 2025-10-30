@@ -5,7 +5,7 @@ Provides tools for initializing, configuring, and managing database connections.
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -20,7 +20,7 @@ from database_operations_mcp.tools.help_tools import HelpSystem
 logger = logging.getLogger(__name__)
 
 # Active database connections
-DATABASE_CONNECTIONS: Dict[str, Any] = {}
+DATABASE_CONNECTIONS: dict[str, Any] = {}
 
 # Register tools using the @mcp.tool decorator
 # The mcp instance is imported from the centralized config
@@ -29,8 +29,8 @@ DATABASE_CONNECTIONS: Dict[str, Any] = {}
 @mcp.tool()
 @HelpSystem.register_tool(category="database")
 async def init_database(
-    db_type: str, connection_params: Dict[str, Any], connection_name: str = "default"
-) -> Dict[str, Any]:
+    db_type: str, connection_params: dict[str, Any], connection_name: str = "default"
+) -> dict[str, Any]:
     """Initialize new database connection and register it.
 
     Creates and registers a new database connection for SQL, NoSQL, or Vector
@@ -176,7 +176,7 @@ async def init_database(
 
 @mcp.tool()
 @HelpSystem.register_tool(category="database")
-async def list_connections() -> Dict[str, Any]:
+async def list_connections() -> dict[str, Any]:
     """List all active database connections with status.
 
     Retrieves complete list of registered database connections along with their
@@ -280,7 +280,7 @@ async def list_connections() -> Dict[str, Any]:
 
 @mcp.tool()
 @HelpSystem.register_tool(category="database")
-async def close_connection(connection_name: str) -> Dict[str, Any]:
+async def close_connection(connection_name: str) -> dict[str, Any]:
     """Close database connection and release resources.
 
     Properly closes database connection and removes it from active connections.
@@ -349,7 +349,7 @@ async def close_connection(connection_name: str) -> Dict[str, Any]:
 
 @mcp.tool()
 @HelpSystem.register_tool(category="database")
-async def test_connection(connection_name: str) -> Dict[str, Any]:
+async def test_connection(connection_name: str) -> dict[str, Any]:
     """Test database connection health and responsiveness.
 
     Verifies that database connection is active and responsive by checking
@@ -422,7 +422,7 @@ async def test_connection(connection_name: str) -> Dict[str, Any]:
 
 @mcp.tool()
 @HelpSystem.register_tool(category="database")
-async def get_connection_info(connection_name: str) -> Dict[str, Any]:
+async def get_connection_info(connection_name: str) -> dict[str, Any]:
     """Get detailed information about registered database connection.
 
     Retrieves comprehensive details about a registered connection including

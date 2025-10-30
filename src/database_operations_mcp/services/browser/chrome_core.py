@@ -9,7 +9,7 @@ Chrome's bookmark format.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from database_operations_mcp.services.browser.base_browser import BaseBrowserManager
 
@@ -38,7 +38,7 @@ class ChromeManager(BaseBrowserManager):
         self.chrome_data_dir = self._find_chrome_data_directory()
         self.browser_type = "chrome"
 
-    def _find_chrome_data_directory(self) -> Optional[Path]:
+    def _find_chrome_data_directory(self) -> Path | None:
         """Find Chrome User Data directory on this system.
 
         Searches standard Chrome installation locations across platforms.
@@ -75,7 +75,7 @@ class ChromeManager(BaseBrowserManager):
 
         return None
 
-    async def get_profiles(self) -> List[str]:
+    async def get_profiles(self) -> list[str]:
         """Get list of available Chrome profiles.
 
         Chrome stores profiles in the User Data directory. The default profile
@@ -126,7 +126,7 @@ class ChromeManager(BaseBrowserManager):
 
         return str(profile_path)
 
-    async def parse_bookmarks(self, profile_name: str) -> List[Dict[str, Any]]:
+    async def parse_bookmarks(self, profile_name: str) -> list[dict[str, Any]]:
         """Parse Chrome bookmarks from JSON format.
 
         Chrome stores bookmarks in a JSON file with the following structure:
@@ -160,7 +160,7 @@ class ChromeManager(BaseBrowserManager):
             raise RuntimeError(f"Chrome Bookmarks file not found: {db_path}")
 
         try:
-            with open(bookmarks_file, "r", encoding="utf-8") as f:
+            with open(bookmarks_file, encoding="utf-8") as f:
                 data = json.load(f)
 
             bookmarks = []
@@ -181,8 +181,8 @@ class ChromeManager(BaseBrowserManager):
             raise RuntimeError(f"Error parsing Chrome Bookmarks: {e}") from e
 
     def _parse_bookmark_node(
-        self, node: Dict[str, Any], root_name: str, folder_path: str
-    ) -> List[Dict[str, Any]]:
+        self, node: dict[str, Any], root_name: str, folder_path: str
+    ) -> list[dict[str, Any]]:
         """Recursively parse bookmark nodes from Chrome structure.
 
         Chrome nodes can be either 'url' (bookmark) or 'folder' types.
@@ -224,7 +224,7 @@ class ChromeManager(BaseBrowserManager):
 
         return bookmarks
 
-    async def list_tags(self, profile_name: str) -> List[str]:
+    async def list_tags(self, profile_name: str) -> list[str]:
         """List all tags used in Chrome bookmarks.
 
         Chrome doesn't have built-in tag support like Firefox, but we can
@@ -253,9 +253,9 @@ class ChromeManager(BaseBrowserManager):
         self,
         profile_name: str,
         query: str,
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Search Chrome bookmarks with flexible criteria.
 
         Performs case-insensitive search on bookmark titles and URLs,
@@ -368,7 +368,7 @@ class ChromeManager(BaseBrowserManager):
 
     async def restore_profile(
         self, profile_name: str, backup_file: str, overwrite: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Restore Chrome profile from backup.
 
         Args:

@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -14,8 +14,8 @@ from .db import FirefoxDB
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def find_old_bookmarks(
-    days_old: int = 365, profile_path: Optional[str] = None
-) -> Dict[str, Any]:
+    days_old: int = 365, profile_path: str | None = None
+) -> dict[str, Any]:
     """Find bookmarks that haven't been visited in a while.
 
     Args:
@@ -57,7 +57,7 @@ async def find_old_bookmarks(
 
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
-async def get_bookmark_stats(profile_path: Optional[str] = None) -> Dict[str, Any]:
+async def get_bookmark_stats(profile_path: str | None = None) -> dict[str, Any]:
     """Get statistics about bookmark age and usage.
 
     Args:

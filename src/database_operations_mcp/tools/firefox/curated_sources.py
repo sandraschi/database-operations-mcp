@@ -1,6 +1,6 @@
 """Curated bookmark sources for profile creation."""
 
-from typing import Any, Dict
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 
@@ -184,7 +184,7 @@ CURATED_SOURCES = {
 
 
 @mcp.tool()
-def get_curated_source(source_name: str) -> Dict[str, Any]:
+def get_curated_source(source_name: str) -> dict[str, Any]:
     """
     Get a predefined curated source by name.
 
@@ -198,7 +198,7 @@ def get_curated_source(source_name: str) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def list_curated_sources() -> Dict[str, Any]:
+def list_curated_sources() -> dict[str, Any]:
     """
     List all available curated sources.
 

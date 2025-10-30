@@ -2,7 +2,7 @@
 # Consolidates Firefox curated sources operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -19,11 +19,11 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="firefox")
 async def firefox_curated(
     operation: str,
-    source_name: Optional[str] = None,
-    category: Optional[str] = None,
+    source_name: str | None = None,
+    category: str | None = None,
     include_metadata: bool = True,
     limit: int = 100,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Firefox curated sources portmanteau tool.
 
     This tool consolidates all Firefox curated sources operations into a single interface,
@@ -76,7 +76,7 @@ async def firefox_curated(
         }
 
 
-async def _get_curated_source(source_name: Optional[str], include_metadata: bool) -> Dict[str, Any]:
+async def _get_curated_source(source_name: str | None, include_metadata: bool) -> dict[str, Any]:
     """Get a specific curated source by name."""
     try:
         if not source_name:
@@ -103,8 +103,8 @@ async def _get_curated_source(source_name: Optional[str], include_metadata: bool
 
 
 async def _list_curated_sources(
-    category: Optional[str], include_metadata: bool, limit: int
-) -> Dict[str, Any]:
+    category: str | None, include_metadata: bool, limit: int
+) -> dict[str, Any]:
     """List all available curated sources."""
     try:
         sources = list_curated_sources()
@@ -131,8 +131,8 @@ async def _list_curated_sources(
 
 
 async def _list_curated_bookmark_sources(
-    category: Optional[str], include_metadata: bool, limit: int
-) -> Dict[str, Any]:
+    category: str | None, include_metadata: bool, limit: int
+) -> dict[str, Any]:
     """List curated bookmark sources with details."""
     try:
         sources = list_curated_sources()

@@ -2,7 +2,7 @@
 
 import sqlite3
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -12,11 +12,11 @@ from .utils import get_places_db_path
 
 @mcp.tool()
 async def list_bookmarks(
-    profile_name: Optional[str] = None,
-    folder_id: Optional[int] = None,
+    profile_name: str | None = None,
+    folder_id: int | None = None,
     limit: int = 50,
     offset: int = 0,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """List bookmarks with optional folder filtering.
 
     Args:
@@ -88,7 +88,7 @@ async def list_bookmarks(
 
 
 @mcp.tool()
-async def get_bookmark(bookmark_id: int, profile_name: Optional[str] = None) -> Dict[str, Any]:
+async def get_bookmark(bookmark_id: int, profile_name: str | None = None) -> dict[str, Any]:
     """Get details for a specific bookmark.
 
     Args:
@@ -203,10 +203,10 @@ async def add_bookmark(
     url: str,
     title: str,
     folder_id: int = 3,  # Default to "Other Bookmarks" folder
-    tags: Optional[List[str]] = None,
-    description: Optional[str] = None,
-    profile_name: Optional[str] = None,
-) -> Dict[str, Any]:
+    tags: list[str] | None = None,
+    description: str | None = None,
+    profile_name: str | None = None,
+) -> dict[str, Any]:
     """Add a new bookmark to Firefox.
 
     Args:

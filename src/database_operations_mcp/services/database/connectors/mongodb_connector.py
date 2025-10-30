@@ -7,7 +7,7 @@ Supports document storage, querying, and aggregation operations.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from pymongo import MongoClient
 from pymongo.errors import (
@@ -35,7 +35,7 @@ class MongoDBConnector(BaseDatabaseConnector):
         """Return the database type."""
         return DatabaseType.MONGODB
 
-    def __init__(self, connection_config: Dict[str, Any]):
+    def __init__(self, connection_config: dict[str, Any]):
         """Initialize MongoDB connector.
 
         Args:
@@ -140,8 +140,8 @@ class MongoDBConnector(BaseDatabaseConnector):
             return False
 
     def execute_query(
-        self, query: Dict, database_name: str = None, collection_name: str = None, **kwargs
-    ) -> Dict[str, Any]:
+        self, query: dict, database_name: str = None, collection_name: str = None, **kwargs
+    ) -> dict[str, Any]:
         """Execute a MongoDB query.
 
         Args:
@@ -218,7 +218,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"MongoDB query failed: {e}")
             raise QueryError(f"MongoDB operation failed: {e}") from e
 
-    def list_databases(self) -> List[Dict[str, Any]]:
+    def list_databases(self) -> list[dict[str, Any]]:
         """List all databases on the MongoDB server."""
         try:
             if not self.client:
@@ -251,7 +251,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to list MongoDB databases: {e}")
             raise QueryError(f"Failed to list databases: {e}") from e
 
-    def list_collections(self, database_name: str = None) -> List[Dict[str, Any]]:
+    def list_collections(self, database_name: str = None) -> list[dict[str, Any]]:
         """List collections in a database.
 
         Args:
@@ -294,7 +294,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to list collections in database {database_name}: {e}")
             raise QueryError(f"Failed to list collections: {e}") from e
 
-    def get_collection_stats(self, database_name: str, collection_name: str) -> Dict[str, Any]:
+    def get_collection_stats(self, database_name: str, collection_name: str) -> dict[str, Any]:
         """Get statistics for a specific collection."""
         try:
             if not self.client:
@@ -332,7 +332,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             )
             raise QueryError(f"Failed to get collection stats: {e}") from e
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Perform a health check on the MongoDB connection."""
         try:
             if not self.client:
@@ -393,7 +393,7 @@ class MongoDBConnector(BaseDatabaseConnector):
                 "timestamp": datetime.utcnow().isoformat(),
             }
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics from MongoDB."""
         try:
             if not self.client:
@@ -422,7 +422,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to get MongoDB performance metrics: {e}")
             raise QueryError(f"Failed to get performance metrics: {e}") from e
 
-    def test_connection(self) -> Dict[str, Any]:
+    def test_connection(self) -> dict[str, Any]:
         """Test the MongoDB connection."""
         start_time = datetime.now()
         try:

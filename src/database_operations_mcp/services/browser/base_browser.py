@@ -8,7 +8,7 @@ from this class to ensure consistent interfaces.
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class BaseBrowserManager(ABC):
@@ -24,7 +24,7 @@ class BaseBrowserManager(ABC):
     """
 
     @abstractmethod
-    async def get_profiles(self) -> List[str]:
+    async def get_profiles(self) -> list[str]:
         """Get list of available browser profiles.
 
         Returns a list of profile names or identifiers that can be used
@@ -58,7 +58,7 @@ class BaseBrowserManager(ABC):
         pass
 
     @abstractmethod
-    async def parse_bookmarks(self, profile_name: str) -> List[Dict[str, Any]]:
+    async def parse_bookmarks(self, profile_name: str) -> list[dict[str, Any]]:
         """Parse bookmarks from browser-specific format.
 
         Extracts bookmarks from the browser's storage format and converts
@@ -91,7 +91,7 @@ class BaseBrowserManager(ABC):
         pass
 
     @abstractmethod
-    async def list_tags(self, profile_name: str) -> List[str]:
+    async def list_tags(self, profile_name: str) -> list[str]:
         """List all tags used in bookmarks.
 
         Returns all unique tags found across all bookmarks in the profile.
@@ -112,9 +112,9 @@ class BaseBrowserManager(ABC):
         self,
         profile_name: str,
         query: str,
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Search bookmarks with flexible criteria.
 
         Performs full-text search on bookmark titles and URLs, with optional
@@ -198,7 +198,7 @@ class BaseBrowserManager(ABC):
     @abstractmethod
     async def restore_profile(
         self, profile_name: str, backup_file: str, overwrite: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Restore browser profile from backup.
 
         Restores a profile from a previously created backup. Can optionally
@@ -226,7 +226,7 @@ class BaseBrowserManager(ABC):
         """
         pass
 
-    async def get_profile_info(self, profile_name: str) -> Dict[str, Any]:
+    async def get_profile_info(self, profile_name: str) -> dict[str, Any]:
         """Get information about a profile.
 
         Returns metadata and statistics about the profile including bookmark
@@ -312,7 +312,7 @@ class BaseBrowserManager(ABC):
         except Exception:
             return False
 
-    def format_bookmark_path(self, bookmark: Dict[str, Any]) -> str:
+    def format_bookmark_path(self, bookmark: dict[str, Any]) -> str:
         """Format bookmark for display with full path.
 
         Creates a human-readable path string for a bookmark including its

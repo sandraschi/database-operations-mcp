@@ -6,7 +6,7 @@ Handles health checks, performance monitoring, and administrative operations.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -28,7 +28,7 @@ def _get_timestamp() -> str:
 
 @mcp.tool()
 @HelpSystem.register_tool
-async def database_health_check(connection_name: str) -> Dict[str, Any]:
+async def database_health_check(connection_name: str) -> dict[str, Any]:
     """Perform comprehensive health check on a database connection.
 
     Args:
@@ -61,8 +61,8 @@ async def database_health_check(connection_name: str) -> Dict[str, Any]:
 @mcp.tool()
 @HelpSystem.register_tool
 async def get_database_metrics(
-    connection_name: str, metric_names: Optional[List[str]] = None
-) -> Dict[str, Any]:
+    connection_name: str, metric_names: list[str] | None = None
+) -> dict[str, Any]:
     """Get performance metrics for a database connection.
 
     Args:
@@ -97,7 +97,7 @@ async def get_database_metrics(
 @HelpSystem.register_tool
 async def vacuum_database(
     connection_name: str, analyze: bool = True, full: bool = False
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Run VACUUM on a database to optimize storage.
 
     Args:
@@ -132,7 +132,7 @@ async def vacuum_database(
 
 @mcp.tool()
 @HelpSystem.register_tool
-async def disconnect_database(connection_name: str) -> Dict[str, Any]:
+async def disconnect_database(connection_name: str) -> dict[str, Any]:
     """Safely disconnect from a database.
 
     Args:

@@ -7,7 +7,7 @@ import csv
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from database_operations_mcp.tools.help_tools import HelpSystem
 
@@ -18,7 +18,7 @@ from .db import FirefoxDB
 class BulkOperations:
     """Handles batch operations on Firefox bookmarks."""
 
-    def __init__(self, profile_path: Optional[Path] = None):
+    def __init__(self, profile_path: Path | None = None):
         self.db = FirefoxDB(profile_path)
 
     async def process_in_batches(self, operation: str, batch_size: int = 50, **kwargs):
@@ -37,8 +37,8 @@ class BulkOperations:
             offset += batch_size
 
     async def _export_bookmark(
-        self, bookmark: Dict[str, Any], format: str = "json"
-    ) -> Dict[str, Any]:
+        self, bookmark: dict[str, Any], format: str = "json"
+    ) -> dict[str, Any]:
         """Export a single bookmark in specified format."""
         if format == "json":
             return {
@@ -56,9 +56,9 @@ class BulkOperations:
 @HelpSystem.register_tool(category="firefox")
 async def export_bookmarks(
     output_format: str = "json",
-    output_file: Optional[str] = None,
-    profile_path: Optional[str] = None,
-) -> Dict[str, Any]:
+    output_file: str | None = None,
+    profile_path: str | None = None,
+) -> dict[str, Any]:
     """Export bookmarks to a file.
 
     Args:
@@ -98,8 +98,8 @@ async def export_bookmarks(
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def batch_update_tags(
-    tag_mapping: Dict[str, str], dry_run: bool = True, profile_path: Optional[str] = None
-) -> Dict[str, Any]:
+    tag_mapping: dict[str, str], dry_run: bool = True, profile_path: str | None = None
+) -> dict[str, Any]:
     """Batch update tags in bookmarks.
 
     Args:
@@ -171,8 +171,8 @@ async def batch_update_tags(
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def remove_unused_tags(
-    dry_run: bool = True, profile_path: Optional[str] = None
-) -> Dict[str, Any]:
+    dry_run: bool = True, profile_path: str | None = None
+) -> dict[str, Any]:
     """Remove tags that are not associated with any bookmarks.
 
     Args:

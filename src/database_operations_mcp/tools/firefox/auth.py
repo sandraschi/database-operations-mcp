@@ -5,7 +5,7 @@ import hmac
 import os
 import time
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any
 
 from . import mcp  # Import the mcp instance from __init__
 
@@ -24,7 +24,7 @@ def generate_session_id(username: str) -> str:
 
 
 @mcp.tool()
-async def create_session(username: str, password: str) -> Dict[str, Any]:
+async def create_session(username: str, password: str) -> dict[str, Any]:
     """Create a new authenticated session."""
     if not username or not password:
         return {"status": "error", "message": "Username and password required"}
@@ -44,7 +44,7 @@ async def create_session(username: str, password: str) -> Dict[str, Any]:
 
 
 @mcp.tool
-async def validate_session(session_id: str) -> Dict[str, Any]:
+async def validate_session(session_id: str) -> dict[str, Any]:
     """Validate a session and return session data if valid."""
     if not session_id or session_id not in _sessions:
         return {"status": "error", "valid": False, "message": "Invalid session"}

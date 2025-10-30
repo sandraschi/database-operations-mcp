@@ -8,7 +8,6 @@ This CLI provides direct access to database operations without requiring an MCP 
 import asyncio
 import json
 import sys
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -120,7 +119,7 @@ def list_databases(connection_string: str, database_type: str, output_format: st
     help="Output format",
 )
 def list_tables(
-    connection_string: str, database_type: str, database_name: Optional[str], output_format: str
+    connection_string: str, database_type: str, database_name: str | None, output_format: str
 ):
     """List all tables in a database."""
 
@@ -190,7 +189,7 @@ def describe_table(
     connection_string: str,
     database_type: str,
     table_name: str,
-    database_name: Optional[str],
+    database_name: str | None,
     output_format: str,
 ):
     """Describe table schema."""

@@ -1,0 +1,276 @@
+# Full-Stack Cursor Rules Template
+
+**Copy this to your full-stack repo and adapt the repository-specific sections.**
+
+## 🎯 Repository Purpose
+
+**[REPO_NAME]** - Full-stack application with FastMCP 2.13 backend and React/TypeScript frontend.
+
+### 🚨 **CRITICAL: Consults Central Docs First**
+
+**REQUIRED**: All repository .cursorrules files MUST include the following statement:
+
+> **📚 CONSULT CENTRAL DOCS FIRST**: Before creating new documentation, standards, or patterns, consult the central docs repository (`D:\Dev\repos\mcp-central-docs\`) for existing documentation and standards. This ensures consistency and avoids duplication across all MCP repositories.
+
+## 🚨 CRITICAL: Chat Output & PowerShell Syntax
+
+**REQUIRED**: ALL chat output MUST begin with "hi!" as a test.
+
+**🚫 FORBIDDEN in PowerShell:**
+- `&&` (command chaining) - Use `;` or separate commands
+- `||` (logical OR) - Use PowerShell syntax
+- `mkdir`, `rmdir`, `ls` - Use `New-Item`, `Remove-Item`, `Get-ChildItem`
+- `head`, `tail` - Use PowerShell cmdlets
+- Linux path separators - Use backslash `\` on Windows
+
+---
+
+## Code Standards
+
+### Modern Python Stack
+- **Linter**: ruff (replaces flake8, black, isort)
+- **Package Manager**: uv (replaces pip)
+- **Testing**: pytest with pytest-cov
+- **Type Hints**: Required for all functions
+- **Async**: MCP tools must be async
+
+### Commands
+```bash
+uv run ruff check .
+uv run ruff format .
+uv run python -m pytest -v
+```
+
+## FastMCP 2.13 Standards
+
+### Tool Decorators
+```python
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP()
+
+@mcp.tool()
+async def my_tool(param: str) -> dict:
+    """Tool description following FastMCP 2.13 docstring standards."""
+    pass
+```
+
+### Docstring Requirements
+- Parameters: All parameters described
+- Returns: Return type and structure
+- Usage: Common use cases
+- Examples: Code examples
+- Notes: Important information
+- See Also: Related tools
+- NO triple-quoted strings inside docstrings
+
+## Frontend / UI Standards
+
+### Tech Stack
+- **Framework**: React 18+ with TypeScript
+- **UI Library**: Chakra UI for components
+- **State Management**: Zustand or Jotai
+- **HTTP Client**: Axios with React Query
+- **Routing**: React Router
+- **Forms**: React Hook Form with Zod validation
+- **Build Tool**: Vite
+
+### Component Structure
+```
+frontend/src/
+├── components/
+│   ├── layout/
+│   │   ├── Sidebar.tsx
+│   │   ├── TopBar.tsx
+│   │   └── Layout.tsx
+│   └── [feature]/
+├── pages/
+├── hooks/
+├── services/
+│   └── api.ts
+└── types/
+```
+
+### Layout Standards
+
+#### Sidebar
+- Fixed left sidebar, collapsible
+- Feature navigation tree view
+- Search shortcuts
+
+#### TopBar
+- Breadcrumb navigation
+- Global search input
+- Actions dropdown
+- User settings
+
+### Component Guidelines
+```typescript
+// Use Chakra UI components
+import { Box, Button, Input, Stack } from '@chakra-ui/react';
+
+// Type safety with interfaces
+interface DataModel {
+  id: string;
+  // ... fields
+}
+
+// Custom hooks for API calls
+const useData = () => {
+  return useQuery({
+    queryKey: ['data'],
+    queryFn: () => api.getData()
+  });
+};
+```
+
+### Styling Guidelines
+- Use Chakra UI theme tokens
+- Consistent spacing (4px grid)
+- Dark mode support
+- Responsive design (mobile-first)
+- Accessibility: ARIA labels, keyboard navigation
+
+## Backend Standards
+
+### Database
+- **Primary**: SQLite or PostgreSQL
+- **ORM**: SQLAlchemy 2.0 with async support
+- **Migrations**: Alembic for schema management
+
+### Authentication (Optional)
+- **JWT**: JSON Web Tokens for API auth
+- **OAuth2**: Third-party provider support
+- **Rate Limiting**: FastAPI-limiter for API protection
+- **CORS**: Configured for frontend origin
+- **Security**: Password hashing with bcrypt
+
+### Logging & Monitoring
+- **Logging**: Python logging with structured format
+- **Log Levels**: DEBUG, INFO, WARNING, ERROR, CRITICAL
+- **Log Rotation**: Daily rotation, keep 30 days
+- **Monitoring**: Prometheus metrics (if deployed)
+- **Health Checks**: `/health` endpoint for monitoring
+
+### Docker Support (When Advisable)
+
+#### Dockerfile Pattern
+```dockerfile
+FROM python:3.11-slim
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+WORKDIR /app
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies
+RUN uv sync --frozen
+
+# Copy application code
+COPY src/ src/
+COPY tests/ tests/
+
+# Run application
+CMD ["uv", "run", "python", "-m", "[package_name].main"]
+```
+
+#### Docker Compose (Full Stack)
+```yaml
+version: '3.8'
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+```
+
+#### When NOT to Docker
+- **Local Development**: Don't dockerize for simple local dev
+- **One-Shot Scripts**: Not needed for CLI tools
+- **MCP Servers**: Often run as stdio, no container needed
+
+### API Best Practices
+
+#### Error Handling
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import ValidationError
+
+app = FastAPI()
+
+@app.exception_handler(ValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=422,
+        content={"error": "Validation error", "details": exc.errors()}
+    )
+```
+
+#### Response Models
+```python
+from pydantic import BaseModel
+from typing import Optional
+
+class Response(BaseModel):
+    success: bool
+    data: Optional[dict] = None
+    message: Optional[str] = None
+    errors: list[str] = []
+```
+
+## Development Workflow
+
+### Before Committing
+```bash
+# Run linter
+uv run ruff check .
+uv run ruff format .
+
+# Run tests
+uv run pytest
+
+# Check types
+uv run mypy src/
+```
+
+### Commit Message Format
+```
+feat: Add new feature
+fix: Resolve bug
+docs: Update documentation
+refactor: Improve code structure
+```
+
+## Testing Requirements
+
+- **Coverage**: Minimum 90%
+- **Async Tests**: Use pytest-asyncio
+- **Fixtures**: Reusable test data
+- **Integration Tests**: Test real integrations
+
+## References
+
+- FastMCP 2.13: Latest MCP standards
+- Testing: pytest documentation
+- Ruff: Python linter and formatter
+- Chakra UI: React component library
+
+**Last Updated**: 2025-10-26
+

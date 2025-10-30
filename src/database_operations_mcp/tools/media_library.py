@@ -2,7 +2,7 @@
 # Consolidates Calibre, Plex, and media operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -15,18 +15,18 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="media")
 async def media_library(
     operation: str,
-    library_path: Optional[str] = None,
-    book_title: Optional[str] = None,
-    author: Optional[str] = None,
-    search_query: Optional[str] = None,
-    plex_server_url: Optional[str] = None,
-    plex_token: Optional[str] = None,
-    library_name: Optional[str] = None,
+    library_path: str | None = None,
+    book_title: str | None = None,
+    author: str | None = None,
+    search_query: str | None = None,
+    plex_server_url: str | None = None,
+    plex_token: str | None = None,
+    library_name: str | None = None,
     include_metadata: bool = True,
     export_format: str = "json",
-    export_path: Optional[str] = None,
+    export_path: str | None = None,
     optimize_database: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Media library management portmanteau tool.
 
     This tool consolidates all media library operations into a single interface,
@@ -124,12 +124,12 @@ async def media_library(
 
 
 async def _search_calibre_library(
-    library_path: Optional[str],
-    book_title: Optional[str],
-    author: Optional[str],
-    search_query: Optional[str],
+    library_path: str | None,
+    book_title: str | None,
+    author: str | None,
+    search_query: str | None,
     include_metadata: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Search books in Calibre library."""
     try:
         if not library_path:
@@ -160,11 +160,11 @@ async def _search_calibre_library(
 
 
 async def _get_calibre_book_metadata(
-    library_path: Optional[str],
-    book_title: Optional[str],
-    author: Optional[str],
+    library_path: str | None,
+    book_title: str | None,
+    author: str | None,
     include_metadata: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get detailed metadata for a specific book."""
     try:
         if not library_path:
@@ -195,8 +195,8 @@ async def _get_calibre_book_metadata(
 
 
 async def _search_calibre_fts(
-    library_path: Optional[str], search_query: Optional[str]
-) -> Dict[str, Any]:
+    library_path: str | None, search_query: str | None
+) -> dict[str, Any]:
     """Perform full-text search in Calibre library."""
     try:
         if not library_path:
@@ -226,7 +226,7 @@ async def _search_calibre_fts(
         }
 
 
-async def _find_plex_database(plex_server_url: Optional[str]) -> Dict[str, Any]:
+async def _find_plex_database(plex_server_url: str | None) -> dict[str, Any]:
     """Locate Plex Media Server database."""
     try:
         if not plex_server_url:
@@ -251,8 +251,8 @@ async def _find_plex_database(plex_server_url: Optional[str]) -> Dict[str, Any]:
 
 
 async def _optimize_plex_database(
-    plex_server_url: Optional[str], plex_token: Optional[str], optimize_database: bool
-) -> Dict[str, Any]:
+    plex_server_url: str | None, plex_token: str | None, optimize_database: bool
+) -> dict[str, Any]:
     """Optimize Plex database performance."""
     try:
         if not plex_server_url:
@@ -279,8 +279,8 @@ async def _optimize_plex_database(
 
 
 async def _export_database_schema(
-    library_path: Optional[str], export_format: str, export_path: Optional[str]
-) -> Dict[str, Any]:
+    library_path: str | None, export_format: str, export_path: str | None
+) -> dict[str, Any]:
     """Export database schema information."""
     try:
         if not library_path:
@@ -308,8 +308,8 @@ async def _export_database_schema(
 
 
 async def _get_plex_library_stats(
-    plex_server_url: Optional[str], plex_token: Optional[str], library_name: Optional[str]
-) -> Dict[str, Any]:
+    plex_server_url: str | None, plex_token: str | None, library_name: str | None
+) -> dict[str, Any]:
     """Get statistics about Plex library."""
     try:
         if not plex_server_url:
@@ -341,8 +341,8 @@ async def _get_plex_library_stats(
 
 
 async def _get_plex_library_sections(
-    plex_server_url: Optional[str], plex_token: Optional[str]
-) -> Dict[str, Any]:
+    plex_server_url: str | None, plex_token: str | None
+) -> dict[str, Any]:
     """Get information about Plex library sections."""
     try:
         if not plex_server_url:
@@ -367,3 +367,6 @@ async def _get_plex_library_sections(
             "sections": [],
             "count": 0,
         }
+
+
+

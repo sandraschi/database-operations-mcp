@@ -1,7 +1,7 @@
 """Advanced search functionality for bookmarks with smart profile detection."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -17,7 +17,7 @@ class SmartProfileDetector:
     """Smart profile detection based on search terms and context."""
 
     @staticmethod
-    def detect_profile_from_query(query: str) -> Optional[str]:
+    def detect_profile_from_query(query: str) -> str | None:
         """Detect which profile to use based on search query.
 
         Examples:
@@ -60,7 +60,7 @@ class SmartProfileDetector:
         return None
 
     @staticmethod
-    def find_matching_profile(detected_name: str) -> Optional[str]:
+    def find_matching_profile(detected_name: str) -> str | None:
         """Find an actual profile that matches the detected name."""
         try:
             profiles = parse_profiles_ini()
@@ -93,11 +93,11 @@ class SmartProfileDetector:
 class BookmarkSearcher:
     """Handles bookmark search operations with enhanced safety checks."""
 
-    def __init__(self, profile_path: Optional[Path] = None):
+    def __init__(self, profile_path: Path | None = None):
         self.profile_path = profile_path
         self.db = None
 
-    def _ensure_safe_access(self) -> Dict[str, Any]:
+    def _ensure_safe_access(self) -> dict[str, Any]:
         """Ensure it's safe to access the database."""
         return FirefoxStatusChecker.check_database_access_safe(self.profile_path)
 
@@ -110,7 +110,7 @@ class BookmarkSearcher:
             self.db = FirefoxDB(self.profile_path)
         return self.db
 
-    def search(self, query: str, limit: int = 50) -> List[Dict[str, Any]]:
+    def search(self, query: str, limit: int = 50) -> list[dict[str, Any]]:
         """Search bookmarks by title or URL."""
         db = self._get_db_connection()
         search_term = f"%{query}%"
@@ -130,10 +130,10 @@ class BookmarkSearcher:
 @HelpSystem.register_tool(category="firefox")
 async def search_bookmarks(
     query: str,
-    profile_name: Optional[str] = None,
+    profile_name: str | None = None,
     limit: int = 50,
     auto_detect_profile: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Search bookmarks by title or URL with smart profile detection.
 
     This tool can automatically detect which Firefox profile to search based on your query.
@@ -228,9 +228,9 @@ async def search_bookmarks(
 @HelpSystem.register_tool(category="firefox")
 async def find_duplicates(
     by: str = "url",  # 'url' or 'title'
-    profile_name: Optional[str] = None,
+    profile_name: str | None = None,
     min_duplicates: int = 2,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Find duplicate bookmarks based on URL or title.
 
     Args:

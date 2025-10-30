@@ -5,7 +5,7 @@ This module provides functionality to detect and diagnose various database
 errors including corruption, integrity issues, logical errors, and performance problems.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 import aiosqlite
 
@@ -17,7 +17,7 @@ class ErrorDetector:
     detection, logical validation, and performance diagnostics.
     """
 
-    async def check_integrity(self, db_path: str) -> Dict[str, Any]:
+    async def check_integrity(self, db_path: str) -> dict[str, Any]:
         """Check database integrity using PRAGMA commands.
 
         Performs SQLite integrity checks to detect corruption and consistency issues.
@@ -77,7 +77,7 @@ class ErrorDetector:
             "total_warnings": len(warnings),
         }
 
-    async def detect_corruption(self, db_path: str) -> Dict[str, Any]:
+    async def detect_corruption(self, db_path: str) -> dict[str, Any]:
         """Detect database corruption issues.
 
         Performs comprehensive corruption detection including header checks,
@@ -117,7 +117,7 @@ class ErrorDetector:
             else "Database appears healthy",
         }
 
-    async def find_logical_errors(self, db_path: str) -> List[Dict[str, Any]]:
+    async def find_logical_errors(self, db_path: str) -> list[dict[str, Any]]:
         """Find logical inconsistencies in database.
 
         Detects logical errors like duplicate primary keys, NULL in NOT NULL
@@ -165,7 +165,7 @@ class ErrorDetector:
 
         return errors
 
-    async def suggest_fixes(self, db_path: str) -> List[Dict[str, Any]]:
+    async def suggest_fixes(self, db_path: str) -> list[dict[str, Any]]:
         """Suggest SQL fixes for detected errors.
 
         Analyzes detected errors and generates SQL statements to fix them.

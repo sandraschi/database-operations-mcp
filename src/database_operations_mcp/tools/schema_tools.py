@@ -5,7 +5,7 @@ Handles table/collection discovery, schema analysis, and metadata operations.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 @mcp.tool()
 @HelpSystem.register_tool
-async def list_databases(connection_name: str) -> Dict[str, Any]:
+async def list_databases(connection_name: str) -> dict[str, Any]:
     """List all databases/schemas on database server.
 
     Retrieves complete list of databases or schemas available on the specified
@@ -109,7 +109,7 @@ async def list_databases(connection_name: str) -> Dict[str, Any]:
 
 @mcp.tool()
 @HelpSystem.register_tool
-async def list_tables(connection_name: str, database_name: Optional[str] = None) -> Dict[str, Any]:
+async def list_tables(connection_name: str, database_name: str | None = None) -> dict[str, Any]:
     """List all tables/collections in database or schema.
 
     Retrieves complete list of tables (SQL) or collections (NoSQL) from specified
@@ -217,8 +217,8 @@ async def list_tables(connection_name: str, database_name: Optional[str] = None)
 @mcp.tool()
 @HelpSystem.register_tool
 async def describe_table(
-    connection_name: str, table_name: str, database_name: Optional[str] = None
-) -> Dict[str, Any]:
+    connection_name: str, table_name: str, database_name: str | None = None
+) -> dict[str, Any]:
     """Get detailed schema information about table or collection.
 
     Retrieves complete schema details including columns, data types, constraints,
@@ -354,9 +354,9 @@ async def get_schema_diff(
     connection_name: str,
     table1: str,
     table2: str,
-    database1: Optional[str] = None,
-    database2: Optional[str] = None,
-) -> Dict[str, Any]:
+    database1: str | None = None,
+    database2: str | None = None,
+) -> dict[str, Any]:
     """Compare schemas of two tables to find differences.
 
     Analyzes and compares column structures, types, and constraints between two

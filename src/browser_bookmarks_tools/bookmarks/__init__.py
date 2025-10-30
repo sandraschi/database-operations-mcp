@@ -1,0 +1,1 @@
+"""Bookmark management core functionality."""

@@ -6,7 +6,7 @@ supported browsers. Automatically detects browser type and routes to the
 appropriate browser-specific manager.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 
@@ -15,15 +15,15 @@ from database_operations_mcp.config.mcp_config import mcp
 async def browser_bookmarks(
     operation: str,
     browser: str,
-    profile_name: Optional[str] = None,
-    folder_id: Optional[int] = None,
-    bookmark_id: Optional[int] = None,
-    url: Optional[str] = None,
-    title: Optional[str] = None,
-    tags: Optional[List[str]] = None,
-    search_query: Optional[str] = None,
+    profile_name: str | None = None,
+    folder_id: int | None = None,
+    bookmark_id: int | None = None,
+    url: str | None = None,
+    title: str | None = None,
+    tags: list[str] | None = None,
+    search_query: str | None = None,
     limit: int = 100,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Universal browser bookmark management portmanteau tool.
 
     Provides a unified interface for bookmark management across ALL supported

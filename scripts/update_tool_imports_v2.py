@@ -25,7 +25,7 @@ TOOL_MODULES = [
 
 def update_imports(file_path: Path):
     """Update imports in a single file."""
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         content = f.read()
 
     # Pattern to match 'from . import module' or 'from ..module import something'

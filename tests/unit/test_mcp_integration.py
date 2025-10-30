@@ -11,7 +11,7 @@ This script tests the MCP server by:
 import asyncio
 import json
 import sys
-from typing import Any, Dict
+from typing import Any
 
 
 class MCPClient:
@@ -19,7 +19,7 @@ class MCPClient:
         self.process = process
         self.request_id = 1
 
-    async def send_request(self, method: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def send_request(self, method: str, params: dict[str, Any] = None) -> dict[str, Any]:
         """Send a JSON-RPC request to the MCP server."""
         request = {
             "jsonrpc": "2.0",

@@ -4,7 +4,7 @@ Database health checking service.
 This module provides functionality to check database health and generate health scores.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from database_operations_mcp.services.analysis.error_detector import ErrorDetector
 
@@ -20,7 +20,7 @@ class HealthChecker:
         """Initialize health checker."""
         self.error_detector = ErrorDetector()
 
-    async def check_health(self, db_path: str) -> Dict[str, Any]:
+    async def check_health(self, db_path: str) -> dict[str, Any]:
         """Perform comprehensive health check on database.
 
         Evaluates database health across multiple dimensions including integrity,

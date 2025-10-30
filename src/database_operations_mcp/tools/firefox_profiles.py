@@ -2,7 +2,7 @@
 # Consolidates all Firefox profile operations into a single interface.
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="firefox")
 async def firefox_profiles(
     operation: str,
-    profile_name: Optional[str] = None,
-    source_profiles: Optional[List[str]] = None,
-    preset_name: Optional[str] = None,
-    profile_config: Optional[Dict[str, Any]] = None,
+    profile_name: str | None = None,
+    source_profiles: list[str] | None = None,
+    preset_name: str | None = None,
+    profile_config: dict[str, Any] | None = None,
     check_status: bool = True,
     include_bookmarks: bool = True,
     include_settings: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Firefox profile management portmanteau tool.
 
     This tool consolidates all Firefox profile operations into a single interface,
@@ -117,7 +117,7 @@ async def firefox_profiles(
         }
 
 
-async def _get_firefox_profiles() -> Dict[str, Any]:
+async def _get_firefox_profiles() -> dict[str, Any]:
     """List all available Firefox profiles."""
     try:
         db = FirefoxDB()
@@ -141,8 +141,8 @@ async def _get_firefox_profiles() -> Dict[str, Any]:
 
 
 async def _create_firefox_profile(
-    profile_name: Optional[str], profile_config: Optional[Dict[str, Any]]
-) -> Dict[str, Any]:
+    profile_name: str | None, profile_config: dict[str, Any] | None
+) -> dict[str, Any]:
     """Create a new Firefox profile."""
     try:
         if not profile_name:
@@ -166,7 +166,7 @@ async def _create_firefox_profile(
         }
 
 
-async def _delete_firefox_profile(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _delete_firefox_profile(profile_name: str | None) -> dict[str, Any]:
     """Delete an existing Firefox profile."""
     try:
         if not profile_name:
@@ -189,11 +189,11 @@ async def _delete_firefox_profile(profile_name: Optional[str]) -> Dict[str, Any]
 
 
 async def _create_loaded_profile(
-    profile_name: Optional[str],
-    source_profiles: Optional[List[str]],
+    profile_name: str | None,
+    source_profiles: list[str] | None,
     include_bookmarks: bool,
     include_settings: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create a profile with specific bookmarks loaded."""
     try:
         if not profile_name:
@@ -222,8 +222,8 @@ async def _create_loaded_profile(
 
 
 async def _create_portmanteau_profile(
-    profile_name: Optional[str], source_profiles: Optional[List[str]]
-) -> Dict[str, Any]:
+    profile_name: str | None, source_profiles: list[str] | None
+) -> dict[str, Any]:
     """Create a hybrid profile from multiple sources."""
     try:
         if not profile_name:
@@ -249,7 +249,7 @@ async def _create_portmanteau_profile(
         }
 
 
-async def _suggest_portmanteau_profiles(profile_name: Optional[str]) -> Dict[str, Any]:
+async def _suggest_portmanteau_profiles(profile_name: str | None) -> dict[str, Any]:
     """Get AI suggestions for profile combinations."""
     try:
         return {
@@ -277,8 +277,8 @@ async def _suggest_portmanteau_profiles(profile_name: Optional[str]) -> Dict[str
 
 
 async def _create_loaded_profile_from_preset(
-    profile_name: Optional[str], preset_name: Optional[str]
-) -> Dict[str, Any]:
+    profile_name: str | None, preset_name: str | None
+) -> dict[str, Any]:
     """Create profile from predefined preset."""
     try:
         if not profile_name:
@@ -304,7 +304,7 @@ async def _create_loaded_profile_from_preset(
         }
 
 
-async def _check_firefox_status() -> Dict[str, Any]:
+async def _check_firefox_status() -> dict[str, Any]:
     """Check if Firefox is running and accessible."""
     try:
         status_checker = FirefoxStatusChecker()

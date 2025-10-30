@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import Field, validator
 
@@ -38,11 +38,11 @@ class ConnectionConfig(BaseDBModel):
     name: str
     db_type: DatabaseType
     host: str = "localhost"
-    port: Optional[int] = None
-    username: Optional[str] = None
-    password: Optional[str] = None
-    database: Optional[str] = None
-    options: Dict[str, Any] = Field(default_factory=dict)
+    port: int | None = None
+    username: str | None = None
+    password: str | None = None
+    database: str | None = None
+    options: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
         """Pydantic config."""
@@ -78,6 +78,6 @@ class ConnectionInfo(BaseDBModel):
 
     config: ConnectionConfig
     status: ConnectionStatus = ConnectionStatus.DISCONNECTED
-    last_used: Optional[datetime] = None
-    error: Optional[str] = None
-    stats: Dict[str, Any] = Field(default_factory=dict)
+    last_used: datetime | None = None
+    error: str | None = None
+    stats: dict[str, Any] = Field(default_factory=dict)

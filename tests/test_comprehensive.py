@@ -15,7 +15,7 @@ import json
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Configuration
 OUTPUT_DIR = Path("test_reports")
@@ -63,7 +63,7 @@ class ToolTester:
         }
         self.package_dir, self.tools_dir = setup_python_path()
 
-    def get_tool_modules(self) -> List[str]:
+    def get_tool_modules(self) -> list[str]:
         """Get list of all tool modules to test."""
         modules = []
 
@@ -79,7 +79,7 @@ class ToolTester:
         print(f"Found {len(modules)} tool modules: {', '.join(modules)}")
         return modules
 
-    def analyze_source_code(self, module_name: str, file_path: Path) -> Dict[str, Any]:
+    def analyze_source_code(self, module_name: str, file_path: Path) -> dict[str, Any]:
         """Analyze source code for FastMCP compliance and syntax issues."""
         analysis = {
             "syntax_valid": False,
@@ -91,7 +91,7 @@ class ToolTester:
         }
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 source = f.read()
 
             # Try to parse the AST
@@ -170,7 +170,7 @@ class ToolTester:
             analysis["analysis_error"] = str(e)
             return analysis
 
-    def test_module_import(self, module_name: str) -> Dict[str, Any]:
+    def test_module_import(self, module_name: str) -> dict[str, Any]:
         """Test importing a module and analyze its structure."""
         module_path = self.tools_dir / f"{module_name}.py"
         if not module_path.exists():

@@ -1,6 +1,6 @@
 """Redis database connector."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import redis.asyncio as aioredis
@@ -17,13 +17,13 @@ class RedisConnector:
 
     def __init__(self):
         """Initialize Redis connector."""
-        self.client: Optional[Any] = None
+        self.client: Any | None = None
 
     async def connect(
         self,
         host: str = "localhost",
         port: int = 6379,
-        password: Optional[str] = None,
+        password: str | None = None,
         db: int = 0,
     ) -> Any:
         """Connect to Redis database.
@@ -66,7 +66,7 @@ class RedisConnector:
 
         return await self.client.get(key)
 
-    async def set_value(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    async def set_value(self, key: str, value: Any, ttl: int | None = None) -> bool:
         """Set key-value pair.
 
         Args:
@@ -97,7 +97,7 @@ class RedisConnector:
 
         return await self.client.delete(key)
 
-    async def get_keys(self, pattern: str = "*") -> List[str]:
+    async def get_keys(self, pattern: str = "*") -> list[str]:
         """Get keys matching pattern.
 
         Args:
@@ -111,7 +111,7 @@ class RedisConnector:
 
         return await self.client.keys(pattern)
 
-    async def get_info(self) -> Dict[str, Any]:
+    async def get_info(self) -> dict[str, Any]:
         """Get Redis server information.
 
         Returns:

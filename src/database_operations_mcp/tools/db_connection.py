@@ -4,7 +4,7 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -22,13 +22,13 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="database")
 async def db_connection(
     operation: str,
-    connection_name: Optional[str] = None,
-    database_type: Optional[str] = None,
-    connection_config: Optional[Dict[str, Any]] = None,
+    connection_name: str | None = None,
+    database_type: str | None = None,
+    connection_config: dict[str, Any] | None = None,
     test_connection: bool = True,
-    timeout: Optional[float] = None,
+    timeout: float | None = None,
     parallel: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Database connection management portmanteau tool.
 
     This tool consolidates all database connection operations into a single interface,
@@ -91,7 +91,7 @@ async def db_connection(
         }
 
 
-async def _list_supported_databases() -> Dict[str, Any]:
+async def _list_supported_databases() -> dict[str, Any]:
     """List all supported database types with categories and descriptions."""
     try:
         databases = get_supported_databases()
@@ -124,9 +124,9 @@ async def _list_supported_databases() -> Dict[str, Any]:
 async def _register_database_connection(
     connection_name: str,
     database_type: str,
-    connection_config: Dict[str, Any],
+    connection_config: dict[str, Any],
     test_connection: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Register a new database connection with the connection manager."""
     try:
         # Input validation
@@ -171,7 +171,7 @@ async def _register_database_connection(
         }
 
 
-async def _list_database_connections() -> Dict[str, Any]:
+async def _list_database_connections() -> dict[str, Any]:
     """List all registered database connections with their current status."""
     try:
         connections = db_manager.list_connectors()
@@ -188,7 +188,7 @@ async def _list_database_connections() -> Dict[str, Any]:
         }
 
 
-async def _test_database_connection(connection_name: str) -> Dict[str, Any]:
+async def _test_database_connection(connection_name: str) -> dict[str, Any]:
     """Test connectivity for a specific database connection."""
     try:
         if not connection_name or not isinstance(connection_name, str):
@@ -222,8 +222,8 @@ async def _test_database_connection(connection_name: str) -> Dict[str, Any]:
 
 
 async def _test_all_database_connections(
-    timeout: Optional[float], parallel: bool
-) -> Dict[str, Any]:
+    timeout: float | None, parallel: bool
+) -> dict[str, Any]:
     """Test connectivity for all registered database connections."""
     start_time = time()
 
@@ -304,7 +304,7 @@ async def _test_all_database_connections(
         }
 
 
-async def _test_single_connection(connection_name: str, timeout: Optional[float]) -> Dict[str, Any]:
+async def _test_single_connection(connection_name: str, timeout: float | None) -> dict[str, Any]:
     """Test a single connection (helper function)."""
     try:
         connector = db_manager.get_connector(connection_name)
@@ -323,3 +323,6 @@ async def _test_single_connection(connection_name: str, timeout: Optional[float]
 
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+

@@ -2,7 +2,7 @@
 # Consolidates Firefox tagging operations into a single interface.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -23,14 +23,14 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="firefox")
 async def firefox_tagging(
     operation: str,
-    profile_name: Optional[str] = None,
-    folder_path: Optional[str] = None,
-    year: Optional[int] = None,
-    tag_prefix: Optional[str] = None,
+    profile_name: str | None = None,
+    folder_path: str | None = None,
+    year: int | None = None,
+    tag_prefix: str | None = None,
     batch_size: int = 100,
     dry_run: bool = False,
     include_subfolders: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Firefox tagging system portmanteau tool.
 
     This tool consolidates all Firefox tagging operations into a single interface,
@@ -99,12 +99,12 @@ async def firefox_tagging(
 
 
 async def _tag_from_folder(
-    profile_name: Optional[str],
-    folder_path: Optional[str],
-    tag_prefix: Optional[str],
+    profile_name: str | None,
+    folder_path: str | None,
+    tag_prefix: str | None,
     include_subfolders: bool,
     dry_run: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Tag bookmarks based on their folder structure."""
     try:
         if not folder_path:
@@ -137,13 +137,13 @@ async def _tag_from_folder(
 
 
 async def _batch_tag_from_folder(
-    profile_name: Optional[str],
-    folder_path: Optional[str],
-    tag_prefix: Optional[str],
+    profile_name: str | None,
+    folder_path: str | None,
+    tag_prefix: str | None,
     batch_size: int,
     include_subfolders: bool,
     dry_run: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Tag multiple bookmarks from folder structure in batches."""
     try:
         if not folder_path:
@@ -177,8 +177,8 @@ async def _batch_tag_from_folder(
 
 
 async def _tag_from_year(
-    profile_name: Optional[str], year: Optional[int], tag_prefix: Optional[str], dry_run: bool
-) -> Dict[str, Any]:
+    profile_name: str | None, year: int | None, tag_prefix: str | None, dry_run: bool
+) -> dict[str, Any]:
     """Tag bookmarks based on their creation year."""
     try:
         if not year:
@@ -208,12 +208,12 @@ async def _tag_from_year(
 
 
 async def _batch_tag_from_year(
-    profile_name: Optional[str],
-    year: Optional[int],
-    tag_prefix: Optional[str],
+    profile_name: str | None,
+    year: int | None,
+    tag_prefix: str | None,
     batch_size: int,
     dry_run: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Tag multiple bookmarks from year in batches."""
     try:
         if not year:

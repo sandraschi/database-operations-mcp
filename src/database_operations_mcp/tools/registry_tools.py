@@ -9,8 +9,9 @@ import logging
 import threading
 import time
 import winreg
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar
+from typing import Any, TypeVar
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
@@ -23,7 +24,7 @@ F = TypeVar("F", bound=Callable[..., Any])
 logger = logging.getLogger(__name__)
 
 # Global dictionary to track active monitors
-_active_monitors: Dict[str, "RegistryMonitor"] = {}
+_active_monitors: dict[str, "RegistryMonitor"] = {}
 
 # Map registry hives to their corresponding winreg constants
 HIVE_MAP = {
@@ -56,7 +57,7 @@ VALUE_TYPES = {
 }
 
 
-def _parse_registry_path(path: str) -> Tuple[int, str]:
+def _parse_registry_path(path: str) -> tuple[int, str]:
     """Parse a registry path into hive and subkey."""
     path_parts = path.replace("\\", "/").split("/", 1)
     hive_name = path_parts[0].upper()
@@ -71,7 +72,7 @@ def _parse_registry_path(path: str) -> Tuple[int, str]:
 
 
 # Active monitors
-_active_monitors: Dict[str, "RegistryMonitor"] = {}
+_active_monitors: dict[str, "RegistryMonitor"] = {}
 
 
 @dataclass
@@ -79,10 +80,10 @@ class RegistryMonitor:
     """Monitor registry changes in real-time."""
 
     path: str
-    callback: Callable[[Dict], None]
+    callback: Callable[[dict], None]
     running: bool = False
     thread: threading.Thread = field(init=False)
-    last_values: Dict = field(default_factory=dict)
+    last_values: dict = field(default_factory=dict)
 
     def start(self):
         """Start monitoring the registry key."""
@@ -143,7 +144,7 @@ class RegistryMonitor:
 
         return values
 
-    def _find_changes(self, current: Dict) -> List[Dict]:
+    def _find_changes(self, current: dict) -> list[dict]:
         """Find changes between current and last known values."""
         if not self.last_values:
             return []
@@ -182,7 +183,7 @@ class RegistryMonitor:
 
 @mcp.tool()
 @HelpSystem.register_tool
-def read_registry_value(path: str, value_name: str = "") -> Dict[str, Any]:
+def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
     """Read a value from the Windows Registry.
 
     Args:
@@ -221,8 +222,8 @@ def read_registry_value(path: str, value_name: str = "") -> Dict[str, Any]:
 @mcp.tool()
 @HelpSystem.register_tool
 def write_registry_value(
-    path: str, value_name: str, value: Any, value_type: Optional[str] = None
-) -> Dict[str, Any]:
+    path: str, value_name: str, value: Any, value_type: str | None = None
+) -> dict[str, Any]:
     """Write a value to the Windows Registry.
 
     Args:
@@ -278,7 +279,7 @@ def write_registry_value(
 
 @mcp.tool()
 @HelpSystem.register_tool
-def list_registry_keys(path: str) -> Dict[str, Any]:
+def list_registry_keys(path: str) -> dict[str, Any]:
     """List all subkeys under a registry key.
 
     Args:
@@ -311,7 +312,7 @@ def list_registry_keys(path: str) -> Dict[str, Any]:
 
 @mcp.tool()
 @HelpSystem.register_tool
-def list_registry_values(path: str) -> Dict[str, Any]:
+def list_registry_values(path: str) -> dict[str, Any]:
     """List all values under a registry key.
 
     Args:
