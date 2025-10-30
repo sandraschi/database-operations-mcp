@@ -1,3 +1,8 @@
+## 1.4.0 - 2025-10-30
+- Add unified Chromium portmanteau tool (`chromium_bookmarks`) for list/add/edit/delete
+- README: add Chromium portmanteau usage; version badge updated
+- Ops: GitLab CE eval docs and Tailscale Serve/Funnel notes (non-code)
+
 ## 1.3.0 - 2025-10-30
 - Add Chrome/Edge/Brave write tools and cross-browser sync writes
 - Descriptive Firefox write failure errors ("error. firefox must be closed")
