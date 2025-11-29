@@ -87,6 +87,7 @@ async def delete_edge_bookmark(
 
 
 # Register MCP tools without shadowing callables
+# NOTE: Keep these - browser_bookmarks portmanteau doesn't have full CRUD yet
 LIST_EDGE_BOOKMARKS_TOOL = mcp.tool(name="list_edge_bookmarks")(list_edge_bookmarks)
 ADD_EDGE_BOOKMARK_TOOL = mcp.tool(name="add_edge_bookmark")(add_edge_bookmark)
 EDIT_EDGE_BOOKMARK_TOOL = mcp.tool(name="edit_edge_bookmark")(edit_edge_bookmark)
