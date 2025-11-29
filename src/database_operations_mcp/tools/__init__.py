@@ -13,8 +13,7 @@ PORTMANTEAU TOOLS (Active):
     - help_system: Help and documentation (consolidates help_tools)
     - media_library: Media operations (consolidates calibre_tools, plex_tools, media_tools)
     - windows_system: Windows-specific operations (consolidates registry_tools, windows_tools)
-    - browser_bookmarks: Universal browser bookmark management
-    - firefox_bookmarks, chrome_bookmarks: Browser-specific bookmark tools
+    - browser_bookmarks: Universal browser bookmark management (Firefox, Chrome, Edge, Brave)
 
 DEPRECATED MODULES (kept for backwards compatibility, tools no longer registered):
     - calibre_tools → use media_library(operation='...')
@@ -37,7 +36,6 @@ from . import (
     # Phase 1-3 new tools
     browser_bookmarks,
     calibre_tools,
-    chrome_bookmarks,
     chrome_profiles,
     connection_tools,
     data_tools,
@@ -106,7 +104,6 @@ __all__ = [
     "system_init",
     # Phase 1-3 new tools
     "browser_bookmarks",
-    "chrome_bookmarks",
     "chrome_profiles",
     "db_analysis",
     "db_operations_extended",
