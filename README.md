@@ -28,14 +28,18 @@ Individual tools have been deprecated in favor of portmanteau tools for better m
 - `windows_system` - Windows Registry, service status, system info portmanteau (consolidates registry_tools, windows_tools)
 
 ### Bookmark Tools (Secondary)
-- `chromium_bookmarks` - Unified Chromium CRUD portmanteau (Chrome/Edge/Brave: list/add/edit/delete)
-- `list_chrome_bookmarks`, `add_chrome_bookmark`, `edit_chrome_bookmark`, `delete_chrome_bookmark` - Chrome tools
-- `list_edge_bookmarks`, `add_edge_bookmark`, `edit_edge_bookmark`, `delete_edge_bookmark` - Edge tools
-- `list_brave_bookmarks`, `add_brave_bookmark`, `edit_brave_bookmark`, `delete_brave_bookmark` - Brave tools
-- `sync_bookmarks` - Cross-browser bookmark synchronization (Firefox ↔ Chromium family)
+- `browser_bookmarks` - **Universal browser bookmark portmanteau** (Firefox/Chrome/Edge/Brave)
+  - Operations: list_bookmarks, add_bookmark, edit_bookmark, delete_bookmark, search_bookmarks, get_bookmark, and 20+ more
+  - Supports all browsers through single interface
+- `firefox_bookmarks` - Firefox-specific bookmark operations (SQLite-based)
+  - Operations: list_bookmarks, add_bookmark, search, find_duplicates, find_old_bookmarks, find_forgotten_bookmarks, refresh_bookmarks, get_bookmark_stats, find_broken_links
+  - Tag management: list_tags, find_similar_tags, batch_update_tags, merge_tags, clean_up_tags
+  - **Note:** Write operations require Firefox to be closed (SQLite lock)
 - `firefox_profiles` - Firefox profile management portmanteau
-- `firefox_bookmarks` - Firefox bookmark operations (SQLite-based)
-- `browser_bookmarks` - Universal browser bookmark portmanteau
+- `firefox_backup` - Firefox backup/restore operations
+- `firefox_tagging` - Automated tagging (by folder, by year)
+- `sync_bookmarks` - Cross-browser bookmark synchronization (Firefox ↔ Chromium family)
+- `chrome_profiles` - Chrome profile management portmanteau
 
 ### Media & Other Tools
 - `media_library` - Calibre & Plex library management portmanteau (consolidates calibre_tools, plex_tools, media_tools)
@@ -73,10 +77,51 @@ Individual tools are deprecated but kept for backwards compatibility. Migration 
 ## Bookmark Tools (Secondary)
 Cross-browser bookmark utilities packaged with this server.
 
-### Firefox (existing, SQLite)
-- `list_bookmarks(profile_name=None, folder_id=None)`
-- `add_bookmark(url, title, profile_name=None)`
-- Search, tags, analysis, bulk ops (see `src/database_operations_mcp/tools/firefox/`)
+### Firefox Bookmarks (SQLite-based)
+
+**Important:** Write operations require Firefox to be closed (SQLite database lock).
+Read operations work while Firefox is running using `force_access=True`.
+
+#### Core Operations
+```python
+# List bookmarks
+await firefox_bookmarks(operation="list_bookmarks", profile_name="default")
+
+# Add bookmark (Firefox must be closed!)
+await firefox_bookmarks(operation="add_bookmark", url="https://example.com", title="Example")
+
+# Search bookmarks
+await firefox_bookmarks(operation="search", search_query="python")
+```
+
+#### Bookmark Age Analysis
+```python
+# Find OLD bookmarks (by CREATION date) - e.g. bookmarks from 2005
+await firefox_bookmarks(operation="find_old_bookmarks", age_days=7000)
+# Returns: bookmarks with age_years, age_days, created timestamp
+
+# Find FORGOTTEN bookmarks (not VISITED in N days) - archive candidates
+await firefox_bookmarks(operation="find_forgotten_bookmarks", age_days=365)
+# Returns: suggestion to archive/delete these unused bookmarks
+
+# Refresh bookmarks - check for 404s, attempt URL fixes
+await firefox_bookmarks(operation="refresh_bookmarks", batch_size=100)
+# Returns: working/broken counts, fixable URLs with simplified alternatives
+```
+
+#### Tag Management
+```python
+await firefox_bookmarks(operation="list_tags")
+await firefox_bookmarks(operation="find_similar_tags")  # Find typos like "pythn" vs "python"
+await firefox_bookmarks(operation="merge_tags", tags=["python", "pythn"])  # Requires Firefox closed
+```
+
+#### Statistics & Maintenance
+```python
+await firefox_bookmarks(operation="get_bookmark_stats")
+await firefox_bookmarks(operation="find_duplicates")
+await firefox_bookmarks(operation="find_broken_links")
+```
 
 ### Chrome / Edge / Brave (JSON)
 - `list_chrome_bookmarks(bookmarks_path=None)`

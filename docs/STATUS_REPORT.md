@@ -1,6 +1,6 @@
 # Database Operations MCP - Status Report
 
-**Generated:** 2025-01-27  
+**Generated:** 2025-11-29  
 **Version:** 1.4.0  
 **Repository:** database-operations-mcp
 
@@ -65,16 +65,20 @@ This repository provides a FastMCP 2.13 MCP server for database-centric operatio
 7. `windows_system` - Windows Registry and system management (8 operations)
 
 #### Bookmark Tools (Secondary)
-8. `browser_bookmarks` - Universal browser bookmark portmanteau
-9. `firefox_bookmarks` - Firefox bookmark operations (15 operations)
+8. `browser_bookmarks` - Universal browser bookmark portmanteau (all browsers via single interface)
+9. `firefox_bookmarks` - Firefox bookmark operations (20+ operations)
+   - Core: list_bookmarks, add_bookmark, search, find_duplicates
+   - Age analysis: find_old_bookmarks (by creation), find_forgotten_bookmarks (by visit), refresh_bookmarks (404 check)
+   - Tags: list_tags, find_similar_tags, batch_update_tags, merge_tags, clean_up_tags, remove_unused_tags
+   - Stats: get_bookmark_stats, find_broken_links
 10. `firefox_profiles` - Firefox profile management
 11. `firefox_backup` - Firefox backup and restore (3 operations)
 12. `firefox_curated` - Curated bookmark collections (3 operations)
 13. `firefox_tagging` - Automated tagging operations (4 operations)
-14. `chrome_bookmarks` - Chrome bookmark tools
+14. `firefox_utils` - Firefox utility operations
 15. `chrome_profiles` - Chrome profile management
-16. `chromium_portmanteau` - Unified Chromium (Chrome/Edge/Brave) operations
-17. `sync_tools` - Cross-browser bookmark synchronization
+16. `sync_bookmarks` - Cross-browser bookmark synchronization
+17. `ai_bookmark_portmanteau` - AI-powered bookmark operations
 
 #### Media & Support Tools
 18. `media_library` - Calibre & Plex library management (8 operations)
