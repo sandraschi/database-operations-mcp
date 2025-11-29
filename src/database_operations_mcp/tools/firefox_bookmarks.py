@@ -20,6 +20,42 @@ from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
+# Write operations that require Firefox to be closed
+WRITE_OPERATIONS = {
+    "add_bookmark",
+    "batch_update_tags",
+    "remove_unused_tags",
+    "merge_tags",
+    "clean_up_tags",
+}
+
+
+def _check_firefox_for_write(operation: str) -> dict[str, Any] | None:
+    """Check if Firefox is running before write operations.
+    
+    Returns error dict if Firefox is running, None if safe to proceed.
+    """
+    if operation not in WRITE_OPERATIONS:
+        return None
+    
+    status = FirefoxStatusChecker.is_firefox_running()
+    if status.get("is_running"):
+        return {
+            "success": False,
+            "error": "Firefox is running - cannot write to bookmark database",
+            "operation": operation,
+            "firefox_status": status,
+            "solution": "Please close Firefox completely and try again",
+            "details": (
+                "Firefox locks its places.sqlite database while running. "
+                "Write operations require exclusive access. "
+                "Close all Firefox windows and wait a few seconds for the "
+                "process to fully exit before retrying."
+            ),
+            "hint_for_mcp_client": "Tell the user to close Firefox browser before proceeding",
+        }
+    return None
+
 
 def _get_bruteforce_connection(profile_name: str | None):
     """Get database connection using brute force methods (bypasses Firefox lock)."""
@@ -534,6 +570,12 @@ async def firefox_bookmarks(
                 operation, profile_name, folder_id, bookmark_id,
                 search_query, search_type, similarity_threshold, age_days
             )
+
+    # Block write operations when Firefox is running with explicit error
+    firefox_error = _check_firefox_for_write(operation)
+    if firefox_error:
+        logger.warning(f"Blocking {operation} - Firefox is running")
+        return firefox_error
 
     if operation == "list_bookmarks":
         return await _list_bookmarks(profile_name, folder_id)
