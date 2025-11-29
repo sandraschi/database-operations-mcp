@@ -1,11 +1,16 @@
-"""Firefox status checking utilities."""
+"""Firefox status checking utilities.
+
+DEPRECATED: Individual tools deprecated. Use firefox_profiles portmanteau instead.
+- is_firefox_running() → firefox_profiles(operation='check_firefox_status')
+- check_firefox_database_access_safe() → firefox_profiles(operation='check_firefox_status')
+"""
 
 from pathlib import Path
 from typing import Any
 
 import psutil
 
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_profiles portmanteau
 
 
 class FirefoxStatusChecker:
@@ -94,7 +99,7 @@ class FirefoxStatusChecker:
         return {"safe": True, "message": "Safe to access Firefox databases", "details": status}
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_profiles(operation='check_firefox_status') instead
 def is_firefox_running() -> dict[str, Any]:
     """
     Check if Firefox is currently running.
@@ -107,7 +112,7 @@ def is_firefox_running() -> dict[str, Any]:
     return FirefoxStatusChecker.is_firefox_running()
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_profiles(operation='check_firefox_status') instead
 def check_firefox_database_access_safe(profile_path: str | None = None) -> dict[str, Any]:
     """
     Check if it's safe to access Firefox bookmark databases.

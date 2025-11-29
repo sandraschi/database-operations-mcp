@@ -31,8 +31,7 @@ class TagManager:
         return [dict(row) for row in cursor.fetchall()]
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_tagging portmanteau instead
 async def list_tags(
     profile_path: str | None = None, min_count: int = 0, max_count: int = 1000
 ) -> dict[str, Any]:
@@ -63,11 +62,8 @@ async def list_tags(
     }
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
-async def find_similar_tags(
-    search_pattern: str, profile_path: str | None = None
-) -> dict[str, Any]:
+# DEPRECATED: Use firefox_tagging portmanteau instead
+async def find_similar_tags(search_pattern: str, profile_path: str | None = None) -> dict[str, Any]:
     """Find tags similar to the search pattern.
 
     Args:
@@ -87,8 +83,7 @@ async def find_similar_tags(
     return {"search_pattern": search_pattern, "matches": matches, "match_count": len(matches)}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_tagging portmanteau instead
 async def merge_tags(
     source_tags: list[str],
     target_tag: str,
@@ -140,8 +135,7 @@ async def merge_tags(
     }
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_tagging portmanteau instead
 async def clean_up_tags(
     min_count: int = 1, profile_path: str | None = None, dry_run: bool = True
 ) -> dict[str, Any]:

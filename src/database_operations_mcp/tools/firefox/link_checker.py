@@ -1,6 +1,9 @@
 """
 Link checking functionality for Firefox bookmarks.
 Identifies broken or redirected URLs.
+
+DEPRECATED: Individual tools deprecated. Use firefox_bookmarks portmanteau instead.
+- find_broken_links() → firefox_bookmarks(operation='find_broken_links')
 """
 
 from pathlib import Path
@@ -8,10 +11,7 @@ from typing import Any
 
 import aiohttp
 
-# Import the global MCP instance from the central config
-from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
-
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_bookmarks portmanteau
 from .db import FirefoxDB
 
 
@@ -47,9 +47,7 @@ class LinkChecker:
             return {"url": url, "error": str(e), "is_broken": True}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_bookmarks(operation='find_broken_links') instead
 async def find_broken_links(
     profile_path: str | None = None, timeout: int = 10, concurrent_requests: int = 10
 ) -> dict[str, Any]:

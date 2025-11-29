@@ -14,6 +14,7 @@ from database_operations_mcp.main import DatabaseOperationsMCP
 def test_server_import():
     """Test that the server module can be imported."""
     from database_operations_mcp.main import main
+
     assert main is not None
     print("✅ Module imported successfully")
 
@@ -22,7 +23,7 @@ def test_server_initialization():
     """Test that the server can be initialized without starting."""
     server = DatabaseOperationsMCP()
     assert server is not None
-    assert hasattr(server, 'mcp')
+    assert hasattr(server, "mcp")
     print("✅ Server initialized successfully")
 
 

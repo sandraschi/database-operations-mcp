@@ -1,22 +1,21 @@
 """
 Calibre Library Search Tools
 
-Provides specialized search functionality for Calibre ebook libraries,
-including full-text search within book content.
+DEPRECATED: This module is deprecated. Use media_library portmanteau tool instead.
+
+All operations have been consolidated into media_library():
+- search_calibre_library() → media_library(operation='search_calibre_library')
+- get_calibre_book_metadata() → media_library(operation='get_calibre_book_metadata')
+- search_calibre_fts() → media_library(operation='search_calibre_fts')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
-from collections.abc import Callable
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any
 
-# Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
-
-# Type variable for function type
-F = TypeVar("F", bound=Callable[..., Any])
-
+# NOTE: @mcp.tool decorators removed - functionality moved to media_library portmanteau
 logger = logging.getLogger(__name__)
 
 
@@ -26,8 +25,7 @@ def _get_fts_db_path(library_path: str | Path) -> Path:
     return lib_path / "full-text-search.db"
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use media_library(operation='search_calibre_library') instead
 async def search_calibre_library(
     query: str,
     library_path: str,
@@ -66,8 +64,7 @@ async def search_calibre_library(
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use media_library(operation='get_calibre_book_metadata') instead
 async def get_calibre_book_metadata(book_id: int, library_path: str) -> dict[str, Any]:
     """Get metadata for a specific Calibre book.
 
@@ -95,8 +92,7 @@ async def get_calibre_book_metadata(book_id: int, library_path: str) -> dict[str
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use media_library(operation='search_calibre_fts') instead
 async def search_calibre_fts(
     query: str, library_path: str, highlight: bool = True, limit: int = 20, offset: int = 0
 ) -> dict[str, Any]:

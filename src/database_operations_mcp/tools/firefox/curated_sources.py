@@ -183,7 +183,7 @@ CURATED_SOURCES = {
 }
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_curated(operation='get_curated_source') instead
 def get_curated_source(source_name: str) -> dict[str, Any]:
     """
     Get a predefined curated source by name.
@@ -197,7 +197,7 @@ def get_curated_source(source_name: str) -> dict[str, Any]:
     return CURATED_SOURCES.get(source_name)
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_curated(operation='list_curated_sources') instead
 def list_curated_sources() -> dict[str, Any]:
     """
     List all available curated sources.

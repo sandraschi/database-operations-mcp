@@ -2,12 +2,15 @@
 Tests for Firefox bulk operations implementation.
 """
 
-from unittest.mock import AsyncMock
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from database_operations_mcp.tools.firefox.bulk_operations import (
     BulkOperations,
+    batch_update_tags,
+    remove_unused_tags,
 )
 
 
@@ -19,7 +22,7 @@ class TestFirefoxBulkOperations:
         """Create a mock FirefoxDB instance."""
         mock_db = AsyncMock()
         mock_db.get_all_bookmarks = AsyncMock()
-        mock_db.get_bookmarks = AsyncMock()  # Add this method
+        mock_db.get_bookmarks = AsyncMock()
         mock_db.get_bookmark_tags = AsyncMock()
         mock_db.update_bookmark_tags = AsyncMock()
         mock_db.get_all_tags = AsyncMock()
@@ -27,52 +30,171 @@ class TestFirefoxBulkOperations:
         return mock_db
 
     @pytest.mark.asyncio
-    async def test_batch_update_tags_dry_run(self, mock_db):
+    @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
+    async def test_batch_update_tags_dry_run(self, mock_firefox_db_class, mock_db):
         """Test batch_update_tags in dry run mode."""
-        # Skip this test for now - MCP decorator issues
-        pytest.skip("Skipping MCP-decorated function test - complex mocking issues")
+        # Setup
+        mock_firefox_db_class.return_value = mock_db
+        mock_bookmark = {
+            "id": 1,
+            "title": "Test Bookmark",
+            "url": "http://example.com",
+        }
+        mock_db.get_all_bookmarks.return_value = [mock_bookmark]
+        mock_db.get_bookmark_tags.return_value = ["existing_tag"]
+
+        # Act - call the function directly (no decorator wrapper)
+        result = await batch_update_tags(
+            tag_mapping={"existing_tag": "updated_tag"}, dry_run=True, profile_path=None
+        )
+
+        # Assert
+        assert result["dry_run"] is True
+        assert "changes" in result
+        # Verify no actual updates were made in dry run
+        mock_db.update_bookmark_tags.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_batch_update_tags_actual_run(self, mock_db):
+    @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
+    async def test_batch_update_tags_actual_run(self, mock_firefox_db_class, mock_db):
         """Test batch_update_tags with actual updates."""
-        # Skip this test for now - MCP decorator issues
-        pytest.skip("Skipping MCP-decorated function test - complex mocking issues")
+        # Setup
+        mock_firefox_db_class.return_value = mock_db
+        mock_bookmark = {
+            "id": 1,
+            "title": "Test Bookmark",
+            "url": "http://example.com",
+        }
+        mock_db.get_all_bookmarks.return_value = [mock_bookmark]
+        mock_db.get_bookmark_tags.return_value = ["old_tag"]
+
+        # Act
+        result = await batch_update_tags(
+            tag_mapping={"old_tag": "new_tag"}, dry_run=False, profile_path=None
+        )
+
+        # Assert
+        assert result["dry_run"] is False
+        assert result["affected_bookmarks"] > 0
+        # Verify updates were made
+        mock_db.update_bookmark_tags.assert_called()
 
     @pytest.mark.asyncio
-    async def test_batch_update_tags_no_changes(self, mock_db):
+    @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
+    async def test_batch_update_tags_no_changes(self, mock_firefox_db_class, mock_db):
         """Test batch_update_tags when no changes are needed."""
-        # Skip this test for now - MCP decorator issues
-        pytest.skip("Skipping MCP-decorated function test - complex mocking issues")
+        # Setup - bookmark doesn't have the tag being mapped
+        mock_firefox_db_class.return_value = mock_db
+        mock_bookmark = {
+            "id": 1,
+            "title": "Test Bookmark",
+            "url": "http://example.com",
+        }
+        mock_db.get_all_bookmarks.return_value = [mock_bookmark]
+        mock_db.get_bookmark_tags.return_value = ["other_tag"]
+
+        # Act - map a tag that doesn't exist
+        result = await batch_update_tags(
+            tag_mapping={"nonexistent_tag": "new_tag"}, dry_run=False, profile_path=None
+        )
+
+        # Assert
+        assert result["affected_bookmarks"] == 0
+        # No updates should be made when tag doesn't exist
+        mock_db.update_bookmark_tags.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_batch_update_tags_error_handling(self, mock_db):
+    @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
+    async def test_batch_update_tags_error_handling(
+        self, mock_firefox_db_class, mock_db
+    ):
         """Test batch_update_tags error handling."""
-        # Skip this test for now - MCP decorator issues
-        pytest.skip("Skipping MCP-decorated function test - complex mocking issues")
+        # Setup - simulate an error
+        mock_firefox_db_class.return_value = mock_db
+        mock_db.get_all_bookmarks.side_effect = Exception("Database error")
+
+        # Act
+        result = await batch_update_tags(
+            tag_mapping={"old": "new"}, dry_run=False, profile_path=None
+        )
+
+        # Assert - should handle error gracefully
+        assert "error" in result or result.get("affected_bookmarks", 0) == 0
 
     @pytest.mark.asyncio
-    async def test_remove_unused_tags_dry_run(self, mock_db):
+    @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
+    async def test_remove_unused_tags_dry_run(self, mock_firefox_db_class, mock_db):
         """Test remove_unused_tags in dry run mode."""
-        # Skip this test for now - MCP decorator issues
-        pytest.skip("Skipping MCP-decorated function test - complex mocking issues")
+        # Setup
+        mock_firefox_db_class.return_value = mock_db
+        mock_db.get_all_tags.return_value = ["tag1", "tag2", "unused_tag"]
+        mock_bookmark = {"id": 1, "title": "Test", "url": "http://example.com"}
+        mock_db.get_all_bookmarks.return_value = [mock_bookmark]
+        mock_db.get_bookmark_tags.return_value = ["tag1", "tag2"]  # unused_tag not used
+
+        # Act
+        result = await remove_unused_tags(dry_run=True, profile_path=None)
+
+        # Assert
+        assert result["dry_run"] is True
+        assert "unused_tags" in result
+        # Verify no actual deletions in dry run
+        mock_db.delete_tag.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_remove_unused_tags_actual_run(self, mock_db):
+    @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
+    async def test_remove_unused_tags_actual_run(self, mock_firefox_db_class, mock_db):
         """Test remove_unused_tags with actual removal."""
-        # Skip this test for now - MCP decorator issues
-        pytest.skip("Skipping MCP-decorated function test - complex mocking issues")
+        # Setup
+        mock_firefox_db_class.return_value = mock_db
+        mock_db.get_all_tags.return_value = ["tag1", "unused_tag"]
+        mock_bookmark = {"id": 1, "title": "Test", "url": "http://example.com"}
+        mock_db.get_all_bookmarks.return_value = [mock_bookmark]
+        mock_db.get_bookmark_tags.return_value = ["tag1"]  # unused_tag not used
+
+        # Act
+        result = await remove_unused_tags(dry_run=False, profile_path=None)
+
+        # Assert
+        assert result["dry_run"] is False
+        assert result["removed_count"] >= 0
+        # Verify deletions were attempted
+        if result.get("removed_count", 0) > 0:
+            mock_db.delete_tag.assert_called()
 
     @pytest.mark.asyncio
-    async def test_remove_unused_tags_no_unused(self, mock_db):
+    @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
+    async def test_remove_unused_tags_no_unused(self, mock_firefox_db_class, mock_db):
         """Test remove_unused_tags when no unused tags exist."""
-        # Skip this test for now - MCP decorator issues
-        pytest.skip("Skipping MCP-decorated function test - complex mocking issues")
+        # Setup - all tags are used
+        mock_firefox_db_class.return_value = mock_db
+        mock_db.get_all_tags.return_value = ["tag1", "tag2"]
+        mock_bookmark = {"id": 1, "title": "Test", "url": "http://example.com"}
+        mock_db.get_all_bookmarks.return_value = [mock_bookmark]
+        mock_db.get_bookmark_tags.return_value = ["tag1", "tag2"]  # All tags used
+
+        # Act
+        result = await remove_unused_tags(dry_run=False, profile_path=None)
+
+        # Assert
+        assert result["removed_count"] == 0
+        mock_db.delete_tag.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_remove_unused_tags_error_handling(self, mock_db):
+    @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
+    async def test_remove_unused_tags_error_handling(
+        self, mock_firefox_db_class, mock_db
+    ):
         """Test remove_unused_tags error handling."""
-        # Skip this test for now - MCP decorator issues
-        pytest.skip("Skipping MCP-decorated function test - complex mocking issues")
+        # Setup - simulate an error
+        mock_firefox_db_class.return_value = mock_db
+        mock_db.get_all_tags.side_effect = Exception("Database error")
+
+        # Act
+        result = await remove_unused_tags(dry_run=False, profile_path=None)
+
+        # Assert - should handle error gracefully
+        assert "error" in result or result.get("removed_count", 0) == 0
 
     @pytest.mark.asyncio
     async def test_bulk_operations_class_init(self):

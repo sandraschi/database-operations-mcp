@@ -36,7 +36,3 @@ async def generate_bookmark_description(bookmark: dict[str, Any]) -> str:
     summarizer = BookmarkSummarizer()
     return await summarizer.generate_description(bookmark)
 
-
-
-
-

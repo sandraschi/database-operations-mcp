@@ -41,73 +41,293 @@ async def firefox_bookmarks(
 ) -> dict[str, Any]:
     """Firefox bookmark management portmanteau tool.
 
-    This tool consolidates all Firefox bookmark operations into a single interface,
-    providing unified access to bookmark management functionality.
+    Comprehensive Firefox bookmark operations consolidating ALL bookmark management
+    into a single interface. Supports CRUD operations, search, deduplication, tagging,
+    age analysis, broken link detection, and export across Firefox profiles.
+
+    Prerequisites:
+        - Firefox must be completely closed before operations (prevents database lock)
+        - Valid Firefox profile name (use firefox_profiles to list available profiles)
+        - For write operations: Profile must exist and be accessible
+        - For broken link detection: Network connectivity required
 
     Operations:
-    - list_bookmarks: List bookmarks from a profile or folder
-    - get_bookmark: Get details for a specific bookmark
-    - add_bookmark: Add a new bookmark to the profile
-    - search_bookmarks: Search bookmarks using various criteria
-    - find_duplicates: Find duplicate bookmarks based on URL or content
-    - export_bookmarks: Export bookmarks to various formats
-    - batch_update_tags: Update tags for multiple bookmarks
-    - remove_unused_tags: Remove tags that are no longer used
-    - list_tags: List all tags used in bookmarks
-    - find_similar_tags: Find tags with similar names
-    - merge_tags: Merge similar tags into a single tag
-    - clean_up_tags: Clean up and standardize tag names
-    - find_old_bookmarks: Find bookmarks older than specified days
-    - get_bookmark_stats: Get statistics about bookmark collection
-    - find_broken_links: Find bookmarks with broken or inaccessible URLs
+        - list_bookmarks: List bookmarks from a profile or folder
+        - get_bookmark: Get details for a specific bookmark
+        - add_bookmark: Add a new bookmark to the profile
+        - search_bookmarks: Search bookmarks using various criteria
+        - find_duplicates: Find duplicate bookmarks based on URL or content
+        - export_bookmarks: Export bookmarks to various formats
+        - batch_update_tags: Update tags for multiple bookmarks
+        - remove_unused_tags: Remove tags that are no longer used
+        - list_tags: List all tags used in bookmarks
+        - find_similar_tags: Find tags with similar names
+        - merge_tags: Merge similar tags into a single tag
+        - clean_up_tags: Clean up and standardize tag names
+        - find_old_bookmarks: Find bookmarks older than specified days
+        - get_bookmark_stats: Get statistics about bookmark collection
+        - find_broken_links: Find bookmarks with broken or inaccessible URLs
 
-    Args:
-        operation: The operation to perform (required)
-        profile_name: Firefox profile name to operate on
-        folder_id: ID of the folder to operate on
-        bookmark_id: ID of the specific bookmark
-        url: URL for the bookmark
-        title: Title for the bookmark
-        tags: List of tags to apply
-        search_query: Search query string
-        search_type: Type of search (all, title, url, tags)
-        export_format: Format for export (json, csv, html)
-        export_path: Path to save exported data
-        batch_size: Number of bookmarks to process per batch
-        similarity_threshold: Threshold for duplicate detection
-        age_days: Age threshold for old bookmark detection
-        check_links: Whether to check link accessibility
+    Parameters:
+        operation (str, REQUIRED): The operation to perform
+            Valid values: 'list_bookmarks', 'get_bookmark', 'add_bookmark',
+                         'search_bookmarks', 'find_duplicates', 'export_bookmarks',
+                         'batch_update_tags', 'remove_unused_tags', 'list_tags',
+                         'find_similar_tags', 'merge_tags', 'clean_up_tags',
+                         'find_old_bookmarks', 'get_bookmark_stats', 'find_broken_links'
+            Example: 'list_bookmarks', 'add_bookmark', 'search_bookmarks'
+
+        profile_name (str, OPTIONAL): Firefox profile name to operate on
+            Format: Valid Firefox profile name
+            Default: 'default' (if not specified)
+            Required for: All operations
+            Example: 'default', 'work', 'personal'
+            Validation: Profile must exist (use firefox_profiles to verify)
+
+        folder_id (int, OPTIONAL): ID of the folder to operate on
+            Format: Numeric folder ID from Firefox database
+            Used for: list_bookmarks operation (filter by folder)
+            Example: 1, 2, 3 (1=Bookmarks Menu, 2=Bookmarks Toolbar, 3=Other Bookmarks)
+
+        bookmark_id (int, OPTIONAL): ID of the specific bookmark
+            Format: Numeric bookmark ID from Firefox database
+            Required for: get_bookmark operation
+            Example: 12345, 67890
+
+        url (str, OPTIONAL): URL for the bookmark
+            Format: Full URL including protocol
+            Required for: add_bookmark operation
+            Validation: Must be valid URL format
+            Example: 'https://example.com', 'https://docs.python.org/3/'
+
+        title (str, OPTIONAL): Title for the bookmark
+            Format: Human-readable bookmark title
+            Required for: add_bookmark operation
+            Example: 'Python Documentation', 'Example Website'
+
+        tags (list[str], OPTIONAL): List of tags to apply
+            Format: List of tag strings
+            Used for: add_bookmark, batch_update_tags operations
+            Example: ['work', 'programming'], ['reference', 'docs']
+
+        search_query (str, OPTIONAL): Search query string
+            Format: Free-form search text
+            Required for: search_bookmarks operation
+            Behavior: Searches titles, URLs, and tags based on search_type
+            Example: 'python', 'https://docs', 'programming'
+
+        search_type (str, OPTIONAL): Type of search to perform
+            Valid values: 'all', 'title', 'url', 'tags'
+            Default: 'all'
+            Used for: search_bookmarks operation
+            'all': Search titles, URLs, and tags
+            'title': Search only bookmark titles
+            'url': Search only bookmark URLs
+            'tags': Search only tags
+
+        export_format (str, OPTIONAL): Format for exported bookmarks
+            Valid values: 'json', 'csv', 'html'
+            Default: 'json'
+            Used for: export_bookmarks operation
+            Example: 'json', 'csv', 'html'
+
+        export_path (str, OPTIONAL): Path to save exported data
+            Format: Absolute or relative file path
+            Required for: export_bookmarks operation
+            Validation: Parent directory must exist and be writable
+            Example: 'C:/backups/bookmarks.json', './exports/firefox_bookmarks.html'
+
+        batch_size (int, OPTIONAL): Number of bookmarks to process per batch
+            Format: Positive integer
+            Range: 1-10,000
+            Default: 100
+            Used for: batch_update_tags, find_duplicates operations
+            Impact: Larger batches faster but use more memory
+
+        similarity_threshold (float, OPTIONAL): Threshold for duplicate detection
+            Format: Float between 0.0 and 1.0
+            Range: 0.0-1.0
+            Default: 0.85
+            Used for: find_duplicates operation
+            Behavior: Higher values require more similarity (0.9=very strict, 0.7=loose)
+
+        age_days (int, OPTIONAL): Age threshold for old bookmark detection
+            Format: Positive integer (days)
+            Range: 1-36500 (1 day to 100 years)
+            Default: 365
+            Used for: find_old_bookmarks operation
+            Example: 30, 90, 365, 730
+
+        check_links (bool, OPTIONAL): Whether to check link accessibility
+            Default: False
+            Behavior: If True, tests URL accessibility via HTTP request
+            Used for: find_broken_links operation
+            Warning: May be slow for large bookmark collections
+            Example: True, False
 
     Returns:
-        Dictionary with operation results and bookmark data
+        Dictionary containing operation-specific results:
+            - success: Boolean indicating operation success
+            - operation: Echo of operation performed
+            - For list_bookmarks: bookmarks (list), total_count, folder_id
+            - For get_bookmark: bookmark (dict with details)
+            - For add_bookmark: bookmark_id, message, url, title
+            - For search_bookmarks: results (list), count, query
+            - For find_duplicates: duplicates (list), total_duplicates
+            - For export_bookmarks: export_path, format, record_count
+            - For tag operations: tags_processed, tags_affected, changes (list)
+            - For find_old_bookmarks: old_bookmarks (list), count, age_days
+            - For get_bookmark_stats: stats (dict with collection statistics)
+            - For find_broken_links: broken_links (list), count, checked_count
+            - error: Error message if success is False
+            - available_operations: List of valid operations (on invalid operation)
+
+    Usage:
+        This tool provides comprehensive Firefox bookmark management. Use it to organize,
+        search, and maintain your bookmark collections across Firefox profiles.
+
+        Common scenarios:
+        - Organization: Add bookmarks, apply tags, organize by folders
+        - Search: Find bookmarks by title, URL, or tags
+        - Maintenance: Remove duplicates, clean up old bookmarks, fix broken links
+        - Backup: Export bookmarks for backup or migration
+        - Analysis: Get statistics about bookmark usage and age
+
+        Best practices:
+        - Always close Firefox before operations to prevent database locks
+        - Use tags for better organization and searchability
+        - Regularly check for duplicates and broken links
+        - Export bookmarks periodically for backup
+        - Use profile_name to manage separate bookmark collections
 
     Examples:
-        List bookmarks:
-        firefox_bookmarks(operation='list_bookmarks', profile_name='default')
+        List all bookmarks:
+            result = await firefox_bookmarks(
+                operation='list_bookmarks',
+                profile_name='default'
+            )
+            # Returns: {
+            #     'success': True,
+            #     'bookmarks': [...],
+            #     'total_count': 150
+            # }
 
         Add bookmark:
-        firefox_bookmarks(operation='add_bookmark', profile_name='default',
-                         url='https://example.com', title='Example', tags=['work'])
+            result = await firefox_bookmarks(
+                operation='add_bookmark',
+                profile_name='work',
+                url='https://docs.python.org/3/',
+                title='Python Documentation',
+                tags=['programming', 'reference']
+            )
+            # Returns: {
+            #     'success': True,
+            #     'bookmark_id': 12345,
+            #     'message': 'Bookmark added successfully'
+            # }
 
         Search bookmarks:
-        firefox_bookmarks(operation='search_bookmarks', profile_name='default',
-                         search_query='python', search_type='title')
+            result = await firefox_bookmarks(
+                operation='search_bookmarks',
+                profile_name='default',
+                search_query='python',
+                search_type='title'
+            )
+            # Returns: {
+            #     'success': True,
+            #     'results': [
+            #         {'id': 123, 'title': 'Python.org', 'url': 'https://python.org'}
+            #     ],
+            #     'count': 5
+            # }
 
         Find duplicates:
-        firefox_bookmarks(operation='find_duplicates', profile_name='default',
-                         similarity_threshold=0.9)
+            result = await firefox_bookmarks(
+                operation='find_duplicates',
+                profile_name='default',
+                similarity_threshold=0.9
+            )
+            # Returns: {
+            #     'success': True,
+            #     'duplicates': [
+            #         {'url': 'https://example.com', 'count': 3, 'ids': [1, 2, 3]}
+            #     ],
+            #     'total_duplicates': 5
+            # }
 
         Export bookmarks:
-        firefox_bookmarks(operation='export_bookmarks', profile_name='default',
-                         export_format='html', export_path='bookmarks.html')
+            result = await firefox_bookmarks(
+                operation='export_bookmarks',
+                profile_name='default',
+                export_format='json',
+                export_path='C:/backups/firefox_bookmarks.json'
+            )
+            # Returns: {
+            #     'success': True,
+            #     'export_path': 'C:/backups/firefox_bookmarks.json',
+            #     'format': 'json',
+            #     'record_count': 150
+            # }
 
         Find old bookmarks:
-        firefox_bookmarks(operation='find_old_bookmarks', profile_name='default',
-                         age_days=730)
+            result = await firefox_bookmarks(
+                operation='find_old_bookmarks',
+                profile_name='default',
+                age_days=365
+            )
+            # Returns: {
+            #     'success': True,
+            #     'old_bookmarks': [...],
+            #     'count': 25,
+            #     'age_days': 365
+            # }
 
-        Check broken links:
-        firefox_bookmarks(operation='find_broken_links', profile_name='default',
-                         check_links=True)
+        Error handling - Firefox running:
+            result = await firefox_bookmarks(
+                operation='list_bookmarks',
+                profile_name='default'
+            )
+            # Returns: {
+            #     'success': False,
+            #     'error': 'Firefox is running. Close Firefox before operations.'
+            # }
+
+    Errors:
+        Common errors and solutions:
+        - 'Firefox is running. Close Firefox before operations':
+            Cause: Firefox browser is currently running and has database locked
+            Fix: Completely close all Firefox windows and processes
+            Workaround: Wait for Firefox to close, check Task Manager for processes
+
+        - 'Profile not found: {profile_name}':
+            Cause: Specified profile doesn't exist
+            Fix: Use firefox_profiles(operation='get_firefox_profiles') to list profiles
+            Workaround: Use 'default' profile name, check profile spelling
+
+        - 'Database locked':
+            Cause: Another process is accessing Firefox database
+            Fix: Close Firefox, wait a few seconds, check for background processes
+            Workaround: Restart computer if Firefox won't release lock
+
+        - 'Bookmark ID not found: {bookmark_id}':
+            Cause: Specified bookmark_id doesn't exist in database
+            Fix: Use list_bookmarks to find valid bookmark IDs
+            Workaround: Search by URL or title instead
+
+        - 'Invalid URL format':
+            Cause: URL doesn't match valid URL pattern
+            Fix: Ensure URL starts with http:// or https://, check for typos
+            Example: 'https://example.com' not 'example.com'
+
+        - 'Export failed: {error}':
+            Cause: Export path inaccessible or insufficient permissions
+            Fix: Verify path exists, check write permissions, ensure disk space
+            Workaround: Export to user home directory or desktop
+
+    See Also:
+        - firefox_profiles: List and manage Firefox profiles
+        - browser_bookmarks: Universal browser bookmark operations (cross-browser)
+        - firefox_tagging: Advanced tag management operations
     """
 
     if operation == "list_bookmarks":
@@ -281,9 +501,7 @@ async def _search_bookmarks(
         }
 
 
-async def _find_duplicates(
-    profile_name: str | None, similarity_threshold: float
-) -> dict[str, Any]:
+async def _find_duplicates(profile_name: str | None, similarity_threshold: float) -> dict[str, Any]:
     """Find duplicate bookmarks based on URL or content."""
     try:
         searcher = BookmarkSearcher(profile_name)
@@ -559,6 +777,3 @@ async def _find_broken_links(profile_name: str | None, check_links: bool) -> dic
             "broken_links": [],
             "count": 0,
         }
-
-
-

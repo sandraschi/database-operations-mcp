@@ -10,6 +10,54 @@ FastMCP 2.13 MCP server for database-centric operations on Windows, with powerfu
 - Primary: Database tools (inspection, backup/restore, analysis, Windows app databases)
 - Secondary: Bookmark tools (Firefox + Chromium family) including cross-browser sync
 
+## Tools Overview
+
+This server provides **23 portmanteau tools** consolidating 124+ individual operations into unified interfaces.
+Individual tools have been deprecated in favor of portmanteau tools for better maintainability and consistency.
+
+### Database Tools (Primary)
+- `db_connection` - Database connection management portmanteau (consolidates connection_tools, init_tools)
+  - Operations: list_supported, register, init, list, test, test_all, close, get_info, restore, set_active, get_active, get_preferences, set_preferences
+- `db_operations` - Query execution, transactions, batch operations, data export portmanteau (consolidates query_tools, data_tools)
+  - Operations: execute_query, execute_transaction, execute_write, batch_insert, quick_data_sample, export_query_results
+- `db_schema` - Schema inspection, table/column/index analysis portmanteau (consolidates schema_tools)
+  - Operations: list_databases, list_tables, describe_table, get_schema_diff
+- `db_management` - Database health checks, optimization, backup/restore portmanteau (consolidates management_tools)
+- `db_fts` - Full-text search with ranking and highlighting portmanteau (consolidates fts_tools)
+- `db_analysis` - Comprehensive database analysis and diagnostics portmanteau
+- `windows_system` - Windows Registry, service status, system info portmanteau (consolidates registry_tools, windows_tools)
+
+### Bookmark Tools (Secondary)
+- `chromium_bookmarks` - Unified Chromium CRUD portmanteau (Chrome/Edge/Brave: list/add/edit/delete)
+- `list_chrome_bookmarks`, `add_chrome_bookmark`, `edit_chrome_bookmark`, `delete_chrome_bookmark` - Chrome tools
+- `list_edge_bookmarks`, `add_edge_bookmark`, `edit_edge_bookmark`, `delete_edge_bookmark` - Edge tools
+- `list_brave_bookmarks`, `add_brave_bookmark`, `edit_brave_bookmark`, `delete_brave_bookmark` - Brave tools
+- `sync_bookmarks` - Cross-browser bookmark synchronization (Firefox ↔ Chromium family)
+- `firefox_profiles` - Firefox profile management portmanteau
+- `firefox_bookmarks` - Firefox bookmark operations (SQLite-based)
+- `browser_bookmarks` - Universal browser bookmark portmanteau
+
+### Media & Other Tools
+- `media_library` - Calibre & Plex library management portmanteau (consolidates calibre_tools, plex_tools, media_tools)
+- `help_system` - Interactive help and documentation portmanteau (consolidates help_tools)
+- `system_init` - System initialization and setup portmanteau
+
+### Deprecated Tools (Use Portmanteau Equivalents)
+Individual tools are deprecated but kept for backwards compatibility. Migration paths:
+- `connection_tools.*` → `db_connection(operation='...')`
+- `init_tools.*` → `db_connection(operation='...')`
+- `query_tools.*` → `db_operations(operation='...')`
+- `data_tools.*` → `db_operations(operation='...')`
+- `schema_tools.*` → `db_schema(operation='...')`
+- `management_tools.*` → `db_management(operation='...')`
+- `fts_tools.*` → `db_fts(operation='...')`
+- `calibre_tools.*` → `media_library(operation='...')`
+- `plex_tools.*` → `media_library(operation='...')`
+- `registry_tools.*` → `windows_system(operation='...')`
+- `windows_tools.*` → `windows_system(operation='...')`
+
+*See individual tool files in `src/database_operations_mcp/tools/` for complete API documentation.*
+
 ## Core Database Features (Primary)
 - SQLite utilities: open/read, schema introspection, queries, export
 - Backup and restore helpers for common Windows application databases
@@ -62,7 +110,7 @@ await chromium_bookmarks(operation="delete", browser="edge", id="12345")
 ### Cross-Browser Sync
 - `sync_bookmarks(source_browser, target_browser, dry_run=True, limit=1000)`
   - Set `dry_run=False` to write to target.
-  - If writing to Firefox while it’s open, the result will include: "error. firefox must be closed".
+  - If writing to Firefox while it's open, the result will include: "error. firefox must be closed".
 
 ### Examples
 ```python
@@ -133,13 +181,8 @@ Add the server to your MCP config (`%USERPROFILE%\AppData\Roaming\Cursor\.cursor
 }
 ```
 
-## Development (optional)
-```powershell
-uv run pytest -q
-uv run ruff check .
-uv run ruff format .
-uv run mypy src/
-```
+## Development
+For Python development setup, testing, and contribution guidelines, see [README-python.md](README-python.md).
 
 ## Requirements
 - Python 3.10+

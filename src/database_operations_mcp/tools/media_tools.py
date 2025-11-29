@@ -1,8 +1,15 @@
 """
 Media Server Tools
 
-Provides tools for maintaining and interacting with Plex Media Server databases
-and exporting data in various formats.
+DEPRECATED: This module is deprecated. Use media_library portmanteau tool instead.
+
+All operations have been consolidated into media_library():
+- find_plex_database() → media_library(operation='find_plex_database')
+- optimize_plex_database() → media_library(operation='optimize_plex_database')
+- export_database_schema() → media_library(operation='export_database_schema')
+- get_plex_library_stats() → media_library(operation='get_plex_library_stats')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import csv
@@ -13,8 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..config.mcp_config import mcp
-from .help_tools import HelpSystem
+# NOTE: @mcp.tool decorators removed - functionality moved to media_library portmanteau
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +30,7 @@ def register_tools(mcp):
     pass  # Tools are registered via decorators
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use media_library(operation='find_plex_database') instead
 async def find_plex_database(custom_path: str | None = None) -> dict[str, Any]:
     """Locate the Plex Media Server database file.
 
@@ -75,8 +80,7 @@ async def find_plex_database(custom_path: str | None = None) -> dict[str, Any]:
         return {"status": "not_found", "message": "Plex database not found in common locations"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use media_library portmanteau instead
 async def optimize_plex_database(
     db_path: str = None, vacuum: bool = True, analyze: bool = True, backup: bool = True
 ) -> dict[str, Any]:
@@ -146,8 +150,7 @@ async def optimize_plex_database(
             conn.close()
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use media_library portmanteau instead
 async def export_database_schema(
     db_path: str,
     output_format: str = "sql",
@@ -216,8 +219,7 @@ async def export_database_schema(
             conn.close()
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use media_library portmanteau instead
 async def get_plex_library_stats(
     db_path: str | None = None, detailed: bool = False
 ) -> dict[str, Any]:

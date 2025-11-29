@@ -1,6 +1,10 @@
 """
 Bulk operations for Firefox bookmarks.
 Provides tools for batch processing of bookmarks.
+
+DEPRECATED: Individual tools deprecated. Use firefox_bookmarks portmanteau instead.
+- export_bookmarks() → firefox_bookmarks(operation='export_bookmarks')
+- batch_update_tags() → firefox_bookmarks(operation='batch_update_tags')
 """
 
 import csv
@@ -9,9 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from database_operations_mcp.tools.help_tools import HelpSystem
-
-from . import mcp  # Import the mcp instance from __init__
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_bookmarks portmanteau
 from .db import FirefoxDB
 
 
@@ -52,8 +54,7 @@ class BulkOperations:
         # Add other formats as needed
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_bookmarks portmanteau instead
 async def export_bookmarks(
     output_format: str = "json",
     output_file: str | None = None,
@@ -95,8 +96,7 @@ async def export_bookmarks(
     return {"status": "success", "output_file": str(output_path), "bookmark_count": len(bookmarks)}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_bookmarks portmanteau instead
 async def batch_update_tags(
     tag_mapping: dict[str, str], dry_run: bool = True, profile_path: str | None = None
 ) -> dict[str, Any]:
@@ -168,8 +168,7 @@ async def batch_update_tags(
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_bookmarks portmanteau instead
 async def remove_unused_tags(
     dry_run: bool = True, profile_path: str | None = None
 ) -> dict[str, Any]:

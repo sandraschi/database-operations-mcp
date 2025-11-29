@@ -151,8 +151,7 @@ class FirefoxDatabaseUnlocker:
         return None, "All brute force methods failed - database is locked"
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Individual tool removed - functionality available via firefox_profiles/status operations
 async def check_firefox_bruteforce_access() -> dict[str, Any]:
     """Check if Firefox database can be accessed using brute force methods.
 
@@ -236,8 +235,7 @@ def get_default_profile_path() -> Path | None:
     return get_profile_directory()
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_curated(operation='list_curated_sources') instead
 async def list_curated_bookmark_sources() -> dict[str, Any]:
     """List available curated bookmark sources for profile creation.
 
@@ -247,8 +245,7 @@ async def list_curated_bookmark_sources() -> dict[str, Any]:
     return list_curated_sources()
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_profiles(operation='create_loaded_profile_from_preset') instead
 async def create_loaded_profile_from_preset(
     profile_name: str, preset_name: str, max_bookmarks: int = 50
 ) -> dict[str, Any]:
@@ -295,8 +292,7 @@ async def create_loaded_profile_from_preset(
     )
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_profiles(operation='check_firefox_status') instead
 async def check_firefox_status() -> dict[str, Any]:
     """Check Firefox running status and database access safety.
 
@@ -316,8 +312,7 @@ async def check_firefox_status() -> dict[str, Any]:
     }
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_profiles(operation='get_firefox_profiles') instead
 async def get_firefox_profiles() -> dict[str, Any]:
     """List all available Firefox profiles with detailed information.
 
@@ -378,8 +373,7 @@ async def get_firefox_profiles() -> dict[str, Any]:
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_profiles(operation='create_firefox_profile') instead
 async def create_firefox_profile(
     profile_name: str, template_profile: str | None = None
 ) -> dict[str, Any]:
@@ -465,8 +459,7 @@ async def create_firefox_profile(
         return {"status": "error", "message": f"Failed to create profile: {str(e)}"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_profiles(operation='delete_firefox_profile') instead
 async def delete_firefox_profile(
     profile_name: str, confirm_deletion: bool = False
 ) -> dict[str, Any]:
@@ -531,8 +524,7 @@ async def delete_firefox_profile(
         return {"status": "error", "message": f"Failed to delete profile: {str(e)}"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_profiles(operation='create_loaded_profile') instead
 async def create_loaded_profile(
     profile_name: str, source_type: str, source_config: dict[str, Any], max_bookmarks: int = 50
 ) -> dict[str, Any]:
@@ -812,8 +804,7 @@ async def _populate_profile_with_bookmarks(
         return 0
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_profiles(operation='create_portmanteau_profile') instead
 async def create_portmanteau_profile(
     profile_name: str,
     preset_combinations: list[str],
@@ -965,8 +956,7 @@ async def create_portmanteau_profile(
         return {"status": "error", "message": f"Failed to create portmanteau profile: {str(e)}"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_profiles(operation='suggest_portmanteau_profiles') instead
 async def suggest_portmanteau_profiles() -> dict[str, Any]:
     """Suggest interesting portmanteau profile combinations.
 

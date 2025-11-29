@@ -6,5 +6,3 @@ class FirefoxNotClosedError(Exception):
 
     pass
 
-
-

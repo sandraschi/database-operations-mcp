@@ -10,7 +10,7 @@ from database_operations_mcp.main import DatabaseOperationsMCP
 def test_package_import():
     """Test that the package can be imported successfully."""
     assert database_operations_mcp is not None
-    assert hasattr(database_operations_mcp, '__version__')
+    assert hasattr(database_operations_mcp, "__version__")
     print(f"✅ Package imported successfully! Version: {database_operations_mcp.__version__}")
 
 
@@ -18,7 +18,7 @@ def test_mcp_server_initialization():
     """Test that the MCP server can be initialized without starting."""
     server = DatabaseOperationsMCP()
     assert server is not None
-    assert hasattr(server, 'mcp')
+    assert hasattr(server, "mcp")
     print("✅ MCP server initialized successfully!")
 
 

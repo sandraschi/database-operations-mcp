@@ -1,26 +1,28 @@
 """
 Database schema inspection and metadata tools.
 
-Handles table/collection discovery, schema analysis, and metadata operations.
+DEPRECATED: This module is deprecated. Use db_schema portmanteau tool instead.
+
+All operations have been consolidated into db_schema():
+- list_databases() → db_schema(operation='list_databases')
+- list_tables() → db_schema(operation='list_tables')
+- describe_table() → db_schema(operation='describe_table')
+- get_schema_diff() → db_schema(operation='get_schema_diff')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
 from typing import Any
 
-# Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
-
+# NOTE: @mcp.tool decorators removed - functionality moved to db_schema portmanteau
+# Import kept for backwards compatibility in case code references these functions
 from ..database_manager import db_manager
-from .help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
-# Register tools using the @mcp.tool decorator
-# The mcp instance is imported from the centralized config
 
-
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_schema(operation='list_databases') instead
 async def list_databases(connection_name: str) -> dict[str, Any]:
     """List all databases/schemas on database server.
 
@@ -107,8 +109,7 @@ async def list_databases(connection_name: str) -> dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_schema(operation='list_tables') instead
 async def list_tables(connection_name: str, database_name: str | None = None) -> dict[str, Any]:
     """List all tables/collections in database or schema.
 
@@ -214,8 +215,7 @@ async def list_tables(connection_name: str, database_name: str | None = None) ->
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_schema(operation='describe_table') instead
 async def describe_table(
     connection_name: str, table_name: str, database_name: str | None = None
 ) -> dict[str, Any]:
@@ -348,8 +348,7 @@ async def describe_table(
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_schema(operation='get_schema_diff') instead
 async def get_schema_diff(
     connection_name: str,
     table1: str,

@@ -22,4 +22,3 @@ __all__ = [
     "summarize_bookmark",
     "generate_bookmark_description",
 ]
-

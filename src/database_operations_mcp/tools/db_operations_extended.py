@@ -143,4 +143,3 @@ async def db_operations_extended(
             "message": f"Database type '{database_type}' not yet fully supported",
             "supported_types": ["sqlite", "postgresql", "mysql", "redis", "duckdb"],
         }
-

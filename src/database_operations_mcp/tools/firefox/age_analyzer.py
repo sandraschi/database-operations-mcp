@@ -1,18 +1,19 @@
-"""Age analysis for Firefox bookmarks."""
+"""Age analysis for Firefox bookmarks.
+
+DEPRECATED: Individual tools deprecated. Use firefox_bookmarks portmanteau instead.
+- find_old_bookmarks() → firefox_bookmarks(operation='find_old_bookmarks')
+- get_bookmark_stats() → firefox_bookmarks(operation='get_bookmark_stats')
+"""
 
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-# Import the global MCP instance from the central config
-from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
-
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_bookmarks portmanteau
 from .db import FirefoxDB
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_bookmarks(operation='find_old_bookmarks') instead
 async def find_old_bookmarks(
     days_old: int = 365, profile_path: str | None = None
 ) -> dict[str, Any]:
@@ -55,8 +56,7 @@ async def find_old_bookmarks(
     }
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_bookmarks(operation='get_bookmark_stats') instead
 async def get_bookmark_stats(profile_path: str | None = None) -> dict[str, Any]:
     """Get statistics about bookmark age and usage.
 

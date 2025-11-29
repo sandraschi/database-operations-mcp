@@ -258,9 +258,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error executing ChromaDB query: {e}")
             raise QueryError(f"Query execution failed: {e}") from e
 
-    def _execute_search_query(
-        self, query: str, parameters: dict | None = None
-    ) -> dict[str, Any]:
+    def _execute_search_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
         """Execute similarity search."""
         try:
             params = parameters or {}
@@ -289,9 +287,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         except Exception as e:
             raise QueryError(f"Search query failed: {e}") from e
 
-    def _execute_insert_query(
-        self, query: str, parameters: dict | None = None
-    ) -> dict[str, Any]:
+    def _execute_insert_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
         """Execute document insertion."""
         try:
             params = parameters or {}
@@ -326,9 +322,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         except Exception as e:
             raise QueryError(f"Insert query failed: {e}") from e
 
-    def _execute_delete_query(
-        self, query: str, parameters: dict | None = None
-    ) -> dict[str, Any]:
+    def _execute_delete_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
         """Execute document deletion."""
         try:
             params = parameters or {}

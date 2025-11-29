@@ -1,25 +1,27 @@
 """
 Database query execution and data operation tools.
 
-Handles SQL queries, data retrieval, and result formatting.
+DEPRECATED: This module is deprecated. Use db_operations portmanteau tool instead.
+
+All operations have been consolidated into db_operations():
+- execute_query() → db_operations(operation='execute_query')
+- quick_data_sample() → db_operations(operation='quick_data_sample')
+- export_query_results() → db_operations(operation='export_query_results')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
 from typing import Any
 
-# Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: @mcp.tool decorators removed - functionality moved to db_operations portmanteau
+# Import kept for backwards compatibility in case code references these functions
 from database_operations_mcp.database_manager import DatabaseType, db_manager
-from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
-# Register tools using the @mcp.tool decorator
-# The mcp instance is imported from the centralized config
 
-
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_operations(operation='execute_query') instead
 async def execute_query(
     connection_name: str, query: str, parameters: dict[str, Any] | None = None, limit: int = 1000
 ) -> dict[str, Any]:
@@ -192,8 +194,7 @@ async def execute_query(
         return {"success": False, "error": str(e), "query": query}
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_operations(operation='quick_data_sample') instead
 async def quick_data_sample(
     connection_name: str,
     table_name: str,
@@ -353,8 +354,7 @@ async def quick_data_sample(
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_operations(operation='export_query_results') instead
 async def export_query_results(
     connection_name: str,
     query: str,

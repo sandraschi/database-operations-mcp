@@ -27,43 +27,265 @@ async def db_fts(
 ) -> dict[str, Any]:
     """Database full-text search portmanteau tool.
 
-    This tool consolidates all full-text search operations into a single interface,
-    providing unified access to FTS functionality across different database types.
+    Comprehensive full-text search operations consolidating ALL FTS operations into
+    a single interface. Supports advanced search with ranking, highlighting, suggestions,
+    and metadata across SQL, NoSQL, and Vector databases with full-text search capabilities.
+
+    Prerequisites:
+        - Valid database connection registered via db_connection
+        - For FTS operations: Database must have full-text search indexes created
+        - For fts_search: Tables must have FTS indexes on target columns
+        - For fts_suggest: Database must support suggestion/autocomplete features
 
     Operations:
-    - fts_search: Perform full-text search across tables and columns
-    - fts_tables: List all tables that have full-text search indexes
-    - fts_suggest: Get search suggestions based on partial input
+        - fts_search: Perform full-text search across tables and columns with ranking
+        - fts_tables: List all tables that have full-text search indexes
+        - fts_suggest: Get search suggestions and autocomplete based on partial input
 
-    Args:
-        operation: The operation to perform (required)
-        connection_name: Name of the database connection to use
-        search_query: Search query string for FTS operations
-        table_name: Name of the table to search in
-        columns: List of columns to search in (optional)
-        limit: Maximum number of results to return
-        offset: Number of results to skip (for pagination)
-        highlight: Whether to highlight matching terms in results
-        include_metadata: Whether to include search metadata in results
+    Parameters:
+        operation (str, REQUIRED): The operation to perform
+            Valid values: 'fts_search', 'fts_tables', 'fts_suggest'
+            Example: 'fts_search', 'fts_tables', 'fts_suggest'
+
+        connection_name (str, OPTIONAL): Name of the database connection to use
+            Format: Registered connection name (from db_connection)
+            Default: 'default'
+            Validation: Must be previously registered
+            Required for: All operations
+            Example: 'prod_db', 'analytics_warehouse'
+
+        search_query (str, OPTIONAL): Search query string for FTS operations
+            Format: Free-form search text (supports phrases, operators)
+            Required for: fts_search, fts_suggest operations
+            Behavior: Searches indexed text columns using database FTS engine
+            SQLite FTS: Supports phrase queries, boolean operators
+            PostgreSQL FTS: Supports tsquery syntax, ranking
+            Example: 'machine learning', 'python AND programming', '"exact phrase"'
+
+        table_name (str, OPTIONAL): Name of the table to search in
+            Format: Valid table name in database
+            Required for: fts_search (if not searching all tables)
+            Validation: Table must exist and have FTS index
+            Example: 'articles', 'documents', 'posts'
+
+        columns (list[str], OPTIONAL): List of columns to search in
+            Format: List of column names that have FTS indexes
+            Required for: fts_search (if table_name provided and not all columns)
+            Validation: All columns must have FTS indexes
+            Example: ['title', 'content'], ['body', 'summary']
+
+        limit (int, OPTIONAL): Maximum number of results to return
+            Format: Positive integer
+            Range: 1-10,000
+            Default: 100
+            Used for: fts_search, fts_suggest operations
+            Example: 50, 500, 1000
+
+        offset (int, OPTIONAL): Number of results to skip (for pagination)
+            Format: Non-negative integer
+            Range: 0-1,000,000
+            Default: 0
+            Used for: fts_search operation
+            Behavior: Skips N results, returns next 'limit' results
+            Example: 0, 100, 200
+
+        highlight (bool, OPTIONAL): Highlight matching terms in results
+            Default: True
+            Behavior: Wraps matching terms with markers or HTML tags
+            Used for: fts_search operation
+            Impact: Adds processing time but improves result visibility
+            Example: True, False
+
+        include_metadata (bool, OPTIONAL): Include search metadata in results
+            Default: True
+            Behavior: Adds relevance scores, match positions, search statistics
+            Used for: fts_search operation
+            Example: True, False
 
     Returns:
-        Dictionary with operation results and search data
+        Dictionary containing operation-specific results:
+            - success: Boolean indicating operation success
+            - operation: Echo of operation performed
+            - For fts_search: results (list), total_results, highlighted_results (if highlight),
+                            metadata (if include_metadata), pagination (limit/offset/has_more)
+            - For fts_tables: fts_tables (list), count
+            - For fts_suggest: suggestions (list), count
+            - error: Error message if success is False
+            - connection_name: Echo of connection used
+            - search_query: Echo of search query (for search operations)
+            - available_operations: List of valid operations (on invalid operation)
+
+    Usage:
+        This tool provides advanced full-text search capabilities across database content.
+        Use it to search text content efficiently with ranking, highlighting, and pagination.
+
+        Common scenarios:
+        - Content search: Search articles, documents, or posts by content
+        - Text discovery: Find relevant content across large text datasets
+        - Autocomplete: Generate search suggestions for user interfaces
+        - Research: Search academic papers, research notes, or documentation
+        - Search optimization: Understand which tables have FTS capabilities
+
+        Best practices:
+        - Create FTS indexes before searching (use db_schema to verify)
+        - Use specific table_name and columns for faster searches
+        - Use pagination (offset/limit) for large result sets
+        - Enable highlighting for better user experience
+        - Use fts_suggest for autocomplete features
 
     Examples:
-        Search across all tables:
-        db_fts(operation='fts_search', connection_name='prod_db',
-               search_query='machine learning', limit=50)
+        Full-text search across all indexed tables:
+            result = await db_fts(
+                operation='fts_search',
+                connection_name='production_db',
+                search_query='machine learning',
+                limit=50,
+                highlight=True
+            )
+            # Returns: {
+            #     'success': True,
+            #     'results': [
+            #         {
+            #             'table': 'articles',
+            #             'id': 123,
+            #             'title': 'Introduction to Machine Learning',
+            #             'relevance_score': 0.95,
+            #             'matched_columns': ['title', 'content']
+            #         }
+            #     ],
+            #     'total_results': 42,
+            #     'highlighted_results': [
+            #         {'title': 'Introduction to <mark>Machine Learning</mark>'}
+            #     ],
+            #     'metadata': {
+            #         'search_time_ms': 12.5,
+            #         'tables_searched': ['articles', 'posts']
+            #     },
+            #     'pagination': {'limit': 50, 'offset': 0, 'has_more': False}
+            # }
 
-        Search specific table:
-        db_fts(operation='fts_search', connection_name='prod_db',
-               search_query='python', table_name='articles', columns=['title', 'content'])
+        Search specific table and columns:
+            result = await db_fts(
+                operation='fts_search',
+                connection_name='production_db',
+                search_query='python programming',
+                table_name='articles',
+                columns=['title', 'content'],
+                limit=20,
+                offset=0,
+                highlight=True
+            )
+            # Returns: {
+            #     'success': True,
+            #     'results': [
+            #         {
+            #             'id': 456,
+            #             'title': 'Python Programming Guide',
+            #             'content': '...',
+            #             'relevance_score': 0.92
+            #         }
+            #     ],
+            #     'total_results': 15,
+            #     'table_name': 'articles',
+            #     'pagination': {'limit': 20, 'offset': 0, 'has_more': False}
+            # }
 
         List FTS-enabled tables:
-        db_fts(operation='fts_tables', connection_name='prod_db')
+            result = await db_fts(
+                operation='fts_tables',
+                connection_name='production_db'
+            )
+            # Returns: {
+            #     'success': True,
+            #     'fts_tables': [
+            #         {
+            #             'table_name': 'articles',
+            #             'index_name': 'fts_articles_idx',
+            #             'columns': ['title', 'content'],
+            #             'status': 'active'
+            #         },
+            #         {
+            #             'table_name': 'posts',
+            #             'index_name': 'fts_posts_idx',
+            #             'columns': ['body'],
+            #             'status': 'active'
+            #         }
+            #     ],
+            #     'count': 2
+            # }
 
         Get search suggestions:
-        db_fts(operation='fts_suggest', connection_name='prod_db',
-               search_query='machine', limit=10)
+            result = await db_fts(
+                operation='fts_suggest',
+                connection_name='production_db',
+                search_query='mach',
+                limit=10
+            )
+            # Returns: {
+            #     'success': True,
+            #     'suggestions': [
+            #         'machine learning',
+            #         'machine vision',
+            #         'machine translation',
+            #         'machinery'
+            #     ],
+            #     'count': 4,
+            #     'search_query': 'mach'
+            # }
+
+        Paginated search (get next page):
+            result = await db_fts(
+                operation='fts_search',
+                connection_name='production_db',
+                search_query='python',
+                limit=20,
+                offset=20
+            )
+            # Returns: Results 21-40 from search
+
+        Error handling - no FTS indexes:
+            result = await db_fts(
+                operation='fts_search',
+                connection_name='production_db',
+                search_query='python',
+                table_name='articles'
+            )
+            # Returns: {
+            #     'success': False,
+            #     'error': 'Table articles has no full-text search indexes'
+            # }
+
+    Errors:
+        Common errors and solutions:
+        - 'Table has no full-text search indexes':
+            Cause: Table doesn't have FTS indexes created
+            Fix: Create FTS index using database-specific commands
+            Workaround: Use db_schema to check indexes, create FTS index manually
+
+        - 'Connection not found: {connection_name}':
+            Cause: Connection name doesn't exist or not registered
+            Fix: Use db_connection(operation='list') to see available connections
+            Workaround: Register connection first with db_connection(operation='register')
+
+        - 'Search query is required':
+            Cause: Missing search_query parameter
+            Fix: Provide search_query parameter with search terms
+            Example: search_query='machine learning'
+
+        - 'FTS search failed: {error}':
+            Cause: Database FTS query syntax error or unsupported operation
+            Fix: Verify search query syntax for database type, check FTS support
+            Workaround: Simplify query, check database FTS documentation
+
+        - 'No FTS-enabled tables found':
+            Cause: Database has no tables with full-text search indexes
+            Fix: Create FTS indexes on tables you want to search
+            Workaround: Use regular db_operations for text search (slower)
+
+    See Also:
+        - db_connection: Register and manage database connections
+        - db_operations: Execute regular SQL queries (non-FTS)
+        - db_schema: Inspect table structure and indexes
     """
 
     if operation == "fts_search":
@@ -219,6 +441,3 @@ async def _fts_suggest(connection_name: str, search_query: str, limit: int) -> d
             "suggestions": [],
             "count": 0,
         }
-
-
-

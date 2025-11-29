@@ -1,8 +1,15 @@
 """
 Plex Media Server Database Tools
 
-Provides tools for interacting with Plex Media Server's database,
-including exporting metadata, analyzing library content, and optimizing performance.
+DEPRECATED: This module is deprecated. Use media_library portmanteau tool instead.
+
+All operations have been consolidated into media_library():
+- find_plex_database() → media_library(operation='find_plex_database')
+- optimize_plex_database() → media_library(operation='optimize_plex_database')
+- export_database_schema() → media_library(operation='export_database_schema')
+- get_plex_library_stats() → media_library(operation='get_plex_library_stats')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import json
@@ -13,7 +20,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..config.mcp_config import mcp
 
 logger = logging.getLogger(__name__)
 
@@ -368,7 +374,7 @@ def register_tools(mcp):
     """
 
 
-@mcp.tool()
+# DEPRECATED: Use media_library portmanteau instead
 def get_plex_library_sections(db_path: str | None = None) -> list[dict[str, Any]]:
     """Get a list of all library sections from Plex.
 

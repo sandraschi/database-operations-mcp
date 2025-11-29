@@ -1,17 +1,63 @@
-# Cursor Rules for database-operations-mcp
+# Central Documentation Rules
 
-# 📚 CONSULT CENTRAL DOCS FIRST
-# Always consult central docs at D:\Dev\repos\mcp-central-docs\ before creating new documentation, standards, or patterns.
+## Rule #1: Read Central Docs First
 
-# Tagging Policy for MCP Server Notes
-# - Tag every Advanced Memory note related to this MCP server with: database-operations-mcp
-# - Include the server name in note titles when appropriate
-# - Use consistent folders: projects/database-operations-mcp/
+**BEFORE making any changes or starting work, ALWAYS:**
 
-# PowerShell Syntax Guard (Windows)
-# - No '&&' or '||'
-# - Prefer PowerShell cmdlets over *nix commands
+1. **Read the Central Documentation README:**
+   - Location: `D:\Dev\repos\mcp-central-docs\README.md`
+   - This shows all important documentation "branches" (folder trees)
+   - Navigate from there to find specific information
 
-# Documentation Placement
-# - README: databases primary, bookmarks secondary; badges at top
-# - Include MCPB install, dual transports (stdio/http)
+2. **Follow Documentation Branches:**
+   - Central docs are organized by topic (Anthropic ecosystem, Google ecosystem, patterns, projects, etc.)
+   - Each branch has its own README explaining what's inside
+   - Use the branch structure to find relevant docs
+
+3. **Check for Existing Patterns:**
+   - Look in `docs/patterns/` for design patterns
+   - Check `templates/` for reusable templates
+   - Review `docs/projects/` for similar project examples
+
+4. **Avoid Duplication:**
+   - Search existing docs before creating new ones
+   - Update existing docs rather than creating duplicates
+   - Reference central docs instead of copying content
+
+---
+
+## Documentation Branches (from Central README)
+
+### Core Standards
+- `STANDARDS.md` - Documentation quality standards
+- `STRUCTURE.md` - Directory layout guide
+- `CONTRIBUTING.md` - How to contribute
+
+### Anthropic Ecosystem (`docs/anthropic-ecosystem/`)
+- MCP Protocol, FastMCP, MCPB, Claude Desktop, Glama
+
+### Google Ecosystem (`docs/google-ecosystem/`)
+- Gemini 3, Antigravity IDE, Nano Banana Pro, DeepMind, TPU infrastructure
+
+### Patterns (`docs/patterns/`)
+- Design patterns for MCP servers and development
+
+### Projects (`docs/projects/`)
+- myai, veogen, mywienerlinien, autohotkey
+
+### Monitoring (`monitoring/`)
+- Prometheus/Grafana/Loki stack
+
+### Templates (`templates/`)
+- Reusable templates and scripts
+
+---
+
+## Quick Reference
+
+**Central Docs Location:** `D:\Dev\repos\mcp-central-docs\`
+
+**Start Here:** `D:\Dev\repos\mcp-central-docs\README.md`
+
+**When in doubt:** Read the central README and navigate from there.
+

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # DATABASE CONNECTION & OPERATIONS PORTMANTEAU
 # ============================================================================
 
+
 @mcp.tool()
 async def db_connection(
     operation: str,
@@ -372,6 +373,7 @@ async def db_operations(
 # DATABASE SCHEMA & MANAGEMENT PORTMANTEAU
 # ============================================================================
 
+
 @mcp.tool()
 async def db_schema(
     operation: str,
@@ -657,6 +659,7 @@ async def db_management(
 # FULL-TEXT SEARCH PORTMANTEAU
 # ============================================================================
 
+
 @mcp.tool()
 async def db_fts(
     operation: str,
@@ -833,6 +836,7 @@ async def db_fts(
 # ============================================================================
 # BROWSER BOOKMARKS PORTMANTEAU (UNIFIED - FIREFOX + CHROME + EDGE + BRAVE)
 # ============================================================================
+
 
 @mcp.tool()
 async def browser_bookmarks(
@@ -1085,6 +1089,7 @@ async def browser_bookmarks(
 # FIREFOX PROFILES PORTMANTEAU (CONSOLIDATED)
 # ============================================================================
 
+
 @mcp.tool()
 async def firefox_profiles(
     operation: str,
@@ -1240,6 +1245,7 @@ async def firefox_profiles(
 # ============================================================================
 # MEDIA LIBRARY PORTMANTEAU (CALIBRE & PLEX)
 # ============================================================================
+
 
 @mcp.tool()
 async def media_library(
@@ -1406,6 +1412,7 @@ async def media_library(
 # WINDOWS SYSTEM PORTMANTEAU
 # ============================================================================
 
+
 @mcp.tool()
 async def windows_system(
     operation: str,
@@ -1551,6 +1558,7 @@ async def windows_system(
 # ============================================================================
 # SYSTEM INITIALIZATION PORTMANTEAU
 # ============================================================================
+
 
 @mcp.tool()
 async def system_init(
@@ -1723,6 +1731,7 @@ async def system_init(
 # ============================================================================
 # HELP SYSTEM PORTMANTEAU
 # ============================================================================
+
 
 @mcp.tool()
 async def help_system(

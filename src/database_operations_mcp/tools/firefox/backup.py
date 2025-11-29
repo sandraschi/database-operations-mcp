@@ -1,15 +1,20 @@
-"""Backup and restore functionality for Firefox bookmarks."""
+"""Backup and restore functionality for Firefox bookmarks.
+
+DEPRECATED: Individual tools deprecated. Use firefox_backup portmanteau instead.
+- backup_firefox_data() → firefox_backup(operation='backup')
+- restore_firefox_data() → firefox_backup(operation='restore')
+"""
 
 import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from . import mcp  # Import the mcp instance from __init__
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_backup portmanteau
 from .utils import get_profile_directory
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_backup portmanteau instead
 async def backup_firefox_data(
     backup_dir: str | None = None, profile_name: str | None = None
 ) -> dict[str, Any]:
@@ -56,10 +61,8 @@ async def backup_firefox_data(
         return {"status": "error", "message": f"Backup failed: {str(e)}"}
 
 
-@mcp.tool()
-async def restore_firefox_data(
-    backup_path: str, profile_name: str | None = None
-) -> dict[str, Any]:
+# DEPRECATED: Use firefox_backup portmanteau instead
+async def restore_firefox_data(backup_path: str, profile_name: str | None = None) -> dict[str, Any]:
     """Restore Firefox bookmarks from a backup.
 
     Args:

@@ -27,59 +27,219 @@ async def firefox_profiles(
 ) -> dict[str, Any]:
     """Firefox profile management portmanteau tool.
 
-    This tool consolidates all Firefox profile operations into a single interface,
-    providing unified access to profile management functionality.
+    Comprehensive Firefox profile operations consolidating ALL profile management
+    into a single interface. Supports profile creation, deletion, portmanteau profiles,
+    preset loading, and status checking across Firefox profiles.
+
+    Prerequisites:
+        - Firefox must be completely closed before profile operations
+        - For create operations: Sufficient disk space for new profile
+        - For portmanteau operations: Source profiles must exist and be accessible
+        - For preset operations: Preset must be defined (developer_tools, etc.)
 
     Operations:
-    - get_firefox_profiles: List all available Firefox profiles
-    - create_firefox_profile: Create a new Firefox profile
-    - delete_firefox_profile: Delete an existing Firefox profile
-    - create_loaded_profile: Create a profile with specific bookmarks loaded
-    - create_portmanteau_profile: Create a hybrid profile from multiple sources
-    - suggest_portmanteau_profiles: Get AI suggestions for profile combinations
-    - create_loaded_profile_from_preset: Create profile from predefined preset
-    - check_firefox_status: Check if Firefox is running and accessible
+        - get_firefox_profiles: List all available Firefox profiles with details
+        - create_firefox_profile: Create a new empty Firefox profile
+        - delete_firefox_profile: Delete an existing Firefox profile
+        - create_loaded_profile: Create profile with bookmarks from source profiles
+        - create_portmanteau_profile: Create hybrid profile from multiple sources
+        - suggest_portmanteau_profiles: Get AI suggestions for profile combinations
+        - create_loaded_profile_from_preset: Create profile from predefined preset
+        - check_firefox_status: Check if Firefox is running and accessible
 
-    Args:
-        operation: The operation to perform (required)
-        profile_name: Name of the Firefox profile
-        source_profiles: List of source profiles for portmanteau creation
-        preset_name: Name of the preset to use
-        profile_config: Configuration for the new profile
-        check_status: Whether to check Firefox status during operations
-        include_bookmarks: Whether to include bookmarks in profile operations
-        include_settings: Whether to include settings in profile operations
+    Parameters:
+        operation (str, REQUIRED): The operation to perform
+            Valid values: 'get_firefox_profiles', 'create_firefox_profile',
+                         'delete_firefox_profile', 'create_loaded_profile',
+                         'create_portmanteau_profile', 'suggest_portmanteau_profiles',
+                         'create_loaded_profile_from_preset', 'check_firefox_status'
+            Example: 'get_firefox_profiles', 'create_firefox_profile'
+
+        profile_name (str, OPTIONAL): Name of the Firefox profile
+            Format: Valid profile name (alphanumeric, underscores, hyphens)
+            Required for: create_firefox_profile, delete_firefox_profile,
+                         create_loaded_profile, create_portmanteau_profile
+            Validation: Must be unique (for create), must exist (for delete)
+            Example: 'work', 'personal', 'development', 'test_profile'
+
+        source_profiles (list[str], OPTIONAL): List of source profiles for portmanteau
+            Format: List of existing profile names
+            Required for: create_loaded_profile, create_portmanteau_profile
+            Validation: All profiles must exist
+            Example: ['work', 'personal'], ['dev', 'research', 'docs']
+
+        preset_name (str, OPTIONAL): Name of the preset to use
+            Format: Valid preset name
+            Required for: create_loaded_profile_from_preset
+            Valid values: 'developer_tools', 'ai_ml', 'cooking', 'productivity',
+                         'news_media', 'finance', 'entertainment', 'shopping'
+            Example: 'developer_tools', 'ai_ml'
+
+        profile_config (dict, OPTIONAL): Configuration for the new profile
+            Format: Dictionary with profile configuration options
+            Used for: create_firefox_profile, create_loaded_profile
+            Example: {'bookmark_limit': 50, 'include_settings': True}
+
+        check_status (bool, OPTIONAL): Check Firefox status during operations
+            Default: True
+            Behavior: Verifies Firefox is closed before profile operations
+            Used for: All operations
+            Warning: If False, may attempt operations while Firefox is running
+
+        include_bookmarks (bool, OPTIONAL): Include bookmarks in profile operations
+            Default: True
+            Behavior: Copies bookmarks from source profiles
+            Used for: create_loaded_profile, create_portmanteau_profile
+
+        include_settings (bool, OPTIONAL): Include settings in profile operations
+            Default: True
+            Behavior: Copies settings and preferences from source profiles
+            Used for: create_loaded_profile, create_portmanteau_profile
 
     Returns:
-        Dictionary with operation results and profile information
+        Dictionary containing operation-specific results:
+            - success: Boolean indicating operation success
+            - operation: Echo of operation performed
+            - For get_firefox_profiles: profiles (list), total_profiles
+            - For create_firefox_profile: profile_name, profile_path, message
+            - For delete_firefox_profile: profile_name, message
+            - For create_loaded_profile: profile_name, source_profiles, bookmarks_count
+            - For create_portmanteau_profile: profile_name, source_profiles, combined_stats
+            - For suggest_portmanteau_profiles: suggestions (list), profile_name
+            - For create_loaded_profile_from_preset: profile_name, preset_name, bookmarks_loaded
+            - For check_firefox_status: is_running, process_count, message
+            - error: Error message if success is False
+            - available_operations: List of valid operations (on invalid operation)
+
+    Usage:
+        This tool provides comprehensive Firefox profile management. Use it to create,
+        manage, and organize Firefox profiles for different purposes or contexts.
+
+        Common scenarios:
+        - Profile creation: Create new profiles for work, personal, development
+        - Profile organization: Manage multiple profiles for different contexts
+        - Profile combination: Create hybrid profiles from multiple sources
+        - Preset profiles: Quickly set up profiles with predefined bookmark collections
+        - Profile cleanup: Delete unused or old profiles
+
+        Best practices:
+        - Always close Firefox before profile operations
+        - Use descriptive profile names for easy identification
+        - Backup profiles before deletion
+        - Use presets for common profile configurations
+        - Check Firefox status before operations
 
     Examples:
-        List profiles:
-        firefox_profiles(operation='get_firefox_profiles')
+        List all profiles:
+            result = await firefox_profiles(operation='get_firefox_profiles')
+            # Returns: {
+            #     'success': True,
+            #     'profiles': [
+            #         {'name': 'default', 'path': '...', 'bookmark_count': 150},
+            #         {'name': 'work', 'path': '...', 'bookmark_count': 45}
+            #     ],
+            #     'total_profiles': 2
+            # }
 
-        Create profile:
-        firefox_profiles(operation='create_firefox_profile', profile_name='work')
-
-        Delete profile:
-        firefox_profiles(operation='delete_firefox_profile', profile_name='old_profile')
-
-        Create loaded profile:
-        firefox_profiles(operation='create_loaded_profile', profile_name='dev',
-                        source_profiles=['work', 'personal'])
+        Create new profile:
+            result = await firefox_profiles(
+                operation='create_firefox_profile',
+                profile_name='development',
+                check_status=True
+            )
+            # Returns: {
+            #     'success': True,
+            #     'profile_name': 'development',
+            #     'profile_path': 'C:\\Users\\...\\profiles\\development',
+            #     'message': 'Profile created successfully'
+            # }
 
         Create portmanteau profile:
-        firefox_profiles(operation='create_portmanteau_profile', profile_name='hybrid',
-                        source_profiles=['work', 'research', 'personal'])
-
-        Get suggestions:
-        firefox_profiles(operation='suggest_portmanteau_profiles', profile_name='new_profile')
+            result = await firefox_profiles(
+                operation='create_portmanteau_profile',
+                profile_name='hybrid',
+                source_profiles=['work', 'personal', 'research'],
+                include_bookmarks=True,
+                include_settings=True
+            )
+            # Returns: {
+            #     'success': True,
+            #     'profile_name': 'hybrid',
+            #     'source_profiles': ['work', 'personal', 'research'],
+            #     'combined_stats': {
+            #         'total_bookmarks': 245,
+            #         'total_folders': 12
+            #     }
+            # }
 
         Create from preset:
-        firefox_profiles(operation='create_loaded_profile_from_preset',
-                        profile_name='developer', preset_name='dev_tools')
+            result = await firefox_profiles(
+                operation='create_loaded_profile_from_preset',
+                profile_name='developer',
+                preset_name='developer_tools'
+            )
+            # Returns: {
+            #     'success': True,
+            #     'profile_name': 'developer',
+            #     'preset_name': 'developer_tools',
+            #     'bookmarks_loaded': 45
+            # }
 
-        Check status:
-        firefox_profiles(operation='check_firefox_status')
+        Check Firefox status:
+            result = await firefox_profiles(operation='check_firefox_status')
+            # Returns: {
+            #     'success': True,
+            #     'is_running': False,
+            #     'process_count': 0,
+            #     'message': 'Firefox is not running'
+            # }
+
+        Error handling - Firefox running:
+            result = await firefox_profiles(
+                operation='create_firefox_profile',
+                profile_name='test'
+            )
+            # Returns: {
+            #     'success': False,
+            #     'error': 'Firefox is running. Close Firefox before operations.'
+            # }
+
+    Errors:
+        Common errors and solutions:
+        - 'Firefox is running. Close Firefox before operations':
+            Cause: Firefox browser is currently running
+            Fix: Completely close all Firefox windows and processes
+            Workaround: Wait for Firefox to close, check Task Manager
+
+        - 'Profile already exists: {profile_name}':
+            Cause: Attempting to create profile with existing name
+            Fix: Use different profile_name or delete existing profile first
+            Workaround: Use unique name, check existing profiles first
+
+        - 'Profile not found: {profile_name}':
+            Cause: Specified profile doesn't exist
+            Fix: Use get_firefox_profiles to see available profiles
+            Workaround: Check profile spelling, verify Firefox installation
+
+        - 'Source profile not found: {profile_name}':
+            Cause: One or more source profiles don't exist
+            Fix: Verify all source_profiles exist before creating portmanteau
+            Workaround: List profiles first, use valid profile names
+
+        - 'Preset not found: {preset_name}':
+            Cause: Specified preset doesn't exist
+            Fix: Use valid preset name (developer_tools, ai_ml, etc.)
+            Workaround: List available presets, check preset name spelling
+
+        - 'Insufficient disk space':
+            Cause: Not enough disk space to create profile
+            Fix: Free up disk space, choose different location
+            Workaround: Delete old profiles, clean up disk
+
+    See Also:
+        - firefox_bookmarks: Manage bookmarks in profiles
+        - browser_bookmarks: Universal browser bookmark operations
+        - firefox_curated: Curated bookmark collections for profiles
     """
 
     if operation == "get_firefox_profiles":

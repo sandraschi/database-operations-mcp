@@ -124,7 +124,10 @@ async def _get_firefox_profile_directory() -> dict[str, Any]:
         return {
             "success": True,
             "message": "Firefox profile directory requested",
-            "profile_directory": "C:\\Users\\Username\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles",
+            "profile_directory": (
+                "C:\\Users\\Username\\AppData\\Roaming\\"
+                "Mozilla\\Firefox\\Profiles"
+            ),
             "note": "Implementation pending - requires profile directory detection",
         }
 
@@ -147,7 +150,10 @@ async def _get_firefox_places_db_path(profile_name: str | None) -> dict[str, Any
             "success": True,
             "message": f"Firefox places database path requested for '{profile_name}'",
             "profile_name": profile_name,
-            "database_path": f"C:\\Users\\Username\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\{profile_name}\\places.sqlite",
+            "database_path": (
+                f"C:\\Users\\Username\\AppData\\Roaming\\"
+                f"Mozilla\\Firefox\\Profiles\\{profile_name}\\places.sqlite"
+            ),
             "note": "Implementation pending - requires profile path resolution",
         }
 

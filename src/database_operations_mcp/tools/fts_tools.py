@@ -1,17 +1,23 @@
 """
 Full-Text Search (FTS) tools for SQLite databases.
 
-Provides tools for querying and managing SQLite FTS5/4 virtual tables.
+DEPRECATED: This module is deprecated. Use db_fts portmanteau tool instead.
+
+All operations have been consolidated into db_fts():
+- fts_search() → db_fts(operation='fts_search')
+- fts_tables() → db_fts(operation='fts_tables')
+- fts_suggest() → db_fts(operation='fts_suggest')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
 import sqlite3
 from typing import Any
 
-# Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: @mcp.tool decorators removed - functionality moved to db_fts portmanteau
+# Import kept for backwards compatibility in case code references these functions
 from database_operations_mcp.tools import init_tools
-from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +25,7 @@ logger = logging.getLogger(__name__)
 DATABASE_CONNECTIONS = init_tools.DATABASE_CONNECTIONS
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_fts(operation='fts_search') instead
 async def fts_search(
     query: str,
     connection_name: str = "default",
@@ -115,8 +120,7 @@ async def fts_search(
         return {"status": "error", "message": f"Error executing FTS query: {str(e)}"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_fts(operation='fts_tables') instead
 async def fts_tables(connection_name: str = "default") -> dict[str, Any]:
     """List all FTS virtual tables in the database.
 
@@ -163,8 +167,7 @@ async def fts_tables(connection_name: str = "default") -> dict[str, Any]:
         return {"status": "error", "message": f"Error listing FTS tables: {str(e)}"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_fts(operation='fts_suggest') instead
 async def fts_suggest(
     prefix: str,
     connection_name: str = "default",

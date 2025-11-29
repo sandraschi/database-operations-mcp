@@ -1,4 +1,4 @@
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: mcp import removed - tool is deprecated (use chromium_portmanteau or browser_bookmarks)
 import json
 import os
 from pathlib import Path
@@ -58,10 +58,16 @@ def read_chromium_bookmarks(path: Path | None) -> dict[str, Any]:
         path: Path to the Bookmarks JSON
 
     Returns:
-        dict: {status, count, bookmarks|message}
+        dict: {status, count, bookmarks|error, error_code, context, fix}
     """
     if not path or not path.exists():
-        return {"status": "error", "message": "Bookmarks file not found"}
+        return {
+            "status": "error",
+            "error_code": "CHROMIUM_FILE_NOT_FOUND",
+            "error": f"bookmarks_file missing: {path}",
+            "context": {"file_path": str(path) if path else None},
+            "fix": "verify browser installed | check file path | ensure file exists",
+        }
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         roots = data.get("roots", {})
@@ -70,8 +76,34 @@ def read_chromium_bookmarks(path: Path | None) -> dict[str, Any]:
             if root in roots:
                 all_items.extend(_flatten_chromium_tree(roots[root]))
         return {"status": "success", "count": len(all_items), "bookmarks": all_items}
+    except json.JSONDecodeError as e:
+        return {
+            "status": "error",
+            "error_code": "CHROMIUM_INVALID_JSON",
+            "error": f"json_decode_failed: {str(e)}",
+            "context": {
+                "file_path": str(path),
+                "line": getattr(e, "lineno", None),
+                "column": getattr(e, "colno", None),
+                "exception": type(e).__name__,
+            },
+            "fix": "validate JSON syntax | check file corruption | restore from backup",
+        }
     except Exception as e:
-        return {"status": "error", "message": f"Failed to parse bookmarks: {e}"}
+        import traceback
+
+        tb_lines = traceback.format_exc().splitlines()
+        return {
+            "status": "error",
+            "error_code": "CHROMIUM_READ_FAILED",
+            "error": f"read_failed: {type(e).__name__}: {str(e)}",
+            "context": {
+                "file_path": str(path),
+                "exception": type(e).__name__,
+                "traceback": tb_lines[-3:] if tb_lines else None,
+            },
+            "fix": "check file permissions | validate file integrity | review traceback",
+        }
 
 
 def _walk_ids(node: dict[str, Any], ids: list[int]) -> None:
@@ -140,7 +172,18 @@ def write_chromium_bookmark(
                 target = found
 
         if not isinstance(target, dict):
-            return {"status": "error", "message": "Invalid bookmarks file structure"}
+            return {
+                "status": "error",
+                "error_code": "CHROMIUM_INVALID_STRUCTURE",
+                "error": "invalid_bookmarks_file_structure",
+                "context": {
+                    "file_path": str(path),
+                    "expected": "dict with 'roots' containing 'other' or 'bookmark_bar'",
+                },
+                "fix": (
+                    "validate bookmarks file format | restore from backup | check file corruption"
+                ),
+            }
 
         # avoid duplicates
         if not allow_duplicates:
@@ -158,14 +201,53 @@ def write_chromium_bookmark(
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         return {"status": "success", "bookmark": {"title": node["name"], "url": url}}
     except PermissionError as e:
-        return {"status": "error", "message": f"Failed to write bookmarks: {e}"}
+        return {
+            "status": "error",
+            "error_code": "CHROMIUM_PERMISSION_DENIED",
+            "error": f"permission_denied: {str(e)}",
+            "context": {
+                "file_path": str(path),
+                "exception": type(e).__name__,
+                "operation": "write",
+            },
+            "fix": "close browser completely | check file permissions | run elevated",
+        }
+    except json.JSONDecodeError as e:
+        return {
+            "status": "error",
+            "error_code": "CHROMIUM_INVALID_JSON",
+            "error": f"json_decode_failed: {str(e)}",
+            "context": {
+                "file_path": str(path),
+                "line": getattr(e, "lineno", None),
+                "column": getattr(e, "colno", None),
+                "operation": "write",
+            },
+            "fix": "validate JSON syntax before write | check file corruption",
+        }
     except Exception as e:
-        return {"status": "error", "message": f"Failed to write bookmarks: {e}"}
+        import traceback
+
+        tb_lines = traceback.format_exc().splitlines()
+        return {
+            "status": "error",
+            "error_code": "CHROMIUM_WRITE_FAILED",
+            "error": f"write_failed: {type(e).__name__}: {str(e)}",
+            "context": {
+                "file_path": str(path),
+                "exception": type(e).__name__,
+                "operation": "write",
+                "traceback": tb_lines[-3:] if tb_lines else None,
+            },
+            "fix": "check disk space | validate file integrity | review traceback",
+        }
 
 
-@mcp.tool()
+# DEPRECATED: Utility function - use chromium_portmanteau or browser_bookmarks portmanteau instead
 async def chromium_roots(path: str | None) -> dict[str, Any]:
     """List root keys from a Chromium Bookmarks JSON file.
+
+    DEPRECATED: This is a utility function. Use chromium_portmanteau or browser_bookmarks instead.
 
     Parameters:
         path: Path to the Bookmarks JSON (environment variables allowed)
@@ -282,7 +364,8 @@ def edit_chromium_bookmark(
                 existing = read_chromium_bookmarks(path).get("bookmarks", [])
                 if url:
                     if any(b.get("url") == url for b in existing):
-                        # allowed duplicate check is about overall duplicates; keep behavior consistent
+                        # allowed duplicate check is about overall duplicates;
+                        # keep behavior consistent
                         pass
             # locate or create destination folder
             if create_folders:

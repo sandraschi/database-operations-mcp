@@ -1,33 +1,42 @@
 """
 Database initialization and management tools.
 
-Provides tools for initializing, configuring, and managing database connections.
+DEPRECATED: This module is deprecated. Use db_connection portmanteau tool instead.
+
+All operations have been consolidated into db_connection():
+- init_database() → db_connection(operation='init')
+- list_connections() → db_connection(operation='list')
+- close_connection() → db_connection(operation='close')
+- test_connection() → db_connection(operation='test')
+- get_connection_info() → db_connection(operation='get_info')
+- restore_saved_connections() → db_connection(operation='restore')
+- set_active_connection() → db_connection(operation='set_active')
+- get_active_connection() → db_connection(operation='get_active')
+- get_user_preferences() → db_connection(operation='get_preferences')
+- set_user_preferences() → db_connection(operation='set_preferences')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
 from typing import Any
 
-# Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: @mcp.tool decorators removed - functionality moved to db_connection portmanteau
+# Import kept for backwards compatibility in case code references these functions
 from database_operations_mcp.services.database.connectors import (
     ChromaDBConnector,
     MongoDBConnector,
     PostgreSQLConnector,
     SQLiteConnector,
 )
-from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
-# Active database connections
+# Active database connections (legacy, use db_manager instead)
 DATABASE_CONNECTIONS: dict[str, Any] = {}
 
-# Register tools using the @mcp.tool decorator
-# The mcp instance is imported from the centralized config
 
-
-@mcp.tool()
-@HelpSystem.register_tool(category="database")
+# DEPRECATED: Use db_connection(operation='init') instead
 async def init_database(
     db_type: str, connection_params: dict[str, Any], connection_name: str = "default"
 ) -> dict[str, Any]:
@@ -156,12 +165,24 @@ async def init_database(
         connector = connectors[db_type.lower()](**connection_params)
         await connector.connect()
 
-        # Store the connection
+        # Store the connection in memory
         DATABASE_CONNECTIONS[connection_name] = {
             "type": db_type,
             "connection": connector,
             "params": connection_params,
         }
+
+        # Save connection config to persistent storage (without password)
+        try:
+            from database_operations_mcp.storage.persistence import get_storage
+
+            storage = get_storage()
+            if storage:
+                await storage.save_connection(connection_name, db_type, connection_params)
+                logger.info(f"Saved connection '{connection_name}' to persistent storage")
+        except Exception as storage_error:
+            # Storage might not be initialized yet - that's ok
+            logger.debug(f"Could not save to storage: {storage_error}")
 
         return {
             "status": "success",
@@ -174,8 +195,7 @@ async def init_database(
         return {"status": "error", "message": f"Failed to initialize database: {str(e)}"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="database")
+# DEPRECATED: Use db_connection(operation='list') instead
 async def list_connections() -> dict[str, Any]:
     """List all active database connections with status.
 
@@ -278,8 +298,109 @@ async def list_connections() -> dict[str, Any]:
     return {"status": "success", "connections": connections, "total_connections": len(connections)}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="database")
+# DEPRECATED: Use db_connection(operation='restore') instead
+async def restore_saved_connections(auto_reconnect: bool = False) -> dict[str, Any]:
+    """Restore saved database connections from persistent storage.
+
+    Lists all saved connection configurations and optionally reconnects automatically.
+    Connections are restored from persistent storage that survives Claude Desktop
+    and OS restarts.
+
+    Parameters:
+        auto_reconnect: If True, automatically reconnect to saved connections
+                       (DEV MODE: Only works if ENABLE_PASSWORD_STORAGE=1)
+
+    Returns:
+        Dictionary containing:
+            - status: 'success' or 'error'
+            - saved_connections: List of saved connection configurations
+            - reconnected: List of connection names that were reconnected
+            - message: Status message
+
+    Usage:
+        Use this after server restart to see saved connections and reconnect.
+
+        DEV MODE (ENABLE_PASSWORD_STORAGE=1):
+        - Passwords are saved, so auto_reconnect=True will restore automatically
+
+        PRODUCTION MODE:
+        - Passwords not saved, use init_database() manually with password
+
+    Examples:
+        List saved connections:
+            result = await restore_saved_connections()
+            # Returns saved connection configs
+
+        Auto-reconnect (dev mode only):
+            result = await restore_saved_connections(auto_reconnect=True)
+            # Automatically reconnects if passwords were saved
+    """
+    try:
+        from database_operations_mcp.storage.persistence import get_storage
+
+        storage = get_storage()
+        if not storage:
+            return {
+                "status": "error",
+                "message": "Persistent storage not available",
+                "saved_connections": [],
+                "reconnected": [],
+            }
+
+        saved_connections = await storage.get_all_connections()
+        reconnected = []
+
+        # DEV MODE: Auto-reconnect if passwords are saved
+        if auto_reconnect:
+            import os
+
+            enable_password_storage = os.getenv("ENABLE_PASSWORD_STORAGE", "0").lower() in (
+                "1",
+                "true",
+                "yes",
+            )
+
+            if enable_password_storage:
+                for conn_name, conn_info in saved_connections.items():
+                    try:
+                        # Check if password is present (dev mode)
+                        params = conn_info.get("params", {})
+                        if "password" in params:
+                            # Auto-reconnect using saved password
+                            result = await init_database(
+                                db_type=conn_info["type"],
+                                connection_params=params,
+                                connection_name=conn_name,
+                            )
+                            if result.get("status") == "success":
+                                reconnected.append(conn_name)
+                                logger.info(f"Auto-reconnected to {conn_name} (dev mode)")
+                    except Exception as e:
+                        logger.error(f"Failed to auto-reconnect {conn_name}: {e}")
+            else:
+                logger.warning(
+                    "auto_reconnect=True but ENABLE_PASSWORD_STORAGE not set. "
+                    "Passwords not saved, cannot auto-reconnect."
+                )
+
+        return {
+            "status": "success",
+            "saved_connections": saved_connections,
+            "reconnected": reconnected,
+            "message": f"Found {len(saved_connections)} saved connections, "
+            f"reconnected {len(reconnected)}",
+        }
+    except Exception as e:
+        logger.error(f"Error restoring saved connections: {e}")
+        return {
+            "status": "error",
+            "message": f"Failed to restore: {str(e)}",
+            "saved_connections": [],
+            "reconnected": [],
+        }
+
+
+# DEPRECATED: Use db_connection(operation='close') instead
 async def close_connection(connection_name: str) -> dict[str, Any]:
     """Close database connection and release resources.
 
@@ -341,14 +462,24 @@ async def close_connection(connection_name: str) -> dict[str, Any]:
             if hasattr(DATABASE_CONNECTIONS[connection_name]["connection"], "close"):
                 await DATABASE_CONNECTIONS[connection_name]["connection"].close()
             del DATABASE_CONNECTIONS[connection_name]
+
+            # Remove from persistent storage
+            try:
+                from database_operations_mcp.storage.persistence import get_storage
+
+                storage = get_storage()
+                if storage:
+                    await storage.delete_connection(connection_name)
+            except Exception:
+                pass  # Graceful degradation
+
             return {"status": "success", "message": f"Closed connection: {connection_name}"}
         except Exception as e:
             return {"status": "error", "message": f"Error closing connection: {str(e)}"}
     return {"status": "error", "message": f"No such connection: {connection_name}"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="database")
+# DEPRECATED: Use db_connection(operation='test') instead
 async def test_connection(connection_name: str) -> dict[str, Any]:
     """Test database connection health and responsiveness.
 
@@ -420,8 +551,7 @@ async def test_connection(connection_name: str) -> dict[str, Any]:
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="database")
+# DEPRECATED: Use db_connection(operation='get_info') instead
 async def get_connection_info(connection_name: str) -> dict[str, Any]:
     """Get detailed information about registered database connection.
 
@@ -508,3 +638,151 @@ async def get_connection_info(connection_name: str) -> dict[str, Any]:
             "connection_name": connection_name,
             "db_type": conn_info["type"],
         }
+
+
+# DEPRECATED: Use db_connection(operation='set_active') instead
+async def set_active_connection(connection_name: str) -> dict[str, Any]:
+    """Set the active/default database connection.
+
+    Stores the connection name as the active/default connection in persistent
+    storage. This preference survives Claude Desktop and OS restarts.
+
+    Parameters:
+        connection_name: Name of connection to set as active
+            - Must be a currently active connection or a saved connection
+
+    Returns:
+        Dictionary with status and message
+
+    Examples:
+        Set active connection:
+            result = await set_active_connection("prod_db")
+    """
+    try:
+        from database_operations_mcp.storage.persistence import get_storage
+
+        storage = get_storage()
+        if not storage:
+            return {"status": "error", "message": "Persistent storage not available"}
+
+        await storage.set_active_connection(connection_name)
+        return {"status": "success", "message": f"Set active connection: {connection_name}"}
+    except Exception as e:
+        logger.error(f"Error setting active connection: {e}")
+        return {"status": "error", "message": f"Failed to set active connection: {str(e)}"}
+
+
+# DEPRECATED: Use db_connection(operation='get_active') instead
+async def get_active_connection() -> dict[str, Any]:
+    """Get the active/default database connection name.
+
+    Retrieves the stored active connection preference from persistent storage.
+
+    Returns:
+        Dictionary with active connection name or None
+
+    Examples:
+        Get active connection:
+            result = await get_active_connection()
+            # Returns: {'status': 'success', 'active_connection': 'prod_db'}
+    """
+    try:
+        from database_operations_mcp.storage.persistence import get_storage
+
+        storage = get_storage()
+        if not storage:
+            return {
+                "status": "error",
+                "message": "Persistent storage not available",
+                "active_connection": None,
+            }
+
+        active_conn = await storage.get_active_connection()
+        return {"status": "success", "active_connection": active_conn}
+    except Exception as e:
+        logger.error(f"Error getting active connection: {e}")
+        return {
+            "status": "error",
+            "message": f"Failed to get active connection: {str(e)}",
+            "active_connection": None,
+        }
+
+
+# DEPRECATED: Use db_connection(operation='get_preferences') instead
+async def get_user_preferences() -> dict[str, Any]:
+    """Get user preferences from persistent storage.
+
+    Retrieves all user preferences including query limits, page sizes,
+    display settings, etc. Preferences survive Claude Desktop and OS restarts.
+
+    Returns:
+        Dictionary with all user preferences
+
+    Examples:
+        Get preferences:
+            result = await get_user_preferences()
+            # Returns: {
+            #     'default_query_limit': 50,
+            #     'default_page_size': 20,
+            #     ...
+            # }
+    """
+    try:
+        from database_operations_mcp.storage.persistence import get_storage
+
+        storage = get_storage()
+        if not storage:
+            return {
+                "status": "error",
+                "message": "Persistent storage not available",
+                "preferences": {},
+            }
+
+        prefs = await storage.get_user_preferences()
+        return {"status": "success", "preferences": prefs}
+    except Exception as e:
+        logger.error(f"Error getting preferences: {e}")
+        return {
+            "status": "error",
+            "message": f"Failed to get preferences: {str(e)}",
+            "preferences": {},
+        }
+
+
+# DEPRECATED: Use db_connection(operation='set_preferences') instead
+async def set_user_preferences(preferences: dict[str, Any]) -> dict[str, Any]:
+    """Set user preferences in persistent storage.
+
+    Stores user preferences that survive Claude Desktop and OS restarts.
+    Common preferences include:
+    - default_query_limit: Default limit for queries
+    - default_page_size: Default page size for pagination
+    - show_metadata: Whether to show metadata in results
+    - sort_order: Default sort order
+
+    Parameters:
+        preferences: Dictionary of preference key-value pairs
+
+    Returns:
+        Dictionary with status
+
+    Examples:
+        Set preferences:
+            result = await set_user_preferences({
+                "default_query_limit": 50,
+                "default_page_size": 20,
+                "show_metadata": True
+            })
+    """
+    try:
+        from database_operations_mcp.storage.persistence import get_storage
+
+        storage = get_storage()
+        if not storage:
+            return {"status": "error", "message": "Persistent storage not available"}
+
+        await storage.set_user_preferences(preferences)
+        return {"status": "success", "message": "Preferences saved"}
+    except Exception as e:
+        logger.error(f"Error setting preferences: {e}")
+        return {"status": "error", "message": f"Failed to set preferences: {str(e)}"}

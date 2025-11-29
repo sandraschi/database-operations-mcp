@@ -10,5 +10,4 @@ from database_operations_mcp.services.browser.base_browser import (
 )
 from database_operations_mcp.services.browser.chrome_core import ChromeManager
 
-__all__ = ['BaseBrowserManager', 'ChromeManager']
-
+__all__ = ["BaseBrowserManager", "ChromeManager"]

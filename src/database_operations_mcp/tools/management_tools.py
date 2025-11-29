@@ -1,18 +1,24 @@
 """
 Database management and administration tools.
 
-Handles health checks, performance monitoring, and administrative operations.
+DEPRECATED: This module is deprecated. Use db_management portmanteau tool instead.
+
+All operations have been consolidated into db_management():
+- database_health_check() → db_management(operation='database_health_check')
+- get_database_metrics() → db_management(operation='get_database_metrics')
+- vacuum_database() → db_management(operation='vacuum_database')
+- disconnect_database() → db_management(operation='disconnect_database')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
 from datetime import datetime
 from typing import Any
 
-# Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
-
+# NOTE: @mcp.tool decorators removed - functionality moved to db_management portmanteau
+# Import kept for backwards compatibility in case code references these functions
 from ..database_manager import db_manager
-from .help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +28,7 @@ def _get_timestamp() -> str:
     return datetime.utcnow().isoformat()
 
 
-# Register tools using the @mcp.tool decorator
-# The mcp instance is imported from the centralized config
-
-
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_management(operation='database_health_check') instead
 async def database_health_check(connection_name: str) -> dict[str, Any]:
     """Perform comprehensive health check on a database connection.
 
@@ -58,8 +59,7 @@ async def database_health_check(connection_name: str) -> dict[str, Any]:
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_management(operation='get_database_metrics') instead
 async def get_database_metrics(
     connection_name: str, metric_names: list[str] | None = None
 ) -> dict[str, Any]:
@@ -93,8 +93,7 @@ async def get_database_metrics(
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_management(operation='vacuum_database') instead
 async def vacuum_database(
     connection_name: str, analyze: bool = True, full: bool = False
 ) -> dict[str, Any]:
@@ -130,8 +129,7 @@ async def vacuum_database(
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_management(operation='disconnect_database') instead
 async def disconnect_database(connection_name: str) -> dict[str, Any]:
     """Safely disconnect from a database.
 

@@ -1,21 +1,21 @@
 """
 Year-based tagging for Firefox bookmarks.
 Adds creation/edit years as tags for time-based organization.
+
+DEPRECATED: Individual tools deprecated. Use firefox_tagging portmanteau instead.
+- batch_tag_from_year() → firefox_tagging(operation='batch_tag_from_year')
+- tag_from_year() → firefox_tagging(operation='tag_from_year')
 """
 
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-# Import the global MCP instance from the central config
-from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
-
+# NOTE: # DEPRECATED: Use firefox_tagging portmanteau instead decorators removed - functionality moved to firefox_tagging portmanteau
 from .db import FirefoxDB
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_tagging(operation='batch_tag_from_year') instead
 async def batch_tag_from_year(
     profile_path: str | None = None,
     use_last_modified: bool = False,
@@ -109,8 +109,8 @@ async def batch_tag_from_year(
     }
 
 
-@mcp.tool
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_tagging portmanteau instead
+# Decorator removed - functionality moved to firefox_tagging portmanteau
 async def tag_from_year(
     profile_path: str | None = None,
     use_last_modified: bool = False,

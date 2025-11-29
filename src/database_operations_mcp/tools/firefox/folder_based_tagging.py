@@ -1,15 +1,16 @@
 """
 Folder-based tagging for Firefox bookmarks.
 Adds tags based on the bookmark's position in the folder hierarchy.
+
+DEPRECATED: Individual tools deprecated. Use firefox_tagging portmanteau instead.
+- batch_tag_from_folder() → firefox_tagging(operation='batch_tag_from_folder')
+- tag_from_folder() → firefox_tagging(operation='tag_from_folder')
 """
 
 from pathlib import Path
 from typing import Any
 
-# Import the global MCP instance from the central config
-from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
-
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_tagging portmanteau
 from .db import FirefoxDB
 
 
@@ -28,8 +29,7 @@ async def get_folder_path(db: FirefoxDB, folder_id: int) -> list[dict[str, Any]]
     return path
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_tagging(operation='batch_tag_from_folder') instead
 async def batch_tag_from_folder(
     profile_path: str | None = None,
     include_ancestors: bool = True,
@@ -133,8 +133,7 @@ async def batch_tag_from_folder(
     }
 
 
-@mcp.tool
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_tagging(operation='tag_from_folder') instead
 async def tag_from_folder(
     profile_path: str | None = None,
     include_ancestors: bool = True,

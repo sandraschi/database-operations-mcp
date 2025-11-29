@@ -1,9 +1,13 @@
-"""Core bookmark management functionality with enhanced safety checks."""
+"""Core bookmark management functionality with enhanced safety checks.
+
+DEPRECATED: Individual tools deprecated. Use firefox_bookmarks portmanteau instead.
+- list_bookmarks() → firefox_bookmarks(operation='list_bookmarks')
+"""
 
 from pathlib import Path
 from typing import Any
 
-from . import mcp  # Import the mcp instance from __init__
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_bookmarks portmanteau
 from .db import FirefoxDB
 from .exceptions import FirefoxNotClosedError
 from .status import FirefoxStatusChecker
@@ -48,7 +52,7 @@ class BookmarkManager:
         return [dict(row) for row in cursor.fetchall()]
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_bookmarks(operation='list_bookmarks') instead
 async def list_bookmarks(
     profile_name: str | None = None, folder_id: int | None = None
 ) -> dict[str, Any]:

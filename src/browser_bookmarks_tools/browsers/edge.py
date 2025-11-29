@@ -22,14 +22,7 @@ class EdgeBrowser:
         if os.name == "nt":  # Windows
             appdata = os.getenv("LOCALAPPDATA")
             if appdata:
-                return (
-                    Path(appdata)
-                    / "Microsoft"
-                    / "Edge"
-                    / "User Data"
-                    / "Default"
-                    / "Bookmarks"
-                )
+                return Path(appdata) / "Microsoft" / "Edge" / "User Data" / "Default" / "Bookmarks"
         else:
             home = Path.home()
             return home / ".config" / "microsoft-edge" / "Default" / "Bookmarks"
@@ -45,7 +38,9 @@ class EdgeBrowser:
             with open(self.bookmark_file, encoding="utf-8") as f:
                 data = json.load(f)
 
-            def extract_bookmarks(node: dict[str, Any], target_folder: str | None = None) -> list[dict[str, Any]]:
+            def extract_bookmarks(
+                node: dict[str, Any], target_folder: str | None = None
+            ) -> list[dict[str, Any]]:
                 bookmarks = []
                 if node.get("type") == "bookmark":
                     bookmarks.append(
@@ -93,8 +88,4 @@ async def add_edge_bookmark(url: str, title: str, folder: str | None = None) -> 
     """Add bookmark to Edge."""
     browser = EdgeBrowser()
     return await browser.add_bookmark(url, title, folder)
-
-
-
-
 

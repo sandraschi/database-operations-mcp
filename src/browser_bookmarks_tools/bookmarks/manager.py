@@ -115,4 +115,3 @@ class BookmarkManager:
             List of matching bookmarks
         """
         return []
-

@@ -29,63 +29,305 @@ async def media_library(
 ) -> dict[str, Any]:
     """Media library management portmanteau tool.
 
-    This tool consolidates all media library operations into a single interface,
-    providing unified access to Calibre, Plex, and general media functionality.
+    Comprehensive media library operations consolidating ALL Calibre and Plex
+    operations into a single interface. Supports book searching, metadata retrieval,
+    full-text search, database management, and library statistics across media platforms.
+
+    Prerequisites:
+        - For Calibre operations: Valid Calibre library path accessible
+        - For Plex operations: Plex Media Server running and accessible
+        - For Plex API operations: Valid plex_token for authentication
+        - For database operations: Appropriate read/write permissions
 
     Operations:
-    - search_calibre_library: Search books in Calibre library
-    - get_calibre_book_metadata: Get detailed metadata for a specific book
-    - search_calibre_fts: Perform full-text search in Calibre library
-    - find_plex_database: Locate Plex Media Server database
-    - optimize_plex_database: Optimize Plex database performance
-    - export_database_schema: Export database schema information
-    - get_plex_library_stats: Get statistics about Plex library
-    - get_plex_library_sections: Get information about Plex library sections
+        - search_calibre_library: Search books in Calibre library
+        - get_calibre_book_metadata: Get detailed metadata for a specific book
+        - search_calibre_fts: Perform full-text search in Calibre library
+        - find_plex_database: Locate Plex Media Server database file
+        - optimize_plex_database: Optimize Plex database performance
+        - export_database_schema: Export database schema information
+        - get_plex_library_stats: Get statistics about Plex library
+        - get_plex_library_sections: Get information about Plex library sections
 
-    Args:
-        operation: The operation to perform (required)
-        library_path: Path to the Calibre library
-        book_title: Title of the book to search for
-        author: Author name to search for
-        search_query: Search query string
-        plex_server_url: URL of the Plex Media Server
-        plex_token: Authentication token for Plex
-        library_name: Name of the library/section
-        include_metadata: Whether to include detailed metadata
-        export_format: Format for exported data (json, csv, xml)
-        export_path: Path to save exported data
-        optimize_database: Whether to optimize database performance
+    Parameters:
+        operation (str, REQUIRED): The operation to perform
+            Valid values: 'search_calibre_library', 'get_calibre_book_metadata',
+                         'search_calibre_fts', 'find_plex_database',
+                         'optimize_plex_database', 'export_database_schema',
+                         'get_plex_library_stats', 'get_plex_library_sections'
+            Example: 'search_calibre_library', 'get_plex_library_stats'
+
+        library_path (str, OPTIONAL): Path to the Calibre library directory
+            Format: Absolute or relative path to Calibre library root
+            Required for: All Calibre operations (search_calibre_*, export_database_schema)
+            Validation: Directory must exist and contain Calibre metadata.db
+            Example: 'C:/Users/Username/Calibre Library', '/home/user/calibre'
+
+        book_title (str, OPTIONAL): Title of the book to search for
+            Format: Full or partial book title
+            Used for: search_calibre_library, get_calibre_book_metadata
+            Behavior: Case-insensitive partial matching
+            Example: 'Python Cookbook', 'Learning Python'
+
+        author (str, OPTIONAL): Author name to search for
+            Format: Full or partial author name
+            Used for: search_calibre_library, get_calibre_book_metadata
+            Behavior: Case-insensitive partial matching
+            Example: 'David Beazley', 'Mark Lutz'
+
+        search_query (str, OPTIONAL): Search query string
+            Format: Free-form search text
+            Required for: search_calibre_library, search_calibre_fts operations
+            Behavior: Searches titles, authors, tags, and content (FTS)
+            Example: 'python programming', 'machine learning algorithms'
+
+        plex_server_url (str, OPTIONAL): URL of the Plex Media Server
+            Format: HTTP URL with protocol and port
+            Required for: All Plex operations
+            Default: 'http://localhost:32400'
+            Example: 'http://192.168.1.100:32400', 'https://plex.example.com'
+
+        plex_token (str, OPTIONAL): Authentication token for Plex API
+            Format: Plex authentication token string
+            Required for: Plex API operations (get_plex_library_stats, etc.)
+            Validation: Must be valid Plex token
+            Example: 'your-plex-token-here'
+
+        library_name (str, OPTIONAL): Name of the library/section
+            Format: Plex library section name
+            Used for: get_plex_library_stats operation
+            Example: 'Movies', 'TV Shows', 'Music'
+
+        include_metadata (bool, OPTIONAL): Include detailed metadata in results
+            Default: True
+            Behavior: Adds cover images, descriptions, tags, series info if available
+            Used for: search_calibre_library, get_calibre_book_metadata
+
+        export_format (str, OPTIONAL): Format for exported data
+            Valid values: 'json', 'csv', 'xml'
+            Default: 'json'
+            Used for: export_database_schema operation
+            Example: 'json', 'csv', 'xml'
+
+        export_path (str, OPTIONAL): Path to save exported data
+            Format: Absolute or relative file path
+            Required for: export_database_schema (if saving to file)
+            Validation: Parent directory must exist and be writable
+            Example: 'C:/data/schema.json', './exports/calibre_schema.csv'
+
+        optimize_database (bool, OPTIONAL): Optimize database during operation
+            Default: False
+            Behavior: Runs VACUUM, ANALYZE, and index optimization
+            Used for: optimize_plex_database operation
+            Warning: May take several minutes for large databases
 
     Returns:
-        Dictionary with operation results and media information
+        Dictionary containing operation-specific results:
+            - success: Boolean indicating operation success
+            - operation: Echo of operation performed
+            - For search_calibre_library: results (list), count, library_path
+            - For get_calibre_book_metadata: book_info (dict), metadata (if requested)
+            - For search_calibre_fts: results (list with highlights), count
+            - For find_plex_database: database_path, server_info, status
+            - For optimize_plex_database: message, optimization_stats
+            - For export_database_schema: export_path, format, schema_data
+            - For get_plex_library_stats: stats (dict), library_name, item_counts
+            - For get_plex_library_sections: sections (list), total_sections
+            - error: Error message if success is False
+            - available_operations: List of valid operations (on invalid operation)
+
+    Usage:
+        This tool provides unified access to Calibre ebook and Plex media library
+        management. Use it to search, browse, and manage your media collections.
+
+        Common scenarios:
+        - Book discovery: Search Calibre library by title, author, or content
+        - Metadata lookup: Get detailed book information and covers
+        - Library management: Optimize databases and export schemas
+        - Statistics: Analyze Plex library size and organization
+        - Maintenance: Optimize databases for better performance
+
+        Best practices:
+        - Use specific search terms for better results
+        - Include metadata for complete book information
+        - Optimize databases periodically for performance
+        - Export schemas before major operations for backup
 
     Examples:
         Search Calibre library:
-        media_library(operation='search_calibre_library', library_path='/books',
-                     search_query='python programming')
+            result = await media_library(
+                operation='search_calibre_library',
+                library_path='C:/Users/Username/Calibre Library',
+                search_query='python programming',
+                include_metadata=True
+            )
+            # Returns: {
+            #     'success': True,
+            #     'results': [
+            #         {
+            #             'title': 'Python Cookbook',
+            #             'author': 'David Beazley',
+            #             'tags': ['programming', 'python'],
+            #             'metadata': {...}
+            #         }
+            #     ],
+            #     'count': 15,
+            #     'library_path': 'C:/Users/Username/Calibre Library'
+            # }
 
         Get book metadata:
-        media_library(operation='get_calibre_book_metadata', library_path='/books',
-                     book_title='Python Cookbook', include_metadata=True)
+            result = await media_library(
+                operation='get_calibre_book_metadata',
+                library_path='C:/Users/Username/Calibre Library',
+                book_title='Python Cookbook',
+                author='David Beazley',
+                include_metadata=True
+            )
+            # Returns: {
+            #     'success': True,
+            #     'book_info': {
+            #         'title': 'Python Cookbook',
+            #         'author': 'David Beazley',
+            #         'isbn': '978-0596107973',
+            #         'published': '2005-01-01'
+            #     },
+            #     'metadata': {
+            #         'cover_path': '...',
+            #         'description': '...',
+            #         'tags': [...]
+            #     }
+            # }
 
-        Search with FTS:
-        media_library(operation='search_calibre_fts', library_path='/books',
-                     search_query='machine learning')
+        Full-text search in Calibre:
+            result = await media_library(
+                operation='search_calibre_fts',
+                library_path='C:/Users/Username/Calibre Library',
+                search_query='machine learning'
+            )
+            # Returns: {
+            #     'success': True,
+            #     'results': [
+            #         {
+            #             'title': 'Machine Learning with Python',
+            #             'highlight': '...machine learning...',
+            #             'relevance_score': 0.95
+            #         }
+            #     ],
+            #     'count': 8
+            # }
 
         Find Plex database:
-        media_library(operation='find_plex_database', plex_server_url='http://localhost:32400')
+            result = await media_library(
+                operation='find_plex_database',
+                plex_server_url='http://localhost:32400'
+            )
+            # Returns: {
+            #     'success': True,
+            #     'database_path': (
+            #         'C:\\Users\\Username\\AppData\\Local\\'
+            #         'Plex Media Server\\Plug-in Support\\Databases\\'
+            #         'com.plexapp.plugins.library.db'
+            #     ),
+            #     'server_info': {...},
+            #     'status': 'found'
+            # }
 
         Optimize Plex database:
-        media_library(operation='optimize_plex_database', plex_server_url='http://localhost:32400',
-                     optimize_database=True)
+            result = await media_library(
+                operation='optimize_plex_database',
+                plex_server_url='http://localhost:32400',
+                plex_token='your-token',
+                optimize_database=True
+            )
+            # Returns: {
+            #     'success': True,
+            #     'message': 'Plex database optimized successfully',
+            #     'optimization_stats': {
+            #         'vacuum_time': 45.2,
+            #         'analyze_time': 12.8,
+            #         'size_before': 2048000000,
+            #         'size_after': 1800000000
+            #     }
+            # }
 
-        Get Plex library stats:
-        media_library(operation='get_plex_library_stats', plex_server_url='http://localhost:32400',
-                     plex_token='your_token')
+        Get Plex library statistics:
+            result = await media_library(
+                operation='get_plex_library_stats',
+                plex_server_url='http://localhost:32400',
+                plex_token='your-token',
+                library_name='Movies'
+            )
+            # Returns: {
+                'success': True,
+                'library_name': 'Movies',
+                'stats': {
+                    'total_items': 1250,
+                    'total_size_gb': 245.8,
+                    'by_genre': {...},
+                    'by_year': {...}
+                }
+            }
 
-        Export schema:
-        media_library(operation='export_database_schema', library_path='/books',
-                     export_format='json', export_path='schema.json')
+        Export database schema:
+            result = await media_library(
+                operation='export_database_schema',
+                library_path='C:/Users/Username/Calibre Library',
+                export_format='json',
+                export_path='C:/data/calibre_schema.json'
+            )
+            # Returns: {
+            #     'success': True,
+            #     'export_path': 'C:/data/calibre_schema.json',
+            #     'format': 'json',
+            #     'schema_data': {...}
+            # }
+
+        Error handling - library path not found:
+            result = await media_library(
+                operation='search_calibre_library',
+                library_path='C:/nonexistent/library'
+            )
+            # Returns: {
+            #     'success': False,
+            #     'error': 'Library path not found: C:/nonexistent/library'
+            # }
+
+    Errors:
+        Common errors and solutions:
+        - 'Library path is required':
+            Cause: Missing library_path for Calibre operations
+            Fix: Provide valid library_path pointing to Calibre library root
+            Example: library_path='C:/Users/Username/Calibre Library'
+
+        - 'Library path not found: {path}':
+            Cause: Calibre library directory doesn't exist
+            Fix: Verify path exists, check spelling, ensure Calibre is installed
+            Workaround: Use absolute paths, check permissions
+
+        - 'Plex server not accessible':
+            Cause: Plex Media Server not running or URL incorrect
+            Fix: Verify Plex is running, check URL and port (default: 32400)
+            Workaround: Test URL in browser, check firewall settings
+
+        - 'Invalid Plex token':
+            Cause: Plex authentication token is invalid or expired
+            Fix: Generate new token from Plex web interface
+            Workaround: Some operations work without token (read-only)
+
+        - 'Database optimization failed: {error}':
+            Cause: Database locked or corrupted
+            Fix: Stop Plex Media Server, verify database integrity, check disk space
+            Workaround: Export data first, restore from backup if corrupted
+
+        - 'Export failed: {error}':
+            Cause: Export path inaccessible or insufficient permissions
+            Fix: Verify path exists, check write permissions, ensure sufficient disk space
+            Workaround: Export to user home directory or temp folder
+
+    See Also:
+        - db_connection: Database connection management for media databases
+        - db_schema: Schema inspection for media databases
+        - windows_system: Windows-specific media database operations
     """
 
     if operation == "search_calibre_library":
@@ -194,9 +436,7 @@ async def _get_calibre_book_metadata(
         }
 
 
-async def _search_calibre_fts(
-    library_path: str | None, search_query: str | None
-) -> dict[str, Any]:
+async def _search_calibre_fts(library_path: str | None, search_query: str | None) -> dict[str, Any]:
     """Perform full-text search in Calibre library."""
     try:
         if not library_path:
@@ -367,6 +607,3 @@ async def _get_plex_library_sections(
             "sections": [],
             "count": 0,
         }
-
-
-

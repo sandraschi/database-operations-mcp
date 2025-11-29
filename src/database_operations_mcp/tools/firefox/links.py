@@ -1,16 +1,20 @@
-"""Bookmark link management for Firefox."""
+"""Bookmark link management for Firefox.
+
+DEPRECATED: Individual tools deprecated. Use firefox_bookmarks portmanteau instead.
+- list_bookmarks() → firefox_bookmarks(operation='list_bookmarks')
+- get_bookmark() → firefox_bookmarks(operation='get_bookmark')
+- add_bookmark() → firefox_bookmarks(operation='add_bookmark')
+"""
 
 import sqlite3
 from datetime import datetime
 from typing import Any
 
-# Import the global MCP instance from the central config
-from database_operations_mcp.config.mcp_config import mcp
-
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_bookmarks portmanteau
 from .utils import get_places_db_path
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_bookmarks portmanteau instead
 async def list_bookmarks(
     profile_name: str | None = None,
     folder_id: int | None = None,
@@ -87,7 +91,7 @@ async def list_bookmarks(
             conn.close()
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_bookmarks portmanteau instead
 async def get_bookmark(bookmark_id: int, profile_name: str | None = None) -> dict[str, Any]:
     """Get details for a specific bookmark.
 
@@ -198,7 +202,7 @@ async def get_bookmark(bookmark_id: int, profile_name: str | None = None) -> dic
             conn.close()
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_bookmarks portmanteau instead
 async def add_bookmark(
     url: str,
     title: str,

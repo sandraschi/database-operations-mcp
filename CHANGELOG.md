@@ -1,3 +1,36 @@
+## 1.5.0 - 2025-01-27
+
+### Changed
+- **Phase 4 & 5 - Comprehensive Portmanteau Documentation**:
+  - Enhanced all portmanteau tool docstrings to meet cursor rules standards
+  - Added Prerequisites, detailed Parameters (format/examples/validation), Returns structure, Usage scenarios, Errors sections, See Also
+  - Enhanced database tools: `db_connection`, `db_operations`, `db_schema`, `db_management`, `db_fts`, `db_analysis`
+  - Enhanced support tools: `help_system`, `media_library`, `windows_system`
+  - Enhanced browser tools: `firefox_bookmarks`, `firefox_profiles`, `browser_bookmarks`, `chromium_portmanteau`
+  - Enhanced remaining tools: `system_init`, `firefox_backup`, `firefox_curated`, `firefox_tagging`
+- **Tool Consolidation Completion**:
+  - All individual tools successfully consolidated into portmanteau tools
+  - Deprecated modules marked with clear migration paths
+  - Reduced tool count from 124+ individual tools to 23 portmanteau tools
+- **README.md Updates**:
+  - Updated tool overview to reflect portmanteau structure
+  - Added deprecated tools section with migration paths
+  - Clarified operations available in each portmanteau tool
+
+### Fixed
+- Fixed syntax error in `db_operations.py` (ternary expression in list comprehension)
+- Fixed all line length linting errors in enhanced docstrings
+- Resolved dependency conflict with `py-key-value-aio[disk]` (removed explicit requirement, managed by fastmcp)
+
+### Added
+- Comprehensive docstring sections following cursor rules:
+  - Prerequisites for each operation type
+  - Detailed parameter documentation with format, validation, ranges, examples
+  - Complete Returns structure documentation
+  - Usage scenarios and best practices
+  - Common errors with cause/fix/workaround patterns
+  - See Also cross-references
+
 ## 1.4.0 - 2025-10-30
 - Add unified Chromium portmanteau tool (`chromium_bookmarks`) for list/add/edit/delete
 - README: add Chromium portmanteau usage; version badge updated

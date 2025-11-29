@@ -1,7 +1,15 @@
 """
 Windows-Specific Database Tools
 
-Provides tools for managing Windows-specific databases and Plex Media Server.
+DEPRECATED: This module is deprecated. Use windows_system portmanteau tool instead.
+
+All operations have been consolidated into windows_system():
+- list_windows_databases() → windows_system(operation='list_windows_databases')
+- manage_plex_metadata() → windows_system(operation='manage_plex_metadata')
+- query_windows_database() → windows_system(operation='query_windows_database')
+- clean_windows_database() → windows_system(operation='clean_windows_database')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
@@ -12,7 +20,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from ..config.mcp_config import mcp
 
 if TYPE_CHECKING:
     from fastmcp import FastMCP
@@ -118,7 +125,7 @@ def register_tools(mcp: "FastMCP") -> None:
     """
 
 
-@mcp.tool()
+# DEPRECATED: Use windows_system portmanteau instead
 @HelpSystem.register_tool
 async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, Any]:
     """List all discoverable Windows databases with their locations and sizes.
@@ -225,7 +232,7 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
     return {"status": "success", "databases": result}
 
 
-@mcp.tool()
+# DEPRECATED: Use windows_system portmanteau instead
 @HelpSystem.register_tool
 async def manage_plex_metadata(
     action: str = "analyze",
@@ -328,7 +335,7 @@ async def manage_plex_metadata(
             conn.close()
 
 
-@mcp.tool()
+# DEPRECATED: Use windows_system portmanteau instead
 @HelpSystem.register_tool
 async def query_windows_database(
     db_type: str,
@@ -440,7 +447,7 @@ async def query_windows_database(
             conn.close()
 
 
-@mcp.tool()
+# DEPRECATED: Use windows_system portmanteau instead
 @HelpSystem.register_tool
 async def clean_windows_database(
     db_type: str, action: str = "vacuum", backup: bool = True, bruteforce_firefox: bool = False

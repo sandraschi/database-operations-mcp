@@ -1,12 +1,14 @@
-"""Advanced search functionality for bookmarks with smart profile detection."""
+"""Advanced search functionality for bookmarks with smart profile detection.
+
+DEPRECATED: Individual tools deprecated. Use firefox_bookmarks portmanteau instead.
+- search_bookmarks() → firefox_bookmarks(operation='search_bookmarks')
+- find_duplicates() → firefox_bookmarks(operation='find_duplicates')
+"""
 
 from pathlib import Path
 from typing import Any
 
-# Import the global MCP instance from the central config
-from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
-
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_bookmarks portmanteau
 from .db import FirefoxDB
 from .exceptions import FirefoxNotClosedError
 from .status import FirefoxStatusChecker
@@ -126,8 +128,7 @@ class BookmarkSearcher:
         return [dict(row) for row in cursor.fetchall()]
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_bookmarks portmanteau instead
 async def search_bookmarks(
     query: str,
     profile_name: str | None = None,
@@ -224,8 +225,7 @@ async def search_bookmarks(
         return {"status": "error", "message": f"Search failed: {str(e)}"}
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="firefox")
+# DEPRECATED: Use firefox_bookmarks portmanteau instead
 async def find_duplicates(
     by: str = "url",  # 'url' or 'title'
     profile_name: str | None = None,

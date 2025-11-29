@@ -1,11 +1,16 @@
-"""Utility functions for Firefox bookmark management."""
+"""Utility functions for Firefox bookmark management.
+
+DEPRECATED: Individual tools deprecated. Use firefox_profiles portmanteau instead.
+- get_firefox_platform() → firefox_profiles(operation='get_firefox_profiles') (includes platform info)
+- get_firefox_profiles() → firefox_profiles(operation='get_firefox_profiles')
+"""
 
 import configparser
 import os
 from pathlib import Path
 from typing import Any
 
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: @mcp.tool decorators removed - functionality moved to firefox_profiles portmanteau
 
 
 def get_platform() -> str:
@@ -82,7 +87,7 @@ def get_places_db_path(profile_name: str | None = None) -> Path | None:
     return profile_dir / "places.sqlite"
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_profiles portmanteau instead
 def get_firefox_platform() -> dict[str, Any]:
     """
     Get the current platform identifier for Firefox operations.
@@ -94,7 +99,7 @@ def get_firefox_platform() -> dict[str, Any]:
     return {"platform": platform, "os_name": os.name, "message": f"Detected platform: {platform}"}
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_profiles portmanteau instead
 def get_firefox_profiles() -> dict[str, Any]:
     """
     Get all available Firefox profiles.
@@ -113,7 +118,7 @@ def get_firefox_profiles() -> dict[str, Any]:
     }
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_profiles portmanteau instead
 def get_firefox_profile_directory(profile_name: str | None = None) -> dict[str, Any]:
     """
     Get the directory path for a Firefox profile.
@@ -141,7 +146,7 @@ def get_firefox_profile_directory(profile_name: str | None = None) -> dict[str, 
     }
 
 
-@mcp.tool()
+# DEPRECATED: Use firefox_profiles portmanteau instead
 def get_firefox_places_db_path(profile_name: str | None = None) -> dict[str, Any]:
     """
     Get the path to the places.sqlite file for a Firefox profile.

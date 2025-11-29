@@ -1,4 +1,8 @@
-"""Authentication and security utilities for Firefox bookmark tools."""
+"""Authentication and security utilities for Firefox bookmark tools.
+
+DEPRECATED: These tools are internal utilities and should not be exposed.
+Authentication is handled internally by the portmanteau tools.
+"""
 
 import hashlib
 import hmac
@@ -7,7 +11,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Any
 
-from . import mcp  # Import the mcp instance from __init__
+# NOTE: @mcp.tool decorators removed - these are internal utilities
 
 # In-memory session store (use a proper database in production)
 _sessions = {}
@@ -23,7 +27,7 @@ def generate_session_id(username: str) -> str:
     return f"{username}:{timestamp}:{signature}"
 
 
-@mcp.tool()
+# DEPRECATED: Internal utility function
 async def create_session(username: str, password: str) -> dict[str, Any]:
     """Create a new authenticated session."""
     if not username or not password:
@@ -43,7 +47,7 @@ async def create_session(username: str, password: str) -> dict[str, Any]:
     }
 
 
-@mcp.tool
+# DEPRECATED: Internal utility function
 async def validate_session(session_id: str) -> dict[str, Any]:
     """Validate a session and return session data if valid."""
     if not session_id or session_id not in _sessions:

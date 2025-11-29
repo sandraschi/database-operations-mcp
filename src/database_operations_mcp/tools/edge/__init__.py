@@ -60,8 +60,7 @@ async def edit_edge_bookmark(
     dry_run: bool = False,
     bookmarks_path: str | None = None,
 ) -> dict[str, Any]:
-    """Edit an Edge bookmark by id or url (rename/move).
-    """
+    """Edit an Edge bookmark by id or url (rename/move)."""
     path = _find_first_existing(EDGE_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
     return edit_chromium_bookmark(
         path,
@@ -82,8 +81,7 @@ async def delete_edge_bookmark(
     dry_run: bool = False,
     bookmarks_path: str | None = None,
 ) -> dict[str, Any]:
-    """Delete an Edge bookmark by id or url.
-    """
+    """Delete an Edge bookmark by id or url."""
     path = _find_first_existing(EDGE_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
     return delete_chromium_bookmark(path, id=id, url=url, dry_run=dry_run)
 

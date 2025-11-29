@@ -42,6 +42,46 @@ jobs:
         run: uv run pyright
         continue-on-error: true  # Optional: allow to pass with warnings
 
+  powershell-lint:
+    name: PowerShell Script Linting
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install PSScriptAnalyzer
+        run: |
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -AllowClobber
+          Import-Module PSScriptAnalyzer -Force
+      - name: Lint PowerShell scripts
+        run: |
+          $scripts = Get-ChildItem -Path . -Filter "*.ps1" -Recurse | Where-Object {
+            $_.FullName -notmatch '\.venv|node_modules|__pycache__|templates'
+          }
+          if ($scripts.Count -eq 0) {
+            Write-Host "No PowerShell scripts found"
+            exit 0
+          }
+          Write-Host "Found $($scripts.Count) PowerShell script(s)"
+          $allIssues = @()
+          foreach ($script in $scripts) {
+            Write-Host "Linting: $($script.Name)"
+            $issues = Invoke-ScriptAnalyzer -Path $script.FullName -Settings scripts\PSScriptAnalyzerSettings.psd1 -ErrorAction SilentlyContinue
+            if ($issues) {
+              $allIssues += $issues
+              foreach ($issue in $issues) {
+                Write-Host "  $($issue.Severity): $($issue.RuleName) - $($issue.Message) (Line $($issue.Line))" -ForegroundColor Yellow
+              }
+            }
+          }
+          if ($allIssues.Count -gt 0) {
+            Write-Host "`nTotal issues found: $($allIssues.Count)" -ForegroundColor Red
+            exit 1
+          } else {
+            Write-Host "`n✅ All PowerShell scripts passed linting!" -ForegroundColor Green
+          }
+        shell: pwsh
+        continue-on-error: true
+
   test:
     name: Test Suite
     runs-on: ubuntu-latest
@@ -200,7 +240,7 @@ jobs:
   quality-gate:
     name: Quality Gate
     runs-on: ubuntu-latest
-    needs: [lint, security, build, mcpb-build]
+    needs: [lint, powershell-lint, security, build, mcpb-build]
     if: always()
     steps:
       - name: Check critical jobs status

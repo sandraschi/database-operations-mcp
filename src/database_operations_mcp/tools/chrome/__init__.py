@@ -24,7 +24,9 @@ async def list_chrome_bookmarks(bookmarks_path: str | None = None) -> dict[str, 
     Returns:
         dict: {status, count, bookmarks}
     """
-    path = _find_first_existing(CHROME_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
+    path = (
+        _find_first_existing(CHROME_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
+    )
     return read_chromium_bookmarks(path)
 
 
@@ -45,7 +47,9 @@ async def add_chrome_bookmark(
     Returns:
         dict: {status, ...}
     """
-    path = _find_first_existing(CHROME_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
+    path = (
+        _find_first_existing(CHROME_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
+    )
     return write_chromium_bookmark(path, title, url, folder)
 
 
@@ -60,9 +64,10 @@ async def edit_chrome_bookmark(
     dry_run: bool = False,
     bookmarks_path: str | None = None,
 ) -> dict[str, Any]:
-    """Edit a Chrome bookmark by id or url (rename/move).
-    """
-    path = _find_first_existing(CHROME_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
+    """Edit a Chrome bookmark by id or url (rename/move)."""
+    path = (
+        _find_first_existing(CHROME_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
+    )
     return edit_chromium_bookmark(
         path,
         id=id,
@@ -82,9 +87,10 @@ async def delete_chrome_bookmark(
     dry_run: bool = False,
     bookmarks_path: str | None = None,
 ) -> dict[str, Any]:
-    """Delete a Chrome bookmark by id or url.
-    """
-    path = _find_first_existing(CHROME_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
+    """Delete a Chrome bookmark by id or url."""
+    path = (
+        _find_first_existing(CHROME_BOOKMARK_PATHS) if not bookmarks_path else Path(bookmarks_path)
+    )
     return delete_chromium_bookmark(path, id=id, url=url, dry_run=dry_run)
 
 

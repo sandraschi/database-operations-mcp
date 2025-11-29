@@ -38,7 +38,9 @@ class ChromeBrowser:
             with open(self.bookmark_file, encoding="utf-8") as f:
                 data = json.load(f)
 
-            def extract_bookmarks(node: dict[str, Any], target_folder: str | None = None) -> list[dict[str, Any]]:
+            def extract_bookmarks(
+                node: dict[str, Any], target_folder: str | None = None
+            ) -> list[dict[str, Any]]:
                 bookmarks = []
                 if node.get("type") == "bookmark":
                     bookmarks.append(
@@ -71,9 +73,7 @@ class ChromeBrowser:
             logger.error(f"Error reading Chrome bookmarks: {e}", exc_info=True)
             return []
 
-    async def add_bookmark(
-        self, url: str, title: str, folder: str | None = None
-    ) -> dict[str, Any]:
+    async def add_bookmark(self, url: str, title: str, folder: str | None = None) -> dict[str, Any]:
         """Add bookmark to Chrome."""
         # Chrome bookmarks are added by modifying the JSON file
         # This is a simplified version - full implementation would handle the tree structure
@@ -90,8 +90,4 @@ async def add_chrome_bookmark(url: str, title: str, folder: str | None = None) -
     """Add bookmark to Chrome."""
     browser = ChromeBrowser()
     return await browser.add_bookmark(url, title, folder)
-
-
-
-
 

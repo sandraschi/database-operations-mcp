@@ -36,50 +36,86 @@ async def db_analysis(
     table_name: str | None = None,
     limit: int = 10,
 ) -> dict[str, Any]:
-    """Comprehensive database analysis and diagnostics.
+    """Database analysis and diagnostics portmanteau tool.
 
-    Examines a database file to understand its structure, contents, health,
-    and potential issues. Can analyze SQLite, PostgreSQL dumps, MySQL dumps,
-    and more. Provides structure discovery, content analysis, error detection,
-    health scoring, and actionable recommendations.
+    Comprehensive database analysis consolidating ALL analysis operations into
+    a single interface. Examines database files to understand structure, contents,
+    health, and potential issues. Supports SQLite, PostgreSQL dumps, MySQL dumps,
+    and more with structure discovery, content analysis, error detection, health
+    scoring, and actionable recommendations.
+
+    Prerequisites:
+        - Database file must exist and be accessible (read permissions)
+        - For SQLite databases: Database must be closed (not locked by another process)
+        - For error detection: Database file must be readable and valid format
+        - For comprehensive analysis: Sufficient system resources for full scan
+
+    Operations:
+        - analyze: Complete analysis (structure + content + health)
+        - structure: Analyze database structure only
+        - content: Analyze database contents and patterns
+        - health: Check database health and score
+        - errors: Detect errors and issues
+        - report: Generate human-readable report
+        - suggest_fixes: Generate SQL fix suggestions
 
     Parameters:
-        db_file_path: Path to database file to analyze
-            - Must be valid file path
-            - Supports SQLite (.db, .sqlite), PostgreSQL dumps, MySQL dumps
-            - File must exist and be accessible
-        operation: Analysis operation to perform
-            - 'analyze': Complete analysis (structure + content + health)
-            - 'structure': Analyze database structure only
-            - 'content': Analyze database contents and patterns
-            - 'health': Check database health and score
-            - 'errors': Detect errors and issues
-            - 'report': Generate human-readable report
-            - 'suggest_fixes': Generate SQL fix suggestions
-        analysis_depth: Level of analysis to perform
-            - 'quick': Basic structure only (fast, ~1 second)
-            - 'standard': Structure + sample data + basic checks (~5 seconds)
-            - 'comprehensive': Full analysis with error detection (~15 seconds)
-        include_sample_data: Whether to include sample rows from tables
-            - Adds data samples to analysis results
-            - Useful for understanding actual contents
-            - May increase analysis time
-        detect_errors: Whether to scan for errors and inconsistencies
-            - Includes integrity checks, corruption detection
-            - Identifies logical errors and data quality issues
-            - Adds time to analysis but provides valuable diagnostics
-        suggest_fixes: Whether to suggest SQL fixes for detected issues
-            - Generates SQL statements to fix detected errors
-            - Provides actionable solutions
-            - Only relevant when errors detected
-        table_name: Specific table to analyze (optional)
-            - If provided, focuses analysis on single table
-            - Omit to analyze entire database
-            - Used with 'content' and 'structure' operations
-        limit: Maximum number of sample rows to include
-            - Controls how many sample rows per table
-            - Range: 1-100
-            - Higher values increase analysis time
+        db_file_path (str, REQUIRED): Path to database file to analyze
+            Format: Absolute or relative file path
+            Validation: File must exist and be readable
+            Supported formats: SQLite (.db, .sqlite), PostgreSQL dumps, MySQL dumps
+            Example: 'C:/data/database.db', './database.sqlite', '/var/lib/db.sqlite'
+
+        operation (str, OPTIONAL): Analysis operation to perform
+            Valid values: 'analyze', 'structure', 'content', 'health', 'errors',
+                         'report', 'suggest_fixes'
+            Default: 'analyze'
+            Example: 'health', 'errors', 'structure'
+
+        analysis_depth (str, OPTIONAL): Level of analysis to perform
+            Valid values: 'quick', 'standard', 'comprehensive'
+            Default: 'comprehensive'
+            'quick': Basic structure only (fast, ~1 second)
+            'standard': Structure + sample data + basic checks (~5 seconds)
+            'comprehensive': Full analysis with error detection (~15 seconds)
+            Used for: analyze, structure, content operations
+            Example: 'quick', 'standard', 'comprehensive'
+
+        include_sample_data (bool, OPTIONAL): Include sample rows from tables
+            Default: True
+            Behavior: Adds data samples to analysis results for understanding contents
+            Used for: analyze, content operations
+            Impact: May increase analysis time for large tables
+            Example: True, False
+
+        detect_errors (bool, OPTIONAL): Scan for errors and inconsistencies
+            Default: True
+            Behavior: Includes integrity checks, corruption detection, logical errors
+            Used for: analyze, errors operations
+            Impact: Adds time but provides valuable diagnostics
+            Example: True, False
+
+        suggest_fixes (bool, OPTIONAL): Suggest SQL fixes for detected issues
+            Default: True
+            Behavior: Generates SQL statements ready to execute to fix errors
+            Used for: errors, suggest_fixes operations
+            Condition: Only relevant when errors are detected
+            Example: True, False
+
+        table_name (str, OPTIONAL): Specific table to analyze
+            Format: Valid table name in database
+            Required for: content, structure operations (when focusing on single table)
+            Behavior: If provided, focuses analysis on single table only
+            Example: 'users', 'orders', 'products'
+
+        limit (int, OPTIONAL): Maximum number of sample rows to include
+            Format: Positive integer
+            Range: 1-100
+            Default: 10
+            Used for: analyze, content operations (when include_sample_data=True)
+            Behavior: Controls how many sample rows per table included in results
+            Impact: Higher values increase analysis time and result size
+            Example: 5, 10, 20
 
     Returns:
         Dictionary containing comprehensive analysis results:
@@ -159,14 +195,32 @@ async def db_analysis(
             )
             # Returns detected errors with SQL fix suggestions
 
-    Notes:
-        - Database file must be accessible and not locked
-        - SQLite databases must be closed before analysis
-        - Large databases may take longer to analyze
-        - Comprehensive analysis includes all checks and may be slow
-        - Sample data helps understand actual database contents
-        - Error detection can identify corruption and logical issues
-        - Suggested fixes are SQL statements ready to execute
+    Errors:
+        Common errors and solutions:
+        - 'Database file not found: {path}':
+            Cause: File path doesn't exist or is inaccessible
+            Fix: Verify file path is correct, check file permissions, ensure file exists
+            Workaround: Use absolute paths, check current working directory
+
+        - 'Database file is locked':
+            Cause: Another process is using the database file (SQLite)
+            Fix: Close all applications using the database, stop database services
+            Workaround: Wait for lock to release, copy database file for analysis
+
+        - 'Invalid database format':
+            Cause: File is not a recognized database format or is corrupted
+            Fix: Verify file is valid database, check file extension, restore from backup
+            Workaround: Try different database type, check file headers
+
+        - 'Analysis operation failed: {error}':
+            Cause: Internal analysis error or database-specific issue
+            Fix: Check database integrity, verify database is not corrupted
+            Workaround: Try analysis_depth='quick' first, analyze individual tables
+
+        - 'Table not found: {table_name}':
+            Cause: Specified table doesn't exist in database
+            Fix: Use db_schema(operation='list_tables') to see available tables
+            Workaround: Omit table_name to analyze all tables
 
     See Also:
         - db_operations: Database query and manipulation operations
@@ -193,13 +247,9 @@ async def db_analysis(
         structure = await _structure_analyzer.analyze_schema(db_file_path)
 
         if table_name:
-            content = await _content_analyzer.sample_content(
-                db_file_path, table_name, limit=limit
-            )
+            content = await _content_analyzer.sample_content(db_file_path, table_name, limit=limit)
             patterns = await _content_analyzer.detect_patterns(db_file_path, table_name)
-            distributions = await _content_analyzer.analyze_distributions(
-                db_file_path, table_name
-            )
+            distributions = await _content_analyzer.analyze_distributions(db_file_path, table_name)
         else:
             content = await _content_analyzer.sample_content(
                 db_file_path,
@@ -287,4 +337,3 @@ async def db_analysis(
             result["suggested_fixes"] = fixes
 
     return result
-

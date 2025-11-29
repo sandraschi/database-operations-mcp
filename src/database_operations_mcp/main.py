@@ -73,20 +73,35 @@ class DatabaseOperationsMCP:
             signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self._shutdown()))
 
     def _import_all_tools(self) -> None:
-        """Import comprehensive portmanteau tools for all categories to avoid tool explosion."""
+        """Import portmanteau tools from tools/ directory to register them."""
         try:
-            # Import comprehensive portmanteau tools covering all categories
-            # These imports are intentionally unused - they trigger @mcp.tool() decorators
-            from . import comprehensive_portmanteau_tools  # noqa: F401
+            # Import all portmanteau tools from tools/ directory
+            # These imports trigger @mcp.tool() decorators
             from .tools import (  # noqa: F401
                 browser_bookmarks,
                 chrome_bookmarks,
                 chrome_profiles,
                 db_analysis,
+                db_connection,
+                db_fts,
+                db_management,
+                db_operations,
                 db_operations_extended,
+                db_schema,
+                firefox_backup,
+                firefox_bookmarks,
+                firefox_curated,
+                firefox_profiles,
+                firefox_tagging,
+                firefox_utils,
+                help_system,
+                media_library,
+                sync_tools,
+                system_init,
+                windows_system,
             )
 
-            logger.info("All portmanteau tools imported successfully - covering all categories!")
+            logger.info("All 21 portmanteau tools imported successfully!")
 
         except ImportError as e:
             logger.error(f"Failed to import tool modules: {e}")

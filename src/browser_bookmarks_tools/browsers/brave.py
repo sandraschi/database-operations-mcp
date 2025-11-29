@@ -22,7 +22,14 @@ class BraveBrowser:
         if os.name == "nt":  # Windows
             appdata = os.getenv("LOCALAPPDATA")
             if appdata:
-                return Path(appdata) / "BraveSoftware" / "Brave-Browser" / "User Data" / "Default" / "Bookmarks"
+                return (
+                    Path(appdata)
+                    / "BraveSoftware"
+                    / "Brave-Browser"
+                    / "User Data"
+                    / "Default"
+                    / "Bookmarks"
+                )
         else:
             home = Path.home()
             return home / ".config" / "BraveSoftware" / "Brave-Browser" / "Default" / "Bookmarks"
@@ -38,7 +45,9 @@ class BraveBrowser:
             with open(self.bookmark_file, encoding="utf-8") as f:
                 data = json.load(f)
 
-            def extract_bookmarks(node: dict[str, Any], target_folder: str | None = None) -> list[dict[str, Any]]:
+            def extract_bookmarks(
+                node: dict[str, Any], target_folder: str | None = None
+            ) -> list[dict[str, Any]]:
                 bookmarks = []
                 if node.get("type") == "bookmark":
                     bookmarks.append(
@@ -86,8 +95,4 @@ async def add_brave_bookmark(url: str, title: str, folder: str | None = None) ->
     """Add bookmark to Brave."""
     browser = BraveBrowser()
     return await browser.add_bookmark(url, title, folder)
-
-
-
-
 

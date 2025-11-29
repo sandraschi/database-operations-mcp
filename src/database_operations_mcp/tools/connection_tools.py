@@ -1,24 +1,28 @@
 # Database Connection Management Tools.
-# This module provides functionality for managing database connections, including:
-# - Listing supported database types
-# - Creating and testing connections
-# - Managing connection pools
-# - Handling connection lifecycle events
-# It supports various database backends through a unified interface.
+#
+# DEPRECATED: This module is deprecated. Use db_connection portmanteau tool instead.
+#
+# All operations have been consolidated into db_connection():
+# - list_supported_databases() → db_connection(operation='list_supported')
+# - register_database_connection() → db_connection(operation='register')
+# - list_database_connections() → db_connection(operation='list')
+# - test_database_connection() → db_connection(operation='test')
+# - test_all_database_connections() → db_connection(operation='test_all')
+#
+# This module is kept for backwards compatibility but tools are no longer registered.
 
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
 from typing import Any, TypedDict
 
-# Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: @mcp.tool decorators removed - functionality moved to db_connection portmanteau
+# Import kept for backwards compatibility in case code references these functions
 from database_operations_mcp.database_manager import (
     create_connector,
     db_manager,
     get_supported_databases,
 )
-from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
@@ -48,10 +52,7 @@ class ConnectionResult(TypedDict, total=False):
     details: dict[str, Any] | None
 
 
-# Register tools using the @mcp.tool decorator
-# The mcp instance is imported from the centralized config
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_connection(operation='list_supported') instead
 async def list_supported_databases() -> dict[str, Any]:
     """List all supported database types with categories and descriptions.
 
@@ -109,7 +110,7 @@ async def list_supported_databases() -> dict[str, Any]:
         }
 
 
-@mcp.tool()
+# DEPRECATED: Use db_connection(operation='register') instead
 def register_database_connection(
     connection_name: str,
     database_type: str,
@@ -220,7 +221,7 @@ def register_database_connection(
         }
 
 
-@mcp.tool()
+# DEPRECATED: Use db_connection(operation='list') instead
 def list_database_connections() -> dict[str, Any]:
     """List all registered database connections with their current status.
 
@@ -270,7 +271,7 @@ def list_database_connections() -> dict[str, Any]:
         }
 
 
-@mcp.tool
+# DEPRECATED: Use db_connection(operation='test') instead
 def test_database_connection(connection_name: str) -> dict[str, Any]:
     """Test connectivity for a specific database connection.
 
@@ -389,7 +390,7 @@ def test_database_connection(connection_name: str) -> dict[str, Any]:
         }
 
 
-@mcp.tool
+# DEPRECATED: Use db_connection(operation='test_all') instead
 def test_all_database_connections(
     parallel: bool = True, timeout: float | None = 10.0
 ) -> dict[str, Any]:

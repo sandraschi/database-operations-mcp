@@ -1,8 +1,15 @@
 """
 Windows Registry Tools
 
-Provides tools for interacting with the Windows Registry as a hierarchical database,
-including monitoring, backup, and restore functionality.
+DEPRECATED: This module is deprecated. Use windows_system portmanteau tool instead.
+
+All operations have been consolidated into windows_system():
+- read_registry_value() → windows_system(operation='read_registry_value')
+- write_registry_value() → windows_system(operation='write_registry_value')
+- list_registry_keys() → windows_system(operation='list_registry_keys')
+- list_registry_values() → windows_system(operation='list_registry_values')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
@@ -14,7 +21,6 @@ from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
 # Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
 
 from .help_tools import HelpSystem
 
@@ -181,7 +187,7 @@ class RegistryMonitor:
 # The mcp instance is imported from the centralized config
 
 
-@mcp.tool()
+# DEPRECATED: Use windows_system portmanteau instead
 @HelpSystem.register_tool
 def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
     """Read a value from the Windows Registry.
@@ -219,7 +225,7 @@ def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
+# DEPRECATED: Use windows_system portmanteau instead
 @HelpSystem.register_tool
 def write_registry_value(
     path: str, value_name: str, value: Any, value_type: str | None = None
@@ -277,7 +283,7 @@ def write_registry_value(
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
+# DEPRECATED: Use windows_system portmanteau instead
 @HelpSystem.register_tool
 def list_registry_keys(path: str) -> dict[str, Any]:
     """List all subkeys under a registry key.
@@ -310,7 +316,7 @@ def list_registry_keys(path: str) -> dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
+# DEPRECATED: Use windows_system portmanteau instead
 @HelpSystem.register_tool
 def list_registry_values(path: str) -> dict[str, Any]:
     """List all values under a registry key.
@@ -356,4 +362,5 @@ def list_registry_values(path: str) -> dict[str, Any]:
 
 
 # Additional registry tools can be added here following the same pattern
-# Each tool should be decorated with @mcp.tool() and @HelpSystem.register_tool
+# Each tool should be decorated with # DEPRECATED: Use windows_system
+# portmanteau instead and @HelpSystem.register_tool

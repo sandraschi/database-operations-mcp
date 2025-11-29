@@ -1,11 +1,16 @@
-"""Database connection management for Firefox bookmarks."""
+"""Database connection management for Firefox bookmarks.
+
+DEPRECATED: Individual tools deprecated. These are utility functions, not user-facing tools.
+- test_firefox_database_connection() → Use firefox_profiles(operation='check_firefox_status')
+- get_firefox_database_info() → Internal utility function
+"""
 
 import logging
 import sqlite3
 from pathlib import Path
 from typing import Any
 
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: @mcp.tool decorators removed - these are internal utilities
 
 
 class FirefoxDB:
@@ -55,7 +60,7 @@ class FirefoxDB:
             self.conn = None
 
 
-@mcp.tool()
+# DEPRECATED: Internal utility function
 def test_firefox_database_connection(profile_path: str) -> dict[str, Any]:
     """
     Test connection to Firefox bookmark database.
@@ -92,7 +97,7 @@ def test_firefox_database_connection(profile_path: str) -> dict[str, Any]:
         }
 
 
-@mcp.tool()
+# DEPRECATED: Internal utility function
 def get_firefox_database_info(profile_path: str) -> dict[str, Any]:
     """
     Get information about Firefox bookmark database.

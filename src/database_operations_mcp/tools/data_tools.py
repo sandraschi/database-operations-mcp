@@ -1,30 +1,31 @@
 """
 Data read/write operations for databases.
 
-This module provides tools for executing queries, inserting, updating, and deleting data
-across various database backends through a unified interface.
+DEPRECATED: This module is deprecated. Use db_operations portmanteau tool instead.
+
+All operations have been consolidated into db_operations():
+- execute_transaction() → db_operations(operation='execute_transaction')
+- execute_write() → db_operations(operation='execute_write')
+- batch_insert() → db_operations(operation='batch_insert')
+
+This module is kept for backwards compatibility but tools are no longer registered.
 """
 
 import logging
 from typing import Any, TypeVar
 
-# Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
+# NOTE: @mcp.tool decorators removed - functionality moved to db_operations portmanteau
+# Import kept for backwards compatibility in case code references these functions
 from database_operations_mcp.database_manager import QueryError
 from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS
-from database_operations_mcp.tools.help_tools import HelpSystem
 
 # Type variable for generic type hints
 T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
-# Register tools using the @mcp.tool decorator
-# The mcp instance is imported from the centralized config
 
-
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_operations(operation='execute_transaction') instead
 async def execute_transaction(
     queries: list[dict[str, Any]], connection_name: str = "default"
 ) -> dict[str, Any]:
@@ -106,8 +107,7 @@ async def execute_transaction(
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_operations(operation='execute_write') instead
 async def execute_write(
     query: str,
     parameters: dict[str, Any] | list[Any] | None = None,
@@ -149,8 +149,7 @@ async def execute_write(
         }
 
 
-@mcp.tool()
-@HelpSystem.register_tool
+# DEPRECATED: Use db_operations(operation='batch_insert') instead
 async def batch_insert(
     table: str, data: list[dict[str, Any]], connection_name: str = "default", batch_size: int = 1000
 ) -> dict[str, Any]:

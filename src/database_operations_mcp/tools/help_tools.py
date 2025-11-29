@@ -9,7 +9,6 @@ from collections.abc import Callable
 from typing import Any, TypeVar
 
 # Import the global MCP instance
-from database_operations_mcp.config.mcp_config import mcp
 
 # Type variable for function type
 F = TypeVar("F", bound=Callable[..., Any])
@@ -134,12 +133,11 @@ class HelpSystem:
         }
 
 
-# Register tools using the @mcp.tool decorator
-# The mcp instance is imported from the centralized config
+# NOTE: HelpSystem class is still used by portmanteau tools for registration
+# Only the individual tool decorators are removed below
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="help")
+# DEPRECATED: Use help_system(operation='help') instead
 async def help(category: str | None = None) -> dict[str, Any]:
     """Get hierarchical help for all tools or specific category.
 
@@ -216,8 +214,7 @@ async def help(category: str | None = None) -> dict[str, Any]:
     return HelpSystem.get_help(category)
 
 
-@mcp.tool()
-@HelpSystem.register_tool(category="help")
+# DEPRECATED: Use help_system(operation='tool_help') instead
 async def tool_help(tool_name: str) -> dict[str, Any]:
     """Get detailed documentation for specific tool.
 

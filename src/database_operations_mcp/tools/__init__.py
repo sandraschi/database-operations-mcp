@@ -4,21 +4,32 @@ Database Operations MCP - Tools Package
 This package contains all the tool modules for the Database Operations MCP,
 organized into logical modules for better maintainability.
 
-Modules:
-    - calibre_tools: Tools for working with Calibre libraries
-    - connection_tools: Database connection management
-    - data_tools: Data manipulation and query execution
-    - firefox: Firefox bookmark management and analysis tools
-    - fts_tools: Full-text search functionality
-    - help_tools: Help and documentation system
-    - init_tools: Initialization and setup
-    - management_tools: Database administration and maintenance
-    - media_tools: Media file operations
-    - plex_tools: Plex Media Server integration
-    - query_tools: SQL query building and execution
-    - registry_tools: Windows Registry operations
-    - schema_tools: Database schema inspection
-    - windows_tools: Windows-specific operations
+PORTMANTEAU TOOLS (Active):
+    - db_connection: Database connection management (consolidates connection_tools, init_tools)
+    - db_operations: Data manipulation and query execution (consolidates query_tools, data_tools)
+    - db_schema: Database schema inspection (consolidates schema_tools)
+    - db_fts: Full-text search functionality (consolidates fts_tools)
+    - db_management: Database administration (consolidates management_tools)
+    - help_system: Help and documentation (consolidates help_tools)
+    - media_library: Media operations (consolidates calibre_tools, plex_tools, media_tools)
+    - windows_system: Windows-specific operations (consolidates registry_tools, windows_tools)
+    - browser_bookmarks: Universal browser bookmark management
+    - firefox_bookmarks, chrome_bookmarks: Browser-specific bookmark tools
+
+DEPRECATED MODULES (kept for backwards compatibility, tools no longer registered):
+    - calibre_tools → use media_library(operation='...')
+    - connection_tools → use db_connection(operation='...')
+    - data_tools → use db_operations(operation='...')
+    - fts_tools → use db_fts(operation='...')
+    - help_tools → use help_system(operation='...')
+    - init_tools → use db_connection(operation='...')
+    - management_tools → use db_management(operation='...')
+    - media_tools → use media_library(operation='...')
+    - plex_tools → use media_library(operation='...')
+    - query_tools → use db_operations(operation='...')
+    - registry_tools → use windows_system(operation='...')
+    - schema_tools → use db_schema(operation='...')
+    - windows_tools → use windows_system(operation='...')
 """
 
 # Import tool modules to make them available when importing the package
