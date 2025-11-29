@@ -10,12 +10,193 @@ from database_operations_mcp.tools.firefox.age_analyzer import (
 )
 from database_operations_mcp.tools.firefox.bookmark_manager import BookmarkManager
 from database_operations_mcp.tools.firefox.bulk_operations import BulkOperations
+from database_operations_mcp.tools.firefox.core import FirefoxDatabaseUnlocker
 from database_operations_mcp.tools.firefox.link_checker import LinkChecker
 from database_operations_mcp.tools.firefox.search_tools import BookmarkSearcher
+from database_operations_mcp.tools.firefox.status import FirefoxStatusChecker
 from database_operations_mcp.tools.firefox.tag_manager import TagManager
+from database_operations_mcp.tools.firefox.utils import get_profile_directory
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
+
+
+def _get_bruteforce_connection(profile_name: str | None):
+    """Get database connection using brute force methods (bypasses Firefox lock)."""
+    profile_path = get_profile_directory(profile_name)
+    if not profile_path:
+        return None, "Profile not found"
+
+    db_path = profile_path / "places.sqlite"
+    if not db_path.exists():
+        return None, "places.sqlite not found"
+
+    return FirefoxDatabaseUnlocker.get_database_connection_bruteforce(db_path)
+
+
+async def _bruteforce_read_operation(
+    operation: str,
+    profile_name: str | None,
+    folder_id: int | None,
+    bookmark_id: int | None,
+    search_query: str | None,
+    search_type: str,
+    similarity_threshold: float,
+    age_days: int,
+) -> dict[str, Any]:
+    """Execute read operations using brute force database access."""
+    conn, method = _get_bruteforce_connection(profile_name)
+
+    if not conn:
+        return {
+            "success": False,
+            "error": f"Brute force access failed: {method}",
+            "note": "Close Firefox and try again without force_access=True",
+        }
+
+    try:
+        cursor = conn.cursor()
+
+        if operation == "list_bookmarks":
+            # Query bookmarks directly
+            query = """
+                SELECT b.id, b.title, p.url, b.dateAdded, b.lastModified
+                FROM moz_bookmarks b
+                LEFT JOIN moz_places p ON b.fk = p.id
+                WHERE b.type = 1
+            """
+            if folder_id:
+                query += f" AND b.parent = {folder_id}"
+            query += " ORDER BY b.dateAdded DESC LIMIT 1000"
+
+            cursor.execute(query)
+            bookmarks = [
+                {
+                    "id": row[0],
+                    "title": row[1] or "",
+                    "url": row[2] or "",
+                    "dateAdded": row[3],
+                    "lastModified": row[4],
+                }
+                for row in cursor.fetchall()
+            ]
+
+            return {
+                "success": True,
+                "message": "Bookmarks listed (brute force access)",
+                "access_method": method,
+                "firefox_was_running": True,
+                "profile_name": profile_name,
+                "folder_id": folder_id,
+                "bookmarks": bookmarks,
+                "count": len(bookmarks),
+            }
+
+        elif operation == "get_bookmark":
+            if not bookmark_id:
+                return {"success": False, "error": "bookmark_id required"}
+
+            cursor.execute(
+                """
+                SELECT b.id, b.title, p.url, b.dateAdded, b.lastModified, b.parent
+                FROM moz_bookmarks b
+                LEFT JOIN moz_places p ON b.fk = p.id
+                WHERE b.id = ?
+                """,
+                (bookmark_id,),
+            )
+            row = cursor.fetchone()
+            if not row:
+                return {"success": False, "error": f"Bookmark {bookmark_id} not found"}
+
+            return {
+                "success": True,
+                "message": f"Bookmark {bookmark_id} retrieved (brute force)",
+                "access_method": method,
+                "bookmark": {
+                    "id": row[0],
+                    "title": row[1] or "",
+                    "url": row[2] or "",
+                    "dateAdded": row[3],
+                    "lastModified": row[4],
+                    "parent": row[5],
+                },
+            }
+
+        elif operation == "search_bookmarks":
+            if not search_query:
+                return {"success": False, "error": "search_query required"}
+
+            like_query = f"%{search_query}%"
+            cursor.execute(
+                """
+                SELECT b.id, b.title, p.url
+                FROM moz_bookmarks b
+                LEFT JOIN moz_places p ON b.fk = p.id
+                WHERE b.type = 1
+                  AND (b.title LIKE ? OR p.url LIKE ?)
+                LIMIT 100
+                """,
+                (like_query, like_query),
+            )
+            results = [
+                {"id": row[0], "title": row[1] or "", "url": row[2] or ""}
+                for row in cursor.fetchall()
+            ]
+
+            return {
+                "success": True,
+                "message": f"Search completed (brute force)",
+                "access_method": method,
+                "search_query": search_query,
+                "results": results,
+                "count": len(results),
+            }
+
+        elif operation == "get_bookmark_stats":
+            cursor.execute("SELECT COUNT(*) FROM moz_bookmarks WHERE type = 1")
+            bookmark_count = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM moz_places")
+            url_count = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(DISTINCT parent) FROM moz_bookmarks WHERE type = 1")
+            folder_count = cursor.fetchone()[0]
+
+            return {
+                "success": True,
+                "message": "Stats retrieved (brute force)",
+                "access_method": method,
+                "stats": {
+                    "bookmark_count": bookmark_count,
+                    "url_count": url_count,
+                    "folder_count": folder_count,
+                },
+            }
+
+        else:
+            # Other read operations - fall back to normal path
+            return {
+                "success": False,
+                "error": f"Brute force not implemented for {operation}",
+                "note": "Close Firefox and try without force_access=True",
+            }
+
+    except Exception as e:
+        logger.error(f"Brute force operation failed: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Brute force operation failed: {str(e)}",
+        }
+
+    finally:
+        # Clean up temp file if database was copied
+        if hasattr(conn, "temp_db_path"):
+            try:
+                conn.temp_db_path.unlink(missing_ok=True)
+            except Exception:
+                pass
+        conn.close()
 
 
 # NOTE: No @mcp.tool() - browser_bookmarks portmanteau handles all browsers
@@ -36,6 +217,7 @@ async def firefox_bookmarks(
     similarity_threshold: float = 0.85,
     age_days: int = 365,
     check_links: bool = False,
+    force_access: bool = False,
 ) -> dict[str, Any]:
     """Firefox bookmark management portmanteau tool.
 
@@ -44,7 +226,7 @@ async def firefox_bookmarks(
     age analysis, broken link detection, and export across Firefox profiles.
 
     Prerequisites:
-        - Firefox must be completely closed before operations (prevents database lock)
+        - Firefox should be closed, OR use force_access=True to bypass lock
         - Valid Firefox profile name (use firefox_profiles to list available profiles)
         - For write operations: Profile must exist and be accessible
         - For broken link detection: Network connectivity required
@@ -162,6 +344,15 @@ async def firefox_bookmarks(
             Used for: find_broken_links operation
             Warning: May be slow for large bookmark collections
             Example: True, False
+
+        force_access (bool, OPTIONAL): Bypass Firefox database lock for read operations
+            Default: False
+            Behavior: If True, uses brute force methods (URI tricks, temp copy) to read
+                     the database even when Firefox is running
+            Used for: READ operations only (list, search, get, stats)
+            Warning: Write operations still require Firefox to be closed
+            Note: Read data may be slightly stale if Firefox has pending writes
+            Example: True to read while Firefox is open, False for normal operation
 
     Returns:
         Dictionary containing operation-specific results:
@@ -327,6 +518,22 @@ async def firefox_bookmarks(
         - browser_bookmarks: Universal browser bookmark operations (cross-browser)
         - firefox_tagging: Advanced tag management operations
     """
+
+    # Read operations that support force_access
+    read_operations = {
+        "list_bookmarks", "get_bookmark", "search_bookmarks", "find_duplicates",
+        "list_tags", "find_similar_tags", "find_old_bookmarks", "get_bookmark_stats",
+    }
+
+    # Handle force_access for read operations when Firefox is running
+    if force_access and operation in read_operations:
+        status = FirefoxStatusChecker.is_firefox_running()
+        if status.get("is_running"):
+            logger.info(f"Firefox running, using brute force for {operation}")
+            return await _bruteforce_read_operation(
+                operation, profile_name, folder_id, bookmark_id,
+                search_query, search_type, similarity_threshold, age_days
+            )
 
     if operation == "list_bookmarks":
         return await _list_bookmarks(profile_name, folder_id)

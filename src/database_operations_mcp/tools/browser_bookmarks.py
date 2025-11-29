@@ -41,6 +41,8 @@ async def browser_bookmarks(
     allow_duplicates: bool = False,
     create_folders: bool = True,
     dry_run: bool = False,
+    # Firefox lock bypass
+    force_access: bool = False,
 ) -> dict[str, Any]:
     """Universal browser bookmark management portmanteau tool.
 
@@ -50,7 +52,7 @@ async def browser_bookmarks(
 
     Prerequisites:
         - Target browser must be installed and accessible
-        - For Firefox: Firefox must be completely closed (prevents database lock)
+        - For Firefox: Firefox should be closed, OR use force_access=True to bypass lock
         - For Chrome/Edge/Brave: Browser should be closed (recommended, not required)
         - Valid browser profile name (uses default if not specified)
 
@@ -101,6 +103,9 @@ async def browser_bookmarks(
         age_days (int, OPTIONAL): Age threshold for old bookmark detection
         check_links (bool, OPTIONAL): Check URL accessibility
         dry_run (bool, OPTIONAL): Preview changes without applying
+        force_access (bool, OPTIONAL): For Firefox - bypass database lock using brute force
+            methods (read-only URI tricks, temp copy). Allows reading bookmarks while
+            Firefox is running. Default: False
 
     Returns:
         Dictionary containing operation-specific results
@@ -165,6 +170,7 @@ async def browser_bookmarks(
             similarity_threshold=similarity_threshold,
             age_days=age_days,
             check_links=check_links,
+            force_access=force_access,
         )
         result["browser"] = "firefox"
         return result
