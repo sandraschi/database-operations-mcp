@@ -1,11 +1,9 @@
-# Firefox bookmark management portmanteau tool.
-# Consolidates all Firefox bookmark operations into a single interface.
+# Firefox bookmark helper functions.
+# Used by browser_bookmarks portmanteau tool.
 
 import logging
 from typing import Any
 
-# Import the global MCP instance from the central config
-from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.tools.firefox.age_analyzer import (
     find_old_bookmarks,
     get_bookmark_stats,
@@ -20,7 +18,7 @@ from database_operations_mcp.tools.help_tools import HelpSystem
 logger = logging.getLogger(__name__)
 
 
-@mcp.tool()
+# NOTE: No @mcp.tool() - browser_bookmarks portmanteau handles all browsers
 @HelpSystem.register_tool(category="firefox")
 async def firefox_bookmarks(
     operation: str,

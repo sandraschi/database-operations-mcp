@@ -94,9 +94,5 @@ async def delete_brave_bookmark(
     return delete_chromium_bookmark(path, id=id, url=url, dry_run=dry_run)
 
 
-# Register MCP tools without shadowing callables
-# NOTE: Keep these - portmanteau doesn't have full CRUD yet
-LIST_BRAVE_BOOKMARKS_TOOL = mcp.tool(name="list_brave_bookmarks")(list_brave_bookmarks)
-ADD_BRAVE_BOOKMARK_TOOL = mcp.tool(name="add_brave_bookmark")(add_brave_bookmark)
-EDIT_BRAVE_BOOKMARK_TOOL = mcp.tool(name="edit_brave_bookmark")(edit_brave_bookmark)
-DELETE_BRAVE_BOOKMARK_TOOL = mcp.tool(name="delete_brave_bookmark")(delete_brave_bookmark)
+# NOTE: No MCP tool registration - browser_bookmarks portmanteau handles all browsers
+# Functions exported for use by browser_bookmarks portmanteau

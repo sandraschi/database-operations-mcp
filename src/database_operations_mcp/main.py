@@ -78,8 +78,7 @@ class DatabaseOperationsMCP:
             # Import all portmanteau tools from tools/ directory
             # These imports trigger @mcp.tool() decorators
             from .tools import (  # noqa: F401
-                browser_bookmarks,
-                chrome_bookmarks,
+                browser_bookmarks,  # Universal browser bookmark tool (covers all browsers)
                 chrome_profiles,
                 db_analysis,
                 db_connection,
@@ -89,7 +88,7 @@ class DatabaseOperationsMCP:
                 db_operations_extended,
                 db_schema,
                 firefox_backup,
-                firefox_bookmarks,
+                # firefox_bookmarks - now handled by browser_bookmarks
                 firefox_curated,
                 firefox_profiles,
                 firefox_tagging,
@@ -101,7 +100,7 @@ class DatabaseOperationsMCP:
                 windows_system,
             )
 
-            logger.info("All 21 portmanteau tools imported successfully!")
+            logger.info("All 19 portmanteau tools imported successfully!")
 
         except ImportError as e:
             logger.error(f"Failed to import tool modules: {e}")

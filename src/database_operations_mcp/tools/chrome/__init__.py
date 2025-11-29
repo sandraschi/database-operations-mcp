@@ -94,9 +94,5 @@ async def delete_chrome_bookmark(
     return delete_chromium_bookmark(path, id=id, url=url, dry_run=dry_run)
 
 
-# Register MCP tools without shadowing callables
-# NOTE: Keep these - chrome_bookmarks portmanteau doesn't have full CRUD yet
-LIST_CHROME_BOOKMARKS_TOOL = mcp.tool(name="list_chrome_bookmarks")(list_chrome_bookmarks)
-ADD_CHROME_BOOKMARK_TOOL = mcp.tool(name="add_chrome_bookmark")(add_chrome_bookmark)
-EDIT_CHROME_BOOKMARK_TOOL = mcp.tool(name="edit_chrome_bookmark")(edit_chrome_bookmark)
-DELETE_CHROME_BOOKMARK_TOOL = mcp.tool(name="delete_chrome_bookmark")(delete_chrome_bookmark)
+# NOTE: No MCP tool registration - browser_bookmarks portmanteau handles all browsers
+# Functions exported for use by browser_bookmarks portmanteau

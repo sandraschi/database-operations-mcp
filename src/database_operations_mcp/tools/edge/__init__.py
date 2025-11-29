@@ -86,9 +86,5 @@ async def delete_edge_bookmark(
     return delete_chromium_bookmark(path, id=id, url=url, dry_run=dry_run)
 
 
-# Register MCP tools without shadowing callables
-# NOTE: Keep these - browser_bookmarks portmanteau doesn't have full CRUD yet
-LIST_EDGE_BOOKMARKS_TOOL = mcp.tool(name="list_edge_bookmarks")(list_edge_bookmarks)
-ADD_EDGE_BOOKMARK_TOOL = mcp.tool(name="add_edge_bookmark")(add_edge_bookmark)
-EDIT_EDGE_BOOKMARK_TOOL = mcp.tool(name="edit_edge_bookmark")(edit_edge_bookmark)
-DELETE_EDGE_BOOKMARK_TOOL = mcp.tool(name="delete_edge_bookmark")(delete_edge_bookmark)
+# NOTE: No MCP tool registration - browser_bookmarks portmanteau handles all browsers
+# Functions exported for use by browser_bookmarks portmanteau
