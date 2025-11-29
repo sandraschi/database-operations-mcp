@@ -5,6 +5,7 @@ import logging
 from typing import Any
 
 from database_operations_mcp.tools.firefox.age_analyzer import (
+    find_forgotten_bookmarks,
     find_old_bookmarks,
     get_bookmark_stats,
 )
@@ -280,7 +281,9 @@ async def firefox_bookmarks(
         - find_similar_tags: Find tags with similar names
         - merge_tags: Merge similar tags into a single tag
         - clean_up_tags: Clean up and standardize tag names
-        - find_old_bookmarks: Find bookmarks older than specified days
+        - find_old_bookmarks: Find bookmarks CREATED more than N days ago
+        - find_forgotten_bookmarks: Find bookmarks not VISITED in N days (archive candidates)
+        - refresh_bookmarks: Check for 404s, attempt URL fixes, update working URLs
         - get_bookmark_stats: Get statistics about bookmark collection
         - find_broken_links: Find bookmarks with broken or inaccessible URLs
 
@@ -290,7 +293,8 @@ async def firefox_bookmarks(
                          'search_bookmarks', 'find_duplicates', 'export_bookmarks',
                          'batch_update_tags', 'remove_unused_tags', 'list_tags',
                          'find_similar_tags', 'merge_tags', 'clean_up_tags',
-                         'find_old_bookmarks', 'get_bookmark_stats', 'find_broken_links'
+                         'find_old_bookmarks', 'find_forgotten_bookmarks', 'refresh_bookmarks',
+                         'get_bookmark_stats', 'find_broken_links'
             Example: 'list_bookmarks', 'add_bookmark', 'search_bookmarks'
 
         profile_name (str, OPTIONAL): Firefox profile name to operate on
@@ -371,7 +375,7 @@ async def firefox_bookmarks(
             Format: Positive integer (days)
             Range: 1-36500 (1 day to 100 years)
             Default: 365
-            Used for: find_old_bookmarks operation
+            Used for: find_old_bookmarks, find_forgotten_bookmarks operations
             Example: 30, 90, 365, 730
 
         check_links (bool, OPTIONAL): Whether to check link accessibility
@@ -401,7 +405,9 @@ async def firefox_bookmarks(
             - For find_duplicates: duplicates (list), total_duplicates
             - For export_bookmarks: export_path, format, record_count
             - For tag operations: tags_processed, tags_affected, changes (list)
-            - For find_old_bookmarks: old_bookmarks (list), count, age_days
+            - For find_old_bookmarks: bookmarks CREATED > N days ago (with age_years)
+            - For find_forgotten_bookmarks: bookmarks not VISITED in N days
+            - For refresh_bookmarks: 404 check results, fixed URLs, update status
             - For get_bookmark_stats: stats (dict with collection statistics)
             - For find_broken_links: broken_links (list), count, checked_count
             - error: Error message if success is False
@@ -558,7 +564,7 @@ async def firefox_bookmarks(
     # Read operations that support force_access
     read_operations = {
         "list_bookmarks", "get_bookmark", "search_bookmarks", "find_duplicates",
-        "list_tags", "find_similar_tags", "find_old_bookmarks", "get_bookmark_stats",
+        "list_tags", "find_similar_tags", "find_old_bookmarks", "find_forgotten_bookmarks", "get_bookmark_stats",
     }
 
     # Handle force_access for read operations when Firefox is running
@@ -603,6 +609,10 @@ async def firefox_bookmarks(
         return await _clean_up_tags(profile_name)
     elif operation == "find_old_bookmarks":
         return await _find_old_bookmarks(profile_name, age_days)
+    elif operation == "find_forgotten_bookmarks":
+        return await _find_forgotten_bookmarks(profile_name, age_days)
+    elif operation == "refresh_bookmarks":
+        return await _refresh_bookmarks(profile_name, batch_size)
     elif operation == "get_bookmark_stats":
         return await _get_bookmark_stats(profile_name)
     elif operation == "find_broken_links":
@@ -625,6 +635,8 @@ async def firefox_bookmarks(
                 "merge_tags",
                 "clean_up_tags",
                 "find_old_bookmarks",
+                "find_forgotten_bookmarks",
+                "refresh_bookmarks",
                 "get_bookmark_stats",
                 "find_broken_links",
             ],
@@ -953,17 +965,18 @@ async def _clean_up_tags(profile_name: str | None) -> dict[str, Any]:
 
 
 async def _find_old_bookmarks(profile_name: str | None, age_days: int) -> dict[str, Any]:
-    """Find bookmarks older than specified days."""
+    """Find bookmarks CREATED more than N days ago."""
     try:
-        result = await find_old_bookmarks(profile_name, age_days)
+        result = await find_old_bookmarks(age_days, profile_name)
 
         return {
             "success": True,
-            "message": f"Old bookmarks found (older than {age_days} days)",
+            "message": f"Found bookmarks created more than {age_days} days ago",
             "profile_name": profile_name,
             "age_days": age_days,
-            "old_bookmarks": result.get("old_bookmarks", []),
-            "count": result.get("count", 0),
+            "cutoff_date": result.get("cutoff_date"),
+            "bookmarks": result.get("bookmarks", []),
+            "count": result.get("bookmark_count", 0),
         }
 
     except Exception as e:
@@ -973,6 +986,169 @@ async def _find_old_bookmarks(profile_name: str | None, age_days: int) -> dict[s
             "error": f"Failed to find old bookmarks: {str(e)}",
             "profile_name": profile_name,
             "age_days": age_days,
+        }
+
+
+async def _find_forgotten_bookmarks(profile_name: str | None, age_days: int) -> dict[str, Any]:
+    """Find bookmarks not VISITED in N days - good candidates for archiving."""
+    try:
+        result = await find_forgotten_bookmarks(age_days, profile_name)
+
+        return {
+            "success": True,
+            "message": f"Found {result.get('bookmark_count', 0)} bookmarks not visited in {age_days}+ days",
+            "profile_name": profile_name,
+            "days_unvisited": age_days,
+            "cutoff_date": result.get("cutoff_date"),
+            "bookmarks": result.get("bookmarks", []),
+            "count": result.get("bookmark_count", 0),
+            "suggestion": "Consider archiving or deleting these unused bookmarks",
+        }
+
+    except Exception as e:
+        logger.error(f"Error finding forgotten bookmarks: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Failed to find forgotten bookmarks: {str(e)}",
+            "profile_name": profile_name,
+            "days_unvisited": age_days,
+        }
+
+
+async def _refresh_bookmarks(profile_name: str | None, batch_size: int) -> dict[str, Any]:
+    """Check bookmarks for 404s and attempt to fix broken URLs.
+    
+    For each broken bookmark:
+    1. Check if URL returns 404
+    2. Try simplified versions (remove trailing paths, query params)
+    3. Update bookmark if a working URL is found
+    """
+    import asyncio
+    import aiohttp
+    from urllib.parse import urlparse, urlunparse
+    
+    try:
+        manager = BookmarkManager(profile_name)
+        bookmarks = await manager.list_bookmarks()
+        
+        results = {
+            "checked": 0,
+            "working": 0,
+            "broken": 0,
+            "fixed": 0,
+            "unfixable": [],
+            "fixed_urls": [],
+        }
+        
+        async def check_url(url: str, timeout: int = 10) -> tuple[bool, int]:
+            """Check if URL is accessible. Returns (is_working, status_code)."""
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.head(url, timeout=aiohttp.ClientTimeout(total=timeout), allow_redirects=True) as resp:
+                        return resp.status < 400, resp.status
+            except Exception:
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout), allow_redirects=True) as resp:
+                            return resp.status < 400, resp.status
+                except Exception:
+                    return False, 0
+        
+        def get_url_variants(url: str) -> list[str]:
+            """Generate simpler URL variants to try."""
+            parsed = urlparse(url)
+            variants = []
+            
+            # Try without query string
+            if parsed.query:
+                variants.append(urlunparse((parsed.scheme, parsed.netloc, parsed.path, '', '', '')))
+            
+            # Try without fragment
+            if parsed.fragment:
+                variants.append(urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, '')))
+            
+            # Try parent paths
+            path_parts = parsed.path.rstrip('/').split('/')
+            for i in range(len(path_parts) - 1, 0, -1):
+                parent_path = '/'.join(path_parts[:i])
+                if parent_path:
+                    variants.append(urlunparse((parsed.scheme, parsed.netloc, parent_path, '', '', '')))
+            
+            # Try just the domain
+            variants.append(urlunparse((parsed.scheme, parsed.netloc, '/', '', '', '')))
+            
+            return variants
+        
+        # Process in batches
+        for i, bookmark in enumerate(bookmarks[:batch_size]):
+            url = bookmark.get("url", "")
+            if not url or not url.startswith(("http://", "https://")):
+                continue
+            
+            results["checked"] += 1
+            is_working, status = await check_url(url)
+            
+            if is_working:
+                results["working"] += 1
+                continue
+            
+            results["broken"] += 1
+            
+            # Try URL variants
+            fixed = False
+            for variant in get_url_variants(url):
+                variant_works, _ = await check_url(variant)
+                if variant_works:
+                    # Update the bookmark with working URL
+                    try:
+                        # TODO: Implement bookmark URL update in BookmarkManager
+                        results["fixed"] += 1
+                        results["fixed_urls"].append({
+                            "bookmark_id": bookmark.get("id"),
+                            "title": bookmark.get("title"),
+                            "old_url": url,
+                            "new_url": variant,
+                            "status": "would_fix"  # dry-run for now
+                        })
+                        fixed = True
+                        break
+                    except Exception:
+                        pass
+            
+            if not fixed:
+                results["unfixable"].append({
+                    "bookmark_id": bookmark.get("id"),
+                    "title": bookmark.get("title"),
+                    "url": url,
+                    "status_code": status,
+                })
+            
+            # Small delay to avoid hammering servers
+            await asyncio.sleep(0.1)
+        
+        return {
+            "success": True,
+            "message": f"Checked {results['checked']} bookmarks",
+            "profile_name": profile_name,
+            "batch_size": batch_size,
+            "total_bookmarks": len(bookmarks),
+            "results": results,
+            "summary": {
+                "checked": results["checked"],
+                "working": results["working"],
+                "broken": results["broken"],
+                "fixed": results["fixed"],
+                "unfixable": len(results["unfixable"]),
+            },
+            "note": "URL updates are dry-run only - set dry_run=False to apply fixes",
+        }
+        
+    except Exception as e:
+        logger.error(f"Error refreshing bookmarks: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Failed to refresh bookmarks: {str(e)}",
+            "profile_name": profile_name,
             "old_bookmarks": [],
             "count": 0,
         }

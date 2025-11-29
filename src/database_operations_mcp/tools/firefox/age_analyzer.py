@@ -2,6 +2,7 @@
 
 DEPRECATED: Individual tools deprecated. Use firefox_bookmarks portmanteau instead.
 - find_old_bookmarks() → firefox_bookmarks(operation='find_old_bookmarks')
+- find_forgotten_bookmarks() → firefox_bookmarks(operation='find_forgotten_bookmarks')
 - get_bookmark_stats() → firefox_bookmarks(operation='get_bookmark_stats')
 """
 
@@ -17,17 +18,70 @@ from .db import FirefoxDB
 async def find_old_bookmarks(
     days_old: int = 365, profile_path: str | None = None
 ) -> dict[str, Any]:
-    """Find bookmarks that haven't been visited in a while.
+    """Find bookmarks CREATED a long time ago (by dateAdded).
 
     Args:
-        days_old: Minimum age in days to consider a bookmark "old"
+        days_old: Minimum age in days since bookmark was CREATED
         profile_path: Path to the Firefox profile directory
 
     Returns:
-        Dictionary with old bookmarks and statistics
+        Dictionary with old bookmarks sorted by creation date (oldest first)
     """
     db = FirefoxDB(Path(profile_path) if profile_path else None)
     cutoff_date = datetime.now() - timedelta(days=days_old)
+    cutoff_timestamp = int(cutoff_date.timestamp() * 1000000)  # Convert to microseconds
+
+    query = """
+        SELECT b.id, b.title, p.url, 
+               b.dateAdded / 1000000 as created_ts,
+               b.lastModified / 1000000 as modified_ts,
+               (strftime('%s', 'now') - b.dateAdded/1000000)/86400 as age_days,
+               (strftime('%s', 'now') - b.dateAdded/1000000)/86400/365.25 as age_years
+        FROM moz_bookmarks b
+        LEFT JOIN moz_places p ON b.fk = p.id
+        WHERE b.type = 1
+          AND b.dateAdded < ?
+        ORDER BY b.dateAdded ASC
+    """
+
+    cursor = db.execute(query, (cutoff_timestamp,))
+    old_bookmarks = []
+
+    for row in cursor.fetchall():
+        bookmark = dict(row)
+        if bookmark["created_ts"]:
+            bookmark["created"] = datetime.fromtimestamp(bookmark["created_ts"]).isoformat()
+        if bookmark["modified_ts"]:
+            bookmark["last_modified"] = datetime.fromtimestamp(bookmark["modified_ts"]).isoformat()
+        bookmark["age_years"] = round(bookmark["age_years"], 1) if bookmark["age_years"] else None
+        old_bookmarks.append(bookmark)
+
+    return {
+        "description": f"Bookmarks created more than {days_old} days ago",
+        "cutoff_date": cutoff_date.isoformat(),
+        "bookmark_count": len(old_bookmarks),
+        "bookmarks": old_bookmarks,
+    }
+
+
+# DEPRECATED: Use firefox_bookmarks(operation='find_forgotten_bookmarks') instead
+async def find_forgotten_bookmarks(
+    days_unvisited: int = 365, profile_path: str | None = None
+) -> dict[str, Any]:
+    """Find bookmarks not VISITED in a while (by last_visit_date).
+    
+    These are bookmarks that exist but haven't been clicked/used.
+    Good candidates for archiving or deletion.
+
+    Args:
+        days_unvisited: Minimum days since last visit
+        profile_path: Path to the Firefox profile directory
+
+    Returns:
+        Dictionary with forgotten/unused bookmarks
+    """
+    db = FirefoxDB(Path(profile_path) if profile_path else None)
+    cutoff_date = datetime.now() - timedelta(days=days_unvisited)
     cutoff_timestamp = int(cutoff_date.timestamp() * 1000000)  # Convert to microseconds
 
     query = """
@@ -36,23 +90,25 @@ async def find_old_bookmarks(
                (strftime('%s', 'now') - p.last_visit_date/1000000)/86400 as days_since_visit
         FROM moz_places p
         JOIN moz_bookmarks b ON b.fk = p.id
-        WHERE p.last_visit_date > 0
+        WHERE b.type = 1
+          AND p.last_visit_date > 0
           AND p.last_visit_date < ?
         ORDER BY p.last_visit_date ASC
     """
 
     cursor = db.execute(query, (cutoff_timestamp,))
-    old_bookmarks = []
+    stale_bookmarks = []
 
     for row in cursor.fetchall():
         bookmark = dict(row)
-        bookmark["last_visit_date"] = datetime.fromtimestamp(bookmark["last_visit_ts"]).isoformat()
-        old_bookmarks.append(bookmark)
+        bookmark["last_visit"] = datetime.fromtimestamp(bookmark["last_visit_ts"]).isoformat()
+        stale_bookmarks.append(bookmark)
 
     return {
+        "description": f"Bookmarks not visited in {days_unvisited}+ days",
         "cutoff_date": cutoff_date.isoformat(),
-        "bookmark_count": len(old_bookmarks),
-        "bookmarks": old_bookmarks,
+        "bookmark_count": len(stale_bookmarks),
+        "bookmarks": stale_bookmarks,
     }
 
 

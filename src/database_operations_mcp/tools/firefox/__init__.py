@@ -3,7 +3,7 @@
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
 
-from .age_analyzer import find_old_bookmarks, get_bookmark_stats
+from .age_analyzer import find_forgotten_bookmarks, find_old_bookmarks, get_bookmark_stats
 
 # Import AI portmanteau tool
 from .ai_portmanteau import ai_bookmark_portmanteau
@@ -46,6 +46,7 @@ __all__ = [
     "export_bookmarks",
     "batch_update_tags",
     "find_broken_links",
+    "find_forgotten_bookmarks",
     "find_old_bookmarks",
     "get_bookmark_stats",
     "tag_from_folder",
