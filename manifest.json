@@ -3,7 +3,7 @@
   "name": "database-operations-mcp",
   "version": "1.0.0",
   "description": "Universal Database Operations MCP - SQL, NoSQL, and Vector database management with Windows Registry support. Supports stdio and HTTP transports.",
-  "long_description": "Comprehensive MCP server for database operations across SQL (PostgreSQL, SQLite), NoSQL (MongoDB), Vector (ChromaDB) databases, plus Calibre library management, Firefox bookmarks, Plex media server, and Windows Registry access. Built with FastMCP 2.12.0 for enterprise-grade reliability.",
+  "long_description": "Comprehensive MCP server for database operations across SQL (PostgreSQL, SQLite), NoSQL (MongoDB), Vector (ChromaDB) databases, plus Calibre library management, Firefox bookmarks, Plex media server, and Windows Registry access. Built with FastMCP 2.13.0+ for enterprise-grade reliability.",
   "author": {
     "name": "Sandra Schilling",
     "email": "sandra@example.com"

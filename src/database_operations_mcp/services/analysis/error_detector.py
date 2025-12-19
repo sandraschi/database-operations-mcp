@@ -94,13 +94,13 @@ class ErrorDetector:
         async with aiosqlite.connect(db_path) as conn:
             try:
                 # Page count check
-                async with conn.execute("PRAGMA page_count()") as cursor:
+                async with conn.execute("PRAGMA page_count") as cursor:
                     page_count = (await cursor.fetchone())[0]
                     if page_count == 0:
                         corruption_issues.append("Empty database - 0 pages")
 
                 # Page size check
-                async with conn.execute("PRAGMA page_size()") as cursor:
+                async with conn.execute("PRAGMA page_size") as cursor:
                     page_size = (await cursor.fetchone())[0]
                     if page_size not in [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]:
                         corruption_issues.append(f"Unusual page size: {page_size}")
@@ -140,14 +140,14 @@ class ErrorDetector:
 
             for table_name in tables:
                 # Check for NULL in NOT NULL columns
-                async with conn.execute(f"PRAGMA table_info({table_name})") as cursor:
+                async with conn.execute(f'PRAGMA table_info("{table_name}")') as cursor:
                     columns = await cursor.fetchall()
                     not_null_columns = [col[1] for col in columns if col[3] == 1]
 
                     for col_name in not_null_columns:
                         try:
                             async with conn.execute(
-                                f"SELECT COUNT(*) FROM {table_name} WHERE {col_name} IS NULL"
+                                f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col_name}" IS NULL'
                             ) as cursor:
                                 null_count = (await cursor.fetchone())[0]
                                 if null_count > 0:

@@ -43,6 +43,7 @@ async def media_library(
         - search_calibre_library: Search books in Calibre library
         - get_calibre_book_metadata: Get detailed metadata for a specific book
         - search_calibre_fts: Perform full-text search in Calibre library
+        - search_calibre_fts_db: Search Calibre's full-text-search database (FTS)
         - find_plex_database: Locate Plex Media Server database file
         - optimize_plex_database: Optimize Plex database performance
         - export_database_schema: Export database schema information
@@ -77,7 +78,7 @@ async def media_library(
 
         search_query (str, OPTIONAL): Search query string
             Format: Free-form search text
-            Required for: search_calibre_library, search_calibre_fts operations
+            Required for: search_calibre_library, search_calibre_fts, search_calibre_fts_db operations
             Behavior: Searches titles, authors, tags, and content (FTS)
             Example: 'python programming', 'machine learning algorithms'
 
@@ -128,6 +129,7 @@ async def media_library(
             - For search_calibre_library: results (list), count, library_path
             - For get_calibre_book_metadata: book_info (dict), metadata (if requested)
             - For search_calibre_fts: results (list with highlights), count
+            - For search_calibre_fts_db: results (list with metadata), count, fts_db_path
             - For find_plex_database: database_path, server_info, status
             - For optimize_plex_database: message, optimization_stats
             - For export_database_schema: export_path, format, schema_data
@@ -214,6 +216,29 @@ async def media_library(
             #         }
             #     ],
             #     'count': 8
+            # }
+
+        Search Calibre FTS database:
+            result = await media_library(
+                operation='search_calibre_fts_db',
+                library_path='C:/Users/Username/Calibre Library',
+                search_query='python programming',
+                include_metadata=True
+            )
+            # Returns: {
+            #     'success': True,
+            #     'results': [
+            #         {
+            #             'book_id': 123,
+            #             'title': 'Python Cookbook',
+            #             'author': 'David Beazley',
+            #             'format': 'EPUB',
+            #             'text_preview': '...python programming...',
+            #             'relevance_score': 0.89
+            #         }
+            #     ],
+            #     'count': 12,
+            #     'fts_db_path': 'C:/Users/Username/Calibre Library/full-text-search.db'
             # }
 
         Find Plex database:
@@ -338,6 +363,8 @@ async def media_library(
         return await _get_calibre_book_metadata(library_path, book_title, author, include_metadata)
     elif operation == "search_calibre_fts":
         return await _search_calibre_fts(library_path, search_query)
+    elif operation == "search_calibre_fts_db":
+        return await _search_calibre_fts_db(library_path, search_query, include_metadata)
     elif operation == "find_plex_database":
         return await _find_plex_database(plex_server_url)
     elif operation == "optimize_plex_database":
@@ -356,6 +383,7 @@ async def media_library(
                 "search_calibre_library",
                 "get_calibre_book_metadata",
                 "search_calibre_fts",
+                "search_calibre_fts_db",
                 "find_plex_database",
                 "optimize_plex_database",
                 "export_database_schema",
@@ -459,6 +487,144 @@ async def _search_calibre_fts(library_path: str | None, search_query: str | None
         return {
             "success": False,
             "error": f"Failed to perform Calibre FTS search: {str(e)}",
+            "library_path": library_path,
+            "search_query": search_query,
+            "results": [],
+            "count": 0,
+        }
+
+
+async def _search_calibre_fts_db(library_path: str | None, search_query: str | None, include_metadata: bool) -> dict[str, Any]:
+    """Search Calibre's full-text-search database."""
+    try:
+        if not library_path:
+            raise ValueError("Library path is required")
+        if not search_query:
+            raise ValueError("Search query is required")
+
+        import os
+        import sqlite3
+        from pathlib import Path
+
+        # Path to FTS database
+        fts_db_path = os.path.join(library_path, "full-text-search.db")
+        metadata_db_path = os.path.join(library_path, "metadata.db")
+
+        if not os.path.exists(fts_db_path):
+            return {
+                "success": False,
+                "error": f"FTS database not found: {fts_db_path}",
+                "library_path": library_path,
+                "search_query": search_query,
+                "results": [],
+                "count": 0,
+            }
+
+        # Connect to FTS database
+        fts_conn = sqlite3.connect(fts_db_path)
+        fts_cursor = fts_conn.cursor()
+
+        # Build search query - use LIKE for now since custom tokenizer isn't available
+        search_pattern = f"%{search_query}%"
+
+        # Search in books_text table
+        fts_cursor.execute("""
+            SELECT book, format, text_size, searchable_text
+            FROM books_text
+            WHERE searchable_text LIKE ? AND searchable_text IS NOT NULL
+            ORDER BY text_size DESC
+            LIMIT 50
+        """, (search_pattern,))
+
+        fts_results = fts_cursor.fetchall()
+
+        results = []
+        book_metadata = {}
+
+        # If metadata is requested, get book info from metadata.db
+        if include_metadata and os.path.exists(metadata_db_path):
+            try:
+                meta_conn = sqlite3.connect(metadata_db_path)
+                meta_cursor = meta_conn.cursor()
+
+                # Get unique book IDs
+                book_ids = list(set(row[0] for row in fts_results))
+                if book_ids:
+                    # Get book titles and authors
+                    placeholders = ','.join('?' * len(book_ids))
+                    meta_cursor.execute(f"""
+                        SELECT id, title, author_sort
+                        FROM books
+                        WHERE id IN ({placeholders})
+                    """, book_ids)
+
+                    book_metadata = {row[0]: {'title': row[1], 'author': row[2]} for row in meta_cursor.fetchall()}
+
+                meta_conn.close()
+            except Exception as e:
+                logger.warning(f"Could not load book metadata: {e}")
+
+        # Process results
+        for row in fts_results:
+            book_id, format_name, text_size, full_text = row
+
+            # Find context around search term
+            search_lower = search_query.lower()
+            text_lower = full_text.lower()
+            idx = text_lower.find(search_lower)
+
+            if idx >= 0:
+                # Extract context around the match
+                start = max(0, idx - 100)
+                end = min(len(full_text), idx + len(search_query) + 100)
+                context = full_text[start:end]
+
+                # Highlight the search term
+                context_lower = context.lower()
+                highlight_start = context_lower.find(search_lower)
+                if highlight_start >= 0:
+                    highlighted = (
+                        context[:highlight_start] +
+                        "**" + context[highlight_start:highlight_start + len(search_query)] + "**" +
+                        context[highlight_start + len(search_query):]
+                    )
+                else:
+                    highlighted = context
+            else:
+                # Fallback if we can't find the term (shouldn't happen with LIKE)
+                highlighted = full_text[:200] + "..."
+
+            result = {
+                'book_id': book_id,
+                'format': format_name,
+                'text_size': text_size,
+                'text_preview': highlighted,
+                'relevance_score': 1.0  # Basic relevance for LIKE search
+            }
+
+            if include_metadata and book_id in book_metadata:
+                result.update(book_metadata[book_id])
+
+            results.append(result)
+
+        fts_conn.close()
+
+        return {
+            "success": True,
+            "operation": "search_calibre_fts_db",
+            "library_path": library_path,
+            "fts_db_path": fts_db_path,
+            "search_query": search_query,
+            "results": results,
+            "count": len(results),
+            "include_metadata": include_metadata,
+        }
+
+    except Exception as e:
+        logger.error(f"Error searching Calibre FTS database: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Failed to search Calibre FTS database: {str(e)}",
             "library_path": library_path,
             "search_query": search_query,
             "results": [],

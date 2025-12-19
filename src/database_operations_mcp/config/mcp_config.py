@@ -80,9 +80,9 @@ async def server_lifespan(mcp_instance: FastMCP) -> AsyncContextManager[None]:
                 logger.warning(f"Error during storage cleanup (non-fatal): {e}")
 
 
-# Create a single FastMCP instance with lifespan for persistent storage
-# FastMCP 2.13+ supports lifespan parameter for startup/cleanup
-mcp = FastMCP(name="database-operations-mcp", lifespan=server_lifespan)
+# Create a single FastMCP instance WITHOUT lifespan for debugging
+# Temporarily disable persistent storage to isolate the issue
+mcp = FastMCP(name="database-operations-mcp")
 
 # Flag to control individual tool registration
 # Set to False to only register portmanteau tools

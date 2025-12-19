@@ -17,34 +17,27 @@ from database_operations_mcp.services.analysis import (
     StructureAnalyzer,
 )
 
-# Initialize analyzers (temporarily disabled for debugging)
-# _structure_analyzer = StructureAnalyzer()
-# _content_analyzer = ContentAnalyzer()
-# _error_detector = ErrorDetector()
-# _health_checker = HealthChecker()
-# _report_generator = ReportGenerator()
+# Initialize analyzers
+_structure_analyzer = StructureAnalyzer()
+_content_analyzer = ContentAnalyzer()
+_error_detector = ErrorDetector()
+_health_checker = HealthChecker()
+_report_generator = ReportGenerator()
 
 
 @mcp.tool()
-async def db_analysis(db_file_path: str, operation: str = "analyze"):
-    """Database analysis tool."""
-    if operation == "analyze":
-        return {"success": True, "db_file_path": db_file_path, "operation": operation}
-    else:
-        return {"success": False, "error": f"Unknown operation: {operation}"}
-
-
-# async def _db_analysis_impl(
+async def db_analyzer(
     db_file_path: str,
-    operation: str,
-    analysis_depth: str,
-    include_sample_data: bool,
-    detect_errors: bool,
-    suggest_fixes: bool,
-    table_name: Optional[str],
-    limit: int,
+    operation: str = "analyze",
+    analysis_depth: str = "comprehensive",
+    include_sample_data: bool = True,
+    detect_errors: bool = True,
+    suggest_fixes: bool = True,
+    table_name: Optional[str] = None,
+    limit: int = 10,
 ) -> dict:
-    """Database analysis and diagnostics portmanteau tool.
+    """
+    Database analysis and diagnostics portmanteau tool.
 
     Comprehensive database analysis consolidating ALL analysis operations into
     a single interface. Examines database files to understand structure, contents,
@@ -160,24 +153,24 @@ async def db_analysis(db_file_path: str, operation: str = "analyze"):
         Supports multiple database types and provides actionable recommendations.
 
         Common scenarios:
-        - Quick health check: db_analysis(
+        - Quick health check: db_analyzer(
                 db_file_path='database.db',
                 operation='health',
                 analysis_depth='quick'
             )
-        - Full analysis: db_analysis(
+        - Full analysis: db_analyzer(
                 db_file_path='database.db',
                 operation='analyze',
                 analysis_depth='comprehensive'
             )
-        - Structure only: db_analysis(
+        - Structure only: db_analyzer(
                 db_file_path='database.db',
                 operation='structure'
             )
 
     Examples:
         Quick health check:
-            result = await db_analysis(
+            result = await db_analyzer(
                 db_file_path='my_database.db',
                 operation='health',
                 analysis_depth='quick'
@@ -185,7 +178,7 @@ async def db_analysis(db_file_path: str, operation: str = "analyze"):
             # Returns health score, issues, recommendations
 
         Full comprehensive analysis:
-            result = await db_analysis(
+            result = await db_analyzer(
                 db_file_path='production.db',
                 operation='analyze',
                 analysis_depth='comprehensive',
@@ -196,7 +189,7 @@ async def db_analysis(db_file_path: str, operation: str = "analyze"):
             # Returns complete analysis with structure, content, health
 
         Detect and fix errors:
-            result = await db_analysis(
+            result = await db_analyzer(
                 db_file_path='corrupted.db',
                 operation='errors',
                 suggest_fixes=True
@@ -235,24 +228,6 @@ async def db_analysis(db_file_path: str, operation: str = "analyze"):
         - db_schema: Database schema management
         - db_management: Database administration operations
     """
-    return await _db_analysis_impl(
-        db_file_path, operation, analysis_depth, include_sample_data,
-        detect_errors, suggest_fixes, table_name, limit
-    )
-
-
-async def _db_analysis_impl(
-    db_file_path: str,
-    operation: str,
-    analysis_depth: str,
-    include_sample_data: bool,
-    detect_errors: bool,
-    suggest_fixes: bool,
-    table_name: str,
-    limit: int,
-):
-    """Internal implementation of database analysis."""
-    print(f"DEBUG: _db_analysis_impl called with db_file_path={db_file_path}")
     # Route to appropriate analysis handler
     if operation == "structure" or operation == "analyze":
         structure = await _structure_analyzer.analyze_schema(db_file_path)
@@ -350,9 +325,15 @@ async def _db_analysis_impl(
 
     if include_sample_data and structure["tables"]:
         content = await _content_analyzer.sample_content(
-            db_file_path, structure["tables"][0]["name"], limit=limit
+            db_file_path,
+            structure["tables"][0]["name"],
+            limit=limit
         )
-        result["sample_data"] = content
+        result["content"] = {
+            "samples": content,
+            "patterns": {},
+            "distributions": {},
+        }
 
     if detect_errors:
         errors = await _error_detector.find_logical_errors(db_file_path)

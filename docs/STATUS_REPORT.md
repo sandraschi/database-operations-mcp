@@ -81,7 +81,7 @@ This repository provides a FastMCP 2.13 MCP server for database-centric operatio
 17. `ai_bookmark_portmanteau` - AI-powered bookmark operations
 
 #### Media & Support Tools
-18. `media_library` - Calibre & Plex library management (8 operations)
+18. `media_library` - Calibre & Plex library management (9 operations)
 19. `help_system` - Interactive help and documentation (7 operations)
 20. `system_init` - System initialization and setup (7 operations)
 21. `db_operations_extended` - Extended database operations across multiple DB types
@@ -234,6 +234,8 @@ docs/
 **Last Release:** 2025-12-19
 
 **Recent Changes (CHANGELOG):**
+- **Calibre FTS Database Search**: Added `search_calibre_fts_db` operation for full-text search of Calibre libraries
+- **FTS Context Highlighting**: Intelligent search result highlighting with surrounding context
 - **Critical Database Analysis Fixes**: Fixed SQL injection vulnerabilities, PRAGMA syntax errors, and MCP tool registration issues
 - **Tool Renaming**: Renamed `db_analysis` to `db_analyzer` to resolve FastMCP framework conflicts
 - **Security Enhancements**: Added parameterized queries throughout database analysis services

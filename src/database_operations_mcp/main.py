@@ -2,7 +2,7 @@
 Main module for Database Operations MCP.
 
 This module provides the main entry point for the Database Operations MCP server,
-which supports both stdio and HTTP transports with FastMCP 2.12.4.
+which supports both stdio and HTTP transports with FastMCP 2.13.0+.
 """
 
 import asyncio
@@ -56,21 +56,36 @@ class DatabaseOperationsMCP:
         logger.info("Shutting down Database Operations MCP server...")
         self._shutdown_event.set()
 
-        if self.mcp and self._loop:
+        if self.mcp:
             logger.info("Cleaning up MCP resources...")
             # Cancel all running tasks
-            tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-            for task in tasks:
-                task.cancel()
-            await asyncio.gather(*tasks, return_exceptions=True)
-            self._loop.stop()
+            try:
+                tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+                for task in tasks:
+                    task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
+            except Exception as e:
+                logger.warning(f"Error during task cleanup (non-fatal): {e}")
 
     def _register_signal_handlers(self) -> None:
-        """Register signal handlers for graceful shutdown."""
-        if sys.platform == "win32":
-            # Windows signal handling
-            signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self._shutdown()))
-            signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self._shutdown()))
+        """Register signal handlers for graceful shutdown.
+        
+        Note: FastMCP handles most signal management internally.
+        This is primarily for custom shutdown logic if needed.
+        """
+        try:
+            # Register signal handlers for graceful shutdown on all platforms
+            if sys.platform == "win32":
+                # Windows signal handling
+                signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self._shutdown()))
+                signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self._shutdown()))
+            else:
+                # Unix-like systems
+                signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self._shutdown()))
+                signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self._shutdown()))
+        except (ValueError, OSError) as e:
+            # Signal handlers may not be available in all contexts (e.g., threads)
+            logger.debug(f"Could not register signal handlers: {e}")
 
     def _import_all_tools(self) -> None:
         """Import portmanteau tools from tools/ directory to register them."""
@@ -80,8 +95,9 @@ class DatabaseOperationsMCP:
             from .tools import (  # noqa: F401
                 browser_bookmarks,  # Universal browser bookmark tool (covers all browsers)
                 chrome_profiles,
-                db_analysis,
+                db_analyzer,  # Renamed from db_analysis
                 db_connection,
+                test_tool,  # Test tool for debugging
                 db_fts,
                 db_management,
                 db_operations,

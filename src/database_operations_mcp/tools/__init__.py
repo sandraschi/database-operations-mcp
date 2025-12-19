@@ -39,7 +39,7 @@ from . import (
     chrome_profiles,
     connection_tools,
     data_tools,
-    db_analysis,
+    db_analyzer,
     # New portmanteau tools
     db_connection,
     db_fts,
@@ -105,6 +105,6 @@ __all__ = [
     # Phase 1-3 new tools
     "browser_bookmarks",
     "chrome_profiles",
-    "db_analysis",
+    "db_analyzer",
     "db_operations_extended",
 ]

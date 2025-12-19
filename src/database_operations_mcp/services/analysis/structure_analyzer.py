@@ -181,7 +181,7 @@ class StructureAnalyzer:
             Table information dictionary
         """
         # Get column information
-        async with conn.execute(f"PRAGMA table_info({table_name})") as cursor:
+        async with conn.execute(f'PRAGMA table_info("{table_name}")') as cursor:
             columns = []
             primary_key = None
             for row in await cursor.fetchall():
@@ -198,12 +198,13 @@ class StructureAnalyzer:
 
         # Get indexes
         async with conn.execute(
-            f"SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='{table_name}'"
+            "SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name=?",
+            (table_name,)
         ) as cursor:
             indexes = [{"name": row[0], "definition": row[1]} for row in await cursor.fetchall()]
 
         # Get foreign keys
-        async with conn.execute(f"PRAGMA foreign_key_list({table_name})") as cursor:
+        async with conn.execute(f'PRAGMA foreign_key_list("{table_name}")') as cursor:
             foreign_keys = []
             for row in await cursor.fetchall():
                 foreign_keys.append(
@@ -218,7 +219,7 @@ class StructureAnalyzer:
                 )
 
         # Get row count
-        async with conn.execute(f"SELECT COUNT(*) FROM {table_name}") as cursor:
+        async with conn.execute(f'SELECT COUNT(*) FROM "{table_name}"') as cursor:
             row_count = (await cursor.fetchone())[0]
 
         # Estimate table size
@@ -245,11 +246,13 @@ class StructureAnalyzer:
             Estimated size in bytes
         """
         try:
-            async with conn.execute(
-                "SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size()"
-            ) as cursor:
-                result = await cursor.fetchone()
-                return result[0] if result else 0
+            async with conn.execute("PRAGMA page_count") as cursor:
+                page_count = (await cursor.fetchone())[0]
+
+            async with conn.execute("PRAGMA page_size") as cursor:
+                page_size = (await cursor.fetchone())[0]
+
+            return page_count * page_size
         except Exception:
             return 0
 
@@ -282,13 +285,13 @@ class StructureAnalyzer:
         if db_type == "sqlite":
             async with aiosqlite.connect(db_path) as conn:
                 # Get SQLite-specific info
-                async with conn.execute("PRAGMA page_count()") as cursor:
+                async with conn.execute("PRAGMA page_count") as cursor:
                     info["page_count"] = (await cursor.fetchone())[0]
 
-                async with conn.execute("PRAGMA page_size()") as cursor:
+                async with conn.execute("PRAGMA page_size") as cursor:
                     info["page_size"] = (await cursor.fetchone())[0]
 
-                async with conn.execute("PRAGMA encoding()") as cursor:
+                async with conn.execute("PRAGMA encoding") as cursor:
                     info["encoding"] = (await cursor.fetchone())[0]
 
                 async with conn.execute("SELECT sqlite_version()") as cursor:

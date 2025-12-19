@@ -19,6 +19,9 @@
 - **Code Quality**: Enhanced database query security and syntax correctness
 
 ### Added
+- **Calibre FTS Database Search**: New `search_calibre_fts_db` operation in media_library tool for searching Calibre's full-text-search.db database
+- **FTS Context Highlighting**: Intelligent context extraction and search term highlighting in search results
+- **Cross-Database Book Metadata**: Automatic retrieval of book titles and authors from metadata.db for FTS results
 - **Security Improvements**: Parameterized queries throughout database analysis services
 - **Testing Infrastructure**: Multiple test scripts for verifying database analysis functionality
 - **Error Handling**: Better error messages and validation in database operations

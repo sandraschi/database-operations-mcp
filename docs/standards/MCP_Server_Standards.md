@@ -44,8 +44,9 @@ Applications being wrapped as MCP servers should meet these criteria:
 
 ### 1. FastMCP Version Requirements
 
-- Minimum: FastMCP 2.11+
-- Recommended: FastMCP 2.13+ for latest features
+- **SOTA Requirement**: FastMCP 2.13+ (mandatory for state-of-the-art status)
+- **Improvable**: FastMCP 2.11-2.12 (functional but not SOTA - upgrade recommended)
+- **Runt Status**: FastMCP <= 2.10.0 (hard failure - upgrade required)
 
 ### 2. Code Organization
 

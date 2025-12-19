@@ -55,11 +55,11 @@ class ContentAnalyzer:
         """
         async with aiosqlite.connect(db_path) as conn:
             # Get total row count
-            async with conn.execute(f"SELECT COUNT(*) FROM {table_name}") as cursor:
+            async with conn.execute(f'SELECT COUNT(*) FROM "{table_name}"') as cursor:
                 row_count = (await cursor.fetchone())[0]
 
             # Get sample rows
-            async with conn.execute(f"SELECT * FROM {table_name} LIMIT {limit}") as cursor:
+            async with conn.execute(f'SELECT * FROM "{table_name}" LIMIT ?', (limit,)) as cursor:
                 column_names = [desc[0] for desc in cursor.description]
                 rows = []
                 for row in await cursor.fetchall():
@@ -173,7 +173,7 @@ class ContentAnalyzer:
 
             # Analyze potential relationships
             for table_name in tables:
-                async with conn.execute(f"PRAGMA table_info({table_name})") as cursor:
+                async with conn.execute(f'PRAGMA table_info("{table_name}")') as cursor:
                     columns = await cursor.fetchall()
 
                     for col in columns:
