@@ -11,7 +11,7 @@ Reorganize all individual tools into portmanteau tools following FastMCP 2.13+ s
 - ✅ `db_schema` - Database schema operations
 - ✅ `db_management` - Database administration
 - ✅ `db_fts` - Full-text search operations
-- ✅ `db_analysis` - Database analysis
+- ✅ `db_analyzer` - Database analysis (renamed from db_analysis)
 - ✅ `browser_bookmarks` - Universal browser bookmarks
 - ✅ `chrome_bookmarks` - Chrome-specific bookmarks
 - ✅ `chrome_profiles` - Chrome profile management

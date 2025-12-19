@@ -24,7 +24,7 @@ Individual tools have been deprecated in favor of portmanteau tools for better m
   - Operations: list_databases, list_tables, describe_table, get_schema_diff
 - `db_management` - Database health checks, optimization, backup/restore portmanteau (consolidates management_tools)
 - `db_fts` - Full-text search with ranking and highlighting portmanteau (consolidates fts_tools)
-- `db_analysis` - Comprehensive database analysis and diagnostics portmanteau
+- `db_analyzer` - Comprehensive database analysis and diagnostics portmanteau
 - `windows_system` - Windows Registry, service status, system info portmanteau (consolidates registry_tools, windows_tools)
 
 ### Bookmark Tools (Secondary)

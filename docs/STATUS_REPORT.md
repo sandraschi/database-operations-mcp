@@ -1,7 +1,7 @@
 # Database Operations MCP - Status Report
 
-**Generated:** 2025-11-29  
-**Version:** 1.4.0  
+**Generated:** 2025-12-19
+**Version:** 1.6.0
 **Repository:** database-operations-mcp
 
 ---
@@ -61,7 +61,7 @@ This repository provides a FastMCP 2.13 MCP server for database-centric operatio
 3. `db_schema` - Schema inspection and analysis (4 operations)
 4. `db_management` - Health checks, optimization, backup/restore
 5. `db_fts` - Full-text search with ranking (3 operations)
-6. `db_analysis` - Comprehensive database analysis and diagnostics
+6. `db_analyzer` - Comprehensive database analysis and diagnostics
 7. `windows_system` - Windows Registry and system management (8 operations)
 
 #### Bookmark Tools (Secondary)
@@ -230,19 +230,20 @@ docs/
 
 ## 📈 Release Status
 
-### Current Version: 1.4.0
-**Last Release:** 2025-10-30
+### Current Version: 1.6.0
+**Last Release:** 2025-12-19
 
 **Recent Changes (CHANGELOG):**
+- **Critical Database Analysis Fixes**: Fixed SQL injection vulnerabilities, PRAGMA syntax errors, and MCP tool registration issues
+- **Tool Renaming**: Renamed `db_analysis` to `db_analyzer` to resolve FastMCP framework conflicts
+- **Security Enhancements**: Added parameterized queries throughout database analysis services
+- **Code Quality**: Enhanced error handling and type annotations for better compatibility
 - Phase 4 & 5: Comprehensive portmanteau documentation completed
 - Tool consolidation: 124+ tools → 23 portmanteau tools
-- README updates with deprecated tools section
-- Fixed syntax errors and linting issues
-- Dependency conflict resolution
 
 ### Next Release Target
-- **Version**: 1.4.1 or 1.5.0
-- **Blockers**: 
+- **Version**: 1.6.1 or 1.7.0
+- **Blockers**:
   - Fix ruff errors (14 remaining)
   - Fix critical test failures
   - Consolidate workflows
@@ -314,6 +315,6 @@ docs/
 
 ---
 
-**Last Updated**: 2025-01-27  
+**Last Updated**: 2025-12-19
 **Next Review**: After fixing priority actions
 

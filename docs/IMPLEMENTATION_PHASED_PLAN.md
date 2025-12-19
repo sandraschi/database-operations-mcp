@@ -217,13 +217,13 @@ src/database_operations_mcp/services/analysis/
 **Files to Create**:
 ```
 src/database_operations_mcp/tools/
-├── db_analysis.py          # Main analysis tool
+├── db_analyzer.py          # Main analysis tool (renamed from db_analysis)
 ├── db_diagnostics.py       # Error diagnostics
 └── db_health_report.py     # Health reporting
 ```
 
 **Tasks**:
-1. Create db_analysis.py portmanteau tool
+1. Create db_analyzer.py portmanteau tool (renamed from db_analysis)
 2. Integrate all analysis services
 3. Provide comprehensive database analysis
 4. Generate SQL fixes for detected issues

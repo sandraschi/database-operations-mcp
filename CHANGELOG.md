@@ -1,10 +1,35 @@
+## 1.6.0 - 2025-12-19
+
+### Fixed
+- **Database Analysis Tool Critical Fixes**:
+  - Fixed SQL injection vulnerabilities in database analysis services (structure_analyzer, content_analyzer, error_detector)
+  - Corrected PRAGMA syntax errors (removed invalid parentheses from PRAGMA statements)
+  - Renamed `db_analysis` tool to `db_analyzer` to resolve FastMCP framework conflicts
+  - Updated type annotations for better compatibility (Optional[str] instead of str | None)
+  - Fixed table name quoting in SQL queries for security and correctness
+- **MCP Tool Registration Issues**:
+  - Resolved "near ")": syntax error" when calling db_analysis tool
+  - Fixed "TypeError: 'FunctionTool' object is not callable" errors
+  - Ensured all database analysis operations work correctly through MCP interface
+  - Added comprehensive testing scripts for isolation and verification
+
+### Changed
+- **Tool Name Standardization**: Renamed `db_analysis` portmanteau tool to `db_analyzer` across all documentation and code
+- **Documentation Updates**: Updated README.md, CHANGELOG.md, and STATUS_REPORT.md with current status
+- **Code Quality**: Enhanced database query security and syntax correctness
+
+### Added
+- **Security Improvements**: Parameterized queries throughout database analysis services
+- **Testing Infrastructure**: Multiple test scripts for verifying database analysis functionality
+- **Error Handling**: Better error messages and validation in database operations
+
 ## 1.5.0 - 2025-01-27
 
 ### Changed
 - **Phase 4 & 5 - Comprehensive Portmanteau Documentation**:
   - Enhanced all portmanteau tool docstrings to meet cursor rules standards
   - Added Prerequisites, detailed Parameters (format/examples/validation), Returns structure, Usage scenarios, Errors sections, See Also
-  - Enhanced database tools: `db_connection`, `db_operations`, `db_schema`, `db_management`, `db_fts`, `db_analysis`
+  - Enhanced database tools: `db_connection`, `db_operations`, `db_schema`, `db_management`, `db_fts`, `db_analyzer`
   - Enhanced support tools: `help_system`, `media_library`, `windows_system`
   - Enhanced browser tools: `firefox_bookmarks`, `firefox_profiles`, `browser_bookmarks`, `chromium_portmanteau`
   - Enhanced remaining tools: `system_init`, `firefox_backup`, `firefox_curated`, `firefox_tagging`

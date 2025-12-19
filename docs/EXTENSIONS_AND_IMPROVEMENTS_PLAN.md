@@ -1005,7 +1005,7 @@ src/database_operations_mcp/
 │       ├── health_checker.py         # Health scoring
 │       └── report_generator.py       # Report generation
 ├── tools/
-│   ├── db_analysis.py               # Main analysis tool
+│   ├── db_analyzer.py               # Main analysis tool (renamed from db_analysis)
 │   ├── db_diagnostics.py            # Error diagnostics
 │   └── db_health_report.py          # Health reporting
 └── utils/
