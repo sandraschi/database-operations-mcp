@@ -1,3 +1,18 @@
+## 1.6.1 - 2025-12-20
+
+### Added
+- **Calibre Full-Text Search (FTS) Implementation**:
+  - New `search_calibre_fts_db` operation in `media_library` portmanteau tool
+  - Searches Calibre's `full-text-search.db` using LIKE queries on searchable_text column
+  - Intelligent context extraction with search term highlighting
+  - Automatic book metadata retrieval (title, author) from `metadata.db`
+  - Comprehensive error handling for missing databases and search failures
+  - Unicode-safe text processing and output formatting
+
+### Fixed
+- **Documentation Updates**: Updated README.md and STATUS_REPORT.md with FTS functionality
+- **Cleanup**: Removed temporary demo and test scripts after implementation
+
 ## 1.6.0 - 2025-12-19
 
 ### Fixed

@@ -1,7 +1,7 @@
 # Database Operations MCP - Status Report
 
-**Generated:** 2025-12-19
-**Version:** 1.6.0
+**Generated:** 2025-12-20
+**Version:** 1.6.1
 **Repository:** database-operations-mcp
 
 ---
@@ -81,7 +81,7 @@ This repository provides a FastMCP 2.13 MCP server for database-centric operatio
 17. `ai_bookmark_portmanteau` - AI-powered bookmark operations
 
 #### Media & Support Tools
-18. `media_library` - Calibre & Plex library management (9 operations)
+18. `media_library` - Calibre & Plex library management (10 operations)
 19. `help_system` - Interactive help and documentation (7 operations)
 20. `system_init` - System initialization and setup (7 operations)
 21. `db_operations_extended` - Extended database operations across multiple DB types
