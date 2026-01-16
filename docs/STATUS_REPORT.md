@@ -8,7 +8,7 @@
 
 ## 📊 Executive Summary
 
-This repository provides a FastMCP 2.13 MCP server for database-centric operations on Windows, with powerful bookmark tooling as a secondary feature. The project has completed major tool consolidation efforts and maintains comprehensive portmanteau tools across multiple categories.
+This repository provides a FastMCP 2.14.3 MCP server for database-centric operations on Windows, with powerful bookmark tooling as a secondary feature. The project has completed major tool consolidation efforts and maintains comprehensive portmanteau tools across multiple categories.
 
 **Current Status:** ✅ Active Development  
 **Triple Initiatives Status:** 
@@ -33,7 +33,7 @@ This repository provides a FastMCP 2.13 MCP server for database-centric operatio
 ## 🛠️ Technical Stack
 
 ### Core Dependencies
-- **FastMCP**: 2.13.0+ (mandatory for security fixes and persistent storage)
+- **FastMCP**: 2.14.3+ (mandatory for conversational returns and sampling capabilities)
 - **Python**: 3.10+ (tested up to 3.13.5)
 - **Package Manager**: uv (replaces pip)
 - **Linter**: ruff (replaces flake8, black, isort)
@@ -213,11 +213,13 @@ docs/
 
 ## 🔒 Security & Compliance
 
-### FastMCP 2.13 Compliance ✅
-- **Version**: Using FastMCP 2.13.0+ (required)
+### FastMCP 2.14.3 Compliance ✅
+- **Version**: Using FastMCP 2.14.3+ (required)
+- **Conversational Returns**: All tools return natural language summaries
+- **Sampling Capabilities**: Agentic workflows for complex database operations
 - **Security Fixes**: CVE-2025-62801 (command injection) ✅ Fixed
 - **Security Fixes**: CVE-2025-62800 (XSS) ✅ Fixed
-- **Architecture**: Proper FastMCP 2.13+ framework usage
+- **Architecture**: Proper FastMCP 2.14.3+ framework usage
 - **Persistent Storage**: FastMCP storage backends implemented
 
 ### Security Practices

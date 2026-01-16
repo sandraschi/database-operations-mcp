@@ -44,7 +44,7 @@ Applications being wrapped as MCP servers should meet these criteria:
 
 ### 1. FastMCP Version Requirements
 
-- **SOTA Requirement**: FastMCP 2.13+ (mandatory for state-of-the-art status)
+- **SOTA Requirement**: FastMCP 2.14.3+ (mandatory for state-of-the-art status)
 - **Improvable**: FastMCP 2.11-2.12 (functional but not SOTA - upgrade recommended)
 - **Runt Status**: FastMCP <= 2.10.0 (hard failure - upgrade required)
 
@@ -534,7 +534,7 @@ async def update_counter():
 - **Request Batching**: Combine multiple tool calls
 - **Reduced Latency**: Up to 40% improvement in response times
 
-## 🚀 FastMCP 2.13 Features
+## 🚀 FastMCP 2.14.3 Features
 
 ### Consistent State Management
 ```python
@@ -573,7 +573,7 @@ async def process_data(data: dict):
        await state.set("resource:123", process(data))
    ```
 
-## 🔄 FastMCP 2.13 State Management
+## 🔄 FastMCP 2.14.3 State Management
 
 ### Consistent State Management
 ```python
@@ -924,6 +924,6 @@ async def bad_example():
    - Document known working versions
 
 ## 📚 Additional Resources
-- [FastMCP 2.13 Documentation](https://fastmcp.anthropic.com/docs/2.13/)
+- [FastMCP 2.14.3 Documentation](https://fastmcp.anthropic.com/docs/2.14.3/)
 - [MCPB Building Guide](./../mcpb-packaging/MCPB_BUILDING_GUIDE.md)
 - [Database Operations MCP Architecture](./ARCHITECTURE.md)

@@ -1,4 +1,0 @@
-Tests run: 3
-Tests passed: 3
-Tests failed: 0
-Detailed results saved to: test_results.json

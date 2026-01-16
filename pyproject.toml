@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "database-operations-mcp"
-version = "1.4.0"
-description = "FastMCP 2.13 server for database operations on Windows with bookmark tools as secondary feature"
+version = "1.4.1"
+description = "FastMCP 2.14.3 server for database operations on Windows with bookmark tools as secondary feature"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "fastmcp>=2.13.0",
+    "fastmcp>=2.14.3,<2.15.0",
     "aiofiles>=23.2.0",
     "aiosqlite>=0.19.0",
     "pydantic>=2.5.0",

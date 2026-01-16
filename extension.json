@@ -1,0 +1,19 @@
+{
+  "name": "database-operations-mcp",
+  "display_name": "Database Operations MCP",
+  "description": "FastMCP 2.14.3 server for database-centric operations on Windows with bookmark tools as secondary feature",
+  "version": "1.4.1",
+  "schema_version": "0.1.0",
+  "authors": ["Sandra Schipal <sandraschipal@gmail.com>"],
+  "repository": "https://github.com/sandraschi/database-operations-mcp",
+  "languages": ["Python", "Rust"],
+  "categories": ["ai", "database", "productivity"],
+  "context_servers": [
+    {
+      "name": "database-operations-mcp",
+      "command": "uv",
+      "args": ["run", "--project", ".", "--mcp"],
+      "env": {}
+    }
+  ]
+}

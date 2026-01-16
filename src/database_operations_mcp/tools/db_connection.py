@@ -391,7 +391,10 @@ async def db_connection(
     else:
         return {
             "success": False,
+            "operation": operation,
+            "message": f"I don't recognize the '{operation}' operation. Here are the available database connection operations you can use.",
             "error": f"Unknown operation: {operation}",
+            "error_code": "INVALID_OPERATION",
             "available_operations": [
                 "list_supported",
                 "register",
@@ -407,6 +410,11 @@ async def db_connection(
                 "get_preferences",
                 "set_preferences",
             ],
+            "suggestions": [
+                "Use 'list_supported' to see all available database types",
+                "Use 'register' to add a new database connection",
+                "Use 'list' to see your existing connections"
+            ]
         }
 
 
@@ -425,18 +433,33 @@ async def _list_supported_databases() -> dict[str, Any]:
 
         return {
             "success": True,
+            "operation": "list_supported",
+            "message": f"I found {len(databases)} supported database types across {len(categorized)} categories. You can connect to SQL databases (PostgreSQL, MySQL, SQLite), NoSQL databases (MongoDB), vector databases (ChromaDB), and more.",
             "databases_by_category": categorized,
             "total_supported": len(databases),
             "categories": list(categorized.keys()),
+            "next_steps": [
+                "Use 'register' operation to connect to one of these databases",
+                "Use 'init' operation for legacy connection setup",
+                "Use 'list' to see your existing connections"
+            ]
         }
     except Exception as e:
         logger.error(f"Error listing supported databases: {e}", exc_info=True)
         return {
             "success": False,
+            "operation": "list_supported",
+            "message": f"Sorry, I encountered an error while listing supported databases. The error was: {str(e)}. Please try again or check the system logs.",
             "error": f"Failed to list supported databases: {str(e)}",
+            "error_code": "LIST_DATABASES_FAILED",
             "databases_by_category": {},
             "total_supported": 0,
             "categories": [],
+            "suggestions": [
+                "Try the operation again",
+                "Check system logs for more details",
+                "Verify the database operations service is running"
+            ]
         }
 
 

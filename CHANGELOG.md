@@ -1,3 +1,27 @@
+## 1.4.1 - 2026-01-16
+
+### Added
+- **FastMCP 2.14.3 Upgrade**:
+  - Upgraded from FastMCP 2.13.0+ to 2.14.3+ for state-of-the-art capabilities
+  - Added conversational tool returns with natural language summaries and contextual guidance
+  - Implemented sampling capabilities for agentic workflows and complex database operations
+  - Enhanced error handling with actionable recovery suggestions and structured error codes
+  - Added `db_sampling_workflow` tool demonstrating FastMCP 2.14.3 sampling features
+- **Improved AI Interaction**:
+  - All portmanteau tools now return conversational responses alongside technical data
+  - Better error messages with context-aware guidance and next steps
+  - Enhanced tool discoverability through improved response structures
+
+### Changed
+- **Requirements**: Updated `pyproject.toml` to require `fastmcp>=2.14.3,<2.15.0`
+- **Documentation**: Updated all references from FastMCP 2.13 to 2.14.3 across README, status reports, and standards docs
+- **Badge**: Updated README badge to show FastMCP 2.14.3 compliance
+
+### Technical
+- **Conversational Returns**: All tools now return `message` field with natural language summaries
+- **Error Enhancement**: Error responses include `error_code` and `suggestions` for better programmatic handling
+- **Sampling Workflow**: New `db_sampling_workflow` tool for complex database orchestration without client round-trips
+
 ## 1.6.1 - 2025-12-20
 
 ### Added

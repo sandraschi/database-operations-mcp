@@ -1,27 +1,27 @@
 {
   "manifest_version": "0.2",
   "name": "database-operations-mcp",
-  "version": "1.2.3",
-  "description": "Universal Database Operations MCP - SQL, NoSQL, Vector databases with Windows Registry support",
+  "version": "0.1.0",
+  "description": "MCP server for comprehensive database operations and browser bookmark management",
   "author": {
-    "name": "Sandra Schilling",
+    "name": "Sandra Schi",
     "email": "sandra@example.com"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sandraschi/database-operations-mcp"
+  },
   "server": {
     "type": "python",
     "entry_point": "src/database_operations_mcp/main.py",
     "mcp_config": {
       "command": "python",
-      "args": ["-m", "database_operations_mcp.main"],
+      "args": ["src/database_operations_mcp/main.py"],
       "env": {
-        "PYTHONPATH": "${PWD}",
+        "PYTHONPATH": "${__dirname}/src",
         "PYTHONUNBUFFERED": "1"
       }
     }
-  },
-  "compatibility": {
-    "platforms": ["win32", "darwin", "linux"],
-    "python_version": ">=3.10"
   }
 }

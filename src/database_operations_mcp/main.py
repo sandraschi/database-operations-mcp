@@ -118,6 +118,9 @@ class DatabaseOperationsMCP:
 
             logger.info("All 19 portmanteau tools imported successfully!")
 
+            # Import FastMCP 2.14.3 sampling workflow tool
+            from .tools.sampling_workflow import db_sampling_workflow  # noqa: F401
+
         except ImportError as e:
             logger.error(f"Failed to import tool modules: {e}")
             raise
