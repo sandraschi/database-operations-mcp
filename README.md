@@ -204,14 +204,17 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source ~/.cargo/env
 
 # Build the Zed extension
+cd zed-extension
 cargo build --release --target wasm32-wasip1
 ```
 
 ### Install in Zed
 1. Open Zed
 2. Go to `Extensions` → `Install Dev Extension`
-3. Select the `extension.json` file (if available) or the built WASM file at `target/wasm32-wasip1/release/database_operations_mcp_zed_extension.wasm`
+3. Select the `zed-extension/extension.json` file from the repository root
 4. The extension will be loaded and available for use
+
+**Alternative:** If Zed doesn't recognize the extension.json, you can also select the built WASM file directly at `zed-extension/target/wasm32-wasip1/release/database_operations_mcp_zed_extension.wasm`
 
 ### Zed Extension Features
 - MCP server integration within Zed
