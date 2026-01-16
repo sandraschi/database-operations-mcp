@@ -23,7 +23,7 @@ impl zed::Extension for DatabaseOperationsMcpExtension {
             args: vec![
                 "run".to_string(),
                 "--project".to_string(),
-                ".".to_string(),
+                "..".to_string(),
                 "--mcp".to_string(),
             ],
             env: Default::default(),
