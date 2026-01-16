@@ -209,7 +209,7 @@ cargo build --release --target wasm32-wasip1
 ### Install in Zed
 1. Open Zed
 2. Go to `Extensions` → `Install Dev Extension`
-3. Navigate to the repository and select: `zed-extension/extension.json`
+3. Navigate to the repository and select: `zed-extension/extension.toml`
 4. The Database Operations MCP extension will be installed and loaded
 
 **Note:** The extension runs the MCP server from the parent directory, so make sure you're in the correct repository location.

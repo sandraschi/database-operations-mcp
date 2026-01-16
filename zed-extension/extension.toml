@@ -1,0 +1,12 @@
+id = "database-operations-mcp"
+name = "Database Operations MCP"
+version = "1.4.1"
+schema_version = 1
+authors = ["Sandra Schipal <sandraschipal@gmail.com>"]
+description = "FastMCP 2.14.3 server for database operations on Windows"
+repository = "https://github.com/sandraschi/database-operations-mcp"
+
+[context_servers.database-operations-mcp]
+name = "Database Operations MCP"
+command = "uv"
+args = ["run", "--project", "..", "--mcp"]
