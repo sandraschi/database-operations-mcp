@@ -343,6 +343,5 @@ The `db_sampling_workflow` tool enables complex database operations that would p
 - Python 3.10+
 - FastMCP 2.14.3
 - Supported browsers installed (for bookmark tools)
-
-## License
-MIT License - see LICENSE file.
+- **Database Drivers**: `chromadb`, `pymongo`, `psycopg2-binary`, `duckdb`, `aiomysql`, `redis`
+- **Utilities**: `aiohttp`, `rich`, `psutil`
