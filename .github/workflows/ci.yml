@@ -106,7 +106,7 @@ jobs:
           uv run pytest tests/unit/ --cov=src --cov-report=xml --cov-report=term-missing -x --tb=short --maxfail=5 -q
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage.xml
 
