@@ -24,7 +24,7 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
     - name: Install uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v7
     - name: Install dependencies
       run: uv sync --dev
     - name: Run comprehensive tests
@@ -56,7 +56,7 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
     - name: Install uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v7
     - name: Install dependencies
       run: uv sync --dev
     - name: Create test data
@@ -113,7 +113,7 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
     - name: Install uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v7
     - name: Install dependencies
       run: uv sync --dev
     - name: Run integration tests
@@ -139,7 +139,7 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
     - name: Install uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v7
     - name: Build package
       run: uv build
     - name: Test installation
