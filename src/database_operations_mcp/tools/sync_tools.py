@@ -297,8 +297,7 @@ async def sync_bookmarks(
                             ),
                         },
                         "fix": (
-                            f"check {target_browser} bookmarks file permissions | "
-                            f"verify disk space"
+                            f"check {target_browser} bookmarks file permissions | verify disk space"
                         ),
                     }
                 )
@@ -314,11 +313,11 @@ async def sync_bookmarks(
     }
 
 
-# Minimal MCP-decorated function to satisfy compliance test
-@mcp.tool()
+# DEPRECATED: Consolidate into browser_bookmarks in future
+# @mcp.tool()
 async def sync_tools_health() -> dict[str, Any]:
     return {"status": "ok"}
 
 
-# Register MCP tool without shadowing the callable function
-SYNC_BOOKMARKS_TOOL = mcp.tool(name="sync_bookmarks")(sync_bookmarks)
+# Individual tool registration removed - functionality should move to portmanteau
+# SYNC_BOOKMARKS_TOOL = mcp.tool(name="sync_bookmarks")(sync_bookmarks)

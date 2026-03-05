@@ -1,0 +1,32 @@
+# database-operations-mcp
+> This folder contains all documentation related to achieving and maintaining **Gold Standard** status on the [Glama.ai](https://glama.ai) MCP server directory platform. --- **Current roadmap to achieve...
+
+This project includes automated llms.txt generation for AI accessibility.
+
+## Docs
+- [Readme](docs\glama\README.md): This folder contains all documentation related to achieving and maintaining **Gold Standard** status...
+- [Readme](docs\github\README.md): > **Purpose**: Comprehensive GitHub configuration guide to avoid hours of trial-and-error setup.
+- [Readme](README.md): [![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](CHANGELOG.md)
+- [Readme](docs\mcpb-packaging\README.md): **Complete guide to packaging and distributing MCP servers with MCPB**
+- [Readme](docs\mcp-technical\README.md): This directory contains comprehensive technical documentation for MCP (Model Context Protocol) serve...
+- [Readme Python](README-python.md): ```powershell
+- [Complete Setup Guide](docs\github\COMPLETE_SETUP_GUIDE.md): > **6 hours of pain distilled into 30 minutes of setup**
+- [Self Hosting Guide](docs\SELF_HOSTING_GUIDE.md): This guide covers self-hosting options for MCP (Model Control Protocol) servers, including pros, con...
+- [Gold Status Achievement](docs\glama\GOLD_STATUS_ACHIEVEMENT.md): **Current Status:** Advanced Memory MCP has achieved **Silver Tier** (80% toward Gold) with signific...
+- [Serena Quick Install](docs\serena\SERENA_QUICK_INSTALL.md): **Copy this to any repo for instant Serena setup!**
+
+## Api
+- [Base](src\database_operations_mcp\models\base.py): Models definitions and implementations
+- [Connection](src\database_operations_mcp\models\connection.py): Models definitions and implementations
+- [  Init  ](src\database_operations_mcp\models\__init__.py): Models definitions and implementations
+
+## Configuration
+- [Pyproject](pyproject.toml): Python project configuration and dependencies
+- [Package](web_sota\package.json): Node.js project configuration and dependencies
+- [Cargo](Cargo.toml): Rust project configuration and dependencies
+- [Config](.git\config): Application configuration files
+
+## Optional
+- [Changelog](CHANGELOG.md): Project changelog information
+- [Contributing](CONTRIBUTING.md): Project contributing information
+- [License](LICENSE): Project license information

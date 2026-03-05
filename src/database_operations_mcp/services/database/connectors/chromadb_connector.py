@@ -9,7 +9,10 @@ import logging
 from datetime import datetime
 from typing import Any
 
-import chromadb
+try:
+    import chromadb
+except ImportError:
+    chromadb = None
 
 from ....database_manager import (
     BaseDatabaseConnector,
@@ -84,7 +87,11 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"ChromaDB connection test failed: {e}")
-            return {"success": False, "error": str(e), "timestamp": datetime.now().isoformat()}
+            return {
+                "success": False,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
+            }
 
     def connect(self) -> bool:
         """Establish ChromaDB connection."""
@@ -437,4 +444,8 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
         except Exception as e:
             logger.error(f"Error performing ChromaDB health check: {e}")
-            return {"status": "error", "error": str(e), "timestamp": datetime.now().isoformat()}
+            return {
+                "status": "error",
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
+            }

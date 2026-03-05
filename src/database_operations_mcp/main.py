@@ -13,6 +13,7 @@ import sys
 from typing import Literal
 
 # Import our centralized MCP configuration
+from .transport import run_server
 from .config.mcp_config import get_mcp
 
 # Configure logging
@@ -69,7 +70,7 @@ class DatabaseOperationsMCP:
 
     def _register_signal_handlers(self) -> None:
         """Register signal handlers for graceful shutdown.
-        
+
         Note: FastMCP handles most signal management internally.
         This is primarily for custom shutdown logic if needed.
         """
@@ -94,17 +95,16 @@ class DatabaseOperationsMCP:
             # These imports trigger @mcp.tool() decorators
             from .tools import (  # noqa: F401
                 browser_bookmarks,  # Universal browser bookmark tool (covers all browsers)
+                calibre_integration,
                 chrome_profiles,
-                db_analyzer,  # Renamed from db_analysis
+                db_analyzer,
                 db_connection,
-                test_tool,  # Test tool for debugging
                 db_fts,
                 db_management,
                 db_operations,
                 db_operations_extended,
                 db_schema,
                 firefox_backup,
-                # firefox_bookmarks - now handled by browser_bookmarks
                 firefox_curated,
                 firefox_profiles,
                 firefox_tagging,
@@ -113,13 +113,17 @@ class DatabaseOperationsMCP:
                 media_library,
                 sync_tools,
                 system_init,
-                windows_system,
+                agentic_tools,  # Added to main toolset
+                windows_system,  # Unified registry and windows tools
+                test_tool,
             )
 
-            logger.info("All 19 portmanteau tools imported successfully!")
+            # Register MCP prompts (FastMCP 3.1) - database expert and related
+            from database_operations_mcp import prompts  # noqa: F401
 
-            # Import FastMCP 2.14.3 sampling workflow tool
-            from .tools.sampling_workflow import db_sampling_workflow  # noqa: F401
+            logger.info(
+                "All 19+ portmanteau database, bookmark, and system tools imported successfully!"
+            )
 
         except ImportError as e:
             logger.error(f"Failed to import tool modules: {e}")
@@ -208,7 +212,7 @@ class DatabaseOperationsMCP:
 
             # Run the stdio server
             logger.info("Starting stdio server...")
-            await self.mcp.run_stdio_async()
+            await run_server(self.mcp, server_name="database-operations-mcp")
 
             return 0
 
@@ -296,11 +300,11 @@ class DatabaseOperationsMCP:
             if transport == "http":
                 # Run HTTP server asynchronously
                 logger.info("Running HTTP server...")
-                return asyncio.run(self._run_http_server())
+                return run_server(self.mcp, server_name="database-operations-mcp")
             elif transport == "dual":
                 # Run both servers concurrently
                 logger.info("Running dual interface (stdio + HTTP)...")
-                return asyncio.run(self._run_dual_servers())
+                return run_server(self.mcp, server_name="database-operations-mcp")
             else:
                 # Run stdio server (backward compatibility)
                 logger.info("Running stdio server...")
@@ -316,8 +320,10 @@ class DatabaseOperationsMCP:
                 logger.info(f"MCP Version: {self.mcp.version}")
 
                 # Run the server
-                logger.info("Calling mcp.run()...")
-                self.mcp.run()
+                logger.info(
+                    "Calling run_server(self.mcp, server_name='database-operations-mcp')..."
+                )
+                run_server(self.mcp, server_name="database-operations-mcp")
 
                 return 0
 
@@ -378,7 +384,7 @@ def main() -> int:
 
         # Run the server
         logger.info("Starting server...")
-        return server.run()
+        return run_server(server.mcp, server_name="database-operations-mcp")
 
     except KeyboardInterrupt:
         logger.info("Server stopped by user")

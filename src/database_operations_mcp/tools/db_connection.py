@@ -73,7 +73,7 @@ async def db_connection(
             Example: 'prod_db', 'analytics_warehouse', 'local_sqlite'
 
         database_type (str, OPTIONAL): Type of database to connect to
-            Valid values: 'sqlite', 'postgresql', 'mysql', 'mongodb', 'chromadb', 'redis', 'duckdb'
+            Valid values: 'sqlite', 'postgresql', 'mysql', 'mongodb', 'chromadb', 'redis', 'duckdb', 'lancedb'
             Required for: register, init
             Example: 'postgresql', 'sqlite', 'mongodb'
 
@@ -84,6 +84,7 @@ async def db_connection(
             PostgreSQL example: {'host': 'localhost', 'port': 5432, 'user': 'admin',
                                  'password': 'secret', 'database': 'mydb', 'sslmode': 'prefer'}
             MongoDB example: {'host': 'localhost', 'port': 27017, 'database': 'myapp'}
+            LanceDB example: {'uri': './data/lancedb'} or {'uri': 'db://project', 'api_key': '...', 'region': 'us-east-1'}
             Validation: Must be non-empty dictionary with required keys for database type
 
         connection_params (dict, OPTIONAL): Alias for connection_config (legacy compatibility)
@@ -358,36 +359,36 @@ async def db_connection(
     """
 
     if operation == "list_supported":
-        return await _list_supported_databases()
+        result = await _list_supported_databases()
     elif operation == "register":
-        return await _register_database_connection(
+        result = await _register_database_connection(
             connection_name, database_type, connection_config, test_connection
         )
     elif operation == "init":
         # Legacy init_database operation
         # Use connection_params if provided, otherwise connection_config
         config = connection_params or connection_config
-        return await _init_database(database_type, config, connection_name)
+        result = await _init_database(database_type, config, connection_name)
     elif operation == "list":
-        return await _list_database_connections()
+        result = await _list_database_connections()
     elif operation == "test":
-        return await _test_database_connection(connection_name)
+        result = await _test_database_connection(connection_name)
     elif operation == "test_all":
-        return await _test_all_database_connections(timeout, parallel)
+        result = await _test_all_database_connections(timeout, parallel)
     elif operation == "close":
-        return await _close_connection(connection_name)
+        result = await _close_connection(connection_name)
     elif operation == "get_info":
-        return await _get_connection_info(connection_name)
+        result = await _get_connection_info(connection_name)
     elif operation == "restore":
-        return await _restore_saved_connections(auto_reconnect)
+        result = await _restore_saved_connections(auto_reconnect)
     elif operation == "set_active":
-        return await _set_active_connection(connection_name)
+        result = await _set_active_connection(connection_name)
     elif operation == "get_active":
-        return await _get_active_connection()
+        result = await _get_active_connection()
     elif operation == "get_preferences":
-        return await _get_user_preferences()
+        result = await _get_user_preferences()
     elif operation == "set_preferences":
-        return await _set_user_preferences(preferences)
+        result = await _set_user_preferences(preferences)
     else:
         return {
             "success": False,
@@ -413,9 +414,29 @@ async def db_connection(
             "suggestions": [
                 "Use 'list_supported' to see all available database types",
                 "Use 'register' to add a new database connection",
-                "Use 'list' to see your existing connections"
-            ]
+                "Use 'list' to see your existing connections",
+            ],
         }
+
+    # Standardize result with a conversational summary
+    summary = result.get("message", "")
+    if not summary:
+        if result.get("success"):
+            if operation == "list":
+                count = result.get("total_connections", 0)
+                summary = f"Found {count} registered database connections."
+            elif operation == "test":
+                res = result.get("test_result", {})
+                status = "successful" if res.get("success") else "failed"
+                summary = f"Connection test for '{connection_name}' was {status} ({res.get('latency', 0)}ms)."
+            elif operation == "test_all":
+                summary = f"Tested all connections. {result.get('summary', {}).get('successful', 0)} succeeded, {result.get('summary', {}).get('failed', 0)} failed."
+            else:
+                summary = f"Successfully completed '{operation}' operation."
+        else:
+            summary = f"Error: {result.get('error', 'Unknown error during connection operation')}"
+
+    return {"content": summary, "data": result}
 
 
 async def _list_supported_databases() -> dict[str, Any]:
@@ -441,8 +462,8 @@ async def _list_supported_databases() -> dict[str, Any]:
             "next_steps": [
                 "Use 'register' operation to connect to one of these databases",
                 "Use 'init' operation for legacy connection setup",
-                "Use 'list' to see your existing connections"
-            ]
+                "Use 'list' to see your existing connections",
+            ],
         }
     except Exception as e:
         logger.error(f"Error listing supported databases: {e}", exc_info=True)
@@ -458,8 +479,8 @@ async def _list_supported_databases() -> dict[str, Any]:
             "suggestions": [
                 "Try the operation again",
                 "Check system logs for more details",
-                "Verify the database operations service is running"
-            ]
+                "Verify the database operations service is running",
+            ],
         }
 
 

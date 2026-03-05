@@ -5,9 +5,13 @@ Provides unified operations across multiple database types: SQLite, PostgreSQL,
 MySQL, Redis, DuckDB, MongoDB, and more.
 """
 
+import logging
 from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.database_manager import create_connector
+
+logger = logging.getLogger(__name__)
 
 
 @mcp.tool()
@@ -20,6 +24,7 @@ async def db_operations_extended(
     key: str | None = None,
     value: str | None = None,
     parameters: dict[str, Any] | None = None,
+    config_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Extended database operations across multiple database types.
 
@@ -43,10 +48,12 @@ async def db_operations_extended(
             - 'get_keys': Get Redis keys matching pattern
             - 'get_value': Get Redis value by key
             - 'set_value': Set Redis key-value pair
+            - 'health_check': Check connection health
         connection_string: Database connection string
             - For SQLite: file path
             - For MySQL/PostgreSQL: "host:port:user:password:database"
             - For Redis: "host:port:password:db"
+            - For DuckDB: file path or ":memory:"
         query: SQL query string
             - Used for execute_query and execute_non_query operations
             - Parameterized queries supported
@@ -68,78 +75,131 @@ async def db_operations_extended(
                 'result': Any,
                 'message': str
             }
-
-    Usage:
-        Unified database operations across multiple database types.
-        Simplifies working with different databases through single interface.
-
-    Examples:
-        Execute SQL query on SQLite:
-            result = await db_operations_extended(
-                database_type='sqlite',
-                operation='execute_query',
-                connection_string='./database.db',
-                query='SELECT * FROM users'
-            )
-
-        Get Redis keys:
-            result = await db_operations_extended(
-                database_type='redis',
-                operation='get_keys',
-                connection_string='localhost:6379',
-                key='user:*'
-            )
-
-        List tables in MySQL:
-            result = await db_operations_extended(
-                database_type='mysql',
-                operation='get_tables',
-                connection_string='localhost:3306:user:pass:dbname'
-            )
-
-    Notes:
-        - Each database type has specific connection string format
-        - Some operations are database-specific
-        - Redis operations use key-value paradigm
-        - SQL databases use SQL query operations
-
-    See Also:
-        - db_operations: Core database operations
-        - db_analysis: Database analysis and diagnostics
     """
-    # Route to appropriate database connector
-    if database_type == "mysql":
+    try:
+        # Parse connection string into a config dict
+        # Format depends on database type
+        config = {}
+        if connection_string:
+            if database_type in ["mysql", "postgresql"]:
+                parts = connection_string.split(":")
+                if len(parts) >= 5:
+                    config = {
+                        "host": parts[0],
+                        "port": int(parts[1]),
+                        "user": parts[2],
+                        "password": parts[3],
+                        "database": parts[4],
+                    }
+            elif database_type == "redis":
+                parts = connection_string.split(":")
+                config = {
+                    "host": parts[0],
+                    "port": int(parts[1]) if len(parts) > 1 else 6379,
+                    "password": parts[2] if len(parts) > 2 else None,
+                    "db": int(parts[3]) if len(parts) > 3 else 0,
+                }
+            elif database_type in ["sqlite", "duckdb"]:
+                config = {"path": connection_string}
+
+        # Merge with config overrides
+        if config_overrides:
+            config.update(config_overrides)
+
+        # Get or create connector
+        connector = create_connector(database_type, config)
+        if not connector:
+            return {
+                "success": False,
+                "database_type": database_type,
+                "operation": operation,
+                "message": f"Failed to create connector for {database_type}",
+            }
+
+        # Perform operation
+        result = None
+        message = ""
+        success = True
+
+        if operation == "execute_query":
+            if not query:
+                return {"success": False, "message": "Query required for execute_query"}
+            res = await connector.execute_query(query, parameters)
+            success = res.success
+            result = res.data
+            message = res.message
+
+        elif operation == "execute_non_query":
+            if not query:
+                return {
+                    "success": False,
+                    "message": "Query required for execute_non_query",
+                }
+            res = await connector.execute_query(query, parameters)
+            success = res.success
+            result = {"affected_rows": res.rowcount}
+            message = res.message
+
+        elif operation == "get_tables":
+            result = await connector.get_tables()
+            message = f"Found {len(result)} tables"
+
+        elif operation == "get_table_structure":
+            if not table_name:
+                return {"success": False, "message": "table_name required"}
+            result = await connector.get_table_schema(table_name)
+            message = f"Schema for table {table_name}"
+
+        elif operation == "health_check":
+            result = await connector.health_check()
+            success = result.get("status") == "connected"
+
+        # Redis specific operations
+        elif database_type == "redis":
+            if operation == "get_keys":
+                res = await connector.execute_query(f"KEYS {key or '*'}")
+                success = res.success
+                result = res.data
+            elif operation == "get_value":
+                if not key:
+                    return {"success": False, "message": "key required for get_value"}
+                res = await connector.execute_query(f"GET {key}")
+                success = res.success
+                result = res.data
+            elif operation == "set_value":
+                if not key or value is None:
+                    return {
+                        "success": False,
+                        "message": "key and value required for set_value",
+                    }
+                res = await connector.execute_query(f"SET {key} {value}")
+                success = res.success
+                result = res.data
+            else:
+                success = False
+                message = f"Unsupported Redis operation: {operation}"
+
+        else:
+            success = False
+            message = f"Unsupported operation '{operation}' for {database_type}"
+
         return {
-            "success": False,
+            "success": success,
             "database_type": database_type,
             "operation": operation,
-            "message": "MySQL connector not yet fully implemented",
-            "note": "Install aiomysql for MySQL support",
+            "result": result,
+            "message": message,
         }
 
-    elif database_type == "redis":
+    except Exception as e:
+        logger.exception(f"Error in db_operations_extended: {e}")
         return {
             "success": False,
             "database_type": database_type,
             "operation": operation,
-            "message": "Redis connector not yet fully implemented",
-            "note": "Install redis package for Redis support",
+            "message": f"Unexpected error: {str(e)}",
         }
-
-    elif database_type == "duckdb":
-        return {
-            "success": False,
-            "database_type": database_type,
-            "operation": operation,
-            "message": "DuckDB connector not yet fully implemented",
-            "note": "Install duckdb package for DuckDB support",
-        }
-
-    else:
-        return {
-            "success": False,
-            "database_type": database_type,
-            "operation": operation,
-            "message": f"Database type '{database_type}' not yet fully supported",
-            "supported_types": ["sqlite", "postgresql", "mysql", "redis", "duckdb"],
-        }
+    finally:
+        # Disconnect if we created a temporary connector
+        if "connector" in locals() and connector:
+            await connector.disconnect()

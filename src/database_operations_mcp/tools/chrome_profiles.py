@@ -24,114 +24,14 @@ async def chrome_profiles(
 ) -> dict[str, Any]:
     """Chrome profile management portmanteau tool.
 
-    Comprehensive Chrome profile management consolidating ALL profile-related
-    operations into a single interface. Includes profile management, utilities,
-    and system operations for complete Chrome administration. Chrome uses a different
-    profile system than Firefox, based on User Data folders rather than SQLite.
+    Operations: get_chrome_profiles, get_profile_info, create_profile, delete_profile,
+    switch_profile, backup_profile, restore_profile, is_chrome_running, get_chrome_platform,
+    get_profile_directory, get_bookmarks_db_path, get_database_info, check_chrome_status,
+    validate_profile.
 
-    Parameters:
-        operation: Profile operation to perform
-            # Core profile operations
-            - 'get_chrome_profiles': List all available Chrome profiles
-            - 'get_profile_info': Get detailed information about a specific profile
-            - 'create_profile': Create a new Chrome profile
-            - 'delete_profile': Delete a Chrome profile (use with caution)
-            - 'switch_profile': Switch to a different profile as default
-            - 'backup_profile': Backup profile data and settings
-            - 'restore_profile': Restore profile from backup
-
-            # Utility operations
-            - 'is_chrome_running': Check if Chrome is currently running
-            - 'get_chrome_platform': Get Chrome platform information
-            - 'get_profile_directory': Get profile directory path
-            - 'get_bookmarks_db_path': Get Bookmarks file path
-            - 'get_database_info': Get database information and statistics
-            - 'check_chrome_status': Comprehensive Chrome status check
-            - 'validate_profile': Validate profile exists and is accessible
-
-        profile_name: Chrome profile name (default: 'Default')
-            - Target Chrome profile for operations
-            - Must be valid Chrome profile name
-            - Example: 'Default', 'Profile 1', 'Profile 2'
-            - Case-sensitive but common variations handled
-
-        check_access: Whether to check database access (default: True)
-            - Verify bookmark database accessibility
-            - Prevents operations on locked databases
-            - Essential for safe operations
-            - May impact operation speed
-
-        include_info: Whether to include detailed information (default: True)
-            - Include comprehensive profile information
-            - Provides additional context and diagnostics
-            - May impact response time
-            - Useful for troubleshooting
-
-    Returns:
-        Dictionary containing the result of the operation, including status,
-        message, and relevant data (profiles, info, diagnostics, etc.).
-
-        Example response structure:
-            {
-                'success': bool,
-                'operation': str,
-                'profile_name': str,
-                'data': {...},       # Profile info, status, etc.
-                'message': str,
-                'warnings': List[str]
-            }
-
-    Usage:
-        Chrome profile management tool covering all profile lifecycle operations.
-        Essential for managing multiple Chrome profiles, organizing bookmarks,
-        and configuring Chrome behavior. Chrome profiles are stored in User Data
-        folders, not SQLite databases.
-
-        Common scenarios:
-        - List Chrome profiles: chrome_profiles(operation='get_chrome_profiles')
-        - Get profile info: chrome_profiles(
-                operation='get_profile_info', profile_name='Default')
-        - Check if Chrome is running: chrome_profiles(operation='is_chrome_running')
-        - Validate profile: chrome_profiles(
-                operation='validate_profile', profile_name='Default')
-
-    Examples:
-        List all Chrome profiles:
-            result = await chrome_profiles(operation='get_chrome_profiles')
-            # Returns: {
-            #     'success': True,
-            #     'profiles': ['Default', 'Profile 1', 'Profile 2'],
-            #     'count': 3
-            # }
-
-        Get detailed profile information:
-            result = await chrome_profiles(
-                operation='get_profile_info',
-                profile_name='Default',
-                include_info=True
-            )
-            # Returns: {
-            #     'success': True,
-            #     'profile_name': 'Default',
-            #     'profile_path': '...',
-            #     'bookmark_count': 1543,
-            #     'browser_version': 'chrome',
-            #     'last_accessed': None
-            # }
-
-    Notes:
-        - Chrome must be completely closed before using profile operations
-        - Chrome profiles are stored in User Data folders
-        - Default profile is always named 'Default'
-        - Additional profiles are named 'Profile 1', 'Profile 2', etc.
-        - Profile names are case-sensitive
-        - Chrome syncs with Google account (may affect data accessibility)
-        - Backing up profiles includes bookmarks, settings, and extensions
-
-    See Also:
-        - chrome_bookmarks: Chrome bookmark management
-        - firefox_profiles: Firefox profile management
-        - browser_bookmarks: Universal browser bookmarks
+    profile_name: Chrome profile name (default: 'Default')
+    check_access: Verify bookmark database accessibility (default: True)
+    include_info: Include detailed diagnostics (default: True)
     """
     # Route to appropriate Chrome profile operation handler
     if operation == "get_chrome_profiles":

@@ -183,7 +183,7 @@ def start_claude(claude_path_arg=None):
         # Start Claude Desktop
         print(f"[INFO] Starting Claude Desktop from: {claude_path}")
         subprocess.Popen([str(claude_path)], shell=True)
-        print(f"[OK] Started Claude Desktop")
+        print("[OK] Started Claude Desktop")
         print("[INFO] Waiting for Claude to initialize...")
         print("[INFO] ⚠️  Check Claude Desktop - chat window should be EMPTY (fresh restart)")
         time.sleep(5)  # Give Claude time to start and connect to MCP
@@ -236,10 +236,10 @@ def monitor_logs_for_startup(
         print(f"[INFO] Found Claude Desktop log: {claude_log_file}")
     elif local_log_file:
         print(f"[INFO] Using local log: {local_log_file}")
-        print(f"[INFO] Claude Desktop log not found yet (may be created during startup)")
+        print("[INFO] Claude Desktop log not found yet (may be created during startup)")
 
     if not log_file:
-        print(f"[WARN] Log file not found in expected locations")
+        print("[WARN] Log file not found in expected locations")
         print("[INFO] Server may not have started yet, or logs are elsewhere")
         import os
 

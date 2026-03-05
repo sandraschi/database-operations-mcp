@@ -6,7 +6,6 @@ This test ensures all critical modules can be imported and tools are properly
 registered before attempting to start the MCP server.
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -192,8 +191,7 @@ class TestToolRegistration:
 
         # We should have at least the portmanteau tools (around 20+)
         assert len(tools) >= 15, (
-            f"Expected at least 15 tools, got {len(tools)}. "
-            f"Registered tools: {list(tools.keys())}"
+            f"Expected at least 15 tools, got {len(tools)}. Registered tools: {list(tools.keys())}"
         )
 
 

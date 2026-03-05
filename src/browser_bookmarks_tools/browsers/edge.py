@@ -88,4 +88,3 @@ async def add_edge_bookmark(url: str, title: str, folder: str | None = None) -> 
     """Add bookmark to Edge."""
     browser = EdgeBrowser()
     return await browser.add_bookmark(url, title, folder)
-

@@ -9,7 +9,7 @@ All operations have been consolidated into windows_system():
 - list_registry_keys() → windows_system(operation='list_registry_keys')
 - list_registry_values() → windows_system(operation='list_registry_values')
 
-This module is kept for backwards compatibility but tools are no longer registered.
+This module is kept for backwards compatibility. Tools are registered as [LEGACY] alternatives.
 """
 
 import logging
@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
 # Import the global MCP instance
-
+from database_operations_mcp.config.mcp_config import mcp
 from .help_tools import HelpSystem
 
 # Type variable for function type
@@ -116,7 +116,13 @@ class RegistryMonitor:
                 changes = self._find_changes(current_values)
 
                 if changes:
-                    self.callback({"path": self.path, "timestamp": time.time(), "changes": changes})
+                    self.callback(
+                        {
+                            "path": self.path,
+                            "timestamp": time.time(),
+                            "changes": changes,
+                        }
+                    )
 
                 self.last_values = current_values
                 time.sleep(1.0)  # Check every second
@@ -138,7 +144,9 @@ class RegistryMonitor:
                         values[name] = {
                             "value": value,
                             "type": value_type,
-                            "type_name": VALUE_TYPES.get(value_type, f"UNKNOWN (0x{value_type:X})"),
+                            "type_name": VALUE_TYPES.get(
+                                value_type, f"UNKNOWN (0x{value_type:X})"
+                            ),
                         }
                         i += 1
                     except OSError as e:
@@ -160,7 +168,9 @@ class RegistryMonitor:
         # Check for new or modified values
         for name, value_info in current.items():
             if name not in self.last_values:
-                changes.append({"type": "value_added", "name": name, "new_value": value_info})
+                changes.append(
+                    {"type": "value_added", "name": name, "new_value": value_info}
+                )
             elif (
                 self.last_values[name]["value"] != value_info["value"]
                 or self.last_values[name]["type"] != value_info["type"]
@@ -177,7 +187,11 @@ class RegistryMonitor:
         # Check for removed values
         for name in set(self.last_values) - set(current):
             changes.append(
-                {"type": "value_removed", "name": name, "old_value": self.last_values[name]}
+                {
+                    "type": "value_removed",
+                    "name": name,
+                    "old_value": self.last_values[name],
+                }
             )
 
         return changes
@@ -188,6 +202,7 @@ class RegistryMonitor:
 
 
 # DEPRECATED: Use windows_system portmanteau instead
+@mcp.tool()
 @HelpSystem.register_tool
 def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
     """Read a value from the Windows Registry.
@@ -219,13 +234,17 @@ def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
                 "type_code": value_type,
             }
     except FileNotFoundError:
-        return {"success": False, "error": f"Registry key or value not found: {path}\\{value_name}"}
+        return {
+            "success": False,
+            "error": f"Registry key or value not found: {path}\\{value_name}",
+        }
     except Exception as e:
         logger.error(f"Error reading registry value {path}\\{value_name}: {e}")
         return {"success": False, "error": str(e)}
 
 
 # DEPRECATED: Use windows_system portmanteau instead
+@mcp.tool()
 @HelpSystem.register_tool
 def write_registry_value(
     path: str, value_name: str, value: Any, value_type: str | None = None
@@ -248,7 +267,10 @@ def write_registry_value(
         if value_type:
             type_map = {v: k for k, v in VALUE_TYPES.items()}
             if value_type not in type_map:
-                return {"success": False, "error": f"Unsupported value type: {value_type}"}
+                return {
+                    "success": False,
+                    "error": f"Unsupported value type: {value_type}",
+                }
             reg_type = type_map[value_type]
         else:
             # Guess type based on Python type
@@ -310,7 +332,12 @@ def list_registry_keys(path: str) -> dict[str, Any]:
                         break
                     raise
 
-        return {"success": True, "path": path, "subkeys": subkeys, "count": len(subkeys)}
+        return {
+            "success": True,
+            "path": path,
+            "subkeys": subkeys,
+            "count": len(subkeys),
+        }
     except Exception as e:
         logger.error(f"Error listing registry keys under {path}: {e}")
         return {"success": False, "error": str(e)}
@@ -346,7 +373,9 @@ def list_registry_values(path: str) -> dict[str, Any]:
 
                     values[value_name] = {
                         "value": value_data,
-                        "type": VALUE_TYPES.get(value_type, f"UNKNOWN (0x{value_type:X})"),
+                        "type": VALUE_TYPES.get(
+                            value_type, f"UNKNOWN (0x{value_type:X})"
+                        ),
                         "type_code": value_type,
                     }
                     i += 1

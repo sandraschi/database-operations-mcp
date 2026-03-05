@@ -149,7 +149,9 @@ async def browser_bookmarks(
 
     # Firefox - delegate to firefox_bookmarks helper (supports all operations)
     if browser_lower == "firefox":
-        from database_operations_mcp.tools.firefox_bookmarks import firefox_bookmarks as ff_bookmarks
+        from database_operations_mcp.tools.firefox_bookmarks import (
+            firefox_bookmarks as ff_bookmarks,
+        )
 
         # Map 'search' to 'search_bookmarks' for Firefox
         ff_operation = "search_bookmarks" if operation == "search" else operation
@@ -185,6 +187,7 @@ async def browser_bookmarks(
                 edit_chrome_bookmark,
                 delete_chrome_bookmark,
             )
+
             list_fn = list_chrome_bookmarks
             add_fn = add_chrome_bookmark
             edit_fn = edit_chrome_bookmark
@@ -196,6 +199,7 @@ async def browser_bookmarks(
                 edit_edge_bookmark,
                 delete_edge_bookmark,
             )
+
             list_fn = list_edge_bookmarks
             add_fn = add_edge_bookmark
             edit_fn = edit_edge_bookmark
@@ -207,6 +211,7 @@ async def browser_bookmarks(
                 edit_brave_bookmark,
                 delete_brave_bookmark,
             )
+
             list_fn = list_brave_bookmarks
             add_fn = add_brave_bookmark
             edit_fn = edit_brave_bookmark
@@ -288,7 +293,8 @@ async def browser_bookmarks(
             bookmarks = result.get("bookmarks", [])
             query_lower = search_query.lower()
             matches = [
-                b for b in bookmarks
+                b
+                for b in bookmarks
                 if query_lower in (b.get("title", "") or "").lower()
                 or query_lower in (b.get("url", "") or "").lower()
             ]
@@ -335,8 +341,12 @@ async def browser_bookmarks(
                 "operation": operation,
                 "error": f"Operation '{operation}' not supported for {browser_lower}",
                 "supported_operations": [
-                    "list_bookmarks", "add_bookmark", "edit_bookmark",
-                    "delete_bookmark", "get_bookmark", "search"
+                    "list_bookmarks",
+                    "add_bookmark",
+                    "edit_bookmark",
+                    "delete_bookmark",
+                    "get_bookmark",
+                    "search",
                 ],
                 "note": "For advanced operations (duplicates, tags, export), use browser='firefox'",
             }

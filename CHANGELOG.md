@@ -1,3 +1,19 @@
+## 1.4.2 - Unreleased
+
+### Added
+- **Persistence**: DiskStore via `py-key-value-aio[disk]` for connection state, active connection, preferences, and schema cache. Data directory: `%APPDATA%\database-operations-mcp` (Windows), `~/Library/Application Support/` (macOS), `~/.local/share/` (Linux). Optional `ENABLE_PASSWORD_STORAGE=1` for dev-only password persistence.
+- **LanceDB**: New `DatabaseType.LANCEDB` and `LanceDBConnector`; supported in `db_connection` and `get_supported_databases`.
+- **Webapp (web_sota)**: FastMCP 3.1 gateway; MCP mounted at `/mcp`, REST `GET /api/tools` and `POST /api/tools/call`; Dashboard and Tools UI (ports 10708/10709).
+- **FastMCP 3.1 prompts**: MCP prompt `database_expert` (optional `focus`: general, sql, connections, export) returns instruction text for LLM-as-database-expert using this server's tools. Clients use `get_prompt("database_expert", arguments={...})` to inject guidance.
+- **FastMCP 3.1 skills**: Bundled skill `database-expert` exposed as MCP resources (`skill://database-expert/SKILL.md`). SkillsDirectoryProvider registered in config; skill content in `src/database_operations_mcp/skills/database-expert/`.
+
+### Changed
+- **FastMCP 3.1**: Upgraded to FastMCP 3.1+; universal gateway and in-process MCP used by web backend.
+- **Dependencies**: Added `lancedb>=0.2.0`, `py-key-value-aio[disk]>=0.4.0` for persistence.
+
+### Removed
+- **Legacy web app**: Removed `web/` (static-only); web interface is now only `web_sota`.
+
 ## 1.4.1 - 2026-01-16
 
 ### Added

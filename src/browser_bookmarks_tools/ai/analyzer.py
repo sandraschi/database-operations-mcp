@@ -58,4 +58,3 @@ async def analyze_bookmark_quality(bookmark: dict[str, Any]) -> dict[str, Any]:
     """Analyze bookmark quality."""
     analyzer = BookmarkAnalyzer()
     return await analyzer.analyze_quality(bookmark)
-

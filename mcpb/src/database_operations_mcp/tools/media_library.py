@@ -494,7 +494,9 @@ async def _search_calibre_fts(library_path: str | None, search_query: str | None
         }
 
 
-async def _search_calibre_fts_db(library_path: str | None, search_query: str | None, include_metadata: bool) -> dict[str, Any]:
+async def _search_calibre_fts_db(
+    library_path: str | None, search_query: str | None, include_metadata: bool
+) -> dict[str, Any]:
     """Search Calibre's full-text-search database."""
     try:
         if not library_path:
@@ -504,7 +506,6 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
 
         import os
         import sqlite3
-        from pathlib import Path
 
         # Path to FTS database
         fts_db_path = os.path.join(library_path, "full-text-search.db")
@@ -528,13 +529,16 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
         search_pattern = f"%{search_query}%"
 
         # Search in books_text table
-        fts_cursor.execute("""
+        fts_cursor.execute(
+            """
             SELECT book, format, text_size, searchable_text
             FROM books_text
             WHERE searchable_text LIKE ? AND searchable_text IS NOT NULL
             ORDER BY text_size DESC
             LIMIT 50
-        """, (search_pattern,))
+        """,
+            (search_pattern,),
+        )
 
         fts_results = fts_cursor.fetchall()
 
@@ -551,14 +555,20 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
                 book_ids = list(set(row[0] for row in fts_results))
                 if book_ids:
                     # Get book titles and authors
-                    placeholders = ','.join('?' * len(book_ids))
-                    meta_cursor.execute(f"""
+                    placeholders = ",".join("?" * len(book_ids))
+                    meta_cursor.execute(
+                        f"""
                         SELECT id, title, author_sort
                         FROM books
                         WHERE id IN ({placeholders})
-                    """, book_ids)
+                    """,
+                        book_ids,
+                    )
 
-                    book_metadata = {row[0]: {'title': row[1], 'author': row[2]} for row in meta_cursor.fetchall()}
+                    book_metadata = {
+                        row[0]: {"title": row[1], "author": row[2]}
+                        for row in meta_cursor.fetchall()
+                    }
 
                 meta_conn.close()
             except Exception as e:
@@ -584,9 +594,11 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
                 highlight_start = context_lower.find(search_lower)
                 if highlight_start >= 0:
                     highlighted = (
-                        context[:highlight_start] +
-                        "**" + context[highlight_start:highlight_start + len(search_query)] + "**" +
-                        context[highlight_start + len(search_query):]
+                        context[:highlight_start]
+                        + "**"
+                        + context[highlight_start : highlight_start + len(search_query)]
+                        + "**"
+                        + context[highlight_start + len(search_query) :]
                     )
                 else:
                     highlighted = context
@@ -595,11 +607,11 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
                 highlighted = full_text[:200] + "..."
 
             result = {
-                'book_id': book_id,
-                'format': format_name,
-                'text_size': text_size,
-                'text_preview': highlighted,
-                'relevance_score': 1.0  # Basic relevance for LIKE search
+                "book_id": book_id,
+                "format": format_name,
+                "text_size": text_size,
+                "text_preview": highlighted,
+                "relevance_score": 1.0,  # Basic relevance for LIKE search
             }
 
             if include_metadata and book_id in book_metadata:

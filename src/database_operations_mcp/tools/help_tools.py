@@ -24,6 +24,7 @@ class HelpSystem:
         "calibre": "Calibre library tools",
         "registry": "Windows Registry tools",
         "help": "Help and documentation",
+        "agentic": "Autonomous orchestration and sampling patterns",
     }
 
     @classmethod
@@ -104,7 +105,11 @@ class HelpSystem:
                 {"name": tool_name, "description": tool_info["description"]}
             )
 
-        return {"status": "success", "categories": categorized, "total_tools": len(tools)}
+        return {
+            "status": "success",
+            "categories": categorized,
+            "total_tools": len(tools),
+        }
 
     @classmethod
     def get_tool_help(cls, tool_name: str) -> dict[str, Any]:
@@ -153,6 +158,7 @@ async def help(category: str | None = None) -> dict[str, Any]:
             - 'calibre': Calibre library tools
             - 'registry': Windows Registry tools
             - 'help': Help and documentation tools
+            - 'agentic': Autonomous orchestration and sampling patterns
 
     Returns:
         Dictionary containing:
@@ -204,7 +210,7 @@ async def help(category: str | None = None) -> dict[str, Any]:
                     print(f"Found: {tool['name']}")
 
     Notes:
-        - Categories are predefined (database, firefox, calibre, registry, help)
+        - Categories are predefined (database, firefox, calibre, registry, help, agentic)
         - Tool descriptions are first line of docstrings
         - Use tool_help for detailed information about specific tools
 

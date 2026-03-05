@@ -9,12 +9,18 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from pymongo import MongoClient
-from pymongo.errors import (
-    ConfigurationError,
-    ConnectionFailure,
-    OperationFailure,
-)
+try:
+    from pymongo import MongoClient
+    from pymongo.errors import (
+        ConfigurationError,
+        ConnectionFailure,
+        OperationFailure,
+    )
+except ImportError:
+    MongoClient = None
+    ConfigurationError = Exception
+    ConnectionFailure = Exception
+    OperationFailure = Exception
 
 from ....database_manager import (
     BaseDatabaseConnector,
@@ -140,7 +146,11 @@ class MongoDBConnector(BaseDatabaseConnector):
             return False
 
     def execute_query(
-        self, query: dict, database_name: str = None, collection_name: str = None, **kwargs
+        self,
+        query: dict,
+        database_name: str = None,
+        collection_name: str = None,
+        **kwargs,
     ) -> dict[str, Any]:
         """Execute a MongoDB query.
 
@@ -183,7 +193,11 @@ class MongoDBConnector(BaseDatabaseConnector):
                 pipeline = query.get("pipeline", [])
                 cursor = collection.aggregate(pipeline, **kwargs)
                 results = list(cursor)
-                return {"operation": "aggregate", "count": len(results), "results": results}
+                return {
+                    "operation": "aggregate",
+                    "count": len(results),
+                    "results": results,
+                }
 
             elif operation == "insert_one":
                 result = collection.insert_one(query.get("document", {}), **kwargs)
@@ -209,7 +223,10 @@ class MongoDBConnector(BaseDatabaseConnector):
 
             elif operation == "delete_one":
                 result = collection.delete_one(query.get("filter", {}), **kwargs)
-                return {"operation": "delete_one", "deleted_count": result.deleted_count}
+                return {
+                    "operation": "delete_one",
+                    "deleted_count": result.deleted_count,
+                }
 
             else:
                 raise ValueError(f"Unsupported MongoDB operation: {operation}")

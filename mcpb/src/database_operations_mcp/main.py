@@ -69,7 +69,7 @@ class DatabaseOperationsMCP:
 
     def _register_signal_handlers(self) -> None:
         """Register signal handlers for graceful shutdown.
-        
+
         Note: FastMCP handles most signal management internally.
         This is primarily for custom shutdown logic if needed.
         """

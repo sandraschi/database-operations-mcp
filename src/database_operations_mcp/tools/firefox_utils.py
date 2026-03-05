@@ -125,8 +125,7 @@ async def _get_firefox_profile_directory() -> dict[str, Any]:
             "success": True,
             "message": "Firefox profile directory requested",
             "profile_directory": (
-                "C:\\Users\\Username\\AppData\\Roaming\\"
-                "Mozilla\\Firefox\\Profiles"
+                "C:\\Users\\Username\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles"
             ),
             "note": "Implementation pending - requires profile directory detection",
         }

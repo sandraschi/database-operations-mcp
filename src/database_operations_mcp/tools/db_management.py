@@ -174,36 +174,6 @@ async def db_management(
                 connection_name='production_db',
                 include_metrics=True
             )
-            # Returns: {
-            #     'success': True,
-            #     'health_status': 'healthy',
-            #     'health_details': {
-            #         'connection_status': 'ok',
-            #         'query_performance': 'good',
-            #         'disk_usage': 'normal'
-            #     },
-            #     'metrics': {
-            #         'active_connections': 5,
-            #         'cache_hit_rate': 0.95,
-            #         'disk_usage_gb': 12.5
-            #     }
-            # }
-
-        Get database metrics:
-            result = await db_management(
-                operation='get_database_metrics',
-                connection_name='production_db'
-            )
-            # Returns: {
-            #     'success': True,
-            #     'metrics': {
-            #         'total_queries': 125000,
-            #         'avg_query_time_ms': 12.5,
-            #         'cache_size_mb': 256,
-            #         'table_count': 42
-            #     },
-            #     'connection_name': 'production_db'
-            # }
 
         Vacuum database (full optimization):
             result = await db_management(
@@ -211,52 +181,6 @@ async def db_management(
                 connection_name='production_db',
                 vacuum_mode='full'
             )
-            # Returns: {
-            #     'success': True,
-            #     'message': 'Database vacuum completed for production_db',
-            #     'vacuum_result': {
-            #         'size_before': 2048000000,
-            #         'size_after': 1800000000,
-            #         'space_reclaimed': 248000000,
-            #         'duration_seconds': 45.2
-            #     }
-            # }
-
-        Test connection:
-            result = await db_management(
-                operation='test_connection',
-                connection_name='production_db'
-            )
-            # Returns: {
-            #     'success': True,
-            #     'test_result': {
-            #         'success': True,
-            #         'latency_ms': 24.5,
-            #         'server_version': 'PostgreSQL 14.5'
-            #     },
-            #     'connection_name': 'production_db'
-            # }
-
-        Close connection:
-            result = await db_management(
-                operation='close_connection',
-                connection_name='temp_db'
-            )
-            # Returns: {
-            #     'success': True,
-            #     'message': "Connection 'temp_db' closed successfully",
-            #     'connection_name': 'temp_db'
-            # }
-
-        Error handling - connection not found:
-            result = await db_management(
-                operation='database_health_check',
-                connection_name='nonexistent'
-            )
-            # Returns: {
-            #     'success': False,
-            #     'error': "Connection 'nonexistent' not found"
-            # }
 
     Errors:
         Common errors and solutions:
@@ -265,25 +189,10 @@ async def db_management(
             Fix: Use db_management(operation='list_connections') to see available connections
             Workaround: Register connection first with db_connection(operation='register')
 
-        - 'Connection already exists: {connection_name}':
-            Cause: Attempting to initialize connection with existing name
-            Fix: Use different connection_name or close existing connection first
-            Workaround: Use db_connection(operation='close') then retry
-
-        - 'Connection test failed: {error}':
-            Cause: Database connection test failed during initialization
-            Fix: Verify database is running, credentials are correct, network is accessible
-            Workaround: Set test_connection=False to register without testing (not recommended)
-
         - 'Vacuum operation failed: {error}':
             Cause: Database locked, insufficient permissions, or unsupported operation
             Fix: Ensure database is not in use, check permissions, verify database supports VACUUM
             Workaround: Use vacuum_mode='analyze' instead of 'full', retry when database is idle
-
-        - 'Health check failed: {error}':
-            Cause: Database inaccessible or monitoring queries failed
-            Fix: Verify connection is active, check database status, ensure monitoring permissions
-            Workaround: Test connection first, check database logs for issues
 
     See Also:
         - db_connection: Register and manage database connections (preferred for new connections)
@@ -292,25 +201,25 @@ async def db_management(
     """
 
     if operation == "init_database":
-        return await _init_database(
+        result = await _init_database(
             connection_name, database_type, connection_config, test_connection
         )
     elif operation == "list_connections":
-        return await _list_connections()
+        result = await _list_connections()
     elif operation == "close_connection":
-        return await _close_connection(connection_name)
+        result = await _close_connection(connection_name)
     elif operation == "test_connection":
-        return await _test_connection(connection_name)
+        result = await _test_connection(connection_name)
     elif operation == "get_connection_info":
-        return await _get_connection_info(connection_name)
+        result = await _get_connection_info(connection_name)
     elif operation == "database_health_check":
-        return await _database_health_check(connection_name, include_metrics)
+        result = await _database_health_check(connection_name, include_metrics)
     elif operation == "get_database_metrics":
-        return await _get_database_metrics(connection_name)
+        result = await _get_database_metrics(connection_name)
     elif operation == "vacuum_database":
-        return await _vacuum_database(connection_name, vacuum_mode)
+        result = await _vacuum_database(connection_name, vacuum_mode)
     elif operation == "disconnect_database":
-        return await _disconnect_database(connection_name)
+        result = await _disconnect_database(connection_name)
     else:
         return {
             "success": False,
@@ -327,6 +236,28 @@ async def db_management(
                 "disconnect_database",
             ],
         }
+
+    # Standardize result with a conversational summary
+    summary = result.get("message", "")
+    if not summary:
+        if result.get("success"):
+            if operation == "list_connections":
+                count = result.get("total_connections", 0)
+                summary = f"Found {count} registered database connections."
+            elif operation == "database_health_check":
+                status = result.get("health_status", "unknown")
+                summary = f"Database health check for '{connection_name}' completed with status: {status}."
+            elif operation == "vacuum_database":
+                mode = result.get("vacuum_mode", "unknown")
+                summary = (
+                    f"Successfully performed '{mode}' vacuum/optimization on '{connection_name}'."
+                )
+            else:
+                summary = f"Successfully completed '{operation}' operation on '{connection_name}'."
+        else:
+            summary = f"Error: {result.get('error', 'Unknown database management error')}"
+
+    return {"content": summary, "data": result}
 
 
 async def _init_database(

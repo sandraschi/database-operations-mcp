@@ -58,4 +58,3 @@ async def add_safari_bookmark(url: str, title: str, folder: str | None = None) -
     """Add bookmark to Safari."""
     browser = SafariBrowser()
     return await browser.add_bookmark(url, title, folder)
-

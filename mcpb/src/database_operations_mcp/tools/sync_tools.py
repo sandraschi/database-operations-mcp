@@ -292,13 +292,10 @@ async def sync_bookmarks(
                             "url": item.get("url"),
                             "title": item.get("title"),
                             "target_browser": target_browser,
-                            "exception": (
-                                type(e).__name__ if isinstance(e, Exception) else None
-                            ),
+                            "exception": (type(e).__name__ if isinstance(e, Exception) else None),
                         },
                         "fix": (
-                            f"check {target_browser} bookmarks file permissions | "
-                            f"verify disk space"
+                            f"check {target_browser} bookmarks file permissions | verify disk space"
                         ),
                     }
                 )

@@ -1,0 +1,385 @@
+# Database operations portmanteau tool.
+# Consolidates data manipulation and query execution operations.
+
+import logging
+from typing import Any
+
+# Import the global MCP instance from the central config
+from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.database_manager import DatabaseType, db_manager
+from database_operations_mcp.tools.help_tools import HelpSystem
+
+logger = logging.getLogger(__name__)
+
+
+@mcp.tool()
+@HelpSystem.register_tool(category="database")
+async def db_operations(
+    operation: str,
+    connection_name: str | None = None,
+    query: str | None = None,
+    params: dict[str, Any] | None = None,
+    data: list[dict[str, Any]] | None = None,
+    table_name: str | None = None,
+    batch_size: int = 1000,
+    output_format: str = "json",
+    output_path: str | None = None,
+    limit: int = 100,
+) -> dict[str, Any]:
+    """Database data manipulation and query execution portmanteau tool.
+
+    Operations: execute_transaction, execute_write, batch_insert, execute_query,
+    quick_data_sample, export_query_results.
+
+    """
+
+    if operation == "execute_transaction":
+        return await _execute_transaction(connection_name, query, params)
+    elif operation == "execute_write":
+        return await _execute_write(connection_name, query, params)
+    elif operation == "batch_insert":
+        return await _batch_insert(connection_name, table_name, data, batch_size)
+    elif operation == "execute_query":
+        return await _execute_query(connection_name, query, params, limit)
+    elif operation == "quick_data_sample":
+        return await _quick_data_sample(connection_name, table_name, limit)
+    elif operation == "export_query_results":
+        return await _export_query_results(
+            connection_name, query, params, output_format, output_path
+        )
+    else:
+        return {
+            "success": False,
+            "error": f"Unknown operation: {operation}",
+            "available_operations": [
+                "execute_transaction",
+                "execute_write",
+                "batch_insert",
+                "execute_query",
+                "quick_data_sample",
+                "export_query_results",
+            ],
+        }
+
+
+async def _execute_transaction(
+    connection_name: str, query: str, params: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Execute a database transaction with multiple operations."""
+    try:
+        if not connection_name:
+            raise ValueError("Connection name is required")
+        if not query:
+            raise ValueError("Query is required")
+
+        connector = db_manager.get_connector(connection_name)
+        if not connector:
+            raise ValueError(f"Connection '{connection_name}' not found")
+
+        result = await connector.execute_transaction(query, params or {})
+
+        return {
+            "success": True,
+            "message": "Transaction executed successfully",
+            "connection_name": connection_name,
+            "rows_affected": result.get("rows_affected", 0),
+            "transaction_id": result.get("transaction_id"),
+        }
+
+    except Exception as e:
+        logger.error(f"Error executing transaction: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Failed to execute transaction: {str(e)}",
+            "connection_name": connection_name,
+        }
+
+
+async def _execute_write(
+    connection_name: str, query: str, params: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Execute write operations (INSERT, UPDATE, DELETE)."""
+    try:
+        if not connection_name:
+            raise ValueError("Connection name is required")
+        if not query:
+            raise ValueError("Query is required")
+
+        connector = db_manager.get_connector(connection_name)
+        if not connector:
+            raise ValueError(f"Connection '{connection_name}' not found")
+
+        result = await connector.execute_write(query, params or {})
+
+        return {
+            "success": True,
+            "message": "Write operation executed successfully",
+            "connection_name": connection_name,
+            "rows_affected": result.get("rows_affected", 0),
+            "last_insert_id": result.get("last_insert_id"),
+        }
+
+    except Exception as e:
+        logger.error(f"Error executing write operation: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Failed to execute write operation: {str(e)}",
+            "connection_name": connection_name,
+        }
+
+
+async def _batch_insert(
+    connection_name: str, table_name: str, data: list[dict[str, Any]], batch_size: int
+) -> dict[str, Any]:
+    """Insert multiple records in batches for better performance."""
+    try:
+        if not connection_name:
+            raise ValueError("Connection name is required")
+        if not table_name:
+            raise ValueError("Table name is required")
+        if not data:
+            raise ValueError("Data is required")
+
+        connector = db_manager.get_connector(connection_name)
+        if not connector:
+            raise ValueError(f"Connection '{connection_name}' not found")
+
+        result = await connector.batch_insert(table_name, data, batch_size)
+
+        return {
+            "success": True,
+            "message": "Batch insert completed successfully",
+            "connection_name": connection_name,
+            "table_name": table_name,
+            "records_inserted": result.get("records_inserted", 0),
+            "batches_processed": result.get("batches_processed", 0),
+        }
+
+    except Exception as e:
+        logger.error(f"Error executing batch insert: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Failed to execute batch insert: {str(e)}",
+            "connection_name": connection_name,
+            "table_name": table_name,
+        }
+
+
+async def _execute_query(
+    connection_name: str | None, query: str | None, params: dict[str, Any] | None, limit: int
+) -> dict[str, Any]:
+    """Execute read-only queries (SELECT)."""
+    try:
+        if not connection_name:
+            return {"success": False, "error": "Connection name is required"}
+        if not query:
+            return {"success": False, "error": "Query is required"}
+
+        connector = db_manager.get_connector(connection_name)
+        if not connector:
+            return {"success": False, "error": f"Connection not found: {connection_name}"}
+
+        # Apply limit to query if not already present
+        limited_query = _apply_query_limit(query, limit, connector.database_type)
+
+        # Execute the query
+        result = await connector.execute_query(limited_query, params or {})
+
+        return {
+            "success": True,
+            "connection_name": connection_name,
+            "query": query,
+            "parameters": params,
+            "applied_limit": limit,
+            "result": {
+                "rows": result.get("rows", []),
+                "columns": result.get("columns", []),
+                "row_count": len(result.get("rows", [])),
+            },
+        }
+
+    except Exception as e:
+        logger.error(f"Error executing query on {connection_name}: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "query": query,
+            "connection_name": connection_name,
+        }
+
+
+async def _quick_data_sample(
+    connection_name: str | None, table_name: str | None, limit: int
+) -> dict[str, Any]:
+    """Get a quick sample of data from a table."""
+    try:
+        if not connection_name:
+            return {"success": False, "error": "Connection name is required"}
+        if not table_name:
+            return {"success": False, "error": "Table name is required"}
+
+        connector = db_manager.get_connector(connection_name)
+        if not connector:
+            return {"success": False, "error": f"Connection not found: {connection_name}"}
+
+        # Generate appropriate query based on database type
+        query = _generate_sample_query(connector.database_type, table_name, None, limit, None, None)
+
+        # Execute the query
+        result = await connector.execute_query(query, {})
+
+        return {
+            "success": True,
+            "connection_name": connection_name,
+            "table_name": table_name,
+            "sample_size": limit,
+            "generated_query": query,
+            "result": {
+                "rows": result.get("rows", []),
+                "columns": result.get("columns", []),
+                "row_count": len(result.get("rows", [])),
+            },
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting data sample from {table_name}: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "connection_name": connection_name,
+            "table_name": table_name,
+        }
+
+
+async def _export_query_results(
+    connection_name: str | None,
+    query: str | None,
+    params: dict[str, Any] | None,
+    output_format: str,
+    output_path: str | None,
+) -> dict[str, Any]:
+    """Export query results to various formats."""
+    try:
+        if not connection_name:
+            return {"success": False, "error": "Connection name is required"}
+        if not query:
+            return {"success": False, "error": "Query is required"}
+
+        connector = db_manager.get_connector(connection_name)
+        if not connector:
+            return {"success": False, "error": f"Connection not found: {connection_name}"}
+
+        # Execute query with limit
+        limited_query = _apply_query_limit(query, 10000, connector.database_type)
+        result = await connector.execute_query(limited_query, params or {})
+
+        # Format results based on export format
+        formatted_data = _format_export_data(result, output_format)
+
+        # Save to file if path provided
+        if output_path:
+            with open(output_path, "w", encoding="utf-8") as f:
+                if output_format.lower() == "json":
+                    import json
+
+                    json.dump(formatted_data, f, indent=2)
+                else:
+                    f.write(
+                        formatted_data if isinstance(formatted_data, str) else str(formatted_data)
+                    )
+
+        return {
+            "success": True,
+            "connection_name": connection_name,
+            "query": query,
+            "export_format": output_format,
+            "row_count": len(result.get("rows", [])),
+            "exported_data": formatted_data if not output_path else None,
+            "file_path": output_path if output_path else None,
+        }
+
+    except Exception as e:
+        logger.error(f"Error exporting query results: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "connection_name": connection_name,
+            "export_format": output_format,
+        }
+
+
+def _apply_query_limit(query: str, limit: int | None, database_type: DatabaseType) -> str:
+    """Apply LIMIT clause to query based on database type."""
+    if not limit:
+        return query
+
+    query_lower = query.lower().strip()
+
+    # Check if LIMIT already exists
+    if "limit" in query_lower:
+        return query
+
+    # Add LIMIT based on database type
+    if database_type in [DatabaseType.POSTGRESQL, DatabaseType.SQLITE]:
+        return f"{query.rstrip(';')} LIMIT {limit}"
+    else:
+        # For NoSQL databases, limit logic will be handled in connectors
+        return query
+
+
+def _generate_sample_query(
+    database_type: DatabaseType,
+    table_name: str,
+    database_name: str | None,
+    sample_size: int,
+    include_columns: list[str] | None,
+    exclude_columns: list[str] | None,
+) -> str:
+    """Generate appropriate sample query based on database type."""
+    if database_type in [DatabaseType.POSTGRESQL, DatabaseType.SQLITE]:
+        table_ref = f"{database_name}.{table_name}" if database_name else table_name
+
+        # Build column list if specified
+        if include_columns:
+            columns = ", ".join(include_columns)
+        else:
+            columns = "*"
+
+        return f"SELECT {columns} FROM {table_ref} LIMIT {sample_size}"
+    elif database_type == DatabaseType.MONGODB:
+        # MongoDB query will be handled in connector
+        return f"db.{table_name}.find().limit({sample_size})"
+    elif database_type == DatabaseType.CHROMADB:
+        # ChromaDB query will be handled in connector
+        return f"collection.peek({sample_size})"
+    else:
+        return f"/* Sample query for {table_name} */"
+
+
+def _format_export_data(result: dict[str, Any], export_format: str) -> Any:
+    """Format query results for export."""
+    rows = result.get("rows", [])
+    columns = result.get("columns", [])
+
+    if export_format.lower() == "json":
+        return {
+            "columns": columns,
+            "rows": rows,
+            "metadata": {"row_count": len(rows), "column_count": len(columns)},
+        }
+    elif export_format.lower() == "csv":
+        # Convert to CSV-like structure
+        csv_lines = []
+        if columns:
+            csv_lines.append(",".join(str(col) for col in columns))
+        for row in rows:
+            if isinstance(row, dict):
+                csv_lines.append(",".join(str(val) for val in row.values()))
+            else:
+                csv_lines.append(",".join(str(val) for val in row))
+        return "\n".join(csv_lines)
+    elif export_format.lower() == "excel":
+        # Excel format (simplified structure)
+        return {"worksheets": [{"name": "Query Results", "headers": columns, "data": rows}]}
+    else:
+        return {"format": export_format, "columns": columns, "rows": rows}

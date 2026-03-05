@@ -1,4 +1,4 @@
-"""
+r"""
 FastMCP 2.13+ Persistent Storage Integration
 
 Uses FastMCP's built-in storage backends for persistent state management.
@@ -43,7 +43,7 @@ SCHEMA_CACHE_PREFIX = f"{STORAGE_PREFIX}schema_cache:"
 
 
 class DatabaseOperationsStorage:
-    """
+    r"""
     Wrapper around FastMCP storage for persistent state.
 
     Uses DiskStore to ensure data persists across Claude Desktop and OS restarts.

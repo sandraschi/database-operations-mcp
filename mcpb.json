@@ -1,0 +1,36 @@
+{
+    "name": "database-operations-mcp",
+    "version": "1.0.0",
+    "type": "server",
+    "runtime": "python",
+    "entry_point": "src/database_operations_mcp/main.py",
+    "dependencies": [
+        "fastmcp>=3.0.0",
+        "sqlalchemy>=2.0.0"
+    ],
+    "build": {
+        "include": [
+            "src/**/*",
+            "README.md",
+            "LICENSE"
+        ],
+        "exclude": [
+            "tests/",
+            ".git/",
+            "__pycache__/",
+            "*.pyc",
+            ".venv/",
+            "dist/",
+            "build/",
+            "target/",
+            "docs/",
+            "scripts/",
+            "mcpb/"
+        ]
+    },
+    "scripts": {
+        "build": "mcpb build",
+        "pack": "mcpb pack . dist/database-operations-mcp.mcpb",
+        "test": "python -m pytest"
+    }
+}

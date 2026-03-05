@@ -90,4 +90,3 @@ async def add_chrome_bookmark(url: str, title: str, folder: str | None = None) -
     """Add bookmark to Chrome."""
     browser = ChromeBrowser()
     return await browser.add_bookmark(url, title, folder)
-

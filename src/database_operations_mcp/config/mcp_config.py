@@ -80,12 +80,26 @@ async def server_lifespan(mcp_instance: FastMCP) -> AsyncContextManager[None]:
                 logger.warning(f"Error during storage cleanup (non-fatal): {e}")
 
 
-# Create a single FastMCP instance WITHOUT lifespan for debugging
-# Temporarily disable persistent storage to isolate the issue
-mcp = FastMCP(name="database-operations-mcp")
+# Create a single FastMCP instance with lifespan for persistent storage
+# Persistent storage is enabled following FastMCP 3.0 standards
+mcp = FastMCP(name="database-operations-mcp", lifespan=server_lifespan)
+
+# Expose bundled skills as MCP resources (skill://database-expert/SKILL.md)
+try:
+    from pathlib import Path
+
+    from fastmcp.server.providers.skills import SkillsDirectoryProvider
+
+    _skills_dir = Path(__file__).resolve().parent.parent / "skills"
+    if _skills_dir.is_dir():
+        mcp.add_provider(SkillsDirectoryProvider(roots=[_skills_dir]))
+        logger.info("Skills provider registered: bundled database-expert skill available")
+except ImportError:
+    pass  # FastMCP 3.1+ skills provider optional
 
 # Flag to control individual tool registration
-# Set to False to only register portmanteau tools
+# Set to False to ensure only portmanteau tools are surfaced
+# This maintains the "unified gateway" design requested by the user
 ENABLE_INDIVIDUAL_TOOLS = os.getenv("ENABLE_INDIVIDUAL_TOOLS", "false").lower() == "true"
 
 

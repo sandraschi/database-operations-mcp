@@ -33,8 +33,9 @@ DEPRECATED MODULES (kept for backwards compatibility, tools no longer registered
 
 # Import tool modules to make them available when importing the package
 from . import (
-    # Phase 1-3 new tools
+    agentic_tools,
     browser_bookmarks,
+    calibre_integration,
     calibre_tools,
     chrome_profiles,
     connection_tools,
@@ -65,6 +66,7 @@ from . import (
     query_tools,
     registry_tools,
     schema_tools,
+    sqlite_inspector,
     system_init,
     windows_system,
     windows_tools,
@@ -72,6 +74,7 @@ from . import (
 
 # Export the main tool modules
 __all__ = [
+    "calibre_integration",
     "calibre_tools",
     "connection_tools",
     "data_tools",
@@ -103,8 +106,10 @@ __all__ = [
     "help_system",
     "system_init",
     # Phase 1-3 new tools
+    "agentic_tools",
     "browser_bookmarks",
     "chrome_profiles",
     "db_analyzer",
     "db_operations_extended",
+    "sqlite_inspector",
 ]

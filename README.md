@@ -1,10 +1,10 @@
-[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.4.1-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10+-green.svg)](https://python.org)
-[![FastMCP](https://img.shields.io/badge/FastMCP-2.14.3-orange.svg)](https://github.com/modelcontextprotocol/python-sdk)
+[![FastMCP](https://img.shields.io/badge/FastMCP-3.1-orange.svg)](https://github.com/modelcontextprotocol/python-sdk)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 # Database Operations MCP
 
-FastMCP 2.14.3 MCP server for database operations on Windows, with bookmark management tools.
+FastMCP 3.1 MCP server for database operations on Windows, with bookmark management tools. Includes MCP prompts and a bundled database-expert skill.
 
 ## Scope
 - Primary: Database tools (inspection, backup/restore, analysis, Windows application databases)
@@ -25,7 +25,7 @@ Individual tools have been deprecated in favor of portmanteau tools for maintain
 - `db_management` - Database health checks, optimization, backup/restore portmanteau (consolidates management_tools)
 - `db_fts` - Full-text search with ranking and highlighting portmanteau (consolidates fts_tools)
 - `db_analyzer` - Comprehensive database analysis and diagnostics portmanteau
-- `db_sampling_workflow` - FastMCP 2.14.3 sampling-enabled agentic workflows for complex database operations
+- `db_sampling_workflow` - FastMCP 3.1 sampling-enabled agentic workflows for complex database operations
 - `windows_system` - Windows Registry, service status, system info portmanteau (consolidates registry_tools, windows_tools)
 
 ### Bookmark Tools (Secondary)
@@ -189,10 +189,16 @@ database-operations-mcp/
 └── README.md
 ```
 
-## Install via MCPB Package (Claude Desktop)
-- Download or build the `.mcpb` package.
-- In Claude Desktop, open Extensions and drag-and-drop the `.mcpb` file.
-- Restart Claude Desktop if prompted.
+## 📦 Packaging & Distribution
+
+This repository is SOTA 2026 compliant and uses the officially validated `@anthropic-ai/mcpb` workflow for distribution.
+
+### Pack Extension
+To generate a `.mcpb` distribution bundle with complete source code and automated build exclusions:
+```bash
+# SOTA 2026 standard pack command
+mcpb pack . dist/database-operations-mcp.mcpb
+```
 
 ## Install Zed Extension
 This repository includes a Zed extension for native integration with the Zed editor.
@@ -256,8 +262,28 @@ Add the server to your MCP config (`%USERPROFILE%\AppData\Roaming\Cursor\.cursor
 ## Development
 For Python development setup, testing, and contribution guidelines, see [README-python.md](README-python.md).
 
-## Installation
+## 🚀 Installation
 
+### Prerequisites
+- [uv](https://docs.astral.sh/uv/) installed (RECOMMENDED)
+- Python 3.12+
+
+### 📦 Quick Start
+Run immediately via `uvx`:
+```bash
+uvx browser-bookmarks
+```
+
+### 🎯 Claude Desktop Integration
+Add to your `claude_desktop_config.json`:
+```json
+"mcpServers": {
+  "browser-bookmarks": {
+    "command": "uv",
+    "args": ["--directory", "D:/Dev/repos/database-operations-mcp", "run", "browser-bookmarks"]
+  }
+}
+```
 ### From PyPI (Recommended)
 
 ```bash
@@ -276,7 +302,7 @@ pip install git+https://github.com/sandraschi/database-operations-mcp.git
 
 ### For Claude Desktop (MCPB Package)
 
-1. Download the latest `.mcpb` file from [Releases](https://github.com/sandraschi/database-operations-mcp/releases)
+1. Download or build the latest `.mcpb` file.
 2. Open Claude Desktop → Settings → Extensions
 3. Drag and drop the `.mcpb` file
 4. Restart Claude Desktop
@@ -341,7 +367,36 @@ The `db_sampling_workflow` tool enables complex database operations that would p
 
 ## Requirements
 - Python 3.10+
-- FastMCP 2.14.3
+- FastMCP 3.1+
 - Supported browsers installed (for bookmark tools)
+- **Persistence**: `py-key-value-aio[disk]` for DiskStore (optional; in-memory fallback if not installed)
 - **Database Drivers**: `chromadb`, `pymongo`, `psycopg2-binary`, `duckdb`, `aiomysql`, `redis`
 - **Utilities**: `aiohttp`, `rich`, `psutil`
+
+
+## Webapp Dashboard
+
+This MCP server includes a web interface (FastMCP 3.1 gateway) for monitoring and tool execution.
+- **Frontend**: port **10708** (Vite dev server)
+- **Backend**: port **10709** (FastAPI + MCP mounted at `/mcp`, REST at `/api/tools`)
+
+To start the webapp:
+1. Navigate to the `web_sota` directory.
+2. Run `.\start.ps1` (PowerShell; from repo root: `cd web_sota; .\start.ps1`).
+3. Open `http://localhost:10708` in your browser.
+
+## Prompts and skills (FastMCP 3.1)
+
+- **MCP prompt `database_expert`**: Clients can call `get_prompt("database_expert", arguments={"focus": "general"|"sql"|"connections"|"export"})` to receive instruction text to inject so the LLM acts as a database expert using this server's tools. Use when you want the assistant to follow connection/schema/query/export best practices without reading this README.
+- **Bundled skill `database-expert`**: Exposed as MCP resources under the `skill://` scheme. Clients that support MCP resources can read `skill://database-expert/SKILL.md` (and manifest/supporting files) for the same expert guidance. The skill lives in `src/database_operations_mcp/skills/database-expert/` and is registered via the FastMCP Skills provider.
+
+See [FastMCP Prompts](https://gofastmcp.com/servers/prompts) and [Skills Provider](https://gofastmcp.com/servers/providers/skills) for the framework docs.
+
+## Persistence
+
+Connection state and preferences are persisted across restarts using `py-key-value-aio[disk]` (DiskStore).
+
+- **Storage location**: `%APPDATA%\database-operations-mcp` (Windows), `~/Library/Application Support/database-operations-mcp` (macOS), `~/.local/share/database-operations-mcp` (Linux).
+- **Persisted data**: Saved database connections, active connection id, user preferences (e.g. default page size), restore state, and schema cache.
+- **Initialization**: Storage is initialized in server lifespan; if the optional `[disk]` extra is not installed, the server falls back to in-memory storage and logs a warning.
+- **Development**: Set `ENABLE_PASSWORD_STORAGE=1` only in dev; it allows storing connection passwords (insecure, not for production).

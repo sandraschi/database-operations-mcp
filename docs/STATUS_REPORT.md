@@ -33,8 +33,9 @@ This repository provides a FastMCP 2.14.3 MCP server for database-centric operat
 ## 🛠️ Technical Stack
 
 ### Core Dependencies
-- **FastMCP**: 2.14.3+ (mandatory for conversational returns and sampling capabilities)
+- **FastMCP**: 3.1+ (universal gateway; conversational returns and sampling)
 - **Python**: 3.10+ (tested up to 3.13.5)
+- **Persistence**: DiskStore via `py-key-value-aio[disk]` for connections, active connection, preferences, schema cache (see README Persistence section)
 - **Package Manager**: uv (replaces pip)
 - **Linter**: ruff (replaces flake8, black, isort)
 - **Testing**: pytest with pytest-cov

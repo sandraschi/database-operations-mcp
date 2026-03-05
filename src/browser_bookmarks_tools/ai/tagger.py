@@ -35,4 +35,3 @@ async def tag_bookmarks(bookmarks: list[dict[str, Any]]) -> list[dict[str, Any]]
     """Tag bookmarks with AI."""
     tagger = BookmarkTagger()
     return await tagger.tag_bookmarks(bookmarks)
-

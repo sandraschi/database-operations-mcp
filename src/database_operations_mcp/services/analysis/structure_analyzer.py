@@ -198,8 +198,7 @@ class StructureAnalyzer:
 
         # Get indexes
         async with conn.execute(
-            "SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name=?",
-            (table_name,)
+            "SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name=?", (table_name,)
         ) as cursor:
             indexes = [{"name": row[0], "definition": row[1]} for row in await cursor.fetchall()]
 

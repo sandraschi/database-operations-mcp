@@ -56,10 +56,10 @@ async def help_system(
             Example: 'database operations', 'firefox bookmarks', 'connection management'
 
         category (str, OPTIONAL): Category to filter help by
-            Valid values: 'database', 'firefox', 'chrome', 'calibre', 'registry', 'help'
+            Valid values: 'database', 'firefox', 'chrome', 'calibre', 'registry', 'help', 'agentic'
             Default: None (show all categories)
             Used for: help operation
-            Example: 'database', 'firefox'
+            Example: 'database', 'agentic'
 
         tool_name (str, OPTIONAL): Name of tool to get help for
             Format: Exact tool name (case-sensitive)
@@ -300,21 +300,16 @@ async def _get_help(
 ) -> dict[str, Any]:
     """Get help for a specific topic or tool."""
     try:
-        if not topic:
-            raise ValueError("Topic is required")
-
+        help_data = HelpSystem.get_help(category)
         return {
             "success": True,
-            "message": f"Help requested for topic '{topic}'",
-            "topic": topic,
+            "message": f"Help requested for {'category ' + category if category else 'all tools'}",
             "category": category,
             "include_examples": include_examples,
             "include_parameters": include_parameters,
             "format_output": format_output,
-            "help_content": f"# Help for {topic}\n\nThis is placeholder help content for {topic}.",
-            "note": "Implementation pending - requires help content generation",
+            "help_data": help_data,
         }
-
     except Exception as e:
         logger.error(f"Error getting help: {e}", exc_info=True)
         return {
@@ -326,28 +321,26 @@ async def _get_help(
 
 
 async def _get_tool_help(
-    tool_name: str | None, include_examples: bool, include_parameters: bool, format_output: str
+    tool_name: str | None,
+    include_examples: bool,
+    include_parameters: bool,
+    format_output: str,
 ) -> dict[str, Any]:
     """Get detailed help for a specific tool."""
     try:
-        if not tool_name:
-            raise ValueError("Tool name is required")
-
+        tool_help_data = HelpSystem.get_tool_help(tool_name)
         return {
-            "success": True,
+            "success": tool_help_data.get("status") == "success",
             "message": f"Tool help requested for '{tool_name}'",
             "tool_name": tool_name,
             "include_examples": include_examples,
             "include_parameters": include_parameters,
             "format_output": format_output,
-            "tool_help": {
-                "description": f"Detailed help for {tool_name}",
-                "parameters": [] if not include_parameters else ["operation", "param1", "param2"],
-                "examples": [] if not include_examples else [f"{tool_name}(operation='example')"],
-                "note": "Implementation pending - requires tool help extraction",
-            },
+            "tool_help": tool_help_data.get("tool", {}),
+            "error": tool_help_data.get("error")
+            if tool_help_data.get("status") == "error"
+            else None,
         }
-
     except Exception as e:
         logger.error(f"Error getting tool help: {e}", exc_info=True)
         return {
@@ -365,13 +358,23 @@ async def _list_categories() -> dict[str, Any]:
             "success": True,
             "message": "Help categories listed",
             "categories": [
-                {"name": "database", "description": "Database operations and management"},
-                {"name": "firefox", "description": "Firefox bookmark and profile management"},
-                {"name": "media", "description": "Media library operations (Calibre, Plex)"},
-                {"name": "windows", "description": "Windows system and registry operations"},
+                {
+                    "name": "database",
+                    "description": "Database operations and management",
+                },
+                {
+                    "name": "firefox",
+                    "description": "Firefox bookmark and profile management",
+                },
+                {"name": "calibre", "description": "Calibre library tools"},
+                {"name": "registry", "description": "Windows Registry tools"},
                 {"name": "help", "description": "Help system and documentation"},
+                {
+                    "name": "agentic",
+                    "description": "Autonomous orchestration and sampling patterns",
+                },
             ],
-            "count": 5,
+            "count": 6,
         }
 
     except Exception as e:

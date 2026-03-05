@@ -6,7 +6,7 @@ single unified interface. Supports structure discovery, content analysis,
 error detection, health checking, and report generation.
 """
 
-from typing import Any, Optional, Union
+from typing import Optional
 
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.services.analysis import (
@@ -325,9 +325,7 @@ async def db_analyzer(
 
     if include_sample_data and structure["tables"]:
         content = await _content_analyzer.sample_content(
-            db_file_path,
-            structure["tables"][0]["name"],
-            limit=limit
+            db_file_path, structure["tables"][0]["name"], limit=limit
         )
         result["content"] = {
             "samples": content,

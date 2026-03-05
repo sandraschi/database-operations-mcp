@@ -69,7 +69,7 @@ async def find_forgotten_bookmarks(
     days_unvisited: int = 365, profile_path: str | None = None
 ) -> dict[str, Any]:
     """Find bookmarks not VISITED in a while (by last_visit_date).
-    
+
     These are bookmarks that exist but haven't been clicked/used.
     Good candidates for archiving or deletion.
 

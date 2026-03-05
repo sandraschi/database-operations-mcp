@@ -2,8 +2,7 @@
 Tests for Firefox bulk operations implementation.
 """
 
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -105,9 +104,7 @@ class TestFirefoxBulkOperations:
 
     @pytest.mark.asyncio
     @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
-    async def test_batch_update_tags_error_handling(
-        self, mock_firefox_db_class, mock_db
-    ):
+    async def test_batch_update_tags_error_handling(self, mock_firefox_db_class, mock_db):
         """Test batch_update_tags error handling."""
         # Setup - simulate an error
         mock_firefox_db_class.return_value = mock_db
@@ -182,9 +179,7 @@ class TestFirefoxBulkOperations:
 
     @pytest.mark.asyncio
     @patch("database_operations_mcp.tools.firefox.bulk_operations.FirefoxDB")
-    async def test_remove_unused_tags_error_handling(
-        self, mock_firefox_db_class, mock_db
-    ):
+    async def test_remove_unused_tags_error_handling(self, mock_firefox_db_class, mock_db):
         """Test remove_unused_tags error handling."""
         # Setup - simulate an error
         mock_firefox_db_class.return_value = mock_db

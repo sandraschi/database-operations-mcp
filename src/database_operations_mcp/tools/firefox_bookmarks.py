@@ -33,12 +33,12 @@ WRITE_OPERATIONS = {
 
 def _check_firefox_for_write(operation: str) -> dict[str, Any] | None:
     """Check if Firefox is running before write operations.
-    
+
     Returns error dict if Firefox is running, None if safe to proceed.
     """
     if operation not in WRITE_OPERATIONS:
         return None
-    
+
     status = FirefoxStatusChecker.is_firefox_running()
     if status.get("is_running"):
         return {
@@ -183,7 +183,7 @@ async def _bruteforce_read_operation(
 
             return {
                 "success": True,
-                "message": f"Search completed (brute force)",
+                "message": "Search completed (brute force)",
                 "access_method": method,
                 "search_query": search_query,
                 "results": results,
@@ -563,8 +563,15 @@ async def firefox_bookmarks(
 
     # Read operations that support force_access
     read_operations = {
-        "list_bookmarks", "get_bookmark", "search_bookmarks", "find_duplicates",
-        "list_tags", "find_similar_tags", "find_old_bookmarks", "find_forgotten_bookmarks", "get_bookmark_stats",
+        "list_bookmarks",
+        "get_bookmark",
+        "search_bookmarks",
+        "find_duplicates",
+        "list_tags",
+        "find_similar_tags",
+        "find_old_bookmarks",
+        "find_forgotten_bookmarks",
+        "get_bookmark_stats",
     }
 
     # Handle force_access for read operations when Firefox is running
@@ -573,8 +580,14 @@ async def firefox_bookmarks(
         if status.get("is_running"):
             logger.info(f"Firefox running, using brute force for {operation}")
             return await _bruteforce_read_operation(
-                operation, profile_name, folder_id, bookmark_id,
-                search_query, search_type, similarity_threshold, age_days
+                operation,
+                profile_name,
+                folder_id,
+                bookmark_id,
+                search_query,
+                search_type,
+                similarity_threshold,
+                age_days,
             )
 
     # Block write operations when Firefox is running with explicit error
@@ -1017,7 +1030,7 @@ async def _find_forgotten_bookmarks(profile_name: str | None, age_days: int) -> 
 
 async def _refresh_bookmarks(profile_name: str | None, batch_size: int) -> dict[str, Any]:
     """Check bookmarks for 404s and attempt to fix broken URLs.
-    
+
     For each broken bookmark:
     1. Check if URL returns 404
     2. Try simplified versions (remove trailing paths, query params)
@@ -1026,11 +1039,11 @@ async def _refresh_bookmarks(profile_name: str | None, batch_size: int) -> dict[
     import asyncio
     import aiohttp
     from urllib.parse import urlparse, urlunparse
-    
+
     try:
         manager = BookmarkManager(profile_name)
         bookmarks = await manager.list_bookmarks()
-        
+
         results = {
             "checked": 0,
             "working": 0,
@@ -1039,61 +1052,71 @@ async def _refresh_bookmarks(profile_name: str | None, batch_size: int) -> dict[
             "unfixable": [],
             "fixed_urls": [],
         }
-        
+
         async def check_url(url: str, timeout: int = 10) -> tuple[bool, int]:
             """Check if URL is accessible. Returns (is_working, status_code)."""
             try:
                 async with aiohttp.ClientSession() as session:
-                    async with session.head(url, timeout=aiohttp.ClientTimeout(total=timeout), allow_redirects=True) as resp:
+                    async with session.head(
+                        url, timeout=aiohttp.ClientTimeout(total=timeout), allow_redirects=True
+                    ) as resp:
                         return resp.status < 400, resp.status
             except Exception:
                 try:
                     async with aiohttp.ClientSession() as session:
-                        async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout), allow_redirects=True) as resp:
+                        async with session.get(
+                            url, timeout=aiohttp.ClientTimeout(total=timeout), allow_redirects=True
+                        ) as resp:
                             return resp.status < 400, resp.status
                 except Exception:
                     return False, 0
-        
+
         def get_url_variants(url: str) -> list[str]:
             """Generate simpler URL variants to try."""
             parsed = urlparse(url)
             variants = []
-            
+
             # Try without query string
             if parsed.query:
-                variants.append(urlunparse((parsed.scheme, parsed.netloc, parsed.path, '', '', '')))
-            
+                variants.append(urlunparse((parsed.scheme, parsed.netloc, parsed.path, "", "", "")))
+
             # Try without fragment
             if parsed.fragment:
-                variants.append(urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, '')))
-            
+                variants.append(
+                    urlunparse(
+                        (parsed.scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, "")
+                    )
+                )
+
             # Try parent paths
-            path_parts = parsed.path.rstrip('/').split('/')
+            path_parts = parsed.path.rstrip("/").split("/")
             for i in range(len(path_parts) - 1, 0, -1):
-                parent_path = '/'.join(path_parts[:i])
+                parent_path = "/".join(path_parts[:i])
                 if parent_path:
-                    variants.append(urlunparse((parsed.scheme, parsed.netloc, parent_path, '', '', '')))
-            
+                    variants.append(
+                        urlunparse((parsed.scheme, parsed.netloc, parent_path, "", "", ""))
+                    )
+
             # Try just the domain
-            variants.append(urlunparse((parsed.scheme, parsed.netloc, '/', '', '', '')))
-            
+            variants.append(urlunparse((parsed.scheme, parsed.netloc, "/", "", "", "")))
+
             return variants
-        
+
         # Process in batches
         for i, bookmark in enumerate(bookmarks[:batch_size]):
             url = bookmark.get("url", "")
             if not url or not url.startswith(("http://", "https://")):
                 continue
-            
+
             results["checked"] += 1
             is_working, status = await check_url(url)
-            
+
             if is_working:
                 results["working"] += 1
                 continue
-            
+
             results["broken"] += 1
-            
+
             # Try URL variants
             fixed = False
             for variant in get_url_variants(url):
@@ -1103,29 +1126,33 @@ async def _refresh_bookmarks(profile_name: str | None, batch_size: int) -> dict[
                     try:
                         # TODO: Implement bookmark URL update in BookmarkManager
                         results["fixed"] += 1
-                        results["fixed_urls"].append({
-                            "bookmark_id": bookmark.get("id"),
-                            "title": bookmark.get("title"),
-                            "old_url": url,
-                            "new_url": variant,
-                            "status": "would_fix"  # dry-run for now
-                        })
+                        results["fixed_urls"].append(
+                            {
+                                "bookmark_id": bookmark.get("id"),
+                                "title": bookmark.get("title"),
+                                "old_url": url,
+                                "new_url": variant,
+                                "status": "would_fix",  # dry-run for now
+                            }
+                        )
                         fixed = True
                         break
                     except Exception:
                         pass
-            
+
             if not fixed:
-                results["unfixable"].append({
-                    "bookmark_id": bookmark.get("id"),
-                    "title": bookmark.get("title"),
-                    "url": url,
-                    "status_code": status,
-                })
-            
+                results["unfixable"].append(
+                    {
+                        "bookmark_id": bookmark.get("id"),
+                        "title": bookmark.get("title"),
+                        "url": url,
+                        "status_code": status,
+                    }
+                )
+
             # Small delay to avoid hammering servers
             await asyncio.sleep(0.1)
-        
+
         return {
             "success": True,
             "message": f"Checked {results['checked']} bookmarks",
@@ -1142,7 +1169,7 @@ async def _refresh_bookmarks(profile_name: str | None, batch_size: int) -> dict[
             },
             "note": "URL updates are dry-run only - set dry_run=False to apply fixes",
         }
-        
+
     except Exception as e:
         logger.error(f"Error refreshing bookmarks: {e}", exc_info=True)
         return {

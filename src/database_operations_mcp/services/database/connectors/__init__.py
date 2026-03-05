@@ -8,8 +8,21 @@ from .chromadb_connector import ChromaDBConnector
 from .mongodb_connector import MongoDBConnector
 from .postgresql_connector import PostgreSQLConnector
 from .sqlite_connector import SQLiteConnector
+from .mysql_connector import MySQLConnector
+from .redis_connector import RedisConnector
+from .duckdb_connector import DuckDBConnector
+from .lancedb_connector import LanceDBConnector
 
-__all__ = ["SQLiteConnector", "PostgreSQLConnector", "ChromaDBConnector", "MongoDBConnector"]
+__all__ = [
+    "SQLiteConnector",
+    "PostgreSQLConnector",
+    "ChromaDBConnector",
+    "MongoDBConnector",
+    "MySQLConnector",
+    "RedisConnector",
+    "DuckDBConnector",
+    "LanceDBConnector",
+]
 
 # Connector availability mapping
 AVAILABLE_CONNECTORS = {
@@ -17,6 +30,10 @@ AVAILABLE_CONNECTORS = {
     "postgresql": PostgreSQLConnector,
     "chromadb": ChromaDBConnector,
     "mongodb": MongoDBConnector,
+    "mysql": MySQLConnector,
+    "redis": RedisConnector,
+    "duckdb": DuckDBConnector,
+    "lancedb": LanceDBConnector,
 }
 
 

@@ -95,4 +95,3 @@ async def add_brave_bookmark(url: str, title: str, folder: str | None = None) ->
     """Add bookmark to Brave."""
     browser = BraveBrowser()
     return await browser.add_bookmark(url, title, folder)
-

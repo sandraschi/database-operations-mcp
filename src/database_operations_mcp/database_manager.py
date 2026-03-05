@@ -23,6 +23,10 @@ class DatabaseType(str, Enum):
     POSTGRESQL = "postgresql"
     MONGODB = "mongodb"
     CHROMADB = "chromadb"
+    MYSQL = "mysql"
+    REDIS = "redis"
+    DUCKDB = "duckdb"
+    LANCEDB = "lancedb"
 
 
 class ConnectionStatus(str, Enum):
@@ -227,6 +231,30 @@ def get_supported_databases() -> list[dict[str, Any]]:
             "name": "ChromaDB",
             "category": "Vector",
             "description": "Vector database for embeddings and AI applications",
+        },
+        {
+            "type": DatabaseType.MYSQL,
+            "name": "MySQL/MariaDB",
+            "category": "SQL Server",
+            "description": "Popular open-source relational database",
+        },
+        {
+            "type": DatabaseType.REDIS,
+            "name": "Redis",
+            "category": "NoSQL",
+            "description": "In-memory data structure store",
+        },
+        {
+            "type": DatabaseType.DUCKDB,
+            "name": "DuckDB",
+            "category": "Analytical",
+            "description": "In-process analytical SQL database",
+        },
+        {
+            "type": DatabaseType.LANCEDB,
+            "name": "LanceDB",
+            "category": "Vector",
+            "description": "Embedding store and vector search (local or LanceDB Cloud)",
         },
     ]
 

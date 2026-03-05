@@ -313,17 +313,17 @@ async def db_operations(
     """
 
     if operation == "execute_transaction":
-        return await _execute_transaction(connection_name, query, params)
+        result = await _execute_transaction(connection_name, query, params)
     elif operation == "execute_write":
-        return await _execute_write(connection_name, query, params)
+        result = await _execute_write(connection_name, query, params)
     elif operation == "batch_insert":
-        return await _batch_insert(connection_name, table_name, data, batch_size)
+        result = await _batch_insert(connection_name, table_name, data, batch_size)
     elif operation == "execute_query":
-        return await _execute_query(connection_name, query, params, limit)
+        result = await _execute_query(connection_name, query, params, limit)
     elif operation == "quick_data_sample":
-        return await _quick_data_sample(connection_name, table_name, limit)
+        result = await _quick_data_sample(connection_name, table_name, limit)
     elif operation == "export_query_results":
-        return await _export_query_results(
+        result = await _export_query_results(
             connection_name, query, params, output_format, output_path
         )
     else:
@@ -339,6 +339,25 @@ async def db_operations(
                 "export_query_results",
             ],
         }
+
+    # Standardize result with a conversational summary
+    summary = result.get("message", "")
+    if result.get("success"):
+        if operation == "execute_query":
+            rows = result.get("result", {}).get("row_count", 0)
+            summary = f"Successfully executed query on '{connection_name}'. Retrieved {rows} rows."
+        elif operation == "quick_data_sample":
+            rows = result.get("result", {}).get("row_count", 0)
+            summary = f"Retrieved a sample of {rows} rows from table '{table_name}' in '{connection_name}'."
+        elif operation == "export_query_results":
+            count = result.get("row_count", 0)
+            fmt = result.get("export_format", "data")
+            path = result.get("file_path", "memory")
+            summary = f"Exported {count} rows to {fmt} format (Path: {path})."
+    else:
+        summary = f"Error: {result.get('error', 'Unknown database error')}"
+
+    return {"content": summary, "data": result}
 
 
 async def _execute_transaction(

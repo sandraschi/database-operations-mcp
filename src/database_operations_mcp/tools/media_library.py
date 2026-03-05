@@ -26,6 +26,9 @@ async def media_library(
     export_format: str = "json",
     export_path: str | None = None,
     optimize_database: bool = False,
+    action: str | None = None,
+    library_section: str | None = None,
+    item_id: int | None = None,
 ) -> dict[str, Any]:
     """Media library management portmanteau tool.
 
@@ -46,6 +49,7 @@ async def media_library(
         - search_calibre_fts_db: Search Calibre's full-text-search database (FTS)
         - find_plex_database: Locate Plex Media Server database file
         - optimize_plex_database: Optimize Plex database performance
+        - manage_plex_metadata: Analyze or export Plex metadata
         - export_database_schema: Export database schema information
         - get_plex_library_stats: Get statistics about Plex library
         - get_plex_library_sections: Get information about Plex library sections
@@ -360,19 +364,27 @@ async def media_library(
             library_path, book_title, author, search_query, include_metadata
         )
     elif operation == "get_calibre_book_metadata":
-        return await _get_calibre_book_metadata(library_path, book_title, author, include_metadata)
+        return await _get_calibre_book_metadata(
+            library_path, book_title, author, include_metadata
+        )
     elif operation == "search_calibre_fts":
         return await _search_calibre_fts(library_path, search_query)
     elif operation == "search_calibre_fts_db":
-        return await _search_calibre_fts_db(library_path, search_query, include_metadata)
+        return await _search_calibre_fts_db(
+            library_path, search_query, include_metadata
+        )
     elif operation == "find_plex_database":
         return await _find_plex_database(plex_server_url)
     elif operation == "optimize_plex_database":
-        return await _optimize_plex_database(plex_server_url, plex_token, optimize_database)
+        return await _optimize_plex_database(
+            plex_server_url, plex_token, optimize_database
+        )
     elif operation == "export_database_schema":
         return await _export_database_schema(library_path, export_format, export_path)
     elif operation == "get_plex_library_stats":
         return await _get_plex_library_stats(plex_server_url, plex_token, library_name)
+    elif operation == "manage_plex_metadata":
+        return await _manage_plex_metadata(action, library_section, item_id)
     elif operation == "get_plex_library_sections":
         return await _get_plex_library_sections(plex_server_url, plex_token)
     else:
@@ -386,6 +398,7 @@ async def media_library(
                 "search_calibre_fts_db",
                 "find_plex_database",
                 "optimize_plex_database",
+                "manage_plex_metadata",
                 "export_database_schema",
                 "get_plex_library_stats",
                 "get_plex_library_sections",
@@ -405,17 +418,73 @@ async def _search_calibre_library(
         if not library_path:
             raise ValueError("Library path is required")
 
+        import sqlite3
+        import os
+
+        db_path = os.path.join(library_path, "metadata.db")
+        if not os.path.exists(db_path):
+            raise FileNotFoundError(f"Calibre database not found at {db_path}")
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        query = """
+            SELECT 
+                b.id, 
+                b.title, 
+                b.sort as title_sort,
+                b.timestamp, 
+                b.pubdate,
+                (SELECT GROUP_CONCAT(name, ' & ') FROM authors a JOIN books_authors_link bal ON a.id = bal.author WHERE bal.book = b.id) as authors,
+                s.name as series,
+                b.series_index
+            FROM books b
+            LEFT JOIN books_series_link bsl ON b.id = bsl.book
+            LEFT JOIN series s ON bsl.series = s.id
+            WHERE 1=1
+        """
+        params = []
+
+        if book_title:
+            query += " AND b.title LIKE ?"
+            params.append(f"%{book_title}%")
+
+        if author:
+            query += " AND authors LIKE ?"
+            params.append(f"%{author}%")
+
+        if search_query:
+            query += " AND (b.title LIKE ? OR authors LIKE ?)"
+            params.extend([f"%{search_query}%", f"%{search_query}%"])
+
+        query += " ORDER BY b.timestamp DESC LIMIT 50"
+
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        results = [dict(row) for row in rows]
+
+        if include_metadata:
+            for res in results:
+                # Add tags
+                cursor.execute(
+                    """
+                    SELECT t.name
+                    FROM tags t
+                    JOIN books_tags_link btl ON t.id = btl.tag
+                    WHERE btl.book = ?
+                """,
+                    (res["id"],),
+                )
+                res["tags"] = [row["name"] for row in cursor.fetchall()]
+
+        conn.close()
+
         return {
             "success": True,
-            "message": "Calibre library search requested",
+            "results": results,
+            "count": len(results),
             "library_path": library_path,
-            "book_title": book_title,
-            "author": author,
-            "search_query": search_query,
-            "include_metadata": include_metadata,
-            "results": [],
-            "count": 0,
-            "note": "Implementation pending - requires Calibre library integration",
         }
 
     except Exception as e:
@@ -442,16 +511,64 @@ async def _get_calibre_book_metadata(
         if not book_title and not author:
             raise ValueError("Book title or author is required")
 
-        return {
-            "success": True,
-            "message": f"Calibre book metadata requested for '{book_title or author}'",
-            "library_path": library_path,
-            "book_title": book_title,
-            "author": author,
-            "include_metadata": include_metadata,
-            "metadata": {},
-            "note": "Implementation pending - requires Calibre metadata extraction",
-        }
+        import sqlite3
+        import os
+
+        db_path = os.path.join(library_path, "metadata.db")
+        if not os.path.exists(db_path):
+            raise FileNotFoundError(f"Calibre database not found at {db_path}")
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        query = """
+            SELECT b.*, c.text as comments,
+            (SELECT GROUP_CONCAT(name, ' & ') FROM authors a JOIN books_authors_link bal ON a.id = bal.author WHERE bal.book = b.id) as authors_list
+            FROM books b
+            LEFT JOIN comments c ON b.id = c.book
+            WHERE 1=1
+        """
+        params = []
+        if book_title:
+            query += " AND b.title = ?"
+            params.append(book_title)
+        if author:
+            query += " AND authors_list LIKE ?"
+            params.append(f"%{author}%")
+
+        query += " LIMIT 1"
+
+        cursor.execute(query, params)
+        row = cursor.fetchone()
+
+        if not row:
+            return {"success": False, "error": "Book not found"}
+
+        book_info = dict(row)
+
+        if include_metadata:
+            # Get tags
+            cursor.execute(
+                """
+                SELECT t.name FROM tags t JOIN books_tags_link btl ON t.id = btl.tag WHERE btl.book = ?
+            """,
+                (book_info["id"],),
+            )
+            book_info["tags"] = [r["name"] for r in cursor.fetchall()]
+
+            # Get formats
+            cursor.execute(
+                """
+                SELECT format, name || '.' || LOWER(format) as filename FROM data WHERE book = ?
+            """,
+                (book_info["id"],),
+            )
+            book_info["formats"] = [dict(r) for r in cursor.fetchall()]
+
+        conn.close()
+
+        return {"success": True, "book_info": book_info, "library_path": library_path}
 
     except Exception as e:
         logger.error(f"Error getting Calibre book metadata: {e}", exc_info=True)
@@ -464,37 +581,19 @@ async def _get_calibre_book_metadata(
         }
 
 
-async def _search_calibre_fts(library_path: str | None, search_query: str | None) -> dict[str, Any]:
+async def _search_calibre_fts(
+    library_path: str | None, search_query: str | None
+) -> dict[str, Any]:
     """Perform full-text search in Calibre library."""
-    try:
-        if not library_path:
-            raise ValueError("Library path is required")
-        if not search_query:
-            raise ValueError("Search query is required")
-
-        return {
-            "success": True,
-            "message": f"Calibre FTS search requested for '{search_query}'",
-            "library_path": library_path,
-            "search_query": search_query,
-            "results": [],
-            "count": 0,
-            "note": "Implementation pending - requires Calibre FTS integration",
-        }
-
-    except Exception as e:
-        logger.error(f"Error performing Calibre FTS search: {e}", exc_info=True)
-        return {
-            "success": False,
-            "error": f"Failed to perform Calibre FTS search: {str(e)}",
-            "library_path": library_path,
-            "search_query": search_query,
-            "results": [],
-            "count": 0,
-        }
+    # Deflecting to _search_calibre_fts_db as it is the same functionality
+    return await _search_calibre_fts_db(
+        library_path, search_query, include_metadata=True
+    )
 
 
-async def _search_calibre_fts_db(library_path: str | None, search_query: str | None, include_metadata: bool) -> dict[str, Any]:
+async def _search_calibre_fts_db(
+    library_path: str | None, search_query: str | None, include_metadata: bool
+) -> dict[str, Any]:
     """Search Calibre's full-text-search database."""
     try:
         if not library_path:
@@ -504,7 +603,6 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
 
         import os
         import sqlite3
-        from pathlib import Path
 
         # Path to FTS database
         fts_db_path = os.path.join(library_path, "full-text-search.db")
@@ -528,13 +626,16 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
         search_pattern = f"%{search_query}%"
 
         # Search in books_text table
-        fts_cursor.execute("""
+        fts_cursor.execute(
+            """
             SELECT book, format, text_size, searchable_text
             FROM books_text
             WHERE searchable_text LIKE ? AND searchable_text IS NOT NULL
             ORDER BY text_size DESC
             LIMIT 50
-        """, (search_pattern,))
+        """,
+            (search_pattern,),
+        )
 
         fts_results = fts_cursor.fetchall()
 
@@ -551,14 +652,20 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
                 book_ids = list(set(row[0] for row in fts_results))
                 if book_ids:
                     # Get book titles and authors
-                    placeholders = ','.join('?' * len(book_ids))
-                    meta_cursor.execute(f"""
+                    placeholders = ",".join("?" * len(book_ids))
+                    meta_cursor.execute(
+                        f"""
                         SELECT id, title, author_sort
                         FROM books
                         WHERE id IN ({placeholders})
-                    """, book_ids)
+                    """,
+                        book_ids,
+                    )
 
-                    book_metadata = {row[0]: {'title': row[1], 'author': row[2]} for row in meta_cursor.fetchall()}
+                    book_metadata = {
+                        row[0]: {"title": row[1], "author": row[2]}
+                        for row in meta_cursor.fetchall()
+                    }
 
                 meta_conn.close()
             except Exception as e:
@@ -584,9 +691,11 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
                 highlight_start = context_lower.find(search_lower)
                 if highlight_start >= 0:
                     highlighted = (
-                        context[:highlight_start] +
-                        "**" + context[highlight_start:highlight_start + len(search_query)] + "**" +
-                        context[highlight_start + len(search_query):]
+                        context[:highlight_start]
+                        + "**"
+                        + context[highlight_start : highlight_start + len(search_query)]
+                        + "**"
+                        + context[highlight_start + len(search_query) :]
                     )
                 else:
                     highlighted = context
@@ -595,11 +704,11 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
                 highlighted = full_text[:200] + "..."
 
             result = {
-                'book_id': book_id,
-                'format': format_name,
-                'text_size': text_size,
-                'text_preview': highlighted,
-                'relevance_score': 1.0  # Basic relevance for LIKE search
+                "book_id": book_id,
+                "format": format_name,
+                "text_size": text_size,
+                "text_preview": highlighted,
+                "relevance_score": 1.0,  # Basic relevance for LIKE search
             }
 
             if include_metadata and book_id in book_metadata:
@@ -635,15 +744,18 @@ async def _search_calibre_fts_db(library_path: str | None, search_query: str | N
 async def _find_plex_database(plex_server_url: str | None) -> dict[str, Any]:
     """Locate Plex Media Server database."""
     try:
-        if not plex_server_url:
-            raise ValueError("Plex server URL is required")
+        from database_operations_mcp.tools.plex_tools import PlexDatabase
+
+        # We don't even need the URL if we are looking locally,
+        # but we could use it to verify server if needed.
+        plex = PlexDatabase()
+        db_path = plex.db_path
 
         return {
             "success": True,
-            "message": "Plex database location requested",
-            "plex_server_url": plex_server_url,
-            "database_path": None,
-            "note": "Implementation pending - requires Plex database detection",
+            "database_path": str(db_path),
+            "status": "found" if db_path.exists() else "not_found",
+            "server_url": plex_server_url,
         }
 
     except Exception as e:
@@ -661,18 +773,54 @@ async def _optimize_plex_database(
 ) -> dict[str, Any]:
     """Optimize Plex database performance."""
     try:
-        if not plex_server_url:
-            raise ValueError("Plex server URL is required")
+        from database_operations_mcp.tools.plex_tools import PlexDatabase
+        import time
 
-        return {
-            "success": True,
-            "message": "Plex database optimization requested",
-            "plex_server_url": plex_server_url,
-            "plex_token": plex_token,
-            "optimize_database": optimize_database,
-            "optimization_result": {},
-            "note": "Implementation pending - requires Plex optimization logic",
-        }
+        if not optimize_database:
+            return {
+                "success": True,
+                "message": "Optimization not requested (optimize_database=False)",
+                "plex_server_url": plex_server_url,
+            }
+
+        with PlexDatabase() as plex:
+            db_path = plex.db_path
+            if not db_path.exists():
+                raise FileNotFoundError(f"Plex database not found at {db_path}")
+
+            size_before = db_path.stat().st_size
+
+            # Note: We use a separate connection for optimization to avoid 'file:...?mode=ro' limitations
+            # but we must be careful as Plex might be running.
+            import sqlite3
+
+            opt_conn = sqlite3.connect(str(db_path))
+            cursor = opt_conn.cursor()
+
+            start_time = time.time()
+            cursor.execute("VACUUM")
+            vacuum_time = time.time() - start_time
+
+            start_time = time.time()
+            cursor.execute("ANALYZE")
+            analyze_time = time.time() - start_time
+
+            opt_conn.close()
+
+            size_after = db_path.stat().st_size
+
+            return {
+                "success": True,
+                "message": "Plex database optimized successfully",
+                "plex_server_url": plex_server_url,
+                "optimization_stats": {
+                    "vacuum_time_sec": round(vacuum_time, 2),
+                    "analyze_time_sec": round(analyze_time, 2),
+                    "size_before_bytes": size_before,
+                    "size_after_bytes": size_after,
+                    "saved_bytes": size_before - size_after,
+                },
+            }
 
     except Exception as e:
         logger.error(f"Error optimizing Plex database: {e}", exc_info=True)
@@ -680,7 +828,65 @@ async def _optimize_plex_database(
             "success": False,
             "error": f"Failed to optimize Plex database: {str(e)}",
             "plex_server_url": plex_server_url,
-            "optimization_result": {},
+        }
+
+
+async def _manage_plex_metadata(
+    action: str, library_section: str | None = None, item_id: int | None = None
+) -> dict[str, Any]:
+    """Manage Plex metadata through analysis or export."""
+    try:
+        from database_operations_mcp.tools.plex_tools import PlexDatabase
+
+        with PlexDatabase() as plex:
+            if action == "analyze":
+                sections = plex.get_library_sections()
+                # Get basic counts for each section
+                section_summaries = []
+                total_items = 0
+                for section in sections:
+                    items = plex.get_media_items(section_id=section["id"], limit=1)
+                    # This is just a summary, we'd need a real count query for full stats
+                    section_summaries.append(
+                        {
+                            "id": section["id"],
+                            "name": section["name"],
+                            "type": section.get("section_type"),
+                        }
+                    )
+
+                return {
+                    "success": True,
+                    "operation": "manage_plex_metadata",
+                    "action": action,
+                    "database_path": str(plex.db_path),
+                    "sections": section_summaries,
+                    "total_sections": len(sections),
+                }
+
+            elif action == "export":
+                # Implementation delegated to PlexDatabase.export_library
+                # We'll use a temporary path if none provided or just return data
+                result = plex.export_library(output_format="json")
+                return {
+                    "success": True,
+                    "operation": "manage_plex_metadata",
+                    "action": action,
+                    "data": result.get("data") if "data" in result else result,
+                }
+
+            else:
+                return {
+                    "success": False,
+                    "error": f"Unsupported Plex metadata action: {action}",
+                    "supported_actions": ["analyze", "export"],
+                }
+
+    except Exception as e:
+        logger.error(f"Error managing Plex metadata: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Failed to manage Plex metadata: {str(e)}",
         }
 
 
@@ -689,17 +895,55 @@ async def _export_database_schema(
 ) -> dict[str, Any]:
     """Export database schema information."""
     try:
-        if not library_path:
-            raise ValueError("Library path is required")
+        import sqlite3
+        import os
+        import json
+
+        # Determine which database to export (Calibre if library_path provided, else try Plex)
+        db_path = None
+        if library_path:
+            db_path = os.path.join(library_path, "metadata.db")
+        else:
+            from database_operations_mcp.tools.plex_tools import PlexDatabase
+
+            db_path = str(PlexDatabase().db_path)
+
+        if not db_path or not os.path.exists(db_path):
+            raise FileNotFoundError(f"Database not found at {db_path}")
+
+        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        cursor = conn.cursor()
+
+        # Get all tables and their schemas
+        cursor.execute("SELECT name, sql FROM sqlite_master WHERE type='table'")
+        schema_data = {row[0]: row[1] for row in cursor.fetchall()}
+
+        # Also get indices
+        cursor.execute("SELECT name, sql FROM sqlite_master WHERE type='index'")
+        indices = {row[0]: row[1] for row in cursor.fetchall()}
+
+        full_schema = {
+            "tables": schema_data,
+            "indices": indices,
+            "database_path": db_path,
+        }
+
+        conn.close()
+
+        if export_path:
+            with open(export_path, "w", encoding="utf-8") as f:
+                if export_format == "json":
+                    json.dump(full_schema, f, indent=2)
+                else:
+                    # Basic text export for other formats for now
+                    f.write(str(full_schema))
 
         return {
             "success": True,
-            "message": "Database schema export requested",
-            "library_path": library_path,
-            "export_format": export_format,
+            "message": f"Database schema exported successfully ({export_format})",
+            "library_path": library_path or "Plex Default",
             "export_path": export_path,
-            "schema_data": {},
-            "note": "Implementation pending - requires schema export logic",
+            "schema": full_schema if not export_path else "Saved to file",
         }
 
     except Exception as e:
@@ -708,8 +952,6 @@ async def _export_database_schema(
             "success": False,
             "error": f"Failed to export database schema: {str(e)}",
             "library_path": library_path,
-            "export_format": export_format,
-            "schema_data": {},
         }
 
 
@@ -718,22 +960,63 @@ async def _get_plex_library_stats(
 ) -> dict[str, Any]:
     """Get statistics about Plex library."""
     try:
-        if not plex_server_url:
-            raise ValueError("Plex server URL is required")
+        from database_operations_mcp.tools.plex_tools import PlexDatabase
 
-        return {
-            "success": True,
-            "message": "Plex library statistics requested",
-            "plex_server_url": plex_server_url,
-            "plex_token": plex_token,
-            "library_name": library_name,
-            "stats": {
-                "total_items": 0,
-                "total_size": "0 GB",
-                "last_updated": None,
-                "note": "Implementation pending - requires Plex API integration",
-            },
-        }
+        with PlexDatabase() as plex:
+            sections = plex.get_library_sections()
+
+            target_section = None
+            if library_name:
+                for s in sections:
+                    if s["name"].lower() == library_name.lower():
+                        target_section = s
+                        break
+
+            if library_name and not target_section:
+                return {
+                    "success": False,
+                    "error": f"Library section '{library_name}' not found",
+                }
+
+            stats = {}
+            if target_section:
+                items = plex.get_media_items(
+                    section_id=target_section["id"], limit=10000
+                )
+                stats = {
+                    "total_items": len(items),
+                    "total_size_bytes": sum(
+                        item.get("file_size", 0)
+                        for item in items
+                        if item.get("file_size")
+                    ),
+                    "section_type": target_section["section_type"],
+                    "created_at": target_section["created_at"],
+                }
+            else:
+                # Stats for all sections
+                total_items = 0
+                total_size = 0
+                for s in sections:
+                    sec_items = plex.get_media_items(section_id=s["id"], limit=10000)
+                    total_items += len(sec_items)
+                    total_size += sum(
+                        item.get("file_size", 0)
+                        for item in sec_items
+                        if item.get("file_size")
+                    )
+
+                stats = {
+                    "total_sections": len(sections),
+                    "total_items": total_items,
+                    "total_size_bytes": total_size,
+                }
+
+            return {
+                "success": True,
+                "library_name": library_name or "All Sections",
+                "stats": stats,
+            }
 
     except Exception as e:
         logger.error(f"Error getting Plex library stats: {e}", exc_info=True)
@@ -751,25 +1034,10 @@ async def _get_plex_library_sections(
 ) -> dict[str, Any]:
     """Get information about Plex library sections."""
     try:
-        if not plex_server_url:
-            raise ValueError("Plex server URL is required")
+        from database_operations_mcp.tools.plex_tools import PlexDatabase
 
-        return {
-            "success": True,
-            "message": "Plex library sections requested",
-            "plex_server_url": plex_server_url,
-            "plex_token": plex_token,
-            "sections": [],
-            "count": 0,
-            "note": "Implementation pending - requires Plex API integration",
-        }
-
+        with PlexDatabase() as plex:
+            sections = plex.get_library_sections()
+            return {"success": True, "sections": sections, "count": len(sections)}
     except Exception as e:
-        logger.error(f"Error getting Plex library sections: {e}", exc_info=True)
-        return {
-            "success": False,
-            "error": f"Failed to get Plex library sections: {str(e)}",
-            "plex_server_url": plex_server_url,
-            "sections": [],
-            "count": 0,
-        }
+        return {"success": False, "error": str(e)}

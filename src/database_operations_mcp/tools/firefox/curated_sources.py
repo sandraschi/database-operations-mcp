@@ -2,7 +2,6 @@
 
 from typing import Any
 
-from database_operations_mcp.config.mcp_config import mcp
 
 # Predefined curated bookmark collections
 CURATED_SOURCES = {

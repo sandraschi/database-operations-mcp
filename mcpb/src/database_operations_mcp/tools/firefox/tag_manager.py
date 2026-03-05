@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Any
 
 # Import the global MCP instance from the central config
-from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
 
 from .db import FirefoxDB
 

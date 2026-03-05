@@ -1,0 +1,44 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AppLayout } from '@/components/layout/app-layout';
+import { Dashboard } from '@/pages/dashboard';
+import { GettingStarted } from '@/pages/getting-started';
+import { DatabaseTypesHelp } from '@/pages/database-types-help';
+import { ConnectionWizard } from '@/pages/connection-wizard';
+import { Connections } from '@/pages/connections';
+import { Schema } from '@/pages/schema';
+import { TableViewer } from '@/pages/table-viewer';
+import { SimpleQuery } from '@/pages/simple-query';
+import { Data } from '@/pages/data';
+import { ExportImport } from '@/pages/export-import';
+import { Health } from '@/pages/health';
+import { Chat } from '@/pages/chat';
+import { Tools } from '@/pages/tools';
+import { Settings } from '@/pages/settings';
+
+function App() {
+  return (
+    <Router>
+      <AppLayout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/getting-started" element={<GettingStarted />} />
+          <Route path="/database-types-help" element={<DatabaseTypesHelp />} />
+          <Route path="/connection-wizard" element={<ConnectionWizard />} />
+          <Route path="/connections" element={<Connections />} />
+          <Route path="/schema" element={<Schema />} />
+          <Route path="/table-viewer" element={<TableViewer />} />
+          <Route path="/simple-query" element={<SimpleQuery />} />
+          <Route path="/data" element={<Data />} />
+          <Route path="/export-import" element={<ExportImport />} />
+          <Route path="/health" element={<Health />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/tools" element={<Tools />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppLayout>
+    </Router>
+  );
+}
+
+export default App;

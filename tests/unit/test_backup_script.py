@@ -217,4 +217,3 @@ class TestBackupScriptValidation:
 
         # Should handle gracefully
         assert result.returncode == 0
-
