@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import Any, Optional
 
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import DbAnalyzerOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.services.analysis import (
     ContentAnalyzer,
     ErrorDetector,
@@ -22,20 +24,34 @@ _report_generator = ReportGenerator()
 @HelpSystem.register_tool(category="database")
 async def db_analyzer(
     db_file_path: str,
-    operation: str = "analyze",
+    operation: DbAnalyzerOperation = "analyze",
     analysis_depth: str = "comprehensive",
     include_sample_data: bool = True,
     detect_errors: bool = True,
     suggest_fixes: bool = True,
     table_name: Optional[str] = None,
     limit: int = 10,
-) -> dict:
+) -> dict[str, Any]:
     """Database analysis and diagnostics portmanteau tool.
 
     Operations: analyze, structure, content, health, errors, report, suggest_fixes.
     analysis_depth: quick | standard | comprehensive (default: comprehensive)
     db_file_path: path to SQLite/PostgreSQL/MySQL dump file (required)
+
+    Returns:
+        On success: dict with success=True, operation, and operation-specific keys
+        (structure, health, report, content, errors, suggested_fixes, etc.).
+
+    Errors:
+        Unknown operation returns error_type=invalid_input with available_operations.
+        File access failures: user_fixable — verify db_file_path exists and is readable.
     """
+    _known: set[str] = {"structure", "analyze", "content", "health", "errors", "report"}
+    if operation not in _known:
+        return unknown_operation_response(operation, sorted(_known))
+
+    limit = max(1, min(limit, 10_000))
+
     # Route to appropriate analysis handler
     if operation == "structure" or operation == "analyze":
         structure = await _structure_analyzer.analyze_schema(db_file_path)

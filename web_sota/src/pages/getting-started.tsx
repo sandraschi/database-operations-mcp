@@ -56,6 +56,12 @@ const PAGES = [
     { href: "/export-import", label: "Export / Import", desc: "Download or bulk insert" },
     { href: "/health", label: "Health", desc: "DB health and metrics" },
     { href: "/tools", label: "Tools", desc: "Call any MCP tool" },
+    { href: "/connection-manager", label: "Connection manager", desc: "Register and test DB connections" },
+    { href: "/tool-explorer", label: "Tool explorer", desc: "Browse tools by family and capability" },
+    { href: "/playground", label: "Playground", desc: "JSON tool runner with history" },
+    { href: "/search-hub", label: "Search hub", desc: "Cross-search Calibre and bookmarks" },
+    { href: "/jobs-exports", label: "Jobs & Exports", desc: "Track export jobs and outputs" },
+    { href: "/mcp-capabilities", label: "MCP capabilities", desc: "Sampling/workflows/skills/prompts status" },
 ];
 
 export function GettingStarted() {

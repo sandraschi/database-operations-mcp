@@ -17,7 +17,11 @@ import {
     BookOpen,
     HelpCircle,
     PlusCircle,
-    Search
+    Search,
+    Sparkles,
+    Workflow,
+    ClipboardList,
+    Radar
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -40,7 +44,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         { href: '/data', label: 'Data', icon: FileJson },
         { href: '/export-import', label: 'Export / Import', icon: FileStack },
         { href: '/health', label: 'Health', icon: Heart },
+        { href: '/connection-manager', label: 'Connection manager', icon: Database },
         { href: '/tools', label: 'Tools', icon: Wrench },
+        { href: '/tool-explorer', label: 'Tool explorer', icon: Radar },
+        { href: '/playground', label: 'Playground', icon: Sparkles },
+        { href: '/search-hub', label: 'Search hub', icon: Search },
+        { href: '/jobs-exports', label: 'Jobs & Exports', icon: ClipboardList },
+        { href: '/mcp-capabilities', label: 'MCP capabilities', icon: Workflow },
         { href: '/chat', label: 'AI Command', icon: Bot },
         { href: '/settings', label: 'Settings', icon: Settings },
     ];

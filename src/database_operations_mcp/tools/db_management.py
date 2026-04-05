@@ -6,6 +6,8 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import DbManagementOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.database_manager import db_manager
 from database_operations_mcp.tools.help_tools import HelpSystem
 
@@ -15,7 +17,7 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 @HelpSystem.register_tool(category="database")
 async def db_management(
-    operation: str,
+    operation: DbManagementOperation,
     connection_name: str | None = None,
     database_type: str | None = None,
     connection_config: dict[str, Any] | None = None,
@@ -221,10 +223,9 @@ async def db_management(
     elif operation == "disconnect_database":
         result = await _disconnect_database(connection_name)
     else:
-        return {
-            "success": False,
-            "error": f"Unknown operation: {operation}",
-            "available_operations": [
+        return unknown_operation_response(
+            operation,
+            [
                 "init_database",
                 "list_connections",
                 "close_connection",
@@ -235,7 +236,7 @@ async def db_management(
                 "vacuum_database",
                 "disconnect_database",
             ],
-        }
+        )
 
     # Standardize result with a conversational summary
     summary = result.get("message", "")

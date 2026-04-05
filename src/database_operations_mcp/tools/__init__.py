@@ -4,9 +4,8 @@ Database Operations MCP - Tools Package
 This package contains all the tool modules for the Database Operations MCP,
 organized into logical modules for better maintainability.
 
-PORTMANTEAU TOOLS (Active):
-    - db_connection: Database connection management (consolidates connection_tools, init_tools)
-    - db_operations: Data manipulation and query execution (consolidates query_tools, data_tools)
+ATOMIC DATABASE TOOLS (Active):
+    - db_atomic: Explicit single-purpose database tools (register/test/query/export/etc.)
     - db_schema: Database schema inspection (consolidates schema_tools)
     - db_fts: Full-text search functionality (consolidates fts_tools)
     - db_management: Database administration (consolidates management_tools)
@@ -40,12 +39,12 @@ from . import (
     chrome_profiles,
     connection_tools,
     data_tools,
-    db_analyzer,
-    # New portmanteau tools
     db_connection,
+    db_analyzer,
+    db_operations,
+    # Remaining portmanteau tools
     db_fts,
     db_management,
-    db_operations,
     db_operations_extended,
     db_schema,
     firefox,
@@ -89,7 +88,7 @@ __all__ = [
     "registry_tools",
     "schema_tools",
     "windows_tools",
-    # New portmanteau tools
+    # Core DB tools
     "db_connection",
     "db_operations",
     "db_schema",

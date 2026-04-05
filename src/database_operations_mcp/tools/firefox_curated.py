@@ -6,6 +6,8 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import FirefoxCuratedOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.firefox.curated_sources import (
     get_curated_source,
     list_curated_sources,
@@ -18,7 +20,7 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def firefox_curated(
-    operation: str,
+    operation: FirefoxCuratedOperation,
     source_name: str | None = None,
     category: str | None = None,
     include_metadata: bool = True,
@@ -32,6 +34,8 @@ async def firefox_curated(
     limit: Max results (default: 100)
     """
 
+    limit = max(1, min(limit, 10_000))
+
     if operation == "get_curated_source":
         return await _get_curated_source(source_name, include_metadata)
     elif operation == "list_curated_sources":
@@ -39,15 +43,14 @@ async def firefox_curated(
     elif operation == "list_curated_bookmark_sources":
         return await _list_curated_bookmark_sources(category, include_metadata, limit)
     else:
-        return {
-            "success": False,
-            "error": f"Unknown operation: {operation}",
-            "available_operations": [
+        return unknown_operation_response(
+            operation,
+            [
                 "get_curated_source",
                 "list_curated_sources",
                 "list_curated_bookmark_sources",
             ],
-        }
+        )
 
 
 async def _get_curated_source(source_name: str | None, include_metadata: bool) -> dict[str, Any]:

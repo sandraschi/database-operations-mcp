@@ -6,6 +6,8 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import HelpSystemOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -14,7 +16,7 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 @HelpSystem.register_tool(category="help")
 async def help_system(
-    operation: str,
+    operation: HelpSystemOperation,
     topic: str | None = None,
     category: str | None = None,
     tool_name: str | None = None,
@@ -261,6 +263,8 @@ async def help_system(
         - All other portmanteau tools: See help_system(operation='list_categories')
     """
 
+    max_results = max(1, min(max_results, 100))
+
     if operation == "help":
         return await _get_help(topic, category, include_examples, include_parameters, format_output)
     elif operation == "tool_help":
@@ -276,10 +280,9 @@ async def help_system(
     elif operation == "format_help_output":
         return await _format_help_output(topic, format_output)
     else:
-        return {
-            "success": False,
-            "error": f"Unknown operation: {operation}",
-            "available_operations": [
+        return unknown_operation_response(
+            operation,
+            [
                 "help",
                 "tool_help",
                 "list_categories",
@@ -288,7 +291,7 @@ async def help_system(
                 "get_parameter_info",
                 "format_help_output",
             ],
-        }
+        )
 
 
 async def _get_help(

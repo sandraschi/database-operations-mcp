@@ -6,6 +6,7 @@ which supports both stdio and HTTP transports with FastMCP 2.13.0+.
 """
 
 import asyncio
+import importlib
 import logging
 import os
 import signal
@@ -118,11 +119,14 @@ class DatabaseOperationsMCP:
                 test_tool,
             )
 
+            if os.getenv("ENABLE_ATOMIC_DB_TOOLS", "true").lower() == "true":
+                importlib.import_module("database_operations_mcp.tools.db_atomic")
+
             # Register MCP prompts (FastMCP 3.1) - database expert and related
             from database_operations_mcp import prompts  # noqa: F401
 
             logger.info(
-                "All 19+ portmanteau database, bookmark, and system tools imported successfully!"
+                "Core tools imported successfully (portmanteau enabled; atomic DB tools optional via ENABLE_ATOMIC_DB_TOOLS)."
             )
 
         except ImportError as e:

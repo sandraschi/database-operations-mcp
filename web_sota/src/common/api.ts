@@ -18,6 +18,41 @@ export interface ToolsResponse {
   tools: McpTool[];
 }
 
+export interface CapabilitiesResponse {
+  status: string;
+  fastmcp?: string;
+  tool_surface?: {
+    total: number;
+    portmanteau_count: number;
+    atomic_count: number;
+    portmanteau_tools: string[];
+    atomic_tools: string[];
+  };
+  prompts?: {
+    available: boolean;
+    count: number;
+    names: string[];
+  };
+  resources?: {
+    available: boolean;
+    count: number;
+    uris: string[];
+  };
+  skills?: {
+    available: boolean;
+    count: number;
+    uris: string[];
+  };
+  sampling?: {
+    available: boolean;
+    indicator_tools: string[];
+  };
+  agentic_workflows?: {
+    available: boolean;
+    tools: string[];
+  };
+}
+
 export interface ToolCallRequest {
   name: string;
   arguments: Record<string, unknown>;
@@ -39,6 +74,12 @@ export async function getHealth(): Promise<HealthResponse> {
 export async function getTools(): Promise<ToolsResponse> {
   const r = await fetch(`${API}/tools`);
   if (!r.ok) throw new Error(`Tools list failed: ${r.status}`);
+  return r.json();
+}
+
+export async function getCapabilities(): Promise<CapabilitiesResponse> {
+  const r = await fetch(`${API}/capabilities`);
+  if (!r.ok) throw new Error(`Capabilities failed: ${r.status}`);
   return r.json();
 }
 

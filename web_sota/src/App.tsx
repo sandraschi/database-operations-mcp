@@ -14,6 +14,12 @@ import { Health } from '@/pages/health';
 import { Chat } from '@/pages/chat';
 import { Tools } from '@/pages/tools';
 import { Settings } from '@/pages/settings';
+import { ToolExplorer } from '@/pages/tool-explorer';
+import { Playground } from '@/pages/playground';
+import { SearchHub } from '@/pages/search-hub';
+import { JobsExports } from '@/pages/jobs-exports';
+import { McpCapabilities } from '@/pages/mcp-capabilities';
+import { ConnectionManager } from '@/pages/connection-manager';
 
 function App() {
   return (
@@ -33,6 +39,12 @@ function App() {
           <Route path="/health" element={<Health />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/tools" element={<Tools />} />
+          <Route path="/tool-explorer" element={<ToolExplorer />} />
+          <Route path="/playground" element={<Playground />} />
+          <Route path="/search-hub" element={<SearchHub />} />
+          <Route path="/jobs-exports" element={<JobsExports />} />
+          <Route path="/mcp-capabilities" element={<McpCapabilities />} />
+          <Route path="/connection-manager" element={<ConnectionManager />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

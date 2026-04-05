@@ -39,7 +39,7 @@ Individual tools have been deprecated in favor of portmanteau tools for maintain
 - `firefox_profiles` - Firefox profile management portmanteau
 - `firefox_backup` - Firefox backup/restore operations
 - `firefox_tagging` - Automated tagging (by folder, by year)
-- `sync_bookmarks` - Cross-browser bookmark synchronization (Firefox ↔ Chromium family)
+- `sync_bookmarks` - Cross-browser bookmark synchronization (Firefox  Chromium family)
 - `chrome_profiles` - Chrome profile management portmanteau
 
 ### Media & Other Tools
@@ -49,17 +49,17 @@ Individual tools have been deprecated in favor of portmanteau tools for maintain
 
 ### Deprecated Tools (Use Portmanteau Equivalents)
 Individual tools are deprecated but kept for backwards compatibility. Migration paths:
-- `connection_tools.*` → `db_connection(operation='...')`
-- `init_tools.*` → `db_connection(operation='...')`
-- `query_tools.*` → `db_operations(operation='...')`
-- `data_tools.*` → `db_operations(operation='...')`
-- `schema_tools.*` → `db_schema(operation='...')`
-- `management_tools.*` → `db_management(operation='...')`
-- `fts_tools.*` → `db_fts(operation='...')`
-- `calibre_tools.*` → `media_library(operation='...')`
-- `plex_tools.*` → `media_library(operation='...')`
-- `registry_tools.*` → `windows_system(operation='...')`
-- `windows_tools.*` → `windows_system(operation='...')`
+- `connection_tools.*`  `db_connection(operation='...')`
+- `init_tools.*`  `db_connection(operation='...')`
+- `query_tools.*`  `db_operations(operation='...')`
+- `data_tools.*`  `db_operations(operation='...')`
+- `schema_tools.*`  `db_schema(operation='...')`
+- `management_tools.*`  `db_management(operation='...')`
+- `fts_tools.*`  `db_fts(operation='...')`
+- `calibre_tools.*`  `media_library(operation='...')`
+- `plex_tools.*`  `media_library(operation='...')`
+- `registry_tools.*`  `windows_system(operation='...')`
+- `windows_tools.*`  `windows_system(operation='...')`
 
 *See individual tool files in `src/database_operations_mcp/tools/` for complete API documentation.*
 
@@ -173,23 +173,23 @@ await sync_bookmarks("firefox", "chrome", dry_run=False, limit=100)
 ## Project Layout
 ```
 database-operations-mcp/
-├── src/
-│   └── database_operations_mcp/
-│       ├── main.py                      # MCP server entry
-│       ├── config/
-│       │   └── mcp_config.py            # shared MCP instance
-│       └── tools/
-│           ├── firefox/                 # Firefox bookmark + DB helpers
-│           ├── chrome/                  # Chrome bookmark tools
-│           ├── edge/                    # Edge bookmark tools
-│           ├── brave/                   # Brave bookmark tools
-│           ├── chromium_common.py       # Shared Chromium JSON helpers
-│           └── sync_tools.py            # Cross-browser sync tool
-├── tests/
-└── README.md
+ src/
+    database_operations_mcp/
+        main.py                      # MCP server entry
+        config/
+           mcp_config.py            # shared MCP instance
+        tools/
+            firefox/                 # Firefox bookmark + DB helpers
+            chrome/                  # Chrome bookmark tools
+            edge/                    # Edge bookmark tools
+            brave/                   # Brave bookmark tools
+            chromium_common.py       # Shared Chromium JSON helpers
+            sync_tools.py            # Cross-browser sync tool
+ tests/
+ README.md
 ```
 
-## 📦 Packaging & Distribution
+##  Packaging & Distribution
 
 This repository is SOTA 2026 compliant and uses the officially validated `@anthropic-ai/mcpb` workflow for distribution.
 
@@ -214,7 +214,7 @@ cargo build --release --target wasm32-wasip1
 
 ### Install in Zed
 1. Open Zed
-2. Go to `Extensions` → `Install Dev Extension`
+2. Go to `Extensions`  `Install Dev Extension`
 3. Navigate to the repository and select: `zed-extension/extension.toml`
 4. The Database Operations MCP extension will be installed and loaded
 
@@ -262,19 +262,19 @@ Add the server to your MCP config (`%USERPROFILE%\AppData\Roaming\Cursor\.cursor
 ## Development
 For Python development setup, testing, and contribution guidelines, see [README-python.md](README-python.md).
 
-## 🚀 Installation
+##  Installation
 
 ### Prerequisites
 - [uv](https://docs.astral.sh/uv/) installed (RECOMMENDED)
 - Python 3.12+
 
-### 📦 Quick Start
+###  Quick Start
 Run immediately via `uvx`:
 ```bash
 uvx browser-bookmarks
 ```
 
-### 🎯 Claude Desktop Integration
+###  Claude Desktop Integration
 Add to your `claude_desktop_config.json`:
 ```json
 "mcpServers": {
@@ -303,7 +303,7 @@ pip install git+https://github.com/sandraschi/database-operations-mcp.git
 ### For Claude Desktop (MCPB Package)
 
 1. Download or build the latest `.mcpb` file.
-2. Open Claude Desktop → Settings → Extensions
+2. Open Claude Desktop  Settings  Extensions
 3. Drag and drop the `.mcpb` file
 4. Restart Claude Desktop
 
@@ -387,7 +387,7 @@ To start the webapp:
 
 ## Prompts and skills (FastMCP 3.1)
 
-- **MCP prompt `database_expert`**: Clients can call `get_prompt("database_expert", arguments={"focus": "general"|"sql"|"connections"|"export"})` to receive instruction text to inject so the LLM acts as a database expert using this server's tools. Use when you want the assistant to follow connection/schema/query/export best practices without reading this README.
+- **MCP prompt `database_expert`**: Clients can call `get_prompt("database_expert", arguments={"focus": "general"|"sql"|"connections"|"export"})` to receive instruction text to inject so the LLM acts as a database expert using this server's tools. Use when you want the assistant to follow connection/schema/query/export  practices without reading this README.
 - **Bundled skill `database-expert`**: Exposed as MCP resources under the `skill://` scheme. Clients that support MCP resources can read `skill://database-expert/SKILL.md` (and manifest/supporting files) for the same expert guidance. The skill lives in `src/database_operations_mcp/skills/database-expert/` and is registered via the FastMCP Skills provider.
 
 See [FastMCP Prompts](https://gofastmcp.com/servers/prompts) and [Skills Provider](https://gofastmcp.com/servers/providers/skills) for the framework docs.

@@ -2,20 +2,40 @@
 # Consolidates data manipulation and query execution operations.
 
 import logging
+import os
 from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import DbOperationsOperation
+from database_operations_mcp.tool_responses import (
+    connection_not_found,
+    unknown_operation_response,
+)
 from database_operations_mcp.database_manager import DatabaseType, db_manager
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
+ENABLE_LEGACY_DB_PORTMANTEAU = (
+    os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
+)
 
 
-@mcp.tool()
+def _legacy_tool_decorator():
+    """Register legacy dispatcher tool only when explicitly enabled."""
+    if ENABLE_LEGACY_DB_PORTMANTEAU:
+        return mcp.tool()
+
+    def _identity(func):
+        return func
+
+    return _identity
+
+
+@_legacy_tool_decorator()
 @HelpSystem.register_tool(category="database")
 async def db_operations(
-    operation: str,
+    operation: DbOperationsOperation,
     connection_name: str | None = None,
     query: str | None = None,
     params: dict[str, Any] | None = None,
@@ -129,6 +149,30 @@ async def db_operations(
             - error: Error message if success is False
             - connection_name: Echo of connection used
             - available_operations: List of valid operations (on invalid operation)
+
+        Output schema notes:
+            - All successful responses include: success (bool), and operation-specific payload fields.
+            - Query payload shape:
+              {
+                "success": true,
+                "connection_name": str,
+                "query": str,
+                "applied_limit": int,
+                "result": {"rows": list[dict|list], "columns": list[str], "row_count": int}
+              }
+            - Write payload shape:
+              {
+                "success": true,
+                "connection_name": str,
+                "rows_affected": int,
+                "last_insert_id": Any | None
+              }
+            - Error payload shape:
+              {
+                "success": false,
+                "error": str,
+                "connection_name": str | None
+              }
 
     Usage:
         This tool is the primary interface for all database data operations. Use it to
@@ -306,6 +350,12 @@ async def db_operations(
             Fix: Validate SQL syntax, check database compatibility, verify table/column names
             Workaround: Test query with quick_data_sample first, simplify query
 
+        Error categories:
+        - invalid_input: Missing required parameters (user-fixable immediately)
+        - user_fixable: Connection/table/query issues requiring user correction
+        - retryable: Temporary DB lock/network issues; retry after short delay
+        - fatal: Unsupported connector capability or unrecoverable backend error
+
     See Also:
         - db_connection: Register and manage database connections
         - db_schema: Inspect database structure and schema
@@ -327,10 +377,9 @@ async def db_operations(
             connection_name, query, params, output_format, output_path
         )
     else:
-        return {
-            "success": False,
-            "error": f"Unknown operation: {operation}",
-            "available_operations": [
+        return unknown_operation_response(
+            operation,
+            [
                 "execute_transaction",
                 "execute_write",
                 "batch_insert",
@@ -338,7 +387,7 @@ async def db_operations(
                 "quick_data_sample",
                 "export_query_results",
             ],
-        }
+        )
 
     # Standardize result with a conversational summary
     summary = result.get("message", "")
@@ -475,7 +524,7 @@ async def _execute_query(
 
         connector = db_manager.get_connector(connection_name)
         if not connector:
-            return {"success": False, "error": f"Connection not found: {connection_name}"}
+            return connection_not_found(connection_name)
 
         # Apply limit to query if not already present
         limited_query = _apply_query_limit(query, limit, connector.database_type)
@@ -518,7 +567,7 @@ async def _quick_data_sample(
 
         connector = db_manager.get_connector(connection_name)
         if not connector:
-            return {"success": False, "error": f"Connection not found: {connection_name}"}
+            return connection_not_found(connection_name)
 
         # Generate appropriate query based on database type
         query = _generate_sample_query(connector.database_type, table_name, None, limit, None, None)
@@ -565,7 +614,7 @@ async def _export_query_results(
 
         connector = db_manager.get_connector(connection_name)
         if not connector:
-            return {"success": False, "error": f"Connection not found: {connection_name}"}
+            return connection_not_found(connection_name)
 
         # Execute query with limit
         limited_query = _apply_query_limit(query, 10000, connector.database_type)

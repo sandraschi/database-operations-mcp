@@ -6,15 +6,19 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import MediaLibraryOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
+_MEDIA_MAX_LIMIT = 500
+_MEDIA_MAX_OFFSET = 100_000
 
 
 @mcp.tool()
 @HelpSystem.register_tool(category="media")
 async def media_library(
-    operation: str,
+    operation: MediaLibraryOperation,
     library_path: str | None = None,
     book_title: str | None = None,
     author: str | None = None,
@@ -29,6 +33,8 @@ async def media_library(
     action: str | None = None,
     library_section: str | None = None,
     item_id: int | None = None,
+    limit: int = 50,
+    offset: int = 0,
 ) -> dict[str, Any]:
     """Media library management portmanteau tool.
 
@@ -43,10 +49,10 @@ async def media_library(
         - For database operations: Appropriate read/write permissions
 
     Operations:
-        - search_calibre_library: Search books in Calibre library
+        - search_calibre_library: Metadata search in Calibre `metadata.db` (fast title/author/tag style lookup)
         - get_calibre_book_metadata: Get detailed metadata for a specific book
-        - search_calibre_fts: Perform full-text search in Calibre library
-        - search_calibre_fts_db: Search Calibre's full-text-search database (FTS)
+        - search_calibre_fts: Alias of search_calibre_fts_db for backward compatibility
+        - search_calibre_fts_db: Content search in Calibre `full-text-search.db` (slower, deeper text matching)
         - find_plex_database: Locate Plex Media Server database file
         - optimize_plex_database: Optimize Plex database performance
         - manage_plex_metadata: Analyze or export Plex metadata
@@ -126,20 +132,32 @@ async def media_library(
             Used for: optimize_plex_database operation
             Warning: May take several minutes for large databases
 
+        limit (int, OPTIONAL): Maximum items returned for paginated list/search operations
+            Range: 1-500 (server clamps out-of-range values)
+            Default: 50
+            Used for: search_calibre_library, search_calibre_fts, search_calibre_fts_db
+
+        offset (int, OPTIONAL): Zero-based row offset for paginated list/search operations
+            Range: 0-100000 (server clamps out-of-range values)
+            Default: 0
+            Used for: search_calibre_library, search_calibre_fts, search_calibre_fts_db
+
     Returns:
         Dictionary containing operation-specific results:
             - success: Boolean indicating operation success
             - operation: Echo of operation performed
-            - For search_calibre_library: results (list), count, library_path
+            - For search_calibre_library: results (list), count, total_count, pagination{limit,offset,has_more}, library_path
             - For get_calibre_book_metadata: book_info (dict), metadata (if requested)
-            - For search_calibre_fts: results (list with highlights), count
-            - For search_calibre_fts_db: results (list with metadata), count, fts_db_path
+            - For search_calibre_fts: results (list with highlights), count, total_count, pagination, fts_db_path
+            - For search_calibre_fts_db: results (list with metadata), count, total_count, pagination, fts_db_path
             - For find_plex_database: database_path, server_info, status
             - For optimize_plex_database: message, optimization_stats
             - For export_database_schema: export_path, format, schema_data
             - For get_plex_library_stats: stats (dict), library_name, item_counts
             - For get_plex_library_sections: sections (list), total_sections
             - error: Error message if success is False
+            - error_type: invalid_input | user_fixable | retryable | fatal
+            - recovery_options: Suggested next steps after failures
             - available_operations: List of valid operations (on invalid operation)
 
     Usage:
@@ -359,19 +377,24 @@ async def media_library(
         - windows_system: Windows-specific media database operations
     """
 
+    limit = max(1, min(limit, _MEDIA_MAX_LIMIT))
+    offset = max(0, min(offset, _MEDIA_MAX_OFFSET))
+
     if operation == "search_calibre_library":
         return await _search_calibre_library(
-            library_path, book_title, author, search_query, include_metadata
+            library_path, book_title, author, search_query, include_metadata, limit, offset
         )
     elif operation == "get_calibre_book_metadata":
         return await _get_calibre_book_metadata(
             library_path, book_title, author, include_metadata
         )
     elif operation == "search_calibre_fts":
-        return await _search_calibre_fts(library_path, search_query)
+        return await _search_calibre_fts(
+            library_path, search_query, limit=limit, offset=offset
+        )
     elif operation == "search_calibre_fts_db":
         return await _search_calibre_fts_db(
-            library_path, search_query, include_metadata
+            library_path, search_query, include_metadata, limit=limit, offset=offset
         )
     elif operation == "find_plex_database":
         return await _find_plex_database(plex_server_url)
@@ -388,10 +411,9 @@ async def media_library(
     elif operation == "get_plex_library_sections":
         return await _get_plex_library_sections(plex_server_url, plex_token)
     else:
-        return {
-            "success": False,
-            "error": f"Unknown operation: {operation}",
-            "available_operations": [
+        return unknown_operation_response(
+            operation,
+            [
                 "search_calibre_library",
                 "get_calibre_book_metadata",
                 "search_calibre_fts",
@@ -403,7 +425,7 @@ async def media_library(
                 "get_plex_library_stats",
                 "get_plex_library_sections",
             ],
-        }
+        )
 
 
 async def _search_calibre_library(
@@ -412,6 +434,8 @@ async def _search_calibre_library(
     author: str | None,
     search_query: str | None,
     include_metadata: bool,
+    limit: int,
+    offset: int,
 ) -> dict[str, Any]:
     """Search books in Calibre library."""
     try:
@@ -458,7 +482,12 @@ async def _search_calibre_library(
             query += " AND (b.title LIKE ? OR authors LIKE ?)"
             params.extend([f"%{search_query}%", f"%{search_query}%"])
 
-        query += " ORDER BY b.timestamp DESC LIMIT 50"
+        count_query = f"SELECT COUNT(*) FROM ({query}) as q"
+        cursor.execute(count_query, params)
+        total_count = int(cursor.fetchone()[0])
+
+        query += " ORDER BY b.timestamp DESC LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
 
         cursor.execute(query, params)
         rows = cursor.fetchall()
@@ -484,7 +513,15 @@ async def _search_calibre_library(
             "success": True,
             "results": results,
             "count": len(results),
+            "total_count": total_count,
             "library_path": library_path,
+            "pagination": {
+                "limit": limit,
+                "offset": offset,
+                "returned_count": len(results),
+                "total_count": total_count,
+                "has_more": total_count > (offset + len(results)),
+            },
         }
 
     except Exception as e:
@@ -492,9 +529,15 @@ async def _search_calibre_library(
         return {
             "success": False,
             "error": f"Failed to search Calibre library: {str(e)}",
+            "error_type": "user_fixable",
+            "recovery_options": [
+                "Verify library_path contains metadata.db.",
+                "Ensure Calibre is not locking the database (close Calibre or retry).",
+            ],
             "library_path": library_path,
             "results": [],
             "count": 0,
+            "total_count": 0,
         }
 
 
@@ -582,17 +625,21 @@ async def _get_calibre_book_metadata(
 
 
 async def _search_calibre_fts(
-    library_path: str | None, search_query: str | None
+    library_path: str | None, search_query: str | None, limit: int, offset: int
 ) -> dict[str, Any]:
     """Perform full-text search in Calibre library."""
     # Deflecting to _search_calibre_fts_db as it is the same functionality
     return await _search_calibre_fts_db(
-        library_path, search_query, include_metadata=True
+        library_path, search_query, include_metadata=True, limit=limit, offset=offset
     )
 
 
 async def _search_calibre_fts_db(
-    library_path: str | None, search_query: str | None, include_metadata: bool
+    library_path: str | None,
+    search_query: str | None,
+    include_metadata: bool,
+    limit: int,
+    offset: int,
 ) -> dict[str, Any]:
     """Search Calibre's full-text-search database."""
     try:
@@ -614,8 +661,14 @@ async def _search_calibre_fts_db(
                 "error": f"FTS database not found: {fts_db_path}",
                 "library_path": library_path,
                 "search_query": search_query,
+                "error_type": "user_fixable",
+                "recovery_options": [
+                    "Enable Calibre full-text indexing and reopen the library.",
+                    "Use search_calibre_library for metadata-only search.",
+                ],
                 "results": [],
                 "count": 0,
+                "total_count": 0,
             }
 
         # Connect to FTS database
@@ -628,13 +681,23 @@ async def _search_calibre_fts_db(
         # Search in books_text table
         fts_cursor.execute(
             """
+            SELECT COUNT(*)
+            FROM books_text
+            WHERE searchable_text LIKE ? AND searchable_text IS NOT NULL
+        """,
+            (search_pattern,),
+        )
+        total_count = int(fts_cursor.fetchone()[0])
+
+        fts_cursor.execute(
+            """
             SELECT book, format, text_size, searchable_text
             FROM books_text
             WHERE searchable_text LIKE ? AND searchable_text IS NOT NULL
             ORDER BY text_size DESC
-            LIMIT 50
+            LIMIT ? OFFSET ?
         """,
-            (search_pattern,),
+            (search_pattern, limit, offset),
         )
 
         fts_results = fts_cursor.fetchall()
@@ -726,7 +789,15 @@ async def _search_calibre_fts_db(
             "search_query": search_query,
             "results": results,
             "count": len(results),
+            "total_count": total_count,
             "include_metadata": include_metadata,
+            "pagination": {
+                "limit": limit,
+                "offset": offset,
+                "returned_count": len(results),
+                "total_count": total_count,
+                "has_more": total_count > (offset + len(results)),
+            },
         }
 
     except Exception as e:
@@ -736,8 +807,14 @@ async def _search_calibre_fts_db(
             "error": f"Failed to search Calibre FTS database: {str(e)}",
             "library_path": library_path,
             "search_query": search_query,
+            "error_type": "retryable",
+            "recovery_options": [
+                "Retry once in case the DB was temporarily locked.",
+                "If persistent, rebuild Calibre full-text index then retry.",
+            ],
             "results": [],
             "count": 0,
+            "total_count": 0,
         }
 
 

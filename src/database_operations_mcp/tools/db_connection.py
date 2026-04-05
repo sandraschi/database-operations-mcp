@@ -2,12 +2,15 @@
 # Consolidates all database connection operations into a single interface.
 
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
 from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import DbConnectionOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.database_manager import (
     create_connector,
     db_manager,
@@ -16,12 +19,26 @@ from database_operations_mcp.database_manager import (
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
+ENABLE_LEGACY_DB_PORTMANTEAU = (
+    os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
+)
 
 
-@mcp.tool()
+def _legacy_tool_decorator():
+    """Register legacy dispatcher tool only when explicitly enabled."""
+    if ENABLE_LEGACY_DB_PORTMANTEAU:
+        return mcp.tool()
+
+    def _identity(func):
+        return func
+
+    return _identity
+
+
+@_legacy_tool_decorator()
 @HelpSystem.register_tool(category="database")
 async def db_connection(
-    operation: str,
+    operation: DbConnectionOperation,
     connection_name: str | None = None,
     database_type: str | None = None,
     connection_config: dict[str, Any] | None = None,
@@ -136,6 +153,27 @@ async def db_connection(
             - For set_preferences: status, message
             - error: Error message if status is 'error'
             - available_operations: List of valid operations (on invalid operation)
+
+        Output schema notes:
+            - Success payloads always include success=True and operation-specific keys.
+            - test response:
+              {
+                "success": true,
+                "connection_name": str,
+                "test_result": {"success": bool, "latency": float, "error": str | None}
+              }
+            - test_all response:
+              {
+                "success": true,
+                "test_results": dict[str, {"success": bool, "latency": float | None, "error": str | None}],
+                "summary": {"total_connections": int, "successful": int, "failed": int, "success_rate": str}
+              }
+            - Error payload shape:
+              {
+                "success": false,
+                "error": str,
+                "connection_name": str | None
+              }
 
     Usage:
         This tool is the foundation for all database operations. Use it to establish
@@ -352,6 +390,12 @@ async def db_connection(
             Fix: Increase timeout parameter, check network latency, verify database is responsive
             Workaround: Test connections individually with higher timeout
 
+        Error categories:
+        - invalid_input: Missing/invalid parameters (user-fixable)
+        - user_fixable: Unknown connection, bad credentials, unsupported DB type
+        - retryable: Temporary network/lock timeout issues
+        - fatal: Persistent storage unavailable or unrecoverable connector failure
+
     See Also:
         - db_operations: Execute queries on registered connections
         - db_schema: Inspect database schema on connections
@@ -390,13 +434,9 @@ async def db_connection(
     elif operation == "set_preferences":
         result = await _set_user_preferences(preferences)
     else:
-        return {
-            "success": False,
-            "operation": operation,
-            "message": f"I don't recognize the '{operation}' operation. Here are the available database connection operations you can use.",
-            "error": f"Unknown operation: {operation}",
-            "error_code": "INVALID_OPERATION",
-            "available_operations": [
+        return unknown_operation_response(
+            operation,
+            [
                 "list_supported",
                 "register",
                 "init",
@@ -411,12 +451,12 @@ async def db_connection(
                 "get_preferences",
                 "set_preferences",
             ],
-            "suggestions": [
-                "Use 'list_supported' to see all available database types",
-                "Use 'register' to add a new database connection",
-                "Use 'list' to see your existing connections",
+            extra_recovery=[
+                "Use 'list_supported' to see all available database types.",
+                "Use 'register' to add a new database connection.",
+                "Use 'list' to see your existing connections.",
             ],
-        }
+        )
 
     # Standardize result with a conversational summary
     summary = result.get("message", "")

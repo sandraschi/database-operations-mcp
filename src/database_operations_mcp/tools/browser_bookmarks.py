@@ -9,12 +9,13 @@ from typing import Any
 
 from database_operations_mcp.tools.help_system import HelpSystem
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import BrowserBookmarkOperation
 
 
 @mcp.tool()
 @HelpSystem.register_tool
 async def browser_bookmarks(
-    operation: str,
+    operation: BrowserBookmarkOperation,
     browser: str,
     profile_name: str | None = None,
     # Core parameters
@@ -57,7 +58,24 @@ async def browser_bookmarks(
     remove_unused_tags, list_tags, find_similar_tags, merge_tags, clean_up_tags,
     find_old_bookmarks, get_bookmark_stats, find_broken_links.
     For full docs call help_system.
+
+    Parameter guidance:
+    - profile_name: Used only for Firefox operations. Ignored for chrome/edge/brave.
+    - limit: Paginated cap for list/search operations; clamped to 1..10000.
+    - search vs find_duplicates:
+      - search/search_bookmarks: text lookup by title/url.
+      - find_duplicates (Firefox-only): structural duplicate detection and similarity logic.
+
+    Returns (success=True):
+    - Common: success, browser, operation.
+    - list_bookmarks/search: results/bookmarks, total_count|total_matches, returned_count, pagination{limit,offset,has_more}.
+    - CRUD: bookmark or operation-specific fields from browser backend.
+
+    Returns (success=False):
+    - success, browser, operation, error, and usually recovery_options.
     """
+    limit = max(1, min(limit, 10_000))
+
     browser_lower = browser.lower()
 
     # Special handling for sync_bookmarks (cross-browser operation)
@@ -156,6 +174,12 @@ async def browser_bookmarks(
                 result["total_count"] = len(result["bookmarks"])
                 result["bookmarks"] = result["bookmarks"][:limit]
                 result["returned_count"] = len(result["bookmarks"])
+                result["pagination"] = {
+                    "limit": limit,
+                    "offset": 0,
+                    "has_more": result["total_count"] > result["returned_count"],
+                    "total_count": result["total_count"],
+                }
             return result
 
         elif operation == "add_bookmark":
@@ -165,6 +189,10 @@ async def browser_bookmarks(
                     "browser": browser_lower,
                     "operation": operation,
                     "error": "add_bookmark requires 'url' and 'title' parameters",
+                    "recovery_options": [
+                        "Provide both url and title.",
+                        "Use list_bookmarks to confirm target folder before adding.",
+                    ],
                 }
             result = await add_fn(title=title, url=url, folder=folder)
             result["browser"] = browser_lower
@@ -178,6 +206,10 @@ async def browser_bookmarks(
                     "browser": browser_lower,
                     "operation": operation,
                     "error": "edit_bookmark requires 'bookmark_id' or 'url' parameter",
+                    "recovery_options": [
+                        "Pass bookmark_id for an exact edit target.",
+                        "Use search_bookmarks first to find the correct bookmark.",
+                    ],
                 }
             result = await edit_fn(
                 id=bookmark_id,
@@ -199,6 +231,10 @@ async def browser_bookmarks(
                     "browser": browser_lower,
                     "operation": operation,
                     "error": "delete_bookmark requires 'bookmark_id' or 'url' parameter",
+                    "recovery_options": [
+                        "Pass bookmark_id for safest deletion.",
+                        "Use dry_run=True first to preview the deletion.",
+                    ],
                 }
             result = await delete_fn(
                 id=bookmark_id,
@@ -216,6 +252,9 @@ async def browser_bookmarks(
                     "browser": browser_lower,
                     "operation": operation,
                     "error": "search requires 'search_query' parameter",
+                    "recovery_options": [
+                        "Provide search_query text to match title/url.",
+                    ],
                 }
             # Get all bookmarks and filter
             result = await list_fn()
@@ -235,6 +274,12 @@ async def browser_bookmarks(
                 "results": matches[:limit],
                 "total_matches": len(matches),
                 "returned_count": min(len(matches), limit),
+                "pagination": {
+                    "limit": limit,
+                    "offset": 0,
+                    "has_more": len(matches) > limit,
+                    "total_count": len(matches),
+                },
             }
 
         elif operation == "get_bookmark":
@@ -261,6 +306,9 @@ async def browser_bookmarks(
                 "browser": browser_lower,
                 "operation": operation,
                 "error": f"Bookmark not found: {bookmark_id or url}",
+                "recovery_options": [
+                    "Use search_bookmarks to locate valid bookmark ids.",
+                ],
             }
 
         else:
@@ -278,6 +326,10 @@ async def browser_bookmarks(
                     "search",
                 ],
                 "note": "For advanced operations (duplicates, tags, export), use browser='firefox'",
+                "recovery_options": [
+                    "Switch browser='firefox' for advanced bookmark operations.",
+                    "Or use one of the supported_operations listed.",
+                ],
             }
 
     else:
@@ -287,4 +339,7 @@ async def browser_bookmarks(
             "browser": browser,
             "error": f"Unknown browser type: {browser}",
             "supported_browsers": ["firefox", "chrome", "edge", "brave"],
+            "recovery_options": [
+                "Use one of: firefox, chrome, edge, brave.",
+            ],
         }

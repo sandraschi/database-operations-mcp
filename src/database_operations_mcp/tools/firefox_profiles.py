@@ -6,6 +6,8 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import FirefoxProfilesOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.firefox.db import FirefoxDB
 from database_operations_mcp.tools.firefox.status import FirefoxStatusChecker
 from database_operations_mcp.tools.help_tools import HelpSystem
@@ -16,7 +18,7 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 @HelpSystem.register_tool(category="firefox")
 async def firefox_profiles(
-    operation: str,
+    operation: FirefoxProfilesOperation,
     profile_name: str | None = None,
     source_profiles: list[str] | None = None,
     preset_name: str | None = None,
@@ -64,10 +66,9 @@ async def firefox_profiles(
     elif operation == "check_firefox_status":
         return await _check_firefox_status()
     else:
-        return {
-            "success": False,
-            "error": f"Unknown operation: {operation}",
-            "available_operations": [
+        return unknown_operation_response(
+            operation,
+            [
                 "get_firefox_profiles",
                 "create_firefox_profile",
                 "delete_firefox_profile",
@@ -77,7 +78,7 @@ async def firefox_profiles(
                 "create_loaded_profile_from_preset",
                 "check_firefox_status",
             ],
-        }
+        )
 
 
 async def _get_firefox_profiles() -> dict[str, Any]:

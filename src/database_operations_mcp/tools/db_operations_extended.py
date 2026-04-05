@@ -9,6 +9,8 @@ import logging
 from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import DbOperationsExtendedOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.database_manager import create_connector
 
 logger = logging.getLogger(__name__)
@@ -17,7 +19,7 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 async def db_operations_extended(
     database_type: str,
-    operation: str,
+    operation: DbOperationsExtendedOperation,
     connection_string: str | None = None,
     query: str | None = None,
     table_name: str | None = None,
@@ -176,12 +178,24 @@ async def db_operations_extended(
                 success = res.success
                 result = res.data
             else:
-                success = False
-                message = f"Unsupported Redis operation: {operation}"
+                return unknown_operation_response(
+                    operation,
+                    ["get_keys", "get_value", "set_value"],
+                    extra_recovery=["For non-Redis types, use execute_query, get_tables, etc."],
+                )
 
         else:
-            success = False
-            message = f"Unsupported operation '{operation}' for {database_type}"
+            return unknown_operation_response(
+                operation,
+                [
+                    "execute_query",
+                    "execute_non_query",
+                    "get_tables",
+                    "get_table_structure",
+                    "health_check",
+                ],
+                extra_recovery=[f"Unsupported operation for database_type={database_type!r}."],
+            )
 
         return {
             "success": success,
@@ -198,6 +212,12 @@ async def db_operations_extended(
             "database_type": database_type,
             "operation": operation,
             "message": f"Unexpected error: {str(e)}",
+            "error_type": "fatal",
+            "retryable": False,
+            "recovery_options": [
+                "Verify connection_string format for the selected database_type.",
+                "Check network reachability and credentials, then retry once.",
+            ],
         }
     finally:
         # Disconnect if we created a temporary connector

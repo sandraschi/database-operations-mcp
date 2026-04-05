@@ -11,6 +11,8 @@ from typing import Any, Dict, Optional, Callable
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import WindowsSystemOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -216,7 +218,7 @@ def _find_windows_db(db_type: str) -> Path | None:
 @mcp.tool()
 @HelpSystem.register_tool(category="windows")
 async def windows_system(
-    operation: str,
+    operation: WindowsSystemOperation,
     registry_key: Optional[str] = None,
     registry_value: Optional[str] = None,
     value_data: Optional[Any] = None,
@@ -234,6 +236,8 @@ async def windows_system(
     Comprehensive Windows system operations consolidating ALL registry, Plex, and
     Windows-specific database operations into a single interface.
     """
+    limit = max(1, min(limit, 50_000))
+
     try:
         if operation == "list_windows_databases":
             return await _list_windows_databases(bruteforce_firefox)
@@ -267,10 +271,9 @@ async def windows_system(
         elif operation == "registry_key_exists":
             return await _registry_key_exists(registry_key)
         else:
-            return {
-                "success": False,
-                "error": f"Unknown operation: {operation}",
-                "available_operations": [
+            return unknown_operation_response(
+                operation,
+                [
                     "list_windows_databases",
                     "query_windows_database",
                     "clean_windows_database",
@@ -283,10 +286,19 @@ async def windows_system(
                     "list_registry_values",
                     "monitor_registry",
                 ],
-            }
+            )
     except Exception as e:
         logger.exception(f"Error in windows_system operation {operation}")
-        return {"success": False, "error": str(e)}
+        return {
+            "success": False,
+            "error": str(e),
+            "error_type": "fatal",
+            "retryable": False,
+            "recovery_options": [
+                "Verify registry_key paths and that you have permission.",
+                "For database paths, ensure the file exists and is not exclusively locked.",
+            ],
+        }
 
 
 async def _list_windows_databases(bruteforce: bool = False) -> Dict[str, Any]:

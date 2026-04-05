@@ -6,6 +6,8 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.operation_types import DbSchemaOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.database_manager import db_manager
 from database_operations_mcp.tools.help_tools import HelpSystem
 
@@ -42,16 +44,15 @@ async def db_schema(
     elif operation == "get_schema_diff":
         result = await _get_schema_diff(connection_name, compare_with)
     else:
-        return {
-            "success": False,
-            "error": f"Unknown operation: {operation}",
-            "available_operations": [
+        return unknown_operation_response(
+            operation,
+            [
                 "list_databases",
                 "list_tables",
                 "describe_table",
                 "get_schema_diff",
             ],
-        }
+        )
 
     # Standardize result with a conversational summary
     summary = result.get("message", "")
