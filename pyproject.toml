@@ -41,6 +41,7 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "requests>=2.31.0",
     "beautifulsoup4>=4.12.0",
+    "prefab-ui>=0.14.0",
     "py-key-value-aio[disk]>=0.4.0",
     "ruff>=0.14.0",
 ]
