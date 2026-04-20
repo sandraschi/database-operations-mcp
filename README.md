@@ -1,10 +1,12 @@
+[![FastMCP Version](https://img.shields.io/badge/FastMCP-3.1.0-blue?style=flat-square&logo=python&logoColor=white)](https://github.com/sandraschi/fastmcp) [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) [![Linted with Biome](https://img.shields.io/badge/Linted_with-Biome-60a5fa?style=flat-square&logo=biome&logoColor=white)](https://biomejs.dev/) [![Built with Just](https://img.shields.io/badge/Built_with-Just-000000?style=flat-square&logo=gnu-bash&logoColor=white)](https://github.com/casey/just)
+
 [![Version](https://img.shields.io/badge/version-1.4.1-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10+-green.svg)](https://python.org)
 [![FastMCP](https://img.shields.io/badge/FastMCP-3.1-orange.svg)](https://github.com/modelcontextprotocol/python-sdk)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 # Database Operations MCP
 
-FastMCP 3.1 MCP server for database operations on Windows, with bookmark management tools. Includes MCP prompts and a bundled database-expert skill.
+FastMCP 3.1.0 MCP server for database operations on Windows, with bookmark management tools. Includes MCP prompts and a bundled database-expert skill.
 
 ## Scope
 - Primary: Database tools (inspection, backup/restore, analysis, Windows application databases)
@@ -25,7 +27,7 @@ Individual tools have been deprecated in favor of portmanteau tools for maintain
 - `db_management` - Database health checks, optimization, backup/restore portmanteau (consolidates management_tools)
 - `db_fts` - Full-text search with ranking and highlighting portmanteau (consolidates fts_tools)
 - `db_analyzer` - Comprehensive database analysis and diagnostics portmanteau
-- `db_sampling_workflow` - FastMCP 3.1 sampling-enabled agentic workflows for complex database operations
+- `db_sampling_workflow` - FastMCP 3.1.0 sampling-enabled agentic workflows for complex database operations
 - `windows_system` - Windows Registry, service status, system info portmanteau (consolidates registry_tools, windows_tools)
 
 ### Bookmark Tools (Secondary)
@@ -307,9 +309,9 @@ pip install git+https://github.com/sandraschi/database-operations-mcp.git
 3. Drag and drop the `.mcpb` file
 4. Restart Claude Desktop
 
-## FastMCP 2.14.3 Features
+## FastMCP 3.1.0 Features
 
-This server uses FastMCP 2.14.3 capabilities:
+This server uses FastMCP 3.1.0 capabilities:
 
 ### Conversational Tool Returns
 All tools return structured responses with natural language summaries alongside technical data.
@@ -367,16 +369,27 @@ The `db_sampling_workflow` tool enables complex database operations that would p
 
 ## Requirements
 - Python 3.10+
-- FastMCP 3.1+
+- FastMCP 3.1.0+
 - Supported browsers installed (for bookmark tools)
 - **Persistence**: `py-key-value-aio[disk]` for DiskStore (optional; in-memory fallback if not installed)
 - **Database Drivers**: `chromadb`, `pymongo`, `psycopg2-binary`, `duckdb`, `aiomysql`, `redis`
 - **Utilities**: `aiohttp`, `rich`, `psutil`
 
 
+
+## 🛡️ Industrial Quality Stack
+
+This project adheres to **SOTA 14.1** industrial standards for high-fidelity agentic orchestration:
+
+- **Python (Core)**: [Ruff](https://astral.sh/ruff) for linting and formatting. Zero-tolerance for `print` statements in core handlers (`T201`).
+- **Webapp (UI)**: [Biome](https://biomejs.dev/) for sub-millisecond linting. Strict `noConsoleLog` enforcement.
+- **Protocol Compliance**: Hardened `stdout/stderr` isolation to ensure crash-resistant JSON-RPC communication.
+- **Automation**: [Justfile](./justfile) recipes for all fleet operations (`just lint`, `just fix`, `just dev`).
+- **Security**: Automated audits via `bandit` and `safety`.
+
 ## Webapp Dashboard
 
-This MCP server includes a web interface (FastMCP 3.1 gateway) for monitoring and tool execution.
+This MCP server includes a web interface (FastMCP 3.1.0 gateway) for monitoring and tool execution.
 - **Frontend**: port **10708** (Vite dev server)
 - **Backend**: port **10709** (FastAPI + MCP mounted at `/mcp`, REST at `/api/tools`)
 
@@ -385,12 +398,12 @@ To start the webapp:
 2. Run `.\start.ps1` (PowerShell; from repo root: `cd web_sota; .\start.ps1`).
 3. Open `http://localhost:10708` in your browser.
 
-## Prompts and skills (FastMCP 3.1)
+## Prompts and skills (FastMCP 3.1.0)
 
 - **MCP prompt `database_expert`**: Clients can call `get_prompt("database_expert", arguments={"focus": "general"|"sql"|"connections"|"export"})` to receive instruction text to inject so the LLM acts as a database expert using this server's tools. Use when you want the assistant to follow connection/schema/query/export  practices without reading this README.
 - **Bundled skill `database-expert`**: Exposed as MCP resources under the `skill://` scheme. Clients that support MCP resources can read `skill://database-expert/SKILL.md` (and manifest/supporting files) for the same expert guidance. The skill lives in `src/database_operations_mcp/skills/database-expert/` and is registered via the FastMCP Skills provider.
 
-See [FastMCP Prompts](https://gofastmcp.com/servers/prompts) and [Skills Provider](https://gofastmcp.com/servers/providers/skills) for the framework docs.
+See [FastMCP Prompts](https://goFastMCP 3.1.0com/servers/prompts) and [Skills Provider](https://goFastMCP 3.1.0com/servers/providers/skills) for the framework docs.
 
 ## Persistence
 

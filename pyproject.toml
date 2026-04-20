@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "database-operations-mcp"
 version = "1.4.1"
-description = "Comprehensive FastMCP 3.1 server for database operations (SQL, NoSQL, Vector), browser bookmarks, and system tools."
+description = "Comprehensive FastMCP 3.1.0 server for database operations (SQL, NoSQL, Vector), browser bookmarks, and system tools."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
