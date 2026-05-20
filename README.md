@@ -6,6 +6,13 @@
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 # Database Operations MCP
 
+<p align="center">
+  <a href="https://github.com/casey/just"><img src="https://img.shields.io/badge/just-ready_to_go-7c5cfc?style=flat-square&logo=just&logoColor=white" alt="Just"></a>
+  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.13+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
+  <a href="https://github.com/PrefectHQ/fastmcp"><img src="https://img.shields.io/badge/FastMCP-3.2-7c5cfc?style=flat-square" alt="FastMCP"></a>
+</p>
+
 FastMCP 3.1.0 MCP server for database operations on Windows, with bookmark management tools. Includes MCP prompts and a bundled database-expert skill.
 
 ## Scope
@@ -202,6 +209,21 @@ To generate a `.mcpb` distribution bundle with complete source code and automate
 mcpb pack . dist/database-operations-mcp.mcpb
 ```
 
+## Quick Start
+
+```powershell
+git clone https://github.com/sandraschi/database-operations-mcp
+cd database-operations-mcp
+just
+```
+
+This opens an interactive dashboard showing all available commands. Run `just bootstrap` to install dependencies, then `just serve` or `just dev` to start.
+
+### Manual Setup
+
+If you don't have `just` installed:
+
+
 ## Install Zed Extension
 This repository includes a Zed extension for native integration with the Zed editor.
 
@@ -280,9 +302,9 @@ uvx browser-bookmarks
 Add to your `claude_desktop_config.json`:
 ```json
 "mcpServers": {
-  "browser-bookmarks": {
+  "database-operations": {
     "command": "uv",
-    "args": ["--directory", "D:/Dev/repos/database-operations-mcp", "run", "browser-bookmarks"]
+    "args": ["--directory", "D:/Dev/repos/database-operations-mcp", "run", "database-operations-mcp"]
   }
 }
 ```

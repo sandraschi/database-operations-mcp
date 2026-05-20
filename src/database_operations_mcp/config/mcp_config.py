@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncContextManager
 
 from fastmcp import FastMCP
+from fastmcp.server import create_proxy
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,19 @@ async def server_lifespan(mcp_instance: FastMCP) -> AsyncContextManager[None]:
 # Create a single FastMCP instance with lifespan for persistent storage
 # Persistent storage is enabled following FastMCP 3.0 standards
 mcp = FastMCP(name="database-operations-mcp", lifespan=server_lifespan)
+
+# MCP Bridge: proxy upstream servers via MCP_BRIDGE_URLS (comma-separated)
+_bridge_proxies = []
+bridge_urls = os.getenv("MCP_BRIDGE_URLS", "")
+if bridge_urls:
+    for url in bridge_urls.split(","):
+        url = url.strip()
+        if url:
+            try:
+                mcp.add_provider(create_proxy(url))
+                _bridge_proxies.append(url)
+            except Exception:
+                pass
 
 # Expose bundled skills as MCP resources (skill://database-expert/SKILL.md)
 try:

@@ -1,6 +1,7 @@
 import logging
 from typing import Any, List, Dict, Optional
 
+from fastmcp import Context
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.tools.help_tools import HelpSystem
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 @HelpSystem.register_tool(category="database")
 async def agentic_workflow_tool(
     goal: str,
+    ctx: Context,
     available_operations: Optional[List[str]] = None,
     max_steps: int = 5,
     target_database: Optional[str] = None,
@@ -27,6 +29,7 @@ async def agentic_workflow_tool(
 
     Args:
         goal: Natural language description of the database workflow to execute.
+        ctx: FastMCP context for sampling (injected automatically).
         available_operations: List of operations the LLM can choose from.
         max_steps: Maximum number of autonomous steps (default: 5).
         target_database: Specific database connection to use.
@@ -34,9 +37,6 @@ async def agentic_workflow_tool(
         safety_override: If True, bypasses standard safety guardrails (not recommended).
     """
     logger.info(f"Initiating autonomous database workflow: {goal}")
-
-    # Get the current context for sampling
-    ctx = mcp.get_context()
 
     # Construct a highly detailed prompt for the sampling LLM
     # This prompt instructs the "brain" to think step-by-step
