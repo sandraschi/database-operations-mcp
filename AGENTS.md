@@ -18,3 +18,5 @@ Comprehensive FastMCP 3.1.0 server for database operations (SQL, NoSQL, Vector),
 - `README.md` — full documentation
 - `pyproject.toml` — build config and entry points
 - `CLAUDE.md` — Claude Code context (if present)
+
+Install docs: follow mcp-central-docs/standards/AGENT_INSTALL_REFERENCE.md
