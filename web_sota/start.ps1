@@ -27,10 +27,9 @@ Set-Location $PSScriptRoot
 if (-not (Test-Path "node_modules")) { npm install }
 
 # 3. Start the Python backend (Background)
-Write-Host "Starting Python backend on port $BackendPort ..." -ForegroundColor Cyan
+Write-Host "Starting MCP HTTP backend on port $BackendPort ..." -ForegroundColor Cyan
 
-# Backend lives in repo src; run from repo root so browser_bookmarks_tools.server is importable
-$backendCmd = "Set-Location '$ProjectRoot'; `$env:PYTHONPATH = '$ProjectRoot\src'; uv run uvicorn browser_bookmarks_tools.server:app --host 127.0.0.1 --port $BackendPort --log-level info"
+$backendCmd = "Set-Location '$ProjectRoot'; uv run database-operations-mcp --http --port $BackendPort"
 
 Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd -WindowStyle Normal
 

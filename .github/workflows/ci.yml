@@ -183,23 +183,17 @@ jobs:
       - name: Validate manifest
         run: |
           if command -v mcpb >/dev/null 2>&1; then
-            cd mcpb
-            mcpb validate mcpb.json
-            cd ..
+            mcpb validate manifest.json
           else
             echo "MCPB CLI not available, skipping validation"
           fi
       - name: Build MCPB package
         run: |
           if command -v mcpb >/dev/null 2>&1; then
-            cd mcpb
-            mcpb pack . ../dist/database-operations-mcp.mcpb
-            cd ..
+            mkdir -p dist
+            mcpb pack . dist/database-operations-mcp.mcpb
           else
-            echo "MCPB CLI not available, creating basic package"
-            cd mcpb
-            zip -r ../dist/database-operations-mcp.mcpb . -x "*.git*" "*.pyc" "__pycache__/*"
-            cd ..
+            echo "MCPB CLI not available, skipping pack"
           fi
       - name: Upload MCPB package
         uses: actions/upload-artifact@v4

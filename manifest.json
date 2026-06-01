@@ -1,9 +1,9 @@
 {
   "manifest_version": "0.2",
   "name": "database-operations-mcp",
-  "version": "1.0.0",
+  "version": "1.4.1",
   "description": "Universal Database Operations MCP - SQL, NoSQL, and Vector database management with Windows Registry support. Supports stdio and HTTP transports.",
-  "long_description": "Comprehensive MCP server for database operations across SQL (PostgreSQL, SQLite), NoSQL (MongoDB), Vector (ChromaDB) databases, plus Calibre library management, Firefox bookmarks, Plex media server, and Windows Registry access. Built with FastMCP 2.13.0+ for enterprise-grade reliability.",
+  "long_description": "Comprehensive MCP server for database operations across SQL (PostgreSQL, SQLite), NoSQL (MongoDB), Vector (ChromaDB, LanceDB) databases, plus Calibre library management, Plex media server, and Windows Registry access. Built with FastMCP 3.3+. Bookmark management is provided by bookmarks-mcp.",
   "author": {
     "name": "Sandra Schilling",
     "email": "sandra@example.com"
@@ -14,22 +14,22 @@
   },
   "homepage": "https://github.com/sandraschi/database-operations-mcp",
   "license": "MIT",
-  "keywords": ["database", "mcp", "sql", "nosql", "vector-db", "calibre", "firefox", "plex", "windows-registry"],
+  "keywords": ["database", "mcp", "sql", "nosql", "vector-db", "calibre", "plex", "windows-registry"],
   "server": {
     "type": "python",
     "entry_point": "src/database_operations_mcp/main.py",
     "mcp_config": {
       "command": "python",
-      "args": ["-m", "database_operations_mcp.main"],
+      "args": ["-m", "database_operations_mcp.main", "--stdio"],
       "env": {
-        "PYTHONPATH": "${PWD}",
+        "PYTHONPATH": "${PWD}/src",
         "PYTHONUNBUFFERED": "1"
       }
     }
   },
   "compatibility": {
     "platforms": ["win32", "linux", "darwin"],
-    "python_version": ">=3.9"
+    "python_version": ">=3.12"
   },
   "tools_generated": true,
   "prompts": [

@@ -132,7 +132,6 @@ def is_portmanteau_import():
             filename = frame.f_code.co_filename
             if (
                 "portmanteau" in filename.lower()
-                or "firefox_bookmarks" in filename
                 or "db_connection" in filename
             ):
                 return True

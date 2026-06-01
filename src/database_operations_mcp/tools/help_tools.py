@@ -20,7 +20,6 @@ class HelpSystem:
     _tools = {}
     _categories = {
         "database": "Core database operations",
-        "firefox": "Firefox bookmark tools",
         "calibre": "Calibre library tools",
         "registry": "Windows Registry tools",
         "help": "Help and documentation",
@@ -153,8 +152,6 @@ async def help(category: str | None = None) -> dict[str, Any]:
         category: Category filter (default: None)
             - None: Show all tools
             - 'database': Core database operations
-            - 'firefox': Firefox bookmark tools (profiles, bookmarks,
-              curated collections, portmanteau profiles)
             - 'calibre': Calibre library tools
             - 'registry': Windows Registry tools
             - 'help': Help and documentation tools
@@ -177,7 +174,6 @@ async def help(category: str | None = None) -> dict[str, Any]:
         - Find tools for specific tasks
         - Learn tool capabilities
         - Browse tools by category
-        - Discover Firefox profile and bookmark management features
 
     Examples:
         Get all available tools:
@@ -203,14 +199,8 @@ async def help(category: str | None = None) -> dict[str, Any]:
             result = await help(category="database")
             # Returns: Only database-related tools
 
-        Find specific functionality:
-            result = await help(category="firefox")
-            for tool in result['categories']['firefox']['tools']:
-                if 'bookmark' in tool['description']:
-                    print(f"Found: {tool['name']}")
-
     Notes:
-        - Categories are predefined (database, firefox, calibre, registry, help, agentic)
+        - Categories are predefined (database, calibre, registry, help, agentic)
         - Tool descriptions are first line of docstrings
         - Use tool_help for detailed information about specific tools
 

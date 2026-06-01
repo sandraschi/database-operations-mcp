@@ -55,10 +55,10 @@ async def help_system(
         topic (str, OPTIONAL): Topic to get help for
             Format: Any help topic or category name
             Required for: help, format_help_output operations
-            Example: 'database operations', 'firefox bookmarks', 'connection management'
+            Example: 'database operations', 'connection management'
 
         category (str, OPTIONAL): Category to filter help by
-            Valid values: 'database', 'firefox', 'chrome', 'calibre', 'registry', 'help', 'agentic'
+            Valid values: 'database', 'calibre', 'registry', 'help', 'agentic'
             Default: None (show all categories)
             Used for: help operation
             Example: 'database', 'agentic'
@@ -67,7 +67,7 @@ async def help_system(
             Format: Exact tool name (case-sensitive)
             Required for: tool_help, get_tool_examples, get_parameter_info operations
             Validation: Tool must be registered with HelpSystem
-            Example: 'db_connection', 'firefox_bookmarks', 'browser_bookmarks'
+            Example: 'db_connection', 'db_operations', 'media_library'
 
         include_examples (bool, OPTIONAL): Include usage examples in help output
             Default: True
@@ -91,7 +91,7 @@ async def help_system(
             Format: Free-form search string
             Required for: search_help operation
             Behavior: Searches tool names, descriptions, and docstrings
-            Example: 'firefox bookmarks', 'database connection', 'query execution'
+            Example: 'database connection', 'query execution'
 
         max_results (int, OPTIONAL): Maximum number of search results to return
             Format: Positive integer
@@ -171,7 +171,7 @@ async def help_system(
         Search help documentation:
             result = await help_system(
                 operation='search_help',
-                search_query='bookmark sync',
+                search_query='database backup',
                 max_results=5
             )
             # Returns: {
@@ -187,7 +187,7 @@ async def help_system(
         Get tool examples:
             result = await help_system(
                 operation='get_tool_examples',
-                tool_name='firefox_bookmarks'
+                tool_name='db_connection'
             )
             # Returns: {
             #     'status': 'success',
@@ -365,10 +365,6 @@ async def _list_categories() -> dict[str, Any]:
                     "name": "database",
                     "description": "Database operations and management",
                 },
-                {
-                    "name": "firefox",
-                    "description": "Firefox bookmark and profile management",
-                },
                 {"name": "calibre", "description": "Calibre library tools"},
                 {"name": "registry", "description": "Windows Registry tools"},
                 {"name": "help", "description": "Help system and documentation"},
@@ -377,7 +373,7 @@ async def _list_categories() -> dict[str, Any]:
                     "description": "Autonomous orchestration and sampling patterns",
                 },
             ],
-            "count": 6,
+            "count": 5,
         }
 
     except Exception as e:

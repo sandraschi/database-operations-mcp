@@ -95,9 +95,7 @@ class DatabaseOperationsMCP:
             # Import all portmanteau tools from tools/ directory
             # These imports trigger @mcp.tool() decorators
             from .tools import (  # noqa: F401
-                browser_bookmarks,  # Universal browser bookmark tool (covers all browsers)
                 calibre_integration,
-                chrome_profiles,
                 db_analyzer,
                 db_connection,
                 db_fts,
@@ -105,17 +103,11 @@ class DatabaseOperationsMCP:
                 db_operations,
                 db_operations_extended,
                 db_schema,
-                firefox_backup,
-                firefox_curated,
-                firefox_profiles,
-                firefox_tagging,
-                firefox_utils,
                 help_system,
                 media_library,
-                sync_tools,
                 system_init,
-                agentic_tools,  # Added to main toolset
-                windows_system,  # Unified registry and windows tools
+                agentic_tools,
+                windows_system,
                 test_tool,
             )
 
@@ -379,6 +371,11 @@ def main() -> int:
         return 0
 
     logger.info("Starting Database Operations MCP Server...")
+
+    if "--http" in sys.argv or os.getenv("MCP_TRANSPORT", "").lower() == "http":
+        from database_operations_mcp.http_app import run_http_web
+
+        return run_http_web()
 
     try:
         # Create the server instance

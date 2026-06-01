@@ -21,7 +21,8 @@ import {
     Sparkles,
     Workflow,
     ClipboardList,
-    Radar
+    Radar,
+    ScrollText,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -44,6 +45,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         { href: '/data', label: 'Data', icon: FileJson },
         { href: '/export-import', label: 'Export / Import', icon: FileStack },
         { href: '/health', label: 'Health', icon: Heart },
+        { href: '/logs', label: 'Logs', icon: ScrollText },
         { href: '/connection-manager', label: 'Connection manager', icon: Database },
         { href: '/tools', label: 'Tools', icon: Wrench },
         { href: '/tool-explorer', label: 'Tool explorer', icon: Radar },

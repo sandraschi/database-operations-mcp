@@ -9,7 +9,6 @@ build/
 target/
 docs/
 scripts/
-mcpb/
 .cursor/
 .windsurf/
 .pytest_cache/

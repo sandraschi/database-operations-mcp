@@ -23,8 +23,26 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from fastmcp import FastMCP
-from ..tools.firefox.status import FirefoxStatusChecker
 from .help_tools import HelpSystem
+
+logger = logging.getLogger(__name__)
+
+
+def _is_firefox_running() -> dict[str, Any]:
+    """Return whether Firefox is running (for places.sqlite lock checks)."""
+    try:
+        import psutil
+
+        for proc in psutil.process_iter(["name"]):
+            try:
+                name = (proc.info.get("name") or "").lower()
+                if name in {"firefox.exe", "firefox"}:
+                    return {"is_running": True, "process_name": proc.info.get("name")}
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+    except Exception as exc:
+        logger.debug("Firefox process check failed: %s", exc)
+    return {"is_running": False}
 
 # Common Windows database locations
 WINDOWS_DB_PATHS = {
@@ -142,7 +160,7 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
         try:
             # Special handling for Firefox - check if it's running
             if db_type == "firefox_history":
-                firefox_status = FirefoxStatusChecker.is_firefox_running()
+                firefox_status = _is_firefox_running()
                 if firefox_status["is_running"] and not bruteforce_firefox:
                     result[db_type] = {
                         "path": paths[0] if isinstance(paths, (list, tuple)) else paths,
@@ -155,49 +173,13 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
                     }
                     continue
                 elif firefox_status["is_running"] and bruteforce_firefox:
-                    # Try brute force access
-                    from ..firefox.core import FirefoxDatabaseUnlocker
-
-                    db_path = _find_windows_db(db_type)
-                    if db_path:
-                        conn, method = FirefoxDatabaseUnlocker.get_database_connection_bruteforce(
-                            db_path
-                        )
-                        if conn:
-                            try:
-                                # Get database size
-                                size_mb = os.path.getsize(db_path) / (1024 * 1024)
-                                # Get some stats
-                                cursor = conn.cursor()
-                                cursor.execute("SELECT COUNT(*) FROM moz_places")
-                                places_count = cursor.fetchone()[0]
-                                cursor.close()
-
-                                result[db_type] = {
-                                    "path": str(db_path),
-                                    "size_mb": round(size_mb, 2),
-                                    "exists": True,
-                                    "bruteforce_access": True,
-                                    "access_method": method,
-                                    "firefox_running": True,
-                                    "places_count": places_count,
-                                }
-                            finally:
-                                # Clean up
-                                if hasattr(conn, "temp_db_path"):
-                                    try:
-                                        conn.temp_db_path.unlink(missing_ok=True)
-                                    except Exception:
-                                        pass
-                                conn.close()
-                        else:
-                            result[db_type] = {
-                                "path": str(db_path),
-                                "exists": False,
-                                "error": f"Brute force access failed: {method}",
-                                "firefox_running": True,
-                                "bruteforce_attempted": True,
-                            }
+                    result[db_type] = {
+                        "path": paths[0] if isinstance(paths, (list, tuple)) else paths,
+                        "exists": False,
+                        "error": "Brute-force Firefox access removed; close Firefox or use bookmarks-mcp",
+                        "firefox_running": True,
+                        "bruteforce_attempted": True,
+                    }
                     continue
 
             db_path = _find_windows_db(db_type)
@@ -358,7 +340,7 @@ async def query_windows_database(
     """
     # Check Firefox status for Firefox databases
     if db_type == "firefox_history":
-        firefox_status = FirefoxStatusChecker.is_firefox_running()
+        firefox_status = _is_firefox_running()
         if firefox_status["is_running"] and not bruteforce_firefox:
             return {
                 "status": "error",
@@ -381,22 +363,15 @@ async def query_windows_database(
         if "LIMIT" not in query.upper() and limit > 0:
             query = query.rstrip(";") + f" LIMIT {limit}"
 
-        # Use brute force connection for Firefox when requested
         if db_type == "firefox_history" and bruteforce_firefox:
-            from ..firefox.core import FirefoxDatabaseUnlocker
+            return {
+                "status": "error",
+                "message": "Brute-force Firefox access removed; close Firefox or use bookmarks-mcp",
+                "db_type": db_type,
+                "bruteforce_attempted": True,
+            }
 
-            conn, method = FirefoxDatabaseUnlocker.get_database_connection_bruteforce(db_path)
-            if not conn:
-                return {
-                    "status": "error",
-                    "message": f"Brute force access failed: {method}",
-                    "db_type": db_type,
-                    "bruteforce_attempted": True,
-                }
-            # Store method info for response
-            bruteforce_method_used = method
-        else:
-            conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -426,16 +401,6 @@ async def query_windows_database(
             "count": len(results),
             "results": results,
         }
-
-        # Add brute force info if used
-        if (
-            db_type == "firefox_history"
-            and bruteforce_firefox
-            and "bruteforce_method_used" in locals()
-        ):
-            response["bruteforce_access"] = True
-            response["access_method"] = bruteforce_method_used
-
         return response
 
     except Exception as e:
@@ -466,7 +431,7 @@ async def clean_windows_database(
     """
     # Check Firefox status for Firefox databases
     if db_type == "firefox_history":
-        firefox_status = FirefoxStatusChecker.is_firefox_running()
+        firefox_status = _is_firefox_running()
         if firefox_status["is_running"] and not bruteforce_firefox:
             return {
                 "status": "error",

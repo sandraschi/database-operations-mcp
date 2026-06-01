@@ -30,15 +30,10 @@ class TestQuickImports:
 
     def test_main_module_import(self):
         """Test that the main module and main function can be imported."""
-        from database_operations_mcp import main  # noqa: F401
+        from database_operations_mcp.main import DatabaseOperationsMCP, main  # noqa: F401
 
-        assert main is not None
-        assert hasattr(main, "main")
-        assert callable(main.main)
-
-        # Test that DatabaseOperationsMCP class exists
-        assert hasattr(main, "DatabaseOperationsMCP")
-        assert main.DatabaseOperationsMCP is not None
+        assert callable(main)
+        assert DatabaseOperationsMCP is not None
 
     def test_config_module_import(self):
         """Test that the config module can be imported."""
@@ -59,7 +54,7 @@ class TestQuickImports:
         # Test that key portmanteau tools are available
         assert hasattr(tools, "db_connection")
         assert hasattr(tools, "db_operations")
-        assert hasattr(tools, "firefox_bookmarks")
+        assert hasattr(tools, "media_library")
 
 
 if __name__ == "__main__":

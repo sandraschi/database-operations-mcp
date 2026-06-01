@@ -20,6 +20,7 @@ import { SearchHub } from '@/pages/search-hub';
 import { JobsExports } from '@/pages/jobs-exports';
 import { McpCapabilities } from '@/pages/mcp-capabilities';
 import { ConnectionManager } from '@/pages/connection-manager';
+import { LogsPage } from '@/pages/logs';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
           <Route path="/jobs-exports" element={<JobsExports />} />
           <Route path="/mcp-capabilities" element={<McpCapabilities />} />
           <Route path="/connection-manager" element={<ConnectionManager />} />
+          <Route path="/logs" element={<LogsPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
