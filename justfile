@@ -1,4 +1,4 @@
-set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+﻿set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
 REPO := justfile_directory()
 
@@ -6,7 +6,7 @@ REPO := justfile_directory()
 
 # Open the interactive recipe dashboard in the browser
 default:
-    @pwsh.exe -NoProfile -ExecutionPolicy Bypass -File ../mcp-central-docs/scripts/just-dashboard.ps1 -Path .
+    @just --list
 
 # ── Install ───────────────────────────────────────────────────────────────────
 
@@ -67,3 +67,4 @@ pack mcpb-pack:
     New-Item -ItemType Directory -Force -Path dist | Out-Null
     npx --yes @anthropic-ai/mcpb pack "{{REPO}}" "{{REPO}}/dist/database-operations-mcp-v1.4.1.mcpb"
     Write-Host "Bundle: {{REPO}}/dist/database-operations-mcp-v1.4.1.mcpb"
+
