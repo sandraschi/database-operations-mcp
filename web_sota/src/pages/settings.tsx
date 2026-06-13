@@ -1,8 +1,96 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getCapabilities } from "@/common/api";
+
+function LLMSettings() {
+    const [providers, setProviders] = useState<Record<string, {name:string}[]>>({});
+    const [selectedProvider, setSelectedProvider] = useState("ollama");
+    const [selectedModel, setSelectedModel] = useState("");
+    const [status, setStatus] = useState<"loading"|"ready"|"error">("loading");
+
+    useEffect(() => {
+        fetch("/api/llm/providers")
+            .then(r => r.json())
+            .then(d => {
+                setProviders(d);
+                const savedP = localStorage.getItem("llm_provider") || "ollama";
+                const savedM = localStorage.getItem("llm_model") || "";
+                setSelectedProvider(savedP);
+                const models = d[savedP === "ollama" ? "ollama" : "lm_studio"] || [];
+                setSelectedModel(savedM && models.some((m:{name:string}) => m.name === savedM) ? savedM : (models[0]?.name || ""));
+                setStatus(models.length > 0 ? "ready" : "error");
+            })
+            .catch(() => {
+                setProviders({ ollama: [{name:"llama3.2:3b"}] });
+                setSelectedModel(localStorage.getItem("llm_model") || "llama3.2:3b");
+                setStatus("ready");
+            });
+    }, []);
+
+    const saveConfig = useCallback((provider: string, model: string) => {
+        localStorage.setItem("llm_provider", provider);
+        localStorage.setItem("llm_model", model);
+    }, []);
+
+    const handleProviderChange = (p: string) => {
+        setSelectedProvider(p);
+        const models = providers[p === "ollama" ? "ollama" : "lm_studio"] || [];
+        const first = models[0]?.name || "";
+        setSelectedModel(first);
+        saveConfig(p, first);
+    };
+
+    const handleModelChange = (m: string) => {
+        setSelectedModel(m);
+        saveConfig(selectedProvider, m);
+    };
+
+    const currentModels = providers[selectedProvider === "ollama" ? "ollama" : "lm_studio"] || [];
+
+    return (
+        <Card className="border-slate-800 bg-slate-950/50">
+            <CardHeader>
+                <CardTitle className="text-white">Local LLM</CardTitle>
+                <CardDescription className="text-slate-400">
+                    Configure which LLM backend the AI tools use (agentic workflow, NL control, log analysis).
+                    {status === "ready" ? (
+                        <span className="ml-2 inline-flex items-center gap-1 text-emerald-400">
+                            <span className="h-2 w-2 rounded-full bg-emerald-400" /> reachable
+                        </span>
+                    ) : (
+                        <span className="ml-2 inline-flex items-center gap-1 text-amber-400">
+                            <span className="h-2 w-2 rounded-full bg-amber-400" /> probing...
+                        </span>
+                    )}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Provider</label>
+                    <select className="h-10 w-full rounded-md border border-slate-800 bg-slate-900 px-3 text-sm text-slate-100"
+                        value={selectedProvider} onChange={(e) => handleProviderChange(e.target.value)}>
+                        <option value="ollama">Ollama</option>
+                        <option value="lm_studio">LM Studio</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Model</label>
+                    <select className="h-10 w-full rounded-md border border-slate-800 bg-slate-900 px-3 text-sm text-slate-100"
+                        value={selectedModel} onChange={(e) => handleModelChange(e.target.value)}>
+                        {currentModels.map((m) => (
+                            <option key={m.name} value={m.name}>{m.name}</option>
+                        ))}
+                    </select>
+                </div>
+                <p className="text-xs text-slate-500">
+                    Saved to browser storage. Used by the LLM Chat page and AI tools (agentic workflows, natural language control, log analysis).
+                </p>
+            </CardContent>
+        </Card>
+    );
+}
 
 export function Settings() {
     const [surfaceMode, setSurfaceMode] = useState("both");
@@ -24,7 +112,7 @@ export function Settings() {
         <div className="space-y-6">
             <div>
                 <h2 className="text-2xl font-bold tracking-tight text-white">Configuration</h2>
-                <p className="text-slate-400">Tool surface preferences and MCP feature status</p>
+                <p className="text-slate-400">Tool surface preferences, LLM provider, and MCP feature status</p>
             </div>
 
             <div className="grid gap-6">
@@ -55,6 +143,8 @@ export function Settings() {
                         {saved && <p className="text-sm text-emerald-400">{saved}</p>}
                     </CardContent>
                 </Card>
+
+                <LLMSettings />
 
                 <Card className="border-slate-800 bg-slate-950/50">
                     <CardHeader>
