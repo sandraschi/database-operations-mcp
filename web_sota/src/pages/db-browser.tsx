@@ -18,6 +18,7 @@ import {
     Info,
     ChevronLeft,
     ChevronRight,
+    Eye,
 } from "lucide-react";
 import { cn } from "@/common/utils";
 

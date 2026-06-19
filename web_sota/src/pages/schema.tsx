@@ -25,7 +25,7 @@ export function Schema() {
 
     const listDbMutation = useMutation({
         mutationFn: (conn: string) => callTool("db_schema", { operation: "list_databases", connection_name: conn }),
-        onSuccess: (data, conn) => {
+        onSuccess: (data) => {
             setError(null);
             const d = extractData(data?.result);
             const list = (d?.databases as string[]) ?? (d?.items as string[]) ?? [];

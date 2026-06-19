@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getTools, callTool, type McpTool } from "@/common/api";
+import { getTools, callTool } from "@/common/api";
 import { cn } from "@/common/utils";
 
 export function Tools() {

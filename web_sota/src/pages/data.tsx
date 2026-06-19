@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { callTool } from "@/common/api";
-import { cn } from "@/common/utils";
 import { Play, Table2 } from "lucide-react";
 
 function extractData(res: unknown): Record<string, unknown> | null {

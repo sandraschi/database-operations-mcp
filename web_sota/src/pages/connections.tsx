@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -125,7 +125,7 @@ export function Connections() {
                                 {connections.length === 0 && !listMutation.isPending && (
                                     <li className="text-slate-500 text-sm px-2">None. Register via MCP or Tools page.</li>
                                 )}
-                                {(connections as unknown[]).map((c, idx) => {
+                                {(connections as unknown[]).map((c, _idx) => {
                                     const name = typeof c === "string" ? c : String((c as Record<string, unknown>).connection_name ?? (c as Record<string, unknown>).name ?? c);
                                     const isActive = activeName === name;
                                     const testingThis = testing === name;
@@ -185,7 +185,7 @@ export function Connections() {
                             <div className="flex flex-wrap gap-2">
                                 {((supported.types as unknown[]) as { type?: string; category?: string }[]).map((t, i) => (
                                     <Badge key={i} variant="secondary" className="bg-slate-800 text-slate-300 border-slate-700">
-                                        {t.type ?? t}
+                                        {t.type ?? t.category ?? "?"}
                                     </Badge>
                                 ))}
                             </div>

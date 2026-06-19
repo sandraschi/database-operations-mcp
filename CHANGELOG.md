@@ -1,3 +1,17 @@
+
+## [Unreleased] — 2026-06-14
+
+### Added
+- Tauri 2.0 native wrapper with `bundle.resources` + `std::process::Command`
+- PyInstaller frozen backend embedded in NSIS installer
+- CUA-NSIS smoke test (`scripts/cua-smoke.py`, `scripts/cua-nsis-config.json`)
+- `just cua-nsis-test` recipe
+- Tauri CORS: `tauri://localhost` origins for WebView API access
+- `GET /api/v1/diagnostics` endpoint for CUA verification
+
+### Known Issues
+- **NSIS installer**: Backend exe crashes on fastmcp's OpenTelemetry dependency chain in `--onefile` mode. Build succeeds but uvicorn fails at import time (`ModuleNotFoundError: cachetools → opentelemetry → importlib_metadata`). Workaround: `--onedir` mode or pin fastmcp without telemetry extras. The HTTP and stdio servers work normally outside the Tauri bundle.
+
 ## 1.4.2 - Unreleased
 
 ### Added
@@ -219,3 +233,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Repository**: database-operations-mcp
 **Last Updated**: 2025-01-01
+

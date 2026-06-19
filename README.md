@@ -18,6 +18,8 @@
 
 FastMCP 3.3 MCP server for database operations on Windows. Includes MCP prompts and a bundled database-expert skill. Browser bookmark management lives in [bookmarks-mcp](https://github.com/sandraschi/bookmarks-mcp).
 
+> **⚠️ NSIS Installer Status:** The Tauri NSIS desktop installer is currently non-functional due to a PyInstaller `--onefile` compatibility issue with fastmcp's OpenTelemetry dependency chain. A `--onedir` fix is in progress. The stdio and HTTP servers work normally.
+
 ## Scope
 - Database tools (inspection, backup/restore, analysis, Windows application databases)
 - Media library tools (Calibre, Plex)

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getCapabilities } from "@/common/api";
+import { API_BASE } from "@/lib/api";
 
 function LLMSettings() {
     const [providers, setProviders] = useState<Record<string, {name:string}[]>>({});
@@ -11,7 +12,7 @@ function LLMSettings() {
     const [status, setStatus] = useState<"loading"|"ready"|"error">("loading");
 
     useEffect(() => {
-        fetch("/api/llm/providers")
+        fetch(API_BASE + "/api/llm/providers")
             .then(r => r.json())
             .then(d => {
                 setProviders(d);

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BookOpen, Database, Table2, LayoutGrid, FileStack, Heart, Wrench, ArrowRight } from "lucide-react";
+import { BookOpen, Database, Table2, LayoutGrid, FileStack, ArrowRight } from "lucide-react";
 
 const STEPS = [
     {

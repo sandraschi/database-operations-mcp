@@ -2,17 +2,19 @@ import {
     Card,
     CardContent,
     CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Search,
     Database,
-    Download,
-    Book,
-    User,
-    ChevronLeft,
+    History as HistoryIcon,
     ChevronRight,
+    Play,
+    FileJson,
+    SearchCheck,
+    Table,
 } from "lucide-react";
 
 export default function SQLExplorer() {
@@ -47,7 +49,7 @@ export default function SQLExplorer() {
                         </Tabs>
                         <div className="flex gap-2">
                             <Button size="sm" variant="ghost" className="text-slate-400">
-                                <History className="h-4 w-4" />
+                                <HistoryIcon className="h-4 w-4" />
                             </Button>
                             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
                                 <Play className="h-3 w-3 mr-2" />

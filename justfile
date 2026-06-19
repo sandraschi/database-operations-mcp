@@ -1,6 +1,7 @@
-﻿set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
 REPO := justfile_directory()
+NAME := "database-operations-mcp"
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 
@@ -62,9 +63,19 @@ audit-deps:
 
 # ── MCPB ──────────────────────────────────────────────────────────────────────
 
+MCPB_IGNORE := "{{REPO}}/.mcpbignore"
+
+# Build .mcpb bundle for Claude Desktop
 pack mcpb-pack:
-    Set-Location '{{REPO}}'
-    New-Item -ItemType Directory -Force -Path dist | Out-Null
-    npx --yes @anthropic-ai/mcpb pack "{{REPO}}" "{{REPO}}/dist/database-operations-mcp-v1.4.1.mcpb"
-    Write-Host "Bundle: {{REPO}}/dist/database-operations-mcp-v1.4.1.mcpb"
+    pwsh -NoProfile -File "{{REPO}}/scripts/mcpb-pack.ps1" -RepoRoot "{{REPO}}"
+
+# ── Native / Tauri ─────────────────────────────────────────────────────────────
+
+# Build the PyInstaller backend .exe and copy to Tauri resources
+build-sidecar:
+    pwsh -NoProfile -File "{{REPO}}/native/build.ps1"
+
+# Build the Tauri NSIS desktop installer (full pipeline)
+build-native:
+    pwsh -NoProfile -File "{{REPO}}/native/build.ps1"
 

@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { callTool } from "@/common/api";
 import { FileDown, FileUp, Download, Upload } from "lucide-react";
 

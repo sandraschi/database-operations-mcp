@@ -1,0 +1,14 @@
+{
+    "product_name": "Database Operations MCP",
+    "install_dir": "%LOCALAPPDATA%\\Database Operations MCP",
+    "operator_exe": "database-operations-mcp-native.exe",
+    "backend_process_names": ["database-operations-mcp-native", "database-operations-mcp-backend"],
+    "backend_port": 10709,
+    "health_path": "/api/v1/health",
+    "diagnostics_path": "/api/v1/diagnostics",
+    "feature_smoke_path": "/api/v1/system/info",
+    "window_title_re": "Database Operations MCP",
+    "nsis_glob": "native/target/release/bundle/nsis/Database Operations MCP_*_x64-setup.exe",
+    "bridge_ok_text": "REST bridge reachable",
+    "uninstall_registry_filter": "*Database Operations MCP*"
+}
