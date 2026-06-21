@@ -78,4 +78,15 @@ build-sidecar:
 # Build the Tauri NSIS desktop installer (full pipeline)
 build-native:
     pwsh -NoProfile -File "{{REPO}}/native/build.ps1"
+# ── Playwright E2E ─────────────────────────────────────────────────────
+
+# Install Playwright browsers (one-time)
+e2e-install:
+    cd {{REPO}}\web_sota
+    npx playwright install chromium
+
+# Run Playwright E2E smoke tests (start backend first: just serve)
+e2e:
+    cd {{REPO}}\web_sota
+    npx playwright test
 
