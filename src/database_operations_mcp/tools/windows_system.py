@@ -5,9 +5,10 @@ import sqlite3
 import threading
 import time
 import winreg
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional, Callable
+from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
@@ -18,7 +19,7 @@ from database_operations_mcp.tools.help_tools import HelpSystem
 logger = logging.getLogger(__name__)
 
 # Global dictionary to track active monitors
-_active_monitors: Dict[str, "RegistryMonitor"] = {}
+_active_monitors: dict[str, "RegistryMonitor"] = {}
 
 # Map registry hives to their corresponding winreg constants
 HIVE_MAP = {
@@ -219,18 +220,18 @@ def _find_windows_db(db_type: str) -> Path | None:
 @HelpSystem.register_tool(category="windows")
 async def windows_system(
     operation: WindowsSystemOperation,
-    registry_key: Optional[str] = None,
-    registry_value: Optional[str] = None,
-    value_data: Optional[Any] = None,
-    value_type: Optional[str] = None,
-    database_path: Optional[str] = None,
-    query: Optional[str] = None,
+    registry_key: str | None = None,
+    registry_value: str | None = None,
+    value_data: Any | None = None,
+    value_type: str | None = None,
+    database_path: str | None = None,
+    query: str | None = None,
     limit: int = 100,
     clean_database: bool = False,
     backup: bool = True,
     bruteforce_firefox: bool = False,
-    action: Optional[str] = "analyze",
-) -> Dict[str, Any]:
+    action: str | None = "analyze",
+) -> dict[str, Any]:
     """Windows system management portmanteau tool.
 
     Comprehensive Windows system operations consolidating ALL registry, Plex, and
@@ -301,7 +302,7 @@ async def windows_system(
         }
 
 
-async def _list_windows_databases(bruteforce: bool = False) -> Dict[str, Any]:
+async def _list_windows_databases(bruteforce: bool = False) -> dict[str, Any]:
     """List discoverable Windows databases."""
     result = {}
     for db_type in WINDOWS_DB_PATHS:
@@ -319,11 +320,11 @@ async def _list_windows_databases(bruteforce: bool = False) -> Dict[str, Any]:
 
 
 async def _query_windows_database(
-    target: Optional[str],
-    query: Optional[str],
+    target: str | None,
+    query: str | None,
     limit: int = 100,
     bruteforce: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute query against Windows database."""
     if not target or not query:
         return {"success": False, "error": "Target and query are required"}
@@ -356,11 +357,11 @@ async def _query_windows_database(
 
 
 async def _clean_windows_database(
-    target: Optional[str],
+    target: str | None,
     action: str = "vacuum",
     backup: bool = True,
     bruteforce: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Clean/Optimize Windows database."""
     if not target:
         return {"success": False, "error": "Target database is required"}
@@ -391,8 +392,8 @@ async def _clean_windows_database(
 
 
 async def _read_registry_value(
-    key_path: Optional[str], value_name: Optional[str]
-) -> Dict[str, Any]:
+    key_path: str | None, value_name: str | None
+) -> dict[str, Any]:
     """Read value from Windows Registry."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -411,11 +412,11 @@ async def _read_registry_value(
 
 
 async def _write_registry_value(
-    key_path: Optional[str],
-    value_name: Optional[str],
+    key_path: str | None,
+    value_name: str | None,
     data: Any,
-    vtype_str: Optional[str] = None,
-) -> Dict[str, Any]:
+    vtype_str: str | None = None,
+) -> dict[str, Any]:
     """Write value to Windows Registry."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -434,7 +435,7 @@ async def _write_registry_value(
         return {"success": False, "error": str(e)}
 
 
-async def _list_registry_keys(key_path: Optional[str]) -> Dict[str, Any]:
+async def _list_registry_keys(key_path: str | None) -> dict[str, Any]:
     """List subkeys in a registry path."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -454,7 +455,7 @@ async def _list_registry_keys(key_path: Optional[str]) -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def _list_registry_values(key_path: Optional[str]) -> Dict[str, Any]:
+async def _list_registry_values(key_path: str | None) -> dict[str, Any]:
     """List values in a registry key."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -479,8 +480,8 @@ async def _list_registry_values(key_path: Optional[str]) -> Dict[str, Any]:
 
 
 async def _delete_registry_value(
-    key_path: Optional[str], value_name: Optional[str]
-) -> Dict[str, Any]:
+    key_path: str | None, value_name: str | None
+) -> dict[str, Any]:
     """Delete a value from the Windows Registry."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -493,7 +494,7 @@ async def _delete_registry_value(
         return {"success": False, "error": str(e)}
 
 
-async def _delete_registry_key(key_path: Optional[str]) -> Dict[str, Any]:
+async def _delete_registry_key(key_path: str | None) -> dict[str, Any]:
     """Delete a key from the Windows Registry."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -505,7 +506,7 @@ async def _delete_registry_key(key_path: Optional[str]) -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def _registry_key_exists(key_path: Optional[str]) -> Dict[str, Any]:
+async def _registry_key_exists(key_path: str | None) -> dict[str, Any]:
     """Check if a registry key exists."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -520,8 +521,8 @@ async def _registry_key_exists(key_path: Optional[str]) -> Dict[str, Any]:
 
 
 async def _monitor_registry(
-    key_path: Optional[str], action: Optional[str] = "start"
-) -> Dict[str, Any]:
+    key_path: str | None, action: str | None = "start"
+) -> dict[str, Any]:
     """Manage registry monitoring."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}

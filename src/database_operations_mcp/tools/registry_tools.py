@@ -22,6 +22,7 @@ from typing import Any, TypeVar
 
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
+
 from .help_tools import HelpSystem
 
 # Type variable for function type

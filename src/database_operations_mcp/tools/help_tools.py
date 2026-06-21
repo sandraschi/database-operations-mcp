@@ -6,7 +6,7 @@ Provides interactive help and documentation for all available tools.
 import inspect
 import re
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, ClassVar, TypeVar
 
 # Import the global MCP instance
 
@@ -17,8 +17,8 @@ F = TypeVar("F", bound=Callable[..., Any])
 class HelpSystem:
     """Centralized help system for MCP tools."""
 
-    _tools = {}
-    _categories = {
+    _tools: ClassVar[dict[str, dict[str, Any]]] = {}
+    _categories: ClassVar[dict[str, str]] = {
         "database": "Core database operations",
         "calibre": "Calibre library tools",
         "registry": "Windows Registry tools",
@@ -142,7 +142,7 @@ class HelpSystem:
 
 
 # DEPRECATED: Use help_system(operation='help') instead
-async def help(category: str | None = None) -> dict[str, Any]:
+async def help_(category: str | None = None) -> dict[str, Any]:
     """Get hierarchical help for all tools or specific category.
 
     Provides comprehensive help documentation for all available MCP tools,

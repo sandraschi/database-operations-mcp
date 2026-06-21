@@ -9,13 +9,13 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.operation_types import DbConnectionOperation
-from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.database_manager import (
     create_connector,
     db_manager,
     get_supported_databases,
 )
+from database_operations_mcp.operation_types import DbConnectionOperation
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -510,8 +510,8 @@ async def _list_supported_databases() -> dict[str, Any]:
         return {
             "success": False,
             "operation": "list_supported",
-            "message": f"Sorry, I encountered an error while listing supported databases. The error was: {str(e)}. Please try again or check the system logs.",
-            "error": f"Failed to list supported databases: {str(e)}",
+            "message": f"Sorry, I encountered an error while listing supported databases. The error was: {e!s}. Please try again or check the system logs.",
+            "error": f"Failed to list supported databases: {e!s}",
             "error_code": "LIST_DATABASES_FAILED",
             "databases_by_category": {},
             "total_supported": 0,
@@ -568,7 +568,7 @@ async def _register_database_connection(
         logger.error(f"Error registering database connection: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to register database connection: {str(e)}",
+            "error": f"Failed to register database connection: {e!s}",
             "connection_name": connection_name,
             "database_type": database_type,
         }
@@ -585,7 +585,7 @@ async def _list_database_connections() -> dict[str, Any]:
         logger.error(f"Error listing database connections: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to list database connections: {str(e)}",
+            "error": f"Failed to list database connections: {e!s}",
             "connections": {},
             "total_connections": 0,
         }
@@ -619,7 +619,7 @@ async def _test_database_connection(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error testing database connection: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to test database connection: {str(e)}",
+            "error": f"Failed to test database connection: {e!s}",
             "connection_name": connection_name,
         }
 
@@ -695,7 +695,7 @@ async def _test_all_database_connections(timeout: float | None, parallel: bool) 
         logger.error(f"Error testing all database connections: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to test all database connections: {str(e)}",
+            "error": f"Failed to test all database connections: {e!s}",
             "test_results": {},
             "summary": {
                 "total_connections": len(connection_names) if "connection_names" in locals() else 0,
@@ -788,7 +788,7 @@ async def _init_database(
         logger.error(f"Error initializing {db_type} database: {e}")
         return {
             "status": "error",
-            "message": f"Failed to initialize database: {str(e)}",
+            "message": f"Failed to initialize database: {e!s}",
             "success": False,
         }
 
@@ -822,7 +822,7 @@ async def _close_connection(connection_name: str | None) -> dict[str, Any]:
             if storage:
                 await storage.delete_connection(connection_name)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Failed to remove connection from persistent storage")
 
         return {
             "status": "success",
@@ -833,7 +833,7 @@ async def _close_connection(connection_name: str | None) -> dict[str, Any]:
         logger.error(f"Error closing connection: {e}")
         return {
             "status": "error",
-            "message": f"Error closing connection: {str(e)}",
+            "message": f"Error closing connection: {e!s}",
             "success": False,
         }
 
@@ -876,7 +876,7 @@ async def _get_connection_info(connection_name: str | None) -> dict[str, Any]:
         logger.error(f"Error getting connection info: {e}")
         return {
             "status": "error",
-            "message": f"Error getting connection info: {str(e)}",
+            "message": f"Error getting connection info: {e!s}",
             "connection_name": connection_name,
             "success": False,
         }
@@ -943,7 +943,7 @@ async def _restore_saved_connections(auto_reconnect: bool) -> dict[str, Any]:
         logger.error(f"Error restoring saved connections: {e}")
         return {
             "status": "error",
-            "message": f"Failed to restore: {str(e)}",
+            "message": f"Failed to restore: {e!s}",
             "saved_connections": {},
             "reconnected": [],
             "success": False,
@@ -976,7 +976,7 @@ async def _set_active_connection(connection_name: str | None) -> dict[str, Any]:
         logger.error(f"Error setting active connection: {e}")
         return {
             "status": "error",
-            "message": f"Failed to set active connection: {str(e)}",
+            "message": f"Failed to set active connection: {e!s}",
             "success": False,
         }
 
@@ -1001,7 +1001,7 @@ async def _get_active_connection() -> dict[str, Any]:
         logger.error(f"Error getting active connection: {e}")
         return {
             "status": "error",
-            "message": f"Failed to get active connection: {str(e)}",
+            "message": f"Failed to get active connection: {e!s}",
             "active_connection": None,
             "success": False,
         }
@@ -1027,7 +1027,7 @@ async def _get_user_preferences() -> dict[str, Any]:
         logger.error(f"Error getting preferences: {e}")
         return {
             "status": "error",
-            "message": f"Failed to get preferences: {str(e)}",
+            "message": f"Failed to get preferences: {e!s}",
             "preferences": {},
             "success": False,
         }
@@ -1055,6 +1055,6 @@ async def _set_user_preferences(preferences: dict[str, Any] | None) -> dict[str,
         logger.error(f"Error setting preferences: {e}")
         return {
             "status": "error",
-            "message": f"Failed to set preferences: {str(e)}",
+            "message": f"Failed to set preferences: {e!s}",
             "success": False,
         }

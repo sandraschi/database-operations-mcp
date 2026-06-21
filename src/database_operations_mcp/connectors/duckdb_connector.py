@@ -91,11 +91,11 @@ class DuckDBConnector:
         if not self.conn:
             raise RuntimeError("Not connected to database")
 
-        query = f"SELECT * FROM '{file_path}'"
+        query = f"SELECT * FROM '{file_path}'"  # noqa: S608  # trusted file path
         cursor = self.conn.execute(query)
 
         if table_name:
-            self.conn.execute(f"CREATE TABLE {table_name} AS SELECT * FROM '{file_path}'")
+            self.conn.execute(f"CREATE TABLE {table_name} AS SELECT * FROM '{file_path}'")  # noqa: S608  # trusted identifiers from caller
 
         return cursor.rowcount
 

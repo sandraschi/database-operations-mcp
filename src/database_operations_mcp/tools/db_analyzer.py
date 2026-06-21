@@ -1,8 +1,7 @@
-from typing import Any, Optional
+from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.operation_types import DbAnalyzerOperation
-from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.services.analysis import (
     ContentAnalyzer,
     ErrorDetector,
@@ -10,6 +9,7 @@ from database_operations_mcp.services.analysis import (
     ReportGenerator,
     StructureAnalyzer,
 )
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 # Initialize analyzers
@@ -29,7 +29,7 @@ async def db_analyzer(
     include_sample_data: bool = True,
     detect_errors: bool = True,
     suggest_fixes: bool = True,
-    table_name: Optional[str] = None,
+    table_name: str | None = None,
     limit: int = 10,
 ) -> dict[str, Any]:
     """Database analysis and diagnostics portmanteau tool.

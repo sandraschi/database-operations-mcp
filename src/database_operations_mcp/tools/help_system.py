@@ -317,7 +317,7 @@ async def _get_help(
         logger.error(f"Error getting help: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to get help: {str(e)}",
+            "error": f"Failed to get help: {e!s}",
             "topic": topic,
             "help_content": "",
         }
@@ -348,7 +348,7 @@ async def _get_tool_help(
         logger.error(f"Error getting tool help: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to get tool help: {str(e)}",
+            "error": f"Failed to get tool help: {e!s}",
             "tool_name": tool_name,
             "tool_help": {},
         }
@@ -380,7 +380,7 @@ async def _list_categories() -> dict[str, Any]:
         logger.error(f"Error listing categories: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to list categories: {str(e)}",
+            "error": f"Failed to list categories: {e!s}",
             "categories": [],
             "count": 0,
         }
@@ -413,7 +413,7 @@ async def _search_help(search_query: str | None, max_results: int) -> dict[str, 
         logger.error(f"Error searching help: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to search help: {str(e)}",
+            "error": f"Failed to search help: {e!s}",
             "search_query": search_query,
             "results": [],
             "count": 0,
@@ -445,7 +445,7 @@ async def _get_tool_examples(tool_name: str | None) -> dict[str, Any]:
         logger.error(f"Error getting tool examples: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to get tool examples: {str(e)}",
+            "error": f"Failed to get tool examples: {e!s}",
             "tool_name": tool_name,
             "examples": [],
             "count": 0,
@@ -484,7 +484,7 @@ async def _get_parameter_info(tool_name: str | None) -> dict[str, Any]:
         logger.error(f"Error getting parameter info: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to get parameter info: {str(e)}",
+            "error": f"Failed to get parameter info: {e!s}",
             "tool_name": tool_name,
             "parameters": [],
             "count": 0,
@@ -510,7 +510,7 @@ async def _format_help_output(topic: str | None, format_output: str) -> dict[str
         logger.error(f"Error formatting help output: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to format help output: {str(e)}",
+            "error": f"Failed to format help output: {e!s}",
             "topic": topic,
             "format_output": format_output,
             "formatted_content": "",

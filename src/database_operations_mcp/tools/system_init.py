@@ -292,7 +292,7 @@ async def _init_database(
         logger.error(f"Error initializing database: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to initialize database: {str(e)}",
+            "error": f"Failed to initialize database: {e!s}",
             "database_type": database_type,
             "initialization_result": {},
         }
@@ -321,7 +321,7 @@ async def _setup_system(
 
     except Exception as e:
         logger.error(f"Error setting up system: {e}", exc_info=True)
-        return {"success": False, "error": f"Failed to setup system: {str(e)}", "setup_result": {}}
+        return {"success": False, "error": f"Failed to setup system: {e!s}", "setup_result": {}}
 
 
 async def _verify_installation(verbose: bool) -> dict[str, Any]:
@@ -344,7 +344,7 @@ async def _verify_installation(verbose: bool) -> dict[str, Any]:
         logger.error(f"Error verifying installation: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to verify installation: {str(e)}",
+            "error": f"Failed to verify installation: {e!s}",
             "verification_result": {},
         }
 
@@ -369,7 +369,7 @@ async def _create_default_config() -> dict[str, Any]:
         logger.error(f"Error creating default config: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to create default config: {str(e)}",
+            "error": f"Failed to create default config: {e!s}",
             "config_files": [],
             "count": 0,
         }
@@ -393,7 +393,7 @@ async def _initialize_help_system() -> dict[str, Any]:
         logger.error(f"Error initializing help system: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to initialize help system: {str(e)}",
+            "error": f"Failed to initialize help system: {e!s}",
             "help_system_result": {},
         }
 
@@ -419,7 +419,7 @@ async def _run_system_checks(verbose: bool) -> dict[str, Any]:
         logger.error(f"Error running system checks: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to run system checks: {str(e)}",
+            "error": f"Failed to run system checks: {e!s}",
             "health_checks": {},
         }
 
@@ -441,4 +441,4 @@ async def _reset_system() -> dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error resetting system: {e}", exc_info=True)
-        return {"success": False, "error": f"Failed to reset system: {str(e)}", "reset_result": {}}
+        return {"success": False, "error": f"Failed to reset system: {e!s}", "reset_result": {}}

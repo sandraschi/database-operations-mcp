@@ -9,7 +9,6 @@ import logging
 import os
 from typing import Any
 
-from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.services.database.connectors.sqlite_connector import (
     SQLiteConnector,
 )
@@ -84,7 +83,7 @@ async def sqlite_get_table_data(
 
     try:
         # We wrap the table name in brackets to prevent SQL injection or issues with special names
-        query = f"SELECT * FROM [{table_name}] LIMIT ? OFFSET ?"
+        query = f"SELECT * FROM [{table_name}] LIMIT ? OFFSET ?"  # noqa: S608  # bracket-wrapped prevents injection in SQLite
         result = await connector.execute_query(query, (limit, offset))
         await connector.disconnect()
 

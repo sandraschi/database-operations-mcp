@@ -17,7 +17,7 @@ from typing import Any, TypeVar
 # NOTE: @mcp.tool decorators removed - functionality moved to db_operations portmanteau
 # Import kept for backwards compatibility in case code references these functions
 from database_operations_mcp.database_manager import QueryError
-from database_operations_mcp.tools import init_tools as DATABASE_CONNECTIONS
+from database_operations_mcp.tools import init_tools as init_connections
 
 # Type variable for generic type hints
 T = TypeVar("T")
@@ -53,14 +53,14 @@ async def execute_transaction(
         result = await execute_transaction(queries, 'sqlite')
         ```
     """
-    if connection_name not in DATABASE_CONNECTIONS:
+    if connection_name not in init_connections:
         return {
             "status": "error",
             "message": f"No such connection: {connection_name}",
             "error_type": "ConnectionError",
         }
 
-    connector = DATABASE_CONNECTIONS[connection_name].get("connector")
+    connector = init_connections[connection_name].get("connector")
     if not connector:
         return {
             "status": "error",
@@ -102,7 +102,7 @@ async def execute_transaction(
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Unexpected error: {str(e)}",
+            "message": f"Unexpected error: {e!s}",
             "completed_queries": len(results["results"]),
         }
 
@@ -123,10 +123,10 @@ async def execute_write(
     Returns:
         Dict containing the operation result and status
     """
-    if connection_name not in DATABASE_CONNECTIONS:
+    if connection_name not in init_connections:
         return {"status": "error", "message": f"No such connection: {connection_name}"}
 
-    connector = DATABASE_CONNECTIONS[connection_name].get("connector")
+    connector = init_connections[connection_name].get("connector")
     if not connector:
         return {
             "status": "error",
@@ -144,7 +144,7 @@ async def execute_write(
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Query execution failed: {str(e)}",
+            "message": f"Query execution failed: {e!s}",
             "error_type": type(e).__name__,
         }
 
@@ -167,10 +167,10 @@ async def batch_insert(
     if not data:
         return {"status": "error", "message": "No data provided"}
 
-    if connection_name not in DATABASE_CONNECTIONS:
+    if connection_name not in init_connections:
         return {"status": "error", "message": f"No such connection: {connection_name}"}
 
-    connector = DATABASE_CONNECTIONS[connection_name].get("connector")
+    connector = init_connections[connection_name].get("connector")
     if not connector:
         return {
             "status": "error",
@@ -185,7 +185,7 @@ async def batch_insert(
     # Prepare the base query
     columns_str = ", ".join(f'"{col}"' for col in columns)
     placeholders = ", ".join(["?"] * len(columns))
-    query = f'INSERT INTO "{table}" ({columns_str}) VALUES ({placeholders})'
+    query = f'INSERT INTO "{table}" ({columns_str}) VALUES ({placeholders})'  # noqa: S608  # trusted table/column names from schema
 
     total_rows = len(data)
     processed = 0
@@ -215,7 +215,7 @@ async def batch_insert(
         logger.exception("Error in batch insert")
         return {
             "status": "error",
-            "message": f"Batch insert failed: {str(e)}",
+            "message": f"Batch insert failed: {e!s}",
             "processed": processed,
             "error_type": type(e).__name__,
         }

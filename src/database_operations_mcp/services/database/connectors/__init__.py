@@ -5,23 +5,23 @@ Contains specific implementations for each supported database type.
 """
 
 from .chromadb_connector import ChromaDBConnector
-from .mongodb_connector import MongoDBConnector
-from .postgresql_connector import PostgreSQLConnector
-from .sqlite_connector import SQLiteConnector
-from .mysql_connector import MySQLConnector
-from .redis_connector import RedisConnector
 from .duckdb_connector import DuckDBConnector
 from .lancedb_connector import LanceDBConnector
+from .mongodb_connector import MongoDBConnector
+from .mysql_connector import MySQLConnector
+from .postgresql_connector import PostgreSQLConnector
+from .redis_connector import RedisConnector
+from .sqlite_connector import SQLiteConnector
 
 __all__ = [
-    "SQLiteConnector",
-    "PostgreSQLConnector",
     "ChromaDBConnector",
-    "MongoDBConnector",
-    "MySQLConnector",
-    "RedisConnector",
     "DuckDBConnector",
     "LanceDBConnector",
+    "MongoDBConnector",
+    "MySQLConnector",
+    "PostgreSQLConnector",
+    "RedisConnector",
+    "SQLiteConnector",
 ]
 
 # Connector availability mapping

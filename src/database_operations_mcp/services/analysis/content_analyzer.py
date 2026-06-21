@@ -55,11 +55,11 @@ class ContentAnalyzer:
         """
         async with aiosqlite.connect(db_path) as conn:
             # Get total row count
-            async with conn.execute(f'SELECT COUNT(*) FROM "{table_name}"') as cursor:
+            async with conn.execute(f'SELECT COUNT(*) FROM "{table_name}"') as cursor:  # noqa: S608  # trusted schema name
                 row_count = (await cursor.fetchone())[0]
 
             # Get sample rows
-            async with conn.execute(f'SELECT * FROM "{table_name}" LIMIT ?', (limit,)) as cursor:
+            async with conn.execute(f'SELECT * FROM "{table_name}" LIMIT ?', (limit,)) as cursor:  # noqa: S608  # trusted schema name
                 column_names = [desc[0] for desc in cursor.description]
                 rows = []
                 for row in await cursor.fetchall():
@@ -73,8 +73,8 @@ class ContentAnalyzer:
                     column_stats[col_name] = {
                         "null_count": sum(1 for row in rows if row[col_name] is None),
                         "non_null_count": len(values),
-                        "unique_values": len(set(str(v) for v in values)),
-                        "sample_values": list(set(str(v) for v in values[:5])),
+                        "unique_values": len({str(v) for v in values}),
+                        "sample_values": list({str(v) for v in values[:5]}),
                     }
 
             return {

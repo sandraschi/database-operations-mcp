@@ -20,7 +20,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-
 if TYPE_CHECKING:
     from fastmcp import FastMCP
 from .help_tools import HelpSystem
@@ -249,19 +248,19 @@ async def manage_plex_metadata(
                        (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 1) as movies,
                        (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 2) as shows,
                        (SELECT COUNT(*) FROM metadata_items WHERE metadata_type = 4) as seasons,
-                       (SELECT COUNT(*) FROM metadata_items 
+                       (SELECT COUNT(*) FROM metadata_items
                         WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_seasons,
-                       (SELECT COUNT(*) FROM metadata_items 
+                       (SELECT COUNT(*) FROM metadata_items
                         WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_seasons,
-                       (SELECT COUNT(*) FROM metadata_items 
-                        WHERE metadata_type = 4 AND parent_id NOT IN 
+                       (SELECT COUNT(*) FROM metadata_items
+                        WHERE metadata_type = 4 AND parent_id NOT IN
                         (SELECT id FROM metadata_items WHERE metadata_type = 2)) as invalid_seasons,
-                       (SELECT COUNT(*) FROM metadata_items 
+                       (SELECT COUNT(*) FROM metadata_items
                         WHERE metadata_type = 4 AND parent_id IS NULL) as orphaned_episodes,
-                       (SELECT COUNT(*) FROM metadata_items 
+                       (SELECT COUNT(*) FROM metadata_items
                         WHERE metadata_type = 4 AND parent_id IS NOT NULL) as valid_episodes,
-                       (SELECT COUNT(*) FROM metadata_items 
-                        WHERE metadata_type = 4 AND parent_id NOT IN 
+                       (SELECT COUNT(*) FROM metadata_items
+                        WHERE metadata_type = 4 AND parent_id NOT IN
                         (SELECT id FROM metadata_items WHERE metadata_type = 4)) as invalid_episodes
                 FROM metadata_items
             """)
@@ -269,8 +268,8 @@ async def manage_plex_metadata(
 
             # Add library section information
             cursor.execute("""
-                SELECT id, section_name, section_type, 
-                       (SELECT COUNT(*) FROM metadata_items 
+                SELECT id, section_name, section_type,
+                       (SELECT COUNT(*) FROM metadata_items
                         WHERE library_section_id = library_sections.id) as item_count
                 FROM library_sections
                 ORDER BY section_name
@@ -288,7 +287,7 @@ async def manage_plex_metadata(
             # Export metadata to a JSON file
             cursor = conn.cursor()
             query = """
-                SELECT mi.*, ls.section_name 
+                SELECT mi.*, ls.section_name
                 FROM metadata_items mi
                 LEFT JOIN library_sections ls ON mi.library_section_id = ls.id
             """
@@ -346,7 +345,7 @@ async def query_windows_database(
                 "status": "error",
                 "message": "Firefox is running - database is locked",
                 "firefox_status": firefox_status,
-                "solution": (  # noqa: E501
+                "solution": (
                     "Close Firefox completely and try again, or set bruteforce_firefox=True"
                 ),
             }
@@ -459,7 +458,7 @@ async def clean_windows_database(
             shutil.copy2(db_path, backup_path)
         except Exception as e:
             logger.exception(f"Failed to create backup of {db_type}")
-            return {"status": "error", "message": f"Backup failed: {str(e)}"}
+            return {"status": "error", "message": f"Backup failed: {e!s}"}
 
     try:
         conn = sqlite3.connect(db_path)

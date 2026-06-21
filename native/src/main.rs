@@ -30,10 +30,11 @@ fn main() {
         ])
         .setup(|app| {
             let handle = app.handle().clone();
-            if let Err(e) = spawn_backend(handle.clone(), app.state::<BackendProcess>().inner()) {
-                eprintln!("Backend error: {e}");
-                let _ = handle.emit("backend-status", format!("error: {e}"));
-            }
+            tauri::async_runtime::spawn(async move {
+                if let Err(e) = start_backend(handle.clone(), handle.state::<BackendProcess>()).await {
+                    let _ = handle.emit("backend-status", format!("error: {e}"));
+                }
+            });
             Ok(())
         })
         .build(tauri::generate_context!())

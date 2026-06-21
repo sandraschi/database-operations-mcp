@@ -136,7 +136,7 @@ class MySQLConnector(BaseDatabaseConnector):
                         )
         except Exception as e:
             logger.error(f"MySQL query error: {e}")
-            return QueryResult(success=False, data=[], message=f"Query failed: {str(e)}")
+            return QueryResult(success=False, data=[], message=f"Query failed: {e!s}")
 
     async def get_schema(self, **kwargs: Any) -> dict[str, Any]:
         """Get database schema."""
@@ -149,7 +149,7 @@ class MySQLConnector(BaseDatabaseConnector):
         if not res.success:
             return []
         # SHOW TABLES returns rows with one column, name depends on database
-        return [list(row.values())[0] for row in res.data]
+        return [next(iter(row.values())) for row in res.data]
 
     async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
         """Get schema for a specific table."""

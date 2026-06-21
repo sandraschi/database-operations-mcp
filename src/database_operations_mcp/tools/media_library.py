@@ -442,8 +442,8 @@ async def _search_calibre_library(
         if not library_path:
             raise ValueError("Library path is required")
 
-        import sqlite3
         import os
+        import sqlite3
 
         db_path = os.path.join(library_path, "metadata.db")
         if not os.path.exists(db_path):
@@ -454,11 +454,11 @@ async def _search_calibre_library(
         cursor = conn.cursor()
 
         query = """
-            SELECT 
-                b.id, 
-                b.title, 
+            SELECT
+                b.id,
+                b.title,
                 b.sort as title_sort,
-                b.timestamp, 
+                b.timestamp,
                 b.pubdate,
                 (SELECT GROUP_CONCAT(name, ' & ') FROM authors a JOIN books_authors_link bal ON a.id = bal.author WHERE bal.book = b.id) as authors,
                 s.name as series,
@@ -482,7 +482,7 @@ async def _search_calibre_library(
             query += " AND (b.title LIKE ? OR authors LIKE ?)"
             params.extend([f"%{search_query}%", f"%{search_query}%"])
 
-        count_query = f"SELECT COUNT(*) FROM ({query}) as q"
+        count_query = f"SELECT COUNT(*) FROM ({query}) as q"  # noqa: S608  # subquery built from trusted code
         cursor.execute(count_query, params)
         total_count = int(cursor.fetchone()[0])
 
@@ -528,7 +528,7 @@ async def _search_calibre_library(
         logger.error(f"Error searching Calibre library: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to search Calibre library: {str(e)}",
+            "error": f"Failed to search Calibre library: {e!s}",
             "error_type": "user_fixable",
             "recovery_options": [
                 "Verify library_path contains metadata.db.",
@@ -554,8 +554,8 @@ async def _get_calibre_book_metadata(
         if not book_title and not author:
             raise ValueError("Book title or author is required")
 
-        import sqlite3
         import os
+        import sqlite3
 
         db_path = os.path.join(library_path, "metadata.db")
         if not os.path.exists(db_path):
@@ -617,7 +617,7 @@ async def _get_calibre_book_metadata(
         logger.error(f"Error getting Calibre book metadata: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to get Calibre book metadata: {str(e)}",
+            "error": f"Failed to get Calibre book metadata: {e!s}",
             "library_path": library_path,
             "book_title": book_title,
             "metadata": {},
@@ -712,7 +712,7 @@ async def _search_calibre_fts_db(
                 meta_cursor = meta_conn.cursor()
 
                 # Get unique book IDs
-                book_ids = list(set(row[0] for row in fts_results))
+                book_ids = list({row[0] for row in fts_results})
                 if book_ids:
                     # Get book titles and authors
                     placeholders = ",".join("?" * len(book_ids))
@@ -721,7 +721,7 @@ async def _search_calibre_fts_db(
                         SELECT id, title, author_sort
                         FROM books
                         WHERE id IN ({placeholders})
-                    """,
+                    """,  # noqa: S608  # hardcoded table, parameterized IN clause
                         book_ids,
                     )
 
@@ -804,7 +804,7 @@ async def _search_calibre_fts_db(
         logger.error(f"Error searching Calibre FTS database: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to search Calibre FTS database: {str(e)}",
+            "error": f"Failed to search Calibre FTS database: {e!s}",
             "library_path": library_path,
             "search_query": search_query,
             "error_type": "retryable",
@@ -839,7 +839,7 @@ async def _find_plex_database(plex_server_url: str | None) -> dict[str, Any]:
         logger.error(f"Error finding Plex database: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to find Plex database: {str(e)}",
+            "error": f"Failed to find Plex database: {e!s}",
             "plex_server_url": plex_server_url,
             "database_path": None,
         }
@@ -850,8 +850,9 @@ async def _optimize_plex_database(
 ) -> dict[str, Any]:
     """Optimize Plex database performance."""
     try:
-        from database_operations_mcp.tools.plex_tools import PlexDatabase
         import time
+
+        from database_operations_mcp.tools.plex_tools import PlexDatabase
 
         if not optimize_database:
             return {
@@ -903,7 +904,7 @@ async def _optimize_plex_database(
         logger.error(f"Error optimizing Plex database: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to optimize Plex database: {str(e)}",
+            "error": f"Failed to optimize Plex database: {e!s}",
             "plex_server_url": plex_server_url,
         }
 
@@ -920,9 +921,8 @@ async def _manage_plex_metadata(
                 sections = plex.get_library_sections()
                 # Get basic counts for each section
                 section_summaries = []
-                total_items = 0
                 for section in sections:
-                    items = plex.get_media_items(section_id=section["id"], limit=1)
+                    plex.get_media_items(section_id=section["id"], limit=1)
                     # This is just a summary, we'd need a real count query for full stats
                     section_summaries.append(
                         {
@@ -963,7 +963,7 @@ async def _manage_plex_metadata(
         logger.error(f"Error managing Plex metadata: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to manage Plex metadata: {str(e)}",
+            "error": f"Failed to manage Plex metadata: {e!s}",
         }
 
 
@@ -972,9 +972,9 @@ async def _export_database_schema(
 ) -> dict[str, Any]:
     """Export database schema information."""
     try:
-        import sqlite3
-        import os
         import json
+        import os
+        import sqlite3
 
         # Determine which database to export (Calibre if library_path provided, else try Plex)
         db_path = None
@@ -1027,7 +1027,7 @@ async def _export_database_schema(
         logger.error(f"Error exporting database schema: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to export database schema: {str(e)}",
+            "error": f"Failed to export database schema: {e!s}",
             "library_path": library_path,
         }
 
@@ -1099,7 +1099,7 @@ async def _get_plex_library_stats(
         logger.error(f"Error getting Plex library stats: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to get Plex library stats: {str(e)}",
+            "error": f"Failed to get Plex library stats: {e!s}",
             "plex_server_url": plex_server_url,
             "library_name": library_name,
             "stats": {},

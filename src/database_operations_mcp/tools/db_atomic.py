@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.tools.help_tools import HelpSystem
 from database_operations_mcp.tools import db_connection as _db_connection
 from database_operations_mcp.tools import db_operations as _db_operations
+from database_operations_mcp.tools.help_tools import HelpSystem
 
 
 @mcp.tool()

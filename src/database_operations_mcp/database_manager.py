@@ -9,14 +9,14 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
-from typing import Any, Generic, TypeVar
+from enum import StrEnum
+from typing import Any, TypeVar
 
 # Type variable for the connection type
 T = TypeVar("T")
 
 
-class DatabaseType(str, Enum):
+class DatabaseType(StrEnum):
     """Supported database types."""
 
     SQLITE = "sqlite"
@@ -29,7 +29,7 @@ class DatabaseType(str, Enum):
     LANCEDB = "lancedb"
 
 
-class ConnectionStatus(str, Enum):
+class ConnectionStatus(StrEnum):
     """Connection status enumeration."""
 
     DISCONNECTED = "disconnected"
@@ -61,7 +61,7 @@ class DatabaseError(Exception):
     pass
 
 
-class ConnectionError(DatabaseError):
+class DatabaseConnectionError(DatabaseError):
     """Raised when a database connection fails."""
 
     pass
@@ -73,7 +73,7 @@ class QueryError(DatabaseError):
     pass
 
 
-class BaseDatabaseConnector(ABC, Generic[T]):
+class BaseDatabaseConnector[T](ABC):
     """
     Abstract base class for all database connectors.
 
@@ -287,14 +287,14 @@ db_manager = DatabaseManager()
 # Export commonly used classes and types
 __all__ = [
     "BaseDatabaseConnector",
-    "DatabaseType",
     "ConnectionStatus",
-    "QueryResult",
+    "DatabaseConnectionError",
     "DatabaseError",
-    "ConnectionError",
-    "QueryError",
     "DatabaseManager",
+    "DatabaseType",
+    "QueryError",
+    "QueryResult",
+    "create_connector",
     "db_manager",
     "get_supported_databases",
-    "create_connector",
 ]

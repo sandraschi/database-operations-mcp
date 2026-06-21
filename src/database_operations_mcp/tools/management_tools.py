@@ -53,7 +53,7 @@ async def database_health_check(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error performing health check for {connection_name}: {e}")
         return {
             "success": False,
-            "error": f"Health check failed: {str(e)}",
+            "error": f"Health check failed: {e!s}",
             "connection_name": connection_name,
             "timestamp": _get_timestamp(),
         }
@@ -87,7 +87,7 @@ async def get_database_metrics(
         logger.error(f"Error getting metrics for {connection_name}: {e}")
         return {
             "success": False,
-            "error": f"Failed to get metrics: {str(e)}",
+            "error": f"Failed to get metrics: {e!s}",
             "connection_name": connection_name,
             "timestamp": _get_timestamp(),
         }
@@ -123,7 +123,7 @@ async def vacuum_database(
         logger.error(f"Error running VACUUM on {connection_name}: {e}")
         return {
             "success": False,
-            "error": f"VACUUM failed: {str(e)}",
+            "error": f"VACUUM failed: {e!s}",
             "connection_name": connection_name,
             "timestamp": _get_timestamp(),
         }
@@ -153,7 +153,7 @@ async def disconnect_database(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error disconnecting from {connection_name}: {e}")
         return {
             "success": False,
-            "error": f"Failed to disconnect: {str(e)}",
+            "error": f"Failed to disconnect: {e!s}",
             "connection_name": connection_name,
             "timestamp": _get_timestamp(),
         }

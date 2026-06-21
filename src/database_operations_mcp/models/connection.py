@@ -1,7 +1,7 @@
 """Database connection models."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import Field, validator
@@ -9,7 +9,7 @@ from pydantic import Field, validator
 from .base import BaseDBModel
 
 
-class DatabaseType(str, Enum):
+class DatabaseType(StrEnum):
     """Supported database types."""
 
     SQLITE = "sqlite"
@@ -23,7 +23,7 @@ class DatabaseType(str, Enum):
     CASSANDRA = "cassandra"
 
 
-class ConnectionStatus(str, Enum):
+class ConnectionStatus(StrEnum):
     """Connection status."""
 
     DISCONNECTED = "disconnected"
@@ -50,7 +50,7 @@ class ConnectionConfig(BaseDBModel):
         use_enum_values = True
 
     @validator("port", always=True)
-    def set_default_port(cls, v, values):
+    def set_default_port(self, v, values):
         """Set default port based on database type."""
         if v is not None:
             return v

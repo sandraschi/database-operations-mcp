@@ -14,8 +14,8 @@ import psycopg2.extras
 
 from ....database_manager import (
     BaseDatabaseConnector,
-    ConnectionError,
     ConnectionStatus,
+    DatabaseConnectionError,
     DatabaseType,
     QueryError,
 )
@@ -115,7 +115,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"PostgreSQL connection test failed: {e}")
             return {
                 "success": False,
-                "error": f"Connection failed: {str(e)}",
+                "error": f"Connection failed: {e!s}",
                 "error_type": "connection",
                 "timestamp": datetime.now().isoformat(),
             }
@@ -185,11 +185,11 @@ class PostgreSQLConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to PostgreSQL database")
+                    raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             with self.connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT 
+                    SELECT
                         d.datname as database_name,
                         u.usename as owner,
                         pg_database_size(d.datname) as size_bytes,
@@ -231,11 +231,11 @@ class PostgreSQLConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to PostgreSQL database")
+                    raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             with self.connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT 
+                    SELECT
                         schemaname,
                         tablename,
                         tableowner,
@@ -243,7 +243,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                         hasrules,
                         hastriggers,
                         rowsecurity
-                    FROM pg_tables 
+                    FROM pg_tables
                     WHERE schemaname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
                     ORDER BY schemaname, tablename
                 """)
@@ -253,7 +253,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                     # Get row count
                     try:
                         cursor.execute(
-                            f'SELECT COUNT(*) FROM "{row["schemaname"]}"."{row["tablename"]}"'
+                            f'SELECT COUNT(*) FROM "{row["schemaname"]}"."{row["tablename"]}"'  # noqa: S608  # trusted catalog identifiers
                         )
                         row_count = cursor.fetchone()[0]
                     except Exception:
@@ -284,7 +284,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to PostgreSQL database")
+                    raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             # Parse schema and table name
             if "." in table_name:
@@ -296,7 +296,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                 # Get column information
                 cursor.execute(
                     """
-                    SELECT 
+                    SELECT
                         column_name,
                         data_type,
                         is_nullable,
@@ -340,7 +340,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                         ON kcu.constraint_name = tc.constraint_name
                         AND kcu.table_schema = tc.table_schema
                     WHERE tc.constraint_type = 'PRIMARY KEY'
-                        AND tc.table_schema = %s 
+                        AND tc.table_schema = %s
                         AND tc.table_name = %s
                     ORDER BY kcu.ordinal_position
                 """,
@@ -352,7 +352,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                 # Get foreign key information
                 cursor.execute(
                     """
-                    SELECT 
+                    SELECT
                         kcu.column_name,
                         ccu.table_schema AS foreign_table_schema,
                         ccu.table_name AS foreign_table_name,
@@ -363,7 +363,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                     JOIN information_schema.table_constraints tc
                         ON kcu.constraint_name = tc.constraint_name
                     WHERE tc.constraint_type = 'FOREIGN KEY'
-                        AND kcu.table_schema = %s 
+                        AND kcu.table_schema = %s
                         AND kcu.table_name = %s
                 """,
                     (schema_name, table_name),
@@ -383,7 +383,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                 # Get indexes
                 cursor.execute(
                     """
-                    SELECT 
+                    SELECT
                         indexname,
                         indexdef
                     FROM pg_indexes
@@ -397,7 +397,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                     indexes.append({"name": idx["indexname"], "definition": idx["indexdef"]})
 
                 # Get row count
-                cursor.execute(f'SELECT COUNT(*) FROM "{schema_name}"."{table_name}"')
+                cursor.execute(f'SELECT COUNT(*) FROM "{schema_name}"."{table_name}"')  # noqa: S608  # trusted schema identifiers from catalog
                 row_count = cursor.fetchone()[0]
 
                 return {
@@ -421,7 +421,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to PostgreSQL database")
+                    raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             with self.connection.cursor() as cursor:
                 # Execute query with parameters
@@ -470,7 +470,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to PostgreSQL database")
+                    raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             metrics = {}
 
@@ -483,16 +483,16 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
                 # Connection stats
                 cursor.execute("""
-                    SELECT 
+                    SELECT
                         max_conn,
                         used,
                         res_for_super,
                         max_conn - used - res_for_super as available
-                    FROM 
+                    FROM
                         (SELECT count(*) used FROM pg_stat_activity) q1,
-                        (SELECT setting::int res_for_super FROM pg_settings 
+                        (SELECT setting::int res_for_super FROM pg_settings
                          WHERE name = 'superuser_reserved_connections') q2,
-                        (SELECT setting::int max_conn FROM pg_settings 
+                        (SELECT setting::int max_conn FROM pg_settings
                          WHERE name = 'max_connections') q3
                 """)
 
@@ -506,8 +506,8 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
                 # Cache hit ratio
                 cursor.execute("""
-                    SELECT 
-                        sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read)) 
+                    SELECT
+                        sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read))
                         as cache_hit_ratio
                     FROM pg_statio_user_tables
                 """)
@@ -517,11 +517,11 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
                 # Transaction stats
                 cursor.execute("""
-                    SELECT 
+                    SELECT
                         xact_commit,
                         xact_rollback,
                         xact_commit + xact_rollback as total_transactions
-                    FROM pg_stat_database 
+                    FROM pg_stat_database
                     WHERE datname = current_database()
                 """)
 
@@ -584,7 +584,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                 except Exception as e:
                     query_test = {"success": False, "error": str(e)}
                     health_status = "unhealthy"
-                    issues.append(f"Query test failed: {str(e)}")
+                    issues.append(f"Query test failed: {e!s}")
 
             return {
                 "status": health_status,

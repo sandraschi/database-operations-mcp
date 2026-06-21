@@ -1,7 +1,8 @@
 import logging
-from typing import Any, List, Dict, Optional
+from typing import Any
 
 from fastmcp import Context
+
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.tools.help_tools import HelpSystem
@@ -14,12 +15,12 @@ logger = logging.getLogger(__name__)
 async def agentic_workflow_tool(
     goal: str,
     ctx: Context,
-    available_operations: Optional[List[str]] = None,
+    available_operations: list[str] | None = None,
     max_steps: int = 5,
-    target_database: Optional[str] = None,
+    target_database: str | None = None,
     context_depth: str = "comprehensive",
     safety_override: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """[SEP-1577] Autonomous database orchestration using FastMCP sampling.
 
     This tool allows the LLM to autonomously orchestrate complex database
@@ -42,27 +43,27 @@ async def agentic_workflow_tool(
     # This prompt instructs the "brain" to think step-by-step
     prompt = f"""
     You are an autonomous Database Agent operating within the Database Operations MCP substrate.
-    
+
     GOAL: {goal}
-    
+
     ENVIRONMENTAL CONTEXT:
     - Current Database: {target_database or "System Default / Auto-detect"}
     - Max Autonomous Steps: {max_steps}
     - Analysis Level: {context_depth}
     - Tool Capability: {available_operations or "Full Database Operations Suite"}
-    
+
     YOUR MISSION:
-    Analyze the goal and formulate a multi-step execution strategy. You are not just planning; 
+    Analyze the goal and formulate a multi-step execution strategy. You are not just planning;
     you are the intelligence behind the database substrate. Think through:
     1. Schema Discovery: Do we know the tables? (Use db_analyzer if not)
     2. Data Inspection: What's in the rows? (Use db_operations)
     3. Optimization/Action: What needs to change?
     4. Validation: How do we verify success?
-    
+
     THOUGHT PROCESS:
-    Explain your reasoning clearly. If the task is complex, suggest a 'dialogic' approach 
+    Explain your reasoning clearly. If the task is complex, suggest a 'dialogic' approach
     where you perform a step and then ask for validation or further instructions.
-    
+
     RESPONSE FORMAT:
     1. SUMMARY: A brief human-readable summary of your plan.
     2. STEPS: A detailed list of operations you will perform.
@@ -121,7 +122,7 @@ async def agentic_workflow_tool(
 
 @mcp.tool()
 @HelpSystem.register_tool(category="security")
-async def safety_guard_status(action: str = "status") -> Dict[str, Any]:
+async def safety_guard_status(action: str = "status") -> dict[str, Any]:
     """Check or update the status of the Agentic Safety Guard.
 
     Args:

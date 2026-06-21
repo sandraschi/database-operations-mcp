@@ -16,7 +16,7 @@ from .main import DatabaseOperationsMCP, main
 
 # Define __all__ to specify public API
 __all__ = [
-    "main",
     "DatabaseManager",
     "DatabaseOperationsMCP",
+    "main",
 ]

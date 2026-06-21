@@ -1,7 +1,7 @@
 """Query and result models for database operations."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import Field
@@ -9,7 +9,7 @@ from pydantic import Field
 from .base import BaseDBModel
 
 
-class QueryType(str, Enum):
+class QueryType(StrEnum):
     """Types of database queries."""
 
     SELECT = "select"
@@ -24,7 +24,7 @@ class QueryType(str, Enum):
     TRANSACTION = "transaction"
 
 
-class QueryStatus(str, Enum):
+class QueryStatus(StrEnum):
     """Query execution status."""
 
     PENDING = "pending"

@@ -8,8 +8,8 @@ consistent registration and configuration.
 
 import logging
 import os
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncContextManager
 
 from fastmcp import FastMCP
 from fastmcp.server import create_proxy
@@ -21,7 +21,7 @@ _storage_instance = None
 
 
 @asynccontextmanager
-async def server_lifespan(mcp_instance: FastMCP) -> AsyncContextManager[None]:
+async def server_lifespan(mcp_instance: FastMCP) -> AsyncIterator[None]:
     """
     FastMCP 2.13+ server lifespan for initialization and cleanup.
 
@@ -96,7 +96,7 @@ if bridge_urls:
                 mcp.add_provider(create_proxy(url))
                 _bridge_proxies.append(url)
             except Exception:
-                pass
+                logger.warning("Failed to create proxy for %s", url)
 
 # Expose bundled skills as MCP resources (skill://database-expert/SKILL.md)
 try:
@@ -125,7 +125,7 @@ def is_portmanteau_import():
     frame = inspect.currentframe()
     try:
         # Go up the call stack to find the importing module
-        for i in range(10):  # Check up to 10 frames up
+        for _i in range(10):  # Check up to 10 frames up
             frame = frame.f_back
             if frame is None:
                 break

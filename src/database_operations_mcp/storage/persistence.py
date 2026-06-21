@@ -19,7 +19,7 @@ import os
 import platform
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastmcp import FastMCP
 
@@ -143,7 +143,7 @@ class DatabaseOperationsStorage:
     # ==================== DATABASE CONNECTIONS ====================
 
     async def save_connection(
-        self, connection_name: str, db_type: str, connection_params: Dict[str, Any]
+        self, connection_name: str, db_type: str, connection_params: dict[str, Any]
     ) -> None:
         """
         Save database connection configuration.
@@ -181,9 +181,9 @@ class DatabaseOperationsStorage:
 
             await self._storage.set(CONNECTIONS_KEY, connections)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
-    async def get_all_connections(self) -> Dict[str, Dict[str, Any]]:
+    async def get_all_connections(self) -> dict[str, dict[str, Any]]:
         """Get all saved database connection configurations."""
         await self.initialize()
         if not self._storage:
@@ -211,7 +211,7 @@ class DatabaseOperationsStorage:
                 del connections[connection_name]
                 await self._storage.set(CONNECTIONS_KEY, connections)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
     async def set_active_connection(self, connection_name: str) -> None:
         """Set the active/default database connection."""
@@ -222,9 +222,9 @@ class DatabaseOperationsStorage:
         try:
             await self._storage.set(ACTIVE_CONNECTION_KEY, connection_name)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
-    async def get_active_connection(self) -> Optional[str]:
+    async def get_active_connection(self) -> str | None:
         """Get the active/default database connection name."""
         await self.initialize()
         if not self._storage:
@@ -238,7 +238,7 @@ class DatabaseOperationsStorage:
 
     # ==================== USER PREFERENCES ====================
 
-    async def get_user_preferences(self) -> Dict[str, Any]:
+    async def get_user_preferences(self) -> dict[str, Any]:
         """Get user preferences from persistent storage."""
         await self.initialize()
         if not self._storage:
@@ -254,7 +254,7 @@ class DatabaseOperationsStorage:
         except Exception:
             return {}
 
-    async def set_user_preferences(self, prefs: Dict[str, Any]) -> None:
+    async def set_user_preferences(self, prefs: dict[str, Any]) -> None:
         """Store user preferences persistently."""
         await self.initialize()
         if not self._storage:
@@ -266,7 +266,7 @@ class DatabaseOperationsStorage:
             existing.update(prefs)
             await self._storage.set(USER_PREFS_KEY, existing)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
     async def get_preference(self, key: str, default: Any = None) -> Any:
         """Get a specific user preference."""
@@ -282,7 +282,7 @@ class DatabaseOperationsStorage:
     # ==================== SEARCH HISTORY ====================
 
     async def add_search_to_history(
-        self, query: str, filters: Optional[Dict[str, Any]] = None, max_history: int = 50
+        self, query: str, filters: dict[str, Any] | None = None, max_history: int = 50
     ) -> None:
         """Add a search query to history."""
         await self.initialize()
@@ -300,9 +300,9 @@ class DatabaseOperationsStorage:
             history = history[:max_history]
             await self._storage.set(SEARCH_HISTORY_KEY, history)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
-    async def get_search_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+    async def get_search_history(self, limit: int = 20) -> list[dict[str, Any]]:
         """Get recent search history."""
         await self.initialize()
         if not self._storage:
@@ -328,11 +328,11 @@ class DatabaseOperationsStorage:
         try:
             await self._storage.set(SEARCH_HISTORY_KEY, [])
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
     # ==================== BOOKMARK SYNC STATE ====================
 
-    async def get_bookmark_sync_state(self) -> Dict[str, Any]:
+    async def get_bookmark_sync_state(self) -> dict[str, Any]:
         """Get bookmark sync state (last sync times, preferences)."""
         await self.initialize()
         if not self._storage:
@@ -348,7 +348,7 @@ class DatabaseOperationsStorage:
         except Exception:
             return {}
 
-    async def set_bookmark_sync_state(self, state: Dict[str, Any]) -> None:
+    async def set_bookmark_sync_state(self, state: dict[str, Any]) -> None:
         """Store bookmark sync state."""
         await self.initialize()
         if not self._storage:
@@ -357,7 +357,7 @@ class DatabaseOperationsStorage:
         try:
             await self._storage.set(BOOKMARK_SYNC_STATE_KEY, state)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
     async def update_sync_time(self, source_browser: str, target_browser: str) -> None:
         """Update last sync time for a browser pair."""
@@ -381,9 +381,9 @@ class DatabaseOperationsStorage:
             paths[app_name] = {"path": db_path, "last_used": time.time()}
             await self._storage.set(WINDOWS_DB_PATHS_KEY, paths)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
-    async def get_windows_db_paths(self) -> Dict[str, Dict[str, Any]]:
+    async def get_windows_db_paths(self) -> dict[str, dict[str, Any]]:
         """Get all remembered Windows app database paths."""
         await self.initialize()
         if not self._storage:
@@ -418,9 +418,9 @@ class DatabaseOperationsStorage:
             }
             await self._storage.set(QUERY_TEMPLATES_KEY, templates)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
-    async def get_query_templates(self) -> Dict[str, Dict[str, Any]]:
+    async def get_query_templates(self) -> dict[str, dict[str, Any]]:
         """Get all saved query templates."""
         await self.initialize()
         if not self._storage:
@@ -448,7 +448,7 @@ class DatabaseOperationsStorage:
                 del templates[template_name]
                 await self._storage.set(QUERY_TEMPLATES_KEY, templates)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
     # ==================== BACKUP LOCATIONS ====================
 
@@ -466,9 +466,9 @@ class DatabaseOperationsStorage:
             }
             await self._storage.set(BACKUP_LOCATIONS_KEY, locations)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
-    async def get_backup_locations(self) -> Dict[str, Dict[str, Any]]:
+    async def get_backup_locations(self) -> dict[str, dict[str, Any]]:
         """Get all recent backup locations."""
         await self.initialize()
         if not self._storage:
@@ -487,7 +487,7 @@ class DatabaseOperationsStorage:
     # ==================== SCHEMA CACHE ====================
 
     async def cache_schema(
-        self, connection_name: str, db_name: str, schema: Dict[str, Any], ttl: int = 3600
+        self, connection_name: str, db_name: str, schema: dict[str, Any], ttl: int = 3600
     ) -> None:
         """Cache database schema with TTL (default 1 hour)."""
         await self.initialize()
@@ -498,11 +498,11 @@ class DatabaseOperationsStorage:
             cache_key = f"{SCHEMA_CACHE_PREFIX}{connection_name}:{db_name}"
             await self._storage.set(cache_key, schema, ttl=ttl)
         except Exception:
-            pass  # Graceful degradation
+            logger.warning("Graceful degradation in persistence storage")
 
     async def get_cached_schema(
         self, connection_name: str, db_name: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Get cached schema if available and not expired."""
         await self.initialize()
         if not self._storage:
@@ -521,10 +521,10 @@ class DatabaseOperationsStorage:
 
 
 # Global storage instance (initialized in server startup)
-_storage_instance: Optional[DatabaseOperationsStorage] = None
+_storage_instance: DatabaseOperationsStorage | None = None
 
 
-def get_storage() -> Optional[DatabaseOperationsStorage]:
+def get_storage() -> DatabaseOperationsStorage | None:
     """Get the singleton storage instance."""
     return _storage_instance
 

@@ -103,7 +103,7 @@ async def list_supported_databases() -> dict[str, Any]:
         logger.error(f"Error listing supported databases: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to list supported databases: {str(e)}",
+            "error": f"Failed to list supported databases: {e!s}",
             "databases_by_category": {},
             "total_supported": 0,
             "categories": [],
@@ -207,7 +207,7 @@ def register_database_connection(
         logger.error(f"Validation error in register_database_connection: {e}")
         return {
             "success": False,
-            "error": f"Invalid parameters: {str(e)}",
+            "error": f"Invalid parameters: {e!s}",
             "connection_name": connection_name,
             "database_type": database_type,
         }
@@ -215,7 +215,7 @@ def register_database_connection(
         logger.error(f"Error registering connection {connection_name}: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to register connection: {str(e)}",
+            "error": f"Failed to register connection: {e!s}",
             "connection_name": connection_name,
             "database_type": database_type,
         }
@@ -265,7 +265,7 @@ def list_database_connections() -> dict[str, Any]:
         logger.error(f"Error listing database connections: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to list connections: {str(e)}",
+            "error": f"Failed to list connections: {e!s}",
             "connections": {},
             "total_connections": 0,
         }
@@ -384,7 +384,7 @@ def test_database_connection(connection_name: str) -> dict[str, Any]:
         return {
             "success": False,
             "connection_name": connection_name,
-            "error": f"Failed to test connection: {str(e)}",
+            "error": f"Failed to test connection: {e!s}",
             "test_result": {"success": False, "error": str(e)},
             "connection_info": connection_info,
         }
@@ -585,7 +585,7 @@ def test_all_database_connections(
         logger.error(f"Error testing all connections: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to test connections: {str(e)}",
+            "error": f"Failed to test connections: {e!s}",
             "test_results": test_results if "test_results" in locals() else {},
             "summary": {
                 "total_connections": len(connection_names) if "connection_names" in locals() else 0,

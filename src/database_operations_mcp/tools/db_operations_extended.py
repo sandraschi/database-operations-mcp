@@ -9,9 +9,9 @@ import logging
 from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.database_manager import create_connector
 from database_operations_mcp.operation_types import DbOperationsExtendedOperation
 from database_operations_mcp.tool_responses import unknown_operation_response
-from database_operations_mcp.database_manager import create_connector
 
 logger = logging.getLogger(__name__)
 
@@ -211,7 +211,7 @@ async def db_operations_extended(
             "success": False,
             "database_type": database_type,
             "operation": operation,
-            "message": f"Unexpected error: {str(e)}",
+            "message": f"Unexpected error: {e!s}",
             "error_type": "fatal",
             "retryable": False,
             "recovery_options": [

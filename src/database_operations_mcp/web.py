@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Query
@@ -19,6 +20,8 @@ from database_operations_mcp.activity_log import (
     log_stats,
     query_logs,
 )
+
+logger = logging.getLogger(__name__)
 
 PORTMANTEAU_TOOLS = {
     "db_connection",
@@ -93,18 +96,18 @@ async def _build_capabilities(mcp_app) -> dict[str, Any]:
         prompts = await mcp_app.list_prompts()
         prompt_names = [p.name for p in prompts]
     except Exception:
-        pass
+        logger.warning("Failed to list prompts")
     try:
         resources = await mcp_app.list_resources()
         resource_uris = [str(r.uri) for r in resources]
     except Exception:
-        pass
+        logger.warning("Failed to list resources")
     try:
         if hasattr(mcp_app, "list_skills"):
             skills = await mcp_app.list_skills()
             skill_uris = [str(s.uri) for s in skills]
     except Exception:
-        pass
+        logger.warning("Failed to list skills")
 
     sampling_tools = [n for n in tool_names if "agentic" in n.lower() or "assist" in n.lower()]
     agentic = [n for n in tool_names if n in AGENTIC_TOOLS or "agentic" in n.lower()]
@@ -227,16 +230,16 @@ def setup_webapp(app, mcp_app=None) -> None:
 
     @router.get("/logs/export")
     async def logs_export(
-        format: str = Query("json"),
+        fmt: str = Query("json", alias="format"),
         level: str | None = Query(None),
         kind: str | None = Query(None),
         search: str | None = Query(None),
         sort: str = Query("desc"),
     ):
         order: SortOrder = "asc" if sort == "asc" else "desc"
-        export_format = format if format in ("json", "csv") else "json"
+        export_format = fmt if fmt in ("json", "csv") else "json"
         body, media_type, filename = export_logs(
-            format=export_format,
+            fmt=export_format,
             level=level,
             kind=kind,
             search=search,

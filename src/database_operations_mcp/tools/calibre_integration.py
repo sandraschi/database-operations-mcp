@@ -51,11 +51,11 @@ async def calibre_list_books(limit: int = 50, offset: int = 0) -> dict[str, Any]
         return {"success": False, "error": f"Calibre database not found at {ASSET_DB_PATH}"}
 
     query = """
-        SELECT 
-            b.id, 
-            b.title, 
+        SELECT
+            b.id,
+            b.title,
             b.sort as title_sort,
-            b.timestamp, 
+            b.timestamp,
             b.pubdate,
             (SELECT GROUP_CONCAT(name, ' & ') FROM authors a JOIN books_authors_link bal ON a.id = bal.author WHERE bal.book = b.id) as authors,
             s.name as series,

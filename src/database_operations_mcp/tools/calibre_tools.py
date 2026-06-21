@@ -59,7 +59,7 @@ async def search_calibre_library(
         logger.error(f"Error searching Calibre library: {e}", exc_info=True)
         return {
             "status": "error",
-            "message": f"Failed to search Calibre library: {str(e)}",
+            "message": f"Failed to search Calibre library: {e!s}",
             "error_type": type(e).__name__,
         }
 
@@ -87,7 +87,7 @@ async def get_calibre_book_metadata(book_id: int, library_path: str) -> dict[str
         logger.error(f"Error getting book metadata: {e}", exc_info=True)
         return {
             "status": "error",
-            "message": f"Failed to get book metadata: {str(e)}",
+            "message": f"Failed to get book metadata: {e!s}",
             "error_type": type(e).__name__,
         }
 
@@ -122,7 +122,7 @@ async def search_calibre_fts(
         logger.error(f"Error in Calibre FTS: {e}", exc_info=True)
         return {
             "status": "error",
-            "message": f"Full-text search failed: {str(e)}",
+            "message": f"Full-text search failed: {e!s}",
             "error_type": type(e).__name__,
         }
 

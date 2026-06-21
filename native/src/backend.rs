@@ -13,7 +13,7 @@ pub struct BackendProcess(pub Mutex<Option<Child>>);
 
 // -- PER-REPO: Customize these constants --
 const BACKEND_NAME: &str = "database-operations-mcp-backend.exe";
-const BACKEND_PORT: u16 = 10709;
+const BACKEND_PORT: u16 = 10708;
 const BACKEND_TAG: &str = "database-operations-mcp-backend-x86_64-pc-windows-msvc.exe";
 const ENV_PORT: &str = "MCP_PORT";
 const ENV_HOST: &str = "MCP_HOST";
@@ -128,7 +128,7 @@ pub fn spawn_backend(app: AppHandle, state: &BackendProcess) -> Result<String, S
 
     log_line(
         &app,
-        &format!("spawning {} (cwd {}) on port 10709",
+        &format!("spawning {} (cwd {}) on port 10708",
             backend_path.display(), workdir.display()),
     );
 
@@ -165,7 +165,7 @@ pub fn spawn_backend(app: AppHandle, state: &BackendProcess) -> Result<String, S
         thread::spawn(move || watch_backend_stream(err, app_handle));
     }
 
-    Ok(format!("Backend starting on port 10709"))
+    Ok(format!("Backend starting on port 10708"))
 }
 
 fn watch_backend_stream<R: std::io::Read + Send + 'static>(stream: R, app: AppHandle) {

@@ -133,7 +133,7 @@ def log_stats() -> dict[str, Any]:
     with _lock:
         rows = list(_entries)
 
-    by_level: dict[str, int] = {key: 0 for key in _LEVEL_RANK}
+    by_level: dict[str, int] = dict.fromkeys(_LEVEL_RANK, 0)
     by_kind: dict[str, int] = {}
     for row in rows:
         lvl = str(row.get("level", "INFO"))
@@ -154,7 +154,7 @@ def log_stats() -> dict[str, Any]:
 
 def export_logs(
     *,
-    format: str = "json",
+    fmt: str = "json",
     level: str | None = None,
     kind: str | None = None,
     search: str | None = None,

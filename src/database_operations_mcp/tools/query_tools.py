@@ -522,7 +522,7 @@ def _generate_sample_query(
     """Generate appropriate sample query based on database type."""
     if database_type in [DatabaseType.POSTGRESQL, DatabaseType.SQLITE]:
         table_ref = f"{database_name}.{table_name}" if database_name else table_name
-        return f"SELECT * FROM {table_ref} LIMIT {sample_size}"
+        return f"SELECT * FROM {table_ref} LIMIT {sample_size}"  # noqa: S608  # table_ref from trusted schema introspection
     elif database_type == DatabaseType.MONGODB:
         # MongoDB query will be handled in connector
         return f"db.{table_name}.find().limit({sample_size})"

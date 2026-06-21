@@ -7,12 +7,12 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.database_manager import DatabaseType, db_manager
 from database_operations_mcp.operation_types import DbOperationsOperation
 from database_operations_mcp.tool_responses import (
     connection_not_found,
     unknown_operation_response,
 )
-from database_operations_mcp.database_manager import DatabaseType, db_manager
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -437,7 +437,7 @@ async def _execute_transaction(
         logger.error(f"Error executing transaction: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to execute transaction: {str(e)}",
+            "error": f"Failed to execute transaction: {e!s}",
             "connection_name": connection_name,
         }
 
@@ -470,7 +470,7 @@ async def _execute_write(
         logger.error(f"Error executing write operation: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to execute write operation: {str(e)}",
+            "error": f"Failed to execute write operation: {e!s}",
             "connection_name": connection_name,
         }
 
@@ -506,7 +506,7 @@ async def _batch_insert(
         logger.error(f"Error executing batch insert: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to execute batch insert: {str(e)}",
+            "error": f"Failed to execute batch insert: {e!s}",
             "connection_name": connection_name,
             "table_name": table_name,
         }
@@ -692,7 +692,7 @@ def _generate_sample_query(
         else:
             columns = "*"
 
-        return f"SELECT {columns} FROM {table_ref} LIMIT {sample_size}"
+        return f"SELECT {columns} FROM {table_ref} LIMIT {sample_size}"  # noqa: S608  # trusted table/column names from schema
     elif database_type == DatabaseType.MONGODB:
         # MongoDB query will be handled in connector
         return f"db.{table_name}.find().limit({sample_size})"

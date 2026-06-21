@@ -16,8 +16,8 @@ except ImportError:
 
 from ....database_manager import (
     BaseDatabaseConnector,
-    ConnectionError,
     ConnectionStatus,
+    DatabaseConnectionError,
     DatabaseType,
     QueryError,
 )
@@ -134,7 +134,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to ChromaDB")
+                    raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             return [
                 {
@@ -156,7 +156,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to ChromaDB")
+                    raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             collections = self.client.list_collections()
             tables = []
@@ -187,7 +187,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to ChromaDB")
+                    raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             try:
                 collection = self.client.get_collection(table_name)
@@ -232,7 +232,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             if sample.get("embeddings") and len(sample["embeddings"]) > 0:
                 return len(sample["embeddings"][0])
         except Exception:
-            pass
+            logger.warning("Failed to get embedding dimension")
         return None
 
     def execute_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
@@ -240,7 +240,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to ChromaDB")
+                    raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             # Parse query type - simplified implementation
             query_lower = query.strip().lower()
@@ -368,7 +368,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to ChromaDB")
+                    raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             collections = self.client.list_collections()
             total_documents = 0
@@ -426,7 +426,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
                 except Exception as e:
                     operation_test = {"success": False, "error": str(e)}
                     health_status = "unhealthy"
-                    issues.append(f"Operation test failed: {str(e)}")
+                    issues.append(f"Operation test failed: {e!s}")
 
             return {
                 "status": health_status,

@@ -13,8 +13,8 @@ from typing import Any
 
 from ....database_manager import (
     BaseDatabaseConnector,
-    ConnectionError,
     ConnectionStatus,
+    DatabaseConnectionError,
     DatabaseType,
     QueryError,
     QueryResult,
@@ -87,7 +87,7 @@ class SQLiteConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not await self.connect():
-                    raise ConnectionError("Failed to connect to SQLite database")
+                    raise DatabaseConnectionError("Failed to connect to SQLite database")
 
             cursor = self.connection.cursor()
             start_time = datetime.now()
@@ -133,7 +133,7 @@ class SQLiteConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not await self.connect():
-                    raise ConnectionError("Failed to connect to SQLite database")
+                    raise DatabaseConnectionError("Failed to connect to SQLite database")
 
             tables = await self.get_tables()
             return {
@@ -150,13 +150,13 @@ class SQLiteConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not await self.connect():
-                    raise ConnectionError("Failed to connect to SQLite database")
+                    raise DatabaseConnectionError("Failed to connect to SQLite database")
 
             cursor = self.connection.cursor()
             cursor.execute("""
-                SELECT name 
-                FROM sqlite_master 
-                WHERE type='table' 
+                SELECT name
+                FROM sqlite_master
+                WHERE type='table'
                 AND name NOT LIKE 'sqlite_%'
                 ORDER BY name
             """)
@@ -175,7 +175,7 @@ class SQLiteConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not await self.connect():
-                    raise ConnectionError("Failed to connect to SQLite database")
+                    raise DatabaseConnectionError("Failed to connect to SQLite database")
 
             cursor = self.connection.cursor()
             cursor.execute(f"PRAGMA table_info([{table_name}])")
@@ -198,7 +198,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                     }
                 )
 
-            cursor.execute(f"SELECT COUNT(*) FROM [{table_name}]")
+            cursor.execute(f"SELECT COUNT(*) FROM [{table_name}]")  # noqa: S608  # trusted schema name from PRAGMA
             row_count = cursor.fetchone()[0]
 
             return {
@@ -247,17 +247,17 @@ class SQLiteConnector(BaseDatabaseConnector):
         try:
             if not self.connection:
                 if not await self.connect():
-                    raise ConnectionError("Failed to connect to SQLite database")
+                    raise DatabaseConnectionError("Failed to connect to SQLite database")
 
             cursor = self.connection.cursor()
             cursor.execute("""
-                SELECT 
+                SELECT
                     name as table_name,
                     'table' as table_type,
                     'main' as schema_name,
                     'sqlite' as owner
-                FROM sqlite_master 
-                WHERE type='table' 
+                FROM sqlite_master
+                WHERE type='table'
                 AND name NOT LIKE 'sqlite_%'
                 ORDER BY name
             """)
@@ -266,7 +266,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             for row in cursor.fetchall():
                 # Get row count for each table
                 try:
-                    cursor.execute(f"SELECT COUNT(*) FROM [{row[0]}]")
+                    cursor.execute(f"SELECT COUNT(*) FROM [{row[0]}]")  # noqa: S608  # trusted table name from sqlite_master
                     row_count = cursor.fetchone()[0]
                 except Exception:
                     row_count = 0
@@ -318,7 +318,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                     cursor.fetchone()
                 except Exception as e:
                     health_status = "unhealthy"
-                    issues.append(f"Query test failed: {str(e)}")
+                    issues.append(f"Query test failed: {e!s}")
 
             return {
                 "status": health_status,

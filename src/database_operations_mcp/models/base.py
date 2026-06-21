@@ -2,7 +2,7 @@
 
 import builtins
 from datetime import datetime
-from typing import Any, TypeVar
+from typing import Any, ClassVar, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -21,7 +21,7 @@ class BaseDBModel(BaseModel):
 
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
-        json_encoders = {datetime: lambda v: v.isoformat()}
+        json_encoders: ClassVar[dict] = {datetime: lambda v: v.isoformat()}
 
     def update(self, **kwargs) -> None:
         """Update model fields."""

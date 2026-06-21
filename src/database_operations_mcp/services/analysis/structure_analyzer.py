@@ -6,11 +6,14 @@ information including tables, columns, indexes, foreign keys, views, and trigger
 Supports multiple database types including SQLite, PostgreSQL, MySQL, MongoDB.
 """
 
+import logging
 import sqlite3
 from pathlib import Path
 from typing import Any
 
 import aiosqlite
+
+logger = logging.getLogger(__name__)
 
 
 class StructureAnalyzer:
@@ -63,7 +66,7 @@ class StructureAnalyzer:
                 with sqlite3.connect(db_path):
                     return "sqlite"
             except Exception:
-                pass
+                logger.debug("Not a SQLite database: %s", db_path)
 
             raise ValueError(f"Unknown database type for file: {file_path}")
 
@@ -218,7 +221,7 @@ class StructureAnalyzer:
                 )
 
         # Get row count
-        async with conn.execute(f'SELECT COUNT(*) FROM "{table_name}"') as cursor:
+        async with conn.execute(f'SELECT COUNT(*) FROM "{table_name}"') as cursor:  # noqa: S608  # trusted schema name
             row_count = (await cursor.fetchone())[0]
 
         # Estimate table size

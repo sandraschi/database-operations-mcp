@@ -24,8 +24,8 @@ except ImportError:
 
 from ....database_manager import (
     BaseDatabaseConnector,
-    ConnectionError,
     ConnectionStatus,
+    DatabaseConnectionError,
     DatabaseType,
     QueryError,
 )
@@ -148,8 +148,8 @@ class MongoDBConnector(BaseDatabaseConnector):
     def execute_query(
         self,
         query: dict,
-        database_name: str = None,
-        collection_name: str = None,
+        database_name: str | None = None,
+        collection_name: str | None = None,
         **kwargs,
     ) -> dict[str, Any]:
         """Execute a MongoDB query.
@@ -166,7 +166,7 @@ class MongoDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to MongoDB")
+                    raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             db = self.client[database_name] if database_name else self.connection
             collection = db[collection_name] if collection_name else None
@@ -240,7 +240,7 @@ class MongoDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to MongoDB")
+                    raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             databases = []
             for db_info in self.client.list_databases():
@@ -268,7 +268,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to list MongoDB databases: {e}")
             raise QueryError(f"Failed to list databases: {e}") from e
 
-    def list_collections(self, database_name: str = None) -> list[dict[str, Any]]:
+    def list_collections(self, database_name: str | None = None) -> list[dict[str, Any]]:
         """List collections in a database.
 
         Args:
@@ -280,7 +280,7 @@ class MongoDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to MongoDB")
+                    raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             db = self.client[database_name] if database_name else self.connection
             if not db:
@@ -316,7 +316,7 @@ class MongoDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to MongoDB")
+                    raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             db = self.client[database_name] if database_name else self.connection
             if not db:
@@ -337,7 +337,7 @@ class MongoDBConnector(BaseDatabaseConnector):
                 "storage_size": stats.get("storageSize", 0),
                 "total_index_size": stats.get("totalIndexSize", 0),
                 "index_sizes": stats.get("indexSizes", {}),
-                "indexes": [idx for idx in indexes],
+                "indexes": list(indexes),
                 "capped": stats.get("capped", False),
                 "sharded": "sharded" in stats,
                 "shard_key": stats.get("shardKey", {}) if "sharded" in stats else None,
@@ -415,7 +415,7 @@ class MongoDBConnector(BaseDatabaseConnector):
         try:
             if not self.client:
                 if not self.connect():
-                    raise ConnectionError("Failed to connect to MongoDB")
+                    raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             server_status = self.client.admin.command("serverStatus")
 

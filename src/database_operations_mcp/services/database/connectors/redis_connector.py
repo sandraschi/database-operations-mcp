@@ -140,7 +140,7 @@ class RedisConnector(BaseDatabaseConnector):
             )
         except Exception as e:
             logger.error(f"Redis operation error: {e}")
-            return QueryResult(success=False, data=[], message=f"Operation failed: {str(e)}")
+            return QueryResult(success=False, data=[], message=f"Operation failed: {e!s}")
 
     async def get_schema(self, **kwargs: Any) -> dict[str, Any]:
         """Get Redis info as schema."""

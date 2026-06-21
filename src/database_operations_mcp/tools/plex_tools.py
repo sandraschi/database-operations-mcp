@@ -20,7 +20,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-
 logger = logging.getLogger(__name__)
 
 # Default Plex database locations
@@ -112,7 +111,7 @@ class PlexDatabase:
         """Get a list of all library sections."""
         self.connect()
         self.cursor.execute("""
-            SELECT id, name, section_type, language, agent, scanner, 
+            SELECT id, name, section_type, language, agent, scanner,
                    created_at, updated_at, scanned_at
             FROM library_sections
             ORDER BY name
@@ -135,7 +134,7 @@ class PlexDatabase:
         self.connect()
         query = """
             SELECT mi.id, mi.library_section_id, ls.name as section_name,
-                   mi.metadata_type, mi.guid, mi.media_item_title, 
+                   mi.metadata_type, mi.guid, mi.media_item_title,
                    mi.summary, mi.rating, mi.view_count, mi.last_viewed_at,
                    mi.duration, mi.bitrate, mi.width, mi.height,
                    mi.frames_per_second, mi.audio_channels,
@@ -275,7 +274,7 @@ class PlexDatabase:
                             cursor.execute(
                                 """
                                 INSERT INTO sections (
-                                    id, name, section_type, agent, 
+                                    id, name, section_type, agent,
                                     created_at, updated_at, scanned_at
                                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
                             """,
@@ -336,7 +335,7 @@ class PlexDatabase:
                     except SqliteError as e:
                         return {
                             "status": "error",
-                            "message": f"SQLite error during export: {str(e)}",
+                            "message": f"SQLite error during export: {e!s}",
                             "export_path": str(output_path),
                             "format": output_format,
                         }
@@ -361,7 +360,7 @@ class PlexDatabase:
             logger.exception("Error exporting Plex library")
             return {
                 "status": "error",
-                "message": f"Failed to export Plex library: {str(e)}",
+                "message": f"Failed to export Plex library: {e!s}",
                 "error": str(e),
             }
 
@@ -391,6 +390,6 @@ def get_plex_library_sections(db_path: str | None = None) -> list[dict[str, Any]
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Failed to get Plex library sections: {str(e)}",
+            "message": f"Failed to get Plex library sections: {e!s}",
             "error": str(e),
         }

@@ -1,6 +1,6 @@
 """Database schema models."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import Field
@@ -8,7 +8,7 @@ from pydantic import Field
 from .base import BaseDBModel
 
 
-class ColumnType(str, Enum):
+class ColumnType(StrEnum):
     """Common database column types."""
 
     STRING = "string"
@@ -25,7 +25,7 @@ class ColumnType(str, Enum):
     CUSTOM = "custom"
 
 
-class ConstraintType(str, Enum):
+class ConstraintType(StrEnum):
     """Database constraint types."""
 
     PRIMARY_KEY = "primary_key"

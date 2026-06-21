@@ -13,9 +13,10 @@ import signal
 import sys
 from typing import Literal
 
+from .config.mcp_config import get_mcp
+
 # Import our centralized MCP configuration
 from .transport import run_server
-from .config.mcp_config import get_mcp
 
 # Configure logging
 logging.basicConfig(
@@ -95,6 +96,7 @@ class DatabaseOperationsMCP:
             # Import all portmanteau tools from tools/ directory
             # These imports trigger @mcp.tool() decorators
             from .tools import (  # noqa: F401
+                agentic_tools,
                 calibre_integration,
                 db_analyzer,
                 db_connection,
@@ -106,9 +108,8 @@ class DatabaseOperationsMCP:
                 help_system,
                 media_library,
                 system_init,
-                agentic_tools,
-                windows_system,
                 test_tool,
+                windows_system,
             )
 
             if os.getenv("ENABLE_ATOMIC_DB_TOOLS", "true").lower() == "true":
@@ -172,10 +173,12 @@ class DatabaseOperationsMCP:
             logger.info(f"MCP Version: {self.mcp.version}")
 
             # Get HTTP configuration from environment
-            host = os.getenv("MCP_HOST", "0.0.0.0")
+            host = os.getenv("MCP_HOST", "127.0.0.1")
             port = int(os.getenv("MCP_PORT", "8000"))
 
             logger.info(f"HTTP server will bind to {host}:{port}")
+
+            # Register signal handlers for graceful shutdown
 
             # Register signal handlers for graceful shutdown
             self._register_signal_handlers()
@@ -227,7 +230,7 @@ class DatabaseOperationsMCP:
             logger.info("Running both stdio and HTTP transports concurrently")
 
             # Get HTTP configuration
-            host = os.getenv("MCP_HOST", "0.0.0.0")
+            host = os.getenv("MCP_HOST", "127.0.0.1")
             port = int(os.getenv("MCP_PORT", "8000"))
             logger.info(f"HTTP server will bind to {host}:{port}")
 

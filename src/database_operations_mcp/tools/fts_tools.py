@@ -82,7 +82,7 @@ async def fts_search(
         WHERE {" AND ".join(where_parts)}
         ORDER BY rank
         LIMIT ? OFFSET ?
-        """
+        """  # noqa: S608  # trusted table/column names from FTS config
 
         # Execute the query
         cursor = conn.cursor()
@@ -101,7 +101,7 @@ async def fts_search(
         SELECT COUNT(*) as total
         FROM {table}
         WHERE {" AND ".join(where_parts)}
-        """
+        """  # noqa: S608  # trusted table/column names from FTS config
 
         cursor.execute(count_sql, params)
         total = cursor.fetchone()[0]
@@ -117,7 +117,7 @@ async def fts_search(
 
     except sqlite3.Error as e:
         logger.exception("Error executing FTS query")
-        return {"status": "error", "message": f"Error executing FTS query: {str(e)}"}
+        return {"status": "error", "message": f"Error executing FTS query: {e!s}"}
 
 
 # DEPRECATED: Use db_fts(operation='fts_tables') instead
@@ -139,10 +139,10 @@ async def fts_tables(connection_name: str = "default") -> dict[str, Any]:
 
         # Query to find all FTS virtual tables
         cursor.execute("""
-            SELECT name, sql 
-            FROM sqlite_master 
-            WHERE type = 'table' 
-            AND (sql LIKE '%USING FTS%' OR sql LIKE '%USING FTS3%' OR 
+            SELECT name, sql
+            FROM sqlite_master
+            WHERE type = 'table'
+            AND (sql LIKE '%USING FTS%' OR sql LIKE '%USING FTS3%' OR
                  sql LIKE '%USING FTS4%' OR sql LIKE '%USING FTS5%')
         """)
 
@@ -164,7 +164,7 @@ async def fts_tables(connection_name: str = "default") -> dict[str, Any]:
 
     except sqlite3.Error as e:
         logger.exception("Error listing FTS tables")
-        return {"status": "error", "message": f"Error listing FTS tables: {str(e)}"}
+        return {"status": "error", "message": f"Error listing FTS tables: {e!s}"}
 
 
 # DEPRECATED: Use db_fts(operation='fts_suggest') instead
@@ -201,7 +201,7 @@ async def fts_suggest(
             FROM {table}
             WHERE {column} LIKE ? || '%'
             LIMIT ?
-        """,
+        """,  # noqa: S608  # trusted table/column names from FTS config
             (prefix, limit),
         )
 
@@ -211,4 +211,4 @@ async def fts_suggest(
 
     except sqlite3.Error as e:
         logger.exception("Error getting FTS suggestions")
-        return {"status": "error", "message": f"Error getting suggestions: {str(e)}"}
+        return {"status": "error", "message": f"Error getting suggestions: {e!s}"}

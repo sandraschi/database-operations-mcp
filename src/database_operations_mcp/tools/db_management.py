@@ -6,9 +6,9 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.database_manager import db_manager
 from database_operations_mcp.operation_types import DbManagementOperation
 from database_operations_mcp.tool_responses import unknown_operation_response
-from database_operations_mcp.database_manager import db_manager
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -310,7 +310,7 @@ async def _init_database(
         logger.error(f"Error initializing database: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to initialize database: {str(e)}",
+            "error": f"Failed to initialize database: {e!s}",
             "connection_name": connection_name,
             "database_type": database_type,
         }
@@ -332,7 +332,7 @@ async def _list_connections() -> dict[str, Any]:
         logger.error(f"Error listing connections: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to list connections: {str(e)}",
+            "error": f"Failed to list connections: {e!s}",
             "connections": {},
             "total_connections": 0,
         }
@@ -361,7 +361,7 @@ async def _close_connection(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error closing connection: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to close connection: {str(e)}",
+            "error": f"Failed to close connection: {e!s}",
             "connection_name": connection_name,
         }
 
@@ -389,7 +389,7 @@ async def _test_connection(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error testing connection: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to test connection: {str(e)}",
+            "error": f"Failed to test connection: {e!s}",
             "connection_name": connection_name,
         }
 
@@ -417,7 +417,7 @@ async def _get_connection_info(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error getting connection info: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to get connection info: {str(e)}",
+            "error": f"Failed to get connection info: {e!s}",
             "connection_name": connection_name,
         }
 
@@ -447,7 +447,7 @@ async def _database_health_check(connection_name: str, include_metrics: bool) ->
         logger.error(f"Error performing health check: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to perform health check: {str(e)}",
+            "error": f"Failed to perform health check: {e!s}",
             "connection_name": connection_name,
             "health_status": "error",
         }
@@ -476,7 +476,7 @@ async def _get_database_metrics(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error getting database metrics: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to get database metrics: {str(e)}",
+            "error": f"Failed to get database metrics: {e!s}",
             "connection_name": connection_name,
             "metrics": {},
         }
@@ -506,7 +506,7 @@ async def _vacuum_database(connection_name: str, vacuum_mode: str) -> dict[str, 
         logger.error(f"Error vacuuming database: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to vacuum database: {str(e)}",
+            "error": f"Failed to vacuum database: {e!s}",
             "connection_name": connection_name,
             "vacuum_mode": vacuum_mode,
         }
@@ -535,6 +535,6 @@ async def _disconnect_database(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error disconnecting database: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to disconnect database: {str(e)}",
+            "error": f"Failed to disconnect database: {e!s}",
             "connection_name": connection_name,
         }

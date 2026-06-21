@@ -192,7 +192,7 @@ async def init_database(
         }
     except Exception as e:
         logger.error(f"Error initializing {db_type} database: {e}")
-        return {"status": "error", "message": f"Failed to initialize database: {str(e)}"}
+        return {"status": "error", "message": f"Failed to initialize database: {e!s}"}
 
 
 # DEPRECATED: Use db_connection(operation='list') instead
@@ -394,7 +394,7 @@ async def restore_saved_connections(auto_reconnect: bool = False) -> dict[str, A
         logger.error(f"Error restoring saved connections: {e}")
         return {
             "status": "error",
-            "message": f"Failed to restore: {str(e)}",
+            "message": f"Failed to restore: {e!s}",
             "saved_connections": [],
             "reconnected": [],
         }
@@ -471,11 +471,11 @@ async def close_connection(connection_name: str) -> dict[str, Any]:
                 if storage:
                     await storage.delete_connection(connection_name)
             except Exception:
-                pass  # Graceful degradation
+                logger.warning("Failed to remove connection from persistent storage")
 
             return {"status": "success", "message": f"Closed connection: {connection_name}"}
         except Exception as e:
-            return {"status": "error", "message": f"Error closing connection: {str(e)}"}
+            return {"status": "error", "message": f"Error closing connection: {e!s}"}
     return {"status": "error", "message": f"No such connection: {connection_name}"}
 
 
@@ -547,7 +547,7 @@ async def test_connection(connection_name: str) -> dict[str, Any]:
         return {
             "status": "error",
             "connection_name": connection_name,
-            "message": f"Error testing connection: {str(e)}",
+            "message": f"Error testing connection: {e!s}",
         }
 
 
@@ -634,7 +634,7 @@ async def get_connection_info(connection_name: str) -> dict[str, Any]:
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Error getting connection info: {str(e)}",
+            "message": f"Error getting connection info: {e!s}",
             "connection_name": connection_name,
             "db_type": conn_info["type"],
         }
@@ -669,7 +669,7 @@ async def set_active_connection(connection_name: str) -> dict[str, Any]:
         return {"status": "success", "message": f"Set active connection: {connection_name}"}
     except Exception as e:
         logger.error(f"Error setting active connection: {e}")
-        return {"status": "error", "message": f"Failed to set active connection: {str(e)}"}
+        return {"status": "error", "message": f"Failed to set active connection: {e!s}"}
 
 
 # DEPRECATED: Use db_connection(operation='get_active') instead
@@ -703,7 +703,7 @@ async def get_active_connection() -> dict[str, Any]:
         logger.error(f"Error getting active connection: {e}")
         return {
             "status": "error",
-            "message": f"Failed to get active connection: {str(e)}",
+            "message": f"Failed to get active connection: {e!s}",
             "active_connection": None,
         }
 
@@ -744,7 +744,7 @@ async def get_user_preferences() -> dict[str, Any]:
         logger.error(f"Error getting preferences: {e}")
         return {
             "status": "error",
-            "message": f"Failed to get preferences: {str(e)}",
+            "message": f"Failed to get preferences: {e!s}",
             "preferences": {},
         }
 
@@ -785,4 +785,4 @@ async def set_user_preferences(preferences: dict[str, Any]) -> dict[str, Any]:
         return {"status": "success", "message": "Preferences saved"}
     except Exception as e:
         logger.error(f"Error setting preferences: {e}")
-        return {"status": "error", "message": f"Failed to set preferences: {str(e)}"}
+        return {"status": "error", "message": f"Failed to set preferences: {e!s}"}

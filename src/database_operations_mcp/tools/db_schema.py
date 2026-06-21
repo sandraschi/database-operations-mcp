@@ -6,9 +6,8 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.operation_types import DbSchemaOperation
-from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.database_manager import db_manager
+from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -98,7 +97,7 @@ async def _list_databases(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error listing databases: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to list databases: {str(e)}",
+            "error": f"Failed to list databases: {e!s}",
             "connection_name": connection_name,
             "databases": [],
             "count": 0,
@@ -133,7 +132,7 @@ async def _list_tables(
         logger.error(f"Error listing tables: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to list tables: {str(e)}",
+            "error": f"Failed to list tables: {e!s}",
             "connection_name": connection_name,
             "database_name": database_name,
             "tables": [],
@@ -179,7 +178,7 @@ async def _describe_table(
         logger.error(f"Error describing table: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to describe table: {str(e)}",
+            "error": f"Failed to describe table: {e!s}",
             "connection_name": connection_name,
             "table_name": table_name,
             "table_info": {},
@@ -233,7 +232,7 @@ async def _get_schema_diff(connection_name: str, compare_with: str | None) -> di
         logger.error(f"Error comparing schemas: {e}", exc_info=True)
         return {
             "success": False,
-            "error": f"Failed to compare schemas: {str(e)}",
+            "error": f"Failed to compare schemas: {e!s}",
             "connection_name": connection_name,
             "compare_with": compare_with,
             "schema_diff": {},

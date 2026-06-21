@@ -101,7 +101,7 @@ class DuckDBConnector(BaseDatabaseConnector):
                 columns = [desc[0] for desc in res.description] if res.description else []
 
                 # Convert to list of dicts
-                data = [dict(zip(columns, row)) for row in rows]
+                data = [dict(zip(columns, row, strict=False)) for row in rows]
 
                 execution_time = (datetime.now() - start_time).total_seconds()
                 return QueryResult(
@@ -123,7 +123,7 @@ class DuckDBConnector(BaseDatabaseConnector):
                 )
         except Exception as e:
             logger.error(f"DuckDB query error: {e}")
-            return QueryResult(success=False, data=[], message=f"Query failed: {str(e)}")
+            return QueryResult(success=False, data=[], message=f"Query failed: {e!s}")
 
     async def get_schema(self, **kwargs: Any) -> dict[str, Any]:
         """Get database schema."""
@@ -135,7 +135,7 @@ class DuckDBConnector(BaseDatabaseConnector):
         res = await self.execute_query("SHOW TABLES")
         if not res.success:
             return []
-        return [list(row.values())[0] for row in res.data]
+        return [next(iter(row.values())) for row in res.data]
 
     async def health_check(self) -> dict[str, Any]:
         """Check DuckDB health."""

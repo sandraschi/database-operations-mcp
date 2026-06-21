@@ -5,9 +5,12 @@ This module provides functionality to detect and diagnose various database
 errors including corruption, integrity issues, logical errors, and performance problems.
 """
 
+import logging
 from typing import Any
 
 import aiosqlite
+
+logger = logging.getLogger(__name__)
 
 
 class ErrorDetector:
@@ -147,7 +150,7 @@ class ErrorDetector:
                     for col_name in not_null_columns:
                         try:
                             async with conn.execute(
-                                f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col_name}" IS NULL'
+                                f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col_name}" IS NULL'  # noqa: S608  # trusted schema identifiers
                             ) as cursor:
                                 null_count = (await cursor.fetchone())[0]
                                 if null_count > 0:
@@ -161,7 +164,7 @@ class ErrorDetector:
                                         }
                                     )
                         except Exception:
-                            pass  # Skip if query fails
+                            logger.warning("Query failed for %s.%s", table_name, col_name)
 
         return errors
 
@@ -208,7 +211,7 @@ class ErrorDetector:
                     {
                         "issue": f"NULL values in {error['column']}",
                         "suggested_fix": (
-                            f"UPDATE {error['table']} SET {error['column']} = ''"
+                            f"UPDATE {error['table']} SET {error['column']} = ''"  # noqa: S608  # trusted schema identifiers from detector results
                             f" WHERE {error['column']} IS NULL;"
                         ),
                         "description": "Remove NULL values from NOT NULL column",

@@ -82,7 +82,7 @@ async def find_plex_database(custom_path: str | None = None) -> dict[str, Any]:
 
 # DEPRECATED: Use media_library portmanteau instead
 async def optimize_plex_database(
-    db_path: str = None, vacuum: bool = True, analyze: bool = True, backup: bool = True
+    db_path: str | None = None, vacuum: bool = True, analyze: bool = True, backup: bool = True
 ) -> dict[str, Any]:
     """Optimize the Plex Media Server database.
 
@@ -336,7 +336,7 @@ def _export_to_sql(cursor, tables, output_file, include_data):
             f.write(f"{schema};\n\n")
 
             if include_data:
-                cursor.execute(f"SELECT * FROM {table}")
+                cursor.execute(f"SELECT * FROM {table}")  # noqa: S608  # trusted table name from schema
                 columns = [desc[0] for desc in cursor.description]
 
                 for row in cursor:
@@ -352,7 +352,7 @@ def _export_to_sql(cursor, tables, output_file, include_data):
                             values.append(f"'{escaped_value}'")
 
                     f.write(
-                        f"INSERT INTO {table} ({', '.join(columns)}) "
+                        f"INSERT INTO {table} ({', '.join(columns)}) "  # noqa: S608  # trusted table/column names from schema
                         f"VALUES ({', '.join(values)});\n"
                     )
 
@@ -370,16 +370,16 @@ def _export_to_json(cursor, tables, output_file, include_data):
     """
     result = {}
     for table in tables:
-        cursor.execute(f"SELECT * FROM {table} LIMIT 0")
+        cursor.execute(f"SELECT * FROM {table} LIMIT 0")  # noqa: S608  # trusted table name from schema
         columns = [desc[0] for desc in cursor.description]
 
         if include_data:
-            cursor.execute(f"SELECT * FROM {table}")
+            cursor.execute(f"SELECT * FROM {table}")  # noqa: S608  # trusted table name from schema
             result[table] = [dict(zip(columns, row, strict=False)) for row in cursor.fetchall()]
         else:
             result[table] = {
                 "columns": columns,
-                "row_count": cursor.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0],
+                "row_count": cursor.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0],  # noqa: S608  # trusted table name from schema
             }
 
     with open(output_file, "w", encoding="utf-8") as f:
@@ -400,7 +400,7 @@ def _export_to_csv(cursor, tables, output_file, include_data):
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)
 
     for table in tables:
-        cursor.execute(f"SELECT * FROM {table} LIMIT 0")
+        cursor.execute(f"SELECT * FROM {table} LIMIT 0")  # noqa: S608  # trusted table name from schema
         columns = [desc[0] for desc in cursor.description]
 
         with open(
@@ -410,5 +410,5 @@ def _export_to_csv(cursor, tables, output_file, include_data):
             writer.writerow(columns)
 
             if include_data:
-                cursor.execute(f"SELECT * FROM {table}")
+                cursor.execute(f"SELECT * FROM {table}")  # noqa: S608  # trusted table name from schema
                 writer.writerows(cursor)
