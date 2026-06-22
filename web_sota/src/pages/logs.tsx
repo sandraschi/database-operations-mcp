@@ -11,11 +11,12 @@ import {
   clearLogs,
   downloadLogsExport,
   getLogStats,
-  queryLogs,
   type LogEntry,
   type LogQueryParams,
   type LogStats,
+  queryLogs,
 } from "@/common/api";
+import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/common/utils";
 
 const LEVELS = ["", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] as const;
 const KINDS = ["", "tool_call", "export", "server", "system"] as const;
@@ -37,10 +37,13 @@ const selectClass =
 
 function levelTone(level: string): string {
   const l = level.toUpperCase();
-  if (l === "ERROR" || l === "CRITICAL") return "text-rose-400 bg-rose-500/10 border-rose-500/30";
-  if (l === "WARNING") return "text-amber-400 bg-amber-500/10 border-amber-500/30";
+  if (l === "ERROR" || l === "CRITICAL")
+    return "text-rose-400 bg-rose-500/10 border-rose-500/30";
+  if (l === "WARNING")
+    return "text-amber-400 bg-amber-500/10 border-amber-500/30";
   if (l === "INFO") return "text-sky-400 bg-sky-500/10 border-sky-500/30";
-  if (l === "DEBUG") return "text-slate-400 bg-slate-500/10 border-slate-500/30";
+  if (l === "DEBUG")
+    return "text-slate-400 bg-slate-500/10 border-slate-500/30";
   return "text-slate-400 bg-slate-800/50 border-slate-700";
 }
 
@@ -165,19 +168,47 @@ export function LogsPage() {
         <div>
           <div className="flex items-center gap-2 text-blue-400">
             <ScrollText className="h-6 w-6" />
-            <span className="text-sm font-medium uppercase tracking-wider">Operations</span>
+            <span className="text-sm font-medium uppercase tracking-wider">
+              Operations
+            </span>
           </div>
-          <h2 className="mt-1 text-3xl font-bold tracking-tight text-white">Event logs</h2>
+          <h2 className="mt-1 text-3xl font-bold tracking-tight text-white">
+            Event logs
+          </h2>
           <p className="text-slate-400">
             Tool calls, queries, and server events — ring buffer with live tail
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" className="border-slate-700" onClick={() => void downloadLogsExport("json", { level: level || undefined, kind: kind || undefined, search: search.trim() || undefined, sort })}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-slate-700"
+            onClick={() =>
+              void downloadLogsExport("json", {
+                level: level || undefined,
+                kind: kind || undefined,
+                search: search.trim() || undefined,
+                sort,
+              })
+            }
+          >
             <Download className="mr-2 h-4 w-4" />
             JSON
           </Button>
-          <Button variant="outline" size="sm" className="border-slate-700" onClick={() => void downloadLogsExport("csv", { level: level || undefined, kind: kind || undefined, search: search.trim() || undefined, sort })}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-slate-700"
+            onClick={() =>
+              void downloadLogsExport("csv", {
+                level: level || undefined,
+                kind: kind || undefined,
+                search: search.trim() || undefined,
+                sort,
+              })
+            }
+          >
             <Download className="mr-2 h-4 w-4" />
             CSV
           </Button>
@@ -207,14 +238,26 @@ export function LogsPage() {
             { label: "Capacity", value: stats.max_entries.toLocaleString() },
             {
               label: "Errors",
-              value: ((stats.by_level.ERROR ?? 0) + (stats.by_level.CRITICAL ?? 0)).toLocaleString(),
+              value: (
+                (stats.by_level.ERROR ?? 0) + (stats.by_level.CRITICAL ?? 0)
+              ).toLocaleString(),
             },
-            { label: "Tool calls", value: (stats.by_kind.tool_call ?? 0).toLocaleString() },
+            {
+              label: "Tool calls",
+              value: (stats.by_kind.tool_call ?? 0).toLocaleString(),
+            },
           ].map((item) => (
-            <Card key={item.label} className="border-slate-800 bg-gradient-to-br from-slate-950/80 to-slate-900/40">
+            <Card
+              key={item.label}
+              className="border-slate-800 bg-gradient-to-br from-slate-950/80 to-slate-900/40"
+            >
               <CardContent className="pt-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">{item.label}</p>
-                <p className="text-2xl font-semibold text-white">{item.value}</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">
+                  {item.label}
+                </p>
+                <p className="text-2xl font-semibold text-white">
+                  {item.value}
+                </p>
               </CardContent>
             </Card>
           ))}
@@ -247,27 +290,54 @@ export function LogsPage() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-slate-400">Level</Label>
-              <select className={selectClass} value={level} onChange={(e) => { setLevel(e.target.value); setPage(0); }}>
+              <select
+                className={selectClass}
+                value={level}
+                onChange={(e) => {
+                  setLevel(e.target.value);
+                  setPage(0);
+                }}
+              >
                 <option value="">All levels</option>
                 {LEVELS.filter(Boolean).map((lv) => (
-                  <option key={lv} value={lv}>{lv}</option>
+                  <option key={lv} value={lv}>
+                    {lv}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="space-y-1.5">
               <Label className="text-slate-400">Kind</Label>
-              <select className={selectClass} value={kind} onChange={(e) => { setKind(e.target.value); setPage(0); }}>
+              <select
+                className={selectClass}
+                value={kind}
+                onChange={(e) => {
+                  setKind(e.target.value);
+                  setPage(0);
+                }}
+              >
                 <option value="">All kinds</option>
                 {KINDS.filter(Boolean).map((k) => (
-                  <option key={k} value={k}>{k}</option>
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="space-y-1.5">
               <Label className="text-slate-400">Page size</Label>
-              <select className={selectClass} value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}>
+              <select
+                className={selectClass}
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPage(0);
+                }}
+              >
                 {PAGE_SIZES.map((n) => (
-                  <option key={n} value={n}>{n} rows</option>
+                  <option key={n} value={n}>
+                    {n} rows
+                  </option>
                 ))}
               </select>
             </div>
@@ -276,10 +346,17 @@ export function LogsPage() {
               <Button
                 variant="outline"
                 className="w-full justify-between border-slate-700 bg-slate-900/80"
-                onClick={() => { setSort((s) => (s === "desc" ? "asc" : "desc")); setPage(0); }}
+                onClick={() => {
+                  setSort((s) => (s === "desc" ? "asc" : "desc"));
+                  setPage(0);
+                }}
               >
                 {sort === "desc" ? "Newest first" : "Oldest first"}
-                {sort === "desc" ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
+                {sort === "desc" ? (
+                  <ArrowDown className="h-4 w-4" />
+                ) : (
+                  <ArrowUp className="h-4 w-4" />
+                )}
               </Button>
             </div>
             <div className="flex items-end pb-0.5">
@@ -290,14 +367,41 @@ export function LogsPage() {
                   onChange={(e) => setLiveTail(e.target.checked)}
                   className="rounded border-slate-600"
                 />
-                <Radio className={cn("h-4 w-4", liveTail ? "text-emerald-400" : "text-slate-600")} />
+                <Radio
+                  className={cn(
+                    "h-4 w-4",
+                    liveTail ? "text-emerald-400" : "text-slate-600",
+                  )}
+                />
                 Live tail
               </label>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => { setSearch(searchDraft); setPage(0); void load(); }}>Apply filters</Button>
-            <Button size="sm" variant="ghost" className="text-slate-400" onClick={() => { setSearchDraft(""); setSearch(""); setLevel(""); setKind(""); setPage(0); }}>Reset</Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                setSearch(searchDraft);
+                setPage(0);
+                void load();
+              }}
+            >
+              Apply filters
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-slate-400"
+              onClick={() => {
+                setSearchDraft("");
+                setSearch("");
+                setLevel("");
+                setKind("");
+                setPage(0);
+              }}
+            >
+              Reset
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -307,31 +411,55 @@ export function LogsPage() {
           <div>
             <CardTitle className="text-base text-white">Log stream</CardTitle>
             <CardDescription className="text-xs text-slate-500">
-              {total.toLocaleString()} matching · max {maxEntries.toLocaleString()} retained
-              {liveTail && page === 0 && <span className="ml-2 text-emerald-400">● tail active</span>}
+              {total.toLocaleString()} matching · max{" "}
+              {maxEntries.toLocaleString()} retained
+              {liveTail && page === 0 && (
+                <span className="ml-2 text-emerald-400">● tail active</span>
+              )}
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           {error && (
-            <p className="border-b border-rose-900/50 bg-rose-950/30 px-4 py-2 text-sm text-rose-300">{error}</p>
+            <p className="border-b border-rose-900/50 bg-rose-950/30 px-4 py-2 text-sm text-rose-300">
+              {error}
+            </p>
           )}
-          <div ref={streamRef} onScroll={onStreamScroll} className="max-h-[min(58vh,520px)] overflow-y-auto font-mono text-xs leading-relaxed">
+          <div
+            ref={streamRef}
+            onScroll={onStreamScroll}
+            className="max-h-[min(58vh,520px)] overflow-y-auto font-mono text-xs leading-relaxed"
+          >
             {loading && entries.length === 0 ? (
               <p className="p-6 text-slate-500">Loading logs…</p>
             ) : entries.length === 0 ? (
-              <p className="p-6 text-slate-500">No entries match your filters.</p>
+              <p className="p-6 text-slate-500">
+                No entries match your filters.
+              </p>
             ) : (
               entries.map((entry) => (
-                <div key={entry.id} className="grid grid-cols-[auto_auto_1fr] gap-x-3 border-b border-slate-800/80 px-4 py-2 hover:bg-slate-900/60">
-                  <time className="whitespace-nowrap text-slate-500">{formatTime(entry.timestamp)}</time>
-                  <span className={cn("rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase", levelTone(entry.level))}>
+                <div
+                  key={entry.id}
+                  className="grid grid-cols-[auto_auto_1fr] gap-x-3 border-b border-slate-800/80 px-4 py-2 hover:bg-slate-900/60"
+                >
+                  <time className="whitespace-nowrap text-slate-500">
+                    {formatTime(entry.timestamp)}
+                  </time>
+                  <span
+                    className={cn(
+                      "rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase",
+                      levelTone(entry.level),
+                    )}
+                  >
                     {entry.level}
                   </span>
                   <div className="min-w-0 text-slate-200">
-                    <span className="text-violet-400">[{entry.kind}]</span> {entry.detail}
+                    <span className="text-violet-400">[{entry.kind}]</span>{" "}
+                    {entry.detail}
                     {entry.meta && Object.keys(entry.meta).length > 0 && (
-                      <span className="mt-0.5 block truncate text-slate-500">{JSON.stringify(entry.meta)}</span>
+                      <span className="mt-0.5 block truncate text-slate-500">
+                        {JSON.stringify(entry.meta)}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -339,10 +467,28 @@ export function LogsPage() {
             )}
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 px-4 py-3 text-sm text-slate-400">
-            <span>Page {page + 1} of {totalPages}</span>
+            <span>
+              Page {page + 1} of {totalPages}
+            </span>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="border-slate-700" disabled={page <= 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>Previous</Button>
-              <Button size="sm" variant="outline" className="border-slate-700" disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-slate-700"
+                disabled={page <= 0}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+              >
+                Previous
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-slate-700"
+                disabled={page + 1 >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
             </div>
           </div>
         </CardContent>

@@ -44,9 +44,7 @@ class RedisConnector:
             raise RuntimeError("redis not installed. Install with: pip install redis")
 
         self.client = aioredis.from_url(
-            f"redis://:{password}@{host}:{port}/{db}"
-            if password
-            else f"redis://{host}:{port}/{db}",
+            f"redis://:{password}@{host}:{port}/{db}" if password else f"redis://{host}:{port}/{db}",
             decode_responses=True,
         )
 

@@ -47,9 +47,18 @@ def database_expert(
 - Prefer the user's stated DB type and connection details; point them to the Add connection wizard or Database types help if they are unsure.
 """
     if focus == "sql":
-        return base + "\n\n**Focus: SQL** Prefer safe, read-only SELECTs; use parameterized queries; suggest indexes or explain plans only when the user asks."
+        return (
+            base
+            + "\n\n**Focus: SQL** Prefer safe, read-only SELECTs; use parameterized queries; suggest indexes or explain plans only when the user asks."
+        )
     if focus == "connections":
-        return base + "\n\n**Focus: Connections** Emphasize listing, testing, and registering connections; point to Database types help for required fields per DB type."
+        return (
+            base
+            + "\n\n**Focus: Connections** Emphasize listing, testing, and registering connections; point to Database types help for required fields per DB type."
+        )
     if focus == "export":
-        return base + "\n\n**Focus: Export/Import** Use execute_query for export data then advise downloading as JSON/CSV; use batch_insert for bulk import with clear table and column mapping."
+        return (
+            base
+            + "\n\n**Focus: Export/Import** Use execute_query for export data then advise downloading as JSON/CSV; use batch_insert for bulk import with clear table and column mapping."
+        )
     return base

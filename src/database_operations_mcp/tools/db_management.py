@@ -203,9 +203,7 @@ async def db_management(
     """
 
     if operation == "init_database":
-        result = await _init_database(
-            connection_name, database_type, connection_config, test_connection
-        )
+        result = await _init_database(connection_name, database_type, connection_config, test_connection)
     elif operation == "list_connections":
         result = await _list_connections()
     elif operation == "close_connection":
@@ -250,9 +248,7 @@ async def db_management(
                 summary = f"Database health check for '{connection_name}' completed with status: {status}."
             elif operation == "vacuum_database":
                 mode = result.get("vacuum_mode", "unknown")
-                summary = (
-                    f"Successfully performed '{mode}' vacuum/optimization on '{connection_name}'."
-                )
+                summary = f"Successfully performed '{mode}' vacuum/optimization on '{connection_name}'."
             else:
                 summary = f"Successfully completed '{operation}' operation on '{connection_name}'."
         else:
@@ -292,9 +288,7 @@ async def _init_database(
         if test_connection:
             test_result = await connector.test_connection()
             if not test_result["success"]:
-                raise ConnectionError(
-                    f"Connection test failed: {test_result.get('error', 'Unknown error')}"
-                )
+                raise ConnectionError(f"Connection test failed: {test_result.get('error', 'Unknown error')}")
 
         db_manager.register_connector(connection_name, connector)
 

@@ -43,27 +43,22 @@ def _is_firefox_running() -> dict[str, Any]:
         logger.debug("Firefox process check failed: %s", exc)
     return {"is_running": False}
 
+
 # Common Windows database locations
 WINDOWS_DB_PATHS = {
     "chrome_history": [
         os.path.expandvars(r"%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\History"),
-        os.path.expandvars(
-            r"%USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History"
-        ),
+        os.path.expandvars(r"%USERPROFILE%\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History"),
     ],
     "firefox_history": [
         os.path.expandvars(r"%APPDATA%\\Mozilla\\Firefox\\Profiles"),
     ],
     "edge_history": [
         os.path.expandvars(r"%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Default\\History"),
-        os.path.expandvars(
-            r"%USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\History"
-        ),
+        os.path.expandvars(r"%USERPROFILE%\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\History"),
     ],
     "brave_history": [
-        os.path.expandvars(
-            r"%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History"
-        ),
+        os.path.expandvars(r"%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\Default\\History"),
         os.path.expandvars(
             r"%USERPROFILE%\\AppData\\Local\\BraveSoftware\\Brave-Browser\\"
             r"User Data\\Default\\History"
@@ -166,9 +161,7 @@ async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, 
                         "exists": False,
                         "error": "Firefox is running - database is locked",
                         "firefox_status": firefox_status,
-                        "solution": (
-                            "Close Firefox completely and try again, or set bruteforce_firefox=True"
-                        ),
+                        "solution": ("Close Firefox completely and try again, or set bruteforce_firefox=True"),
                     }
                     continue
                 elif firefox_status["is_running"] and bruteforce_firefox:
@@ -345,9 +338,7 @@ async def query_windows_database(
                 "status": "error",
                 "message": "Firefox is running - database is locked",
                 "firefox_status": firefox_status,
-                "solution": (
-                    "Close Firefox completely and try again, or set bruteforce_firefox=True"
-                ),
+                "solution": ("Close Firefox completely and try again, or set bruteforce_firefox=True"),
             }
 
     db_path = _find_windows_db(db_type)

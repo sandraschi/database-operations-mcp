@@ -106,9 +106,7 @@ class BaseDatabaseConnector[T](ABC):
         pass
 
     @abstractmethod
-    async def execute_query(
-        self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any
-    ) -> QueryResult:
+    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
         """Execute a query and return the results."""
         pass
 
@@ -198,9 +196,7 @@ class DatabaseManager:
                 results[name] = {
                     "success": False,
                     "error": str(e),
-                    "type": connector.database_type
-                    if hasattr(connector, "database_type")
-                    else "unknown",
+                    "type": connector.database_type if hasattr(connector, "database_type") else "unknown",
                 }
         return results
 
@@ -259,9 +255,7 @@ def get_supported_databases() -> list[dict[str, Any]]:
     ]
 
 
-def create_connector(
-    database_type: str, connection_config: dict[str, Any]
-) -> BaseDatabaseConnector | None:
+def create_connector(database_type: str, connection_config: dict[str, Any]) -> BaseDatabaseConnector | None:
     """Create a database connector instance."""
     from .services.database.connectors import AVAILABLE_CONNECTORS
 

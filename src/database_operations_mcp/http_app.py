@@ -48,9 +48,12 @@ def build_web_app() -> FastAPI:
 
     app = FastAPI(title="database-operations-mcp")
 
+    cors_origins = os.environ.get("CORS_ORIGINS", "*")
+    cors_origins_list = [o.strip() for o in cors_origins.split(",") if o.strip()]
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=cors_origins_list,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

@@ -1,25 +1,43 @@
-import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useMemo, useState } from "react";
 import { getCapabilities, getTools } from "@/common/api";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 function getFamily(toolName: string): string {
   if (toolName.startsWith("db_")) return "database";
   if (toolName.startsWith("firefox_")) return "firefox";
-  if (toolName.startsWith("chrome_") || toolName.startsWith("edge_") || toolName.startsWith("brave_"))
+  if (
+    toolName.startsWith("chrome_") ||
+    toolName.startsWith("edge_") ||
+    toolName.startsWith("brave_")
+  )
     return "chromium";
   if (toolName.includes("bookmark")) return "bookmarks";
-  if (toolName.includes("media") || toolName.includes("plex") || toolName.includes("calibre"))
+  if (
+    toolName.includes("media") ||
+    toolName.includes("plex") ||
+    toolName.includes("calibre")
+  )
     return "media";
-  if (toolName.includes("system") || toolName.includes("registry")) return "system";
+  if (toolName.includes("system") || toolName.includes("registry"))
+    return "system";
   return "other";
 }
 
 export function ToolExplorer() {
   const [q, setQ] = useState("");
   const toolsQuery = useQuery({ queryKey: ["tools"], queryFn: getTools });
-  const capsQuery = useQuery({ queryKey: ["capabilities"], queryFn: getCapabilities });
+  const capsQuery = useQuery({
+    queryKey: ["capabilities"],
+    queryFn: getCapabilities,
+  });
 
   const tools = toolsQuery.data?.tools ?? [];
   const qLower = q.trim().toLowerCase();
@@ -50,8 +68,12 @@ export function ToolExplorer() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">Tool Explorer</h2>
-        <p className="text-slate-400">Browse MCP tools by domain, capability, and shape.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-white">
+          Tool Explorer
+        </h2>
+        <p className="text-slate-400">
+          Browse MCP tools by domain, capability, and shape.
+        </p>
       </div>
 
       <Card className="border-slate-800 bg-slate-950/50">
@@ -95,11 +117,16 @@ export function ToolExplorer() {
         <Card key={family} className="border-slate-800 bg-slate-950/50">
           <CardHeader>
             <CardTitle className="text-white capitalize">{family}</CardTitle>
-            <CardDescription className="text-slate-400">{familyTools.length} tool(s)</CardDescription>
+            <CardDescription className="text-slate-400">
+              {familyTools.length} tool(s)
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {familyTools.map((tool) => (
-              <div key={tool.name} className="rounded border border-slate-800 bg-slate-900/40 p-3">
+              <div
+                key={tool.name}
+                className="rounded border border-slate-800 bg-slate-900/40 p-3"
+              >
                 <p className="font-mono text-sm text-slate-100">{tool.name}</p>
                 <p className="mt-1 text-sm text-slate-400 whitespace-pre-wrap">
                   {tool.description || "No description"}

@@ -60,9 +60,7 @@ async def database_health_check(connection_name: str) -> dict[str, Any]:
 
 
 # DEPRECATED: Use db_management(operation='get_database_metrics') instead
-async def get_database_metrics(
-    connection_name: str, metric_names: list[str] | None = None
-) -> dict[str, Any]:
+async def get_database_metrics(connection_name: str, metric_names: list[str] | None = None) -> dict[str, Any]:
     """Get performance metrics for a database connection.
 
     Args:
@@ -94,9 +92,7 @@ async def get_database_metrics(
 
 
 # DEPRECATED: Use db_management(operation='vacuum_database') instead
-async def vacuum_database(
-    connection_name: str, analyze: bool = True, full: bool = False
-) -> dict[str, Any]:
+async def vacuum_database(connection_name: str, analyze: bool = True, full: bool = False) -> dict[str, Any]:
     """Run VACUUM on a database to optimize storage.
 
     Args:

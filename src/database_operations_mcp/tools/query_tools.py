@@ -516,9 +516,7 @@ def _apply_query_limit(query: str, limit: int | None, database_type) -> str:
         return query
 
 
-def _generate_sample_query(
-    database_type, table_name: str, database_name: str | None, sample_size: int
-) -> str:
+def _generate_sample_query(database_type, table_name: str, database_name: str | None, sample_size: int) -> str:
     """Generate appropriate sample query based on database type."""
     if database_type in [DatabaseType.POSTGRESQL, DatabaseType.SQLITE]:
         table_ref = f"{database_name}.{table_name}" if database_name else table_name

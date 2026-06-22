@@ -1,7 +1,9 @@
-use std::fs::{self, OpenOptions};
-use std::io::{BufRead, BufReader, Write};
+use std::fs::{self, File, OpenOptions};
+use std::io::Write;
+use std::net::{SocketAddr, TcpStream};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
+use std::str::FromStr;
 use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
@@ -13,11 +15,11 @@ pub struct BackendProcess(pub Mutex<Option<Child>>);
 
 // -- PER-REPO: Customize these constants --
 const BACKEND_NAME: &str = "database-operations-mcp-backend.exe";
-const BACKEND_PORT: u16 = 10708;
+const BACKEND_PORT: u16 = 10709;
 const BACKEND_TAG: &str = "database-operations-mcp-backend-x86_64-pc-windows-msvc.exe";
-const ENV_PORT: &str = "MCP_PORT";
-const ENV_HOST: &str = "MCP_HOST";
-const ENV_TAURI: &str = "DATABASE_OPERATIONS_MCP_TAURI";
+const ENV_PORT: &str = "PORT";
+const ENV_HOST: &str = "HOST";
+const ENV_TAURI: &str = "CORS_ORIGINS";
 
 fn dev_backend_path() -> Option<PathBuf> {
     if !cfg!(debug_assertions) {
@@ -104,7 +106,7 @@ fn free_port(port: u16) {
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .status();
-        thread::sleep(Duration::from_millis(300));
+        thread::sleep(Duration::from_millis(500));
     }
 }
 
@@ -128,8 +130,12 @@ pub fn spawn_backend(app: AppHandle, state: &BackendProcess) -> Result<String, S
 
     log_line(
         &app,
-        &format!("spawning {} (cwd {}) on port 10708",
+        &format!("spawning {} (cwd {}) on port {BACKEND_PORT}",
             backend_path.display(), workdir.display()),
+    );
+
+    let tauri_cors = format!(
+        "http://127.0.0.1:{BACKEND_PORT},http://localhost:{BACKEND_PORT},tauri://localhost,http://tauri.localhost,https://tauri.localhost,null"
     );
 
     let mut command = Command::new(&backend_path);
@@ -137,9 +143,23 @@ pub fn spawn_backend(app: AppHandle, state: &BackendProcess) -> Result<String, S
         .current_dir(&workdir)
         .env(ENV_PORT, BACKEND_PORT.to_string())
         .env(ENV_HOST, "127.0.0.1")
-        .env(ENV_TAURI, "1")
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        .env(ENV_TAURI, &tauri_cors)
+        .stdout(Stdio::null());
+
+    // Redirect stderr to file to prevent stdout/stderr pipe lockups
+    let stderr_path = app.path().app_log_dir().ok().map(|d| {
+        let _ = fs::create_dir_all(&d);
+        d.join("backend-stderr.log")
+    });
+    if let Some(ref p) = stderr_path {
+        if let Ok(f) = File::create(p) {
+            command.stderr(f);
+        } else {
+            command.stderr(Stdio::null());
+        }
+    } else {
+        command.stderr(Stdio::null());
+    }
 
     #[cfg(windows)]
     {
@@ -152,35 +172,28 @@ pub fn spawn_backend(app: AppHandle, state: &BackendProcess) -> Result<String, S
         .spawn()
         .map_err(|e| format!("Failed to spawn {}: {e}", backend_path.display()))?;
 
-    let stdout = child.stdout.take();
-    let stderr = child.stderr.take();
     state.0.lock().unwrap().replace(child);
 
-    if let Some(out) = stdout {
-        let app_handle = app.clone();
-        thread::spawn(move || watch_backend_stream(out, app_handle));
-    }
-    if let Some(err) = stderr {
-        let app_handle = app.clone();
-        thread::spawn(move || watch_backend_stream(err, app_handle));
-    }
-
-    Ok(format!("Backend starting on port 10708"))
-}
-
-fn watch_backend_stream<R: std::io::Read + Send + 'static>(stream: R, app: AppHandle) {
-    let reader = BufReader::new(stream);
-    let mut ready = false;
-    for line in reader.lines().map_while(Result::ok) {
-        log_line(&app, &line);
-        if !ready
-            && (line.contains("Uvicorn running") || line.contains("Application startup complete"))
-        {
-            ready = true;
-            let _ = app.emit("backend-status", "ready");
+    // Poll backend TCP port to confirm it is actually listening
+    let addr = SocketAddr::from_str(&format!("127.0.0.1:{BACKEND_PORT}")).unwrap();
+    let app_health = app.clone();
+    thread::spawn(move || {
+        for attempt in 0..90 {
+            thread::sleep(Duration::from_secs(2));
+            match TcpStream::connect_timeout(&addr, Duration::from_secs(2)) {
+                Ok(_) => {
+                    log_line(&app_health, &format!("Backend health check PASSED on port {BACKEND_PORT} (attempt {})", attempt + 1));
+                    let _ = app_health.emit("backend-status", "ready");
+                    return;
+                }
+                Err(e) => {
+                    log_line(&app_health, &format!("Backend health check: {e} (attempt {})", attempt + 1));
+                }
+            }
         }
-    }
+        log_line(&app_health, &format!("Backend health check FAILED - not listening on port {BACKEND_PORT} after 90 attempts"));
+        let _ = app_health.emit("backend-status", "error: backend not reachable");
+    });
+
+    Ok(format!("Backend starting on port {BACKEND_PORT}"))
 }
-
-
-

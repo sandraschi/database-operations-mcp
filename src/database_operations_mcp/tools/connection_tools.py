@@ -358,10 +358,7 @@ def test_database_connection(connection_name: str) -> dict[str, Any]:
         if test_result.get("success"):
             logger.info(f"Connection test successful for {connection_name}")
         else:
-            logger.warning(
-                f"Connection test failed for {connection_name}: "
-                f"{test_result.get('error', 'Unknown error')}"
-            )
+            logger.warning(f"Connection test failed for {connection_name}: {test_result.get('error', 'Unknown error')}")
 
         return {
             "success": True,
@@ -391,9 +388,7 @@ def test_database_connection(connection_name: str) -> dict[str, Any]:
 
 
 # DEPRECATED: Use db_connection(operation='test_all') instead
-def test_all_database_connections(
-    parallel: bool = True, timeout: float | None = 10.0
-) -> dict[str, Any]:
+def test_all_database_connections(parallel: bool = True, timeout: float | None = 10.0) -> dict[str, Any]:
     """Test connectivity for all registered database connections.
 
     This function tests all registered database connections and provides a summary
@@ -500,10 +495,7 @@ def test_all_database_connections(
             # Create a thread pool for parallel testing
             with ThreadPoolExecutor(max_workers=min(10, len(connection_names))) as executor:
                 # Start all tests
-                future_to_name = {
-                    executor.submit(db_manager.test_connection, name): name
-                    for name in connection_names
-                }
+                future_to_name = {executor.submit(db_manager.test_connection, name): name for name in connection_names}
 
                 # Process results as they complete
                 for future in as_completed(future_to_name, timeout=timeout):
@@ -576,8 +568,7 @@ def test_all_database_connections(
                 "tested": len(test_results),
                 "pending": len(connection_names) - len(test_results),
                 "successful": sum(1 for r in test_results.values() if r.get("success", False)),
-                "failed": len(test_results)
-                - sum(1 for r in test_results.values() if r.get("success", False)),
+                "failed": len(test_results) - sum(1 for r in test_results.values() if r.get("success", False)),
             },
         }
 

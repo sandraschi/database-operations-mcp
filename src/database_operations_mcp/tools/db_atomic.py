@@ -167,9 +167,7 @@ async def execute_database_transaction(
     Returns:
         dict: {"success": bool, "connection_name": str, "rows_affected": int, "transaction_id": str|None, "error": str|None}
     """
-    return await _db_operations._execute_transaction(
-        connection_name=connection_name, query=query, params=params
-    )
+    return await _db_operations._execute_transaction(connection_name=connection_name, query=query, params=params)
 
 
 @mcp.tool()
@@ -184,9 +182,7 @@ async def execute_database_write(
     Returns:
         dict: {"success": bool, "connection_name": str, "rows_affected": int, "last_insert_id": Any, "error": str|None}
     """
-    return await _db_operations._execute_write(
-        connection_name=connection_name, query=query, params=params
-    )
+    return await _db_operations._execute_write(connection_name=connection_name, query=query, params=params)
 
 
 @mcp.tool()
@@ -223,9 +219,7 @@ async def execute_database_query(
     Returns:
         dict: {"success": bool, "connection_name": str, "query": str, "applied_limit": int, "result": {"rows": list, "columns": list, "row_count": int}, "error": str|None}
     """
-    return await _db_operations._execute_query(
-        connection_name=connection_name, query=query, params=params, limit=limit
-    )
+    return await _db_operations._execute_query(connection_name=connection_name, query=query, params=params, limit=limit)
 
 
 @mcp.tool()
@@ -240,9 +234,7 @@ async def quick_table_data_sample(
     Returns:
         dict: {"success": bool, "connection_name": str, "table_name": str, "sample_size": int, "generated_query": str, "result": {"rows": list, "columns": list, "row_count": int}}
     """
-    return await _db_operations._quick_data_sample(
-        connection_name=connection_name, table_name=table_name, limit=limit
-    )
+    return await _db_operations._quick_data_sample(connection_name=connection_name, table_name=table_name, limit=limit)
 
 
 @mcp.tool()

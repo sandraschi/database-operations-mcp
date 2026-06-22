@@ -99,4 +99,3 @@ WindowsSystemOperation = Literal[
     "delete_registry_key",
     "registry_key_exists",
 ]
-

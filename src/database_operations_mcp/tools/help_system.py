@@ -340,9 +340,7 @@ async def _get_tool_help(
             "include_parameters": include_parameters,
             "format_output": format_output,
             "tool_help": tool_help_data.get("tool", {}),
-            "error": tool_help_data.get("error")
-            if tool_help_data.get("status") == "error"
-            else None,
+            "error": tool_help_data.get("error") if tool_help_data.get("status") == "error" else None,
         }
     except Exception as e:
         logger.error(f"Error getting tool help: {e}", exc_info=True)

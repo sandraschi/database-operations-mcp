@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from database_operations_mcp.database_manager import ConnectionError, QueryError
+from database_operations_mcp.database_manager import DatabaseConnectionError, QueryError
 from database_operations_mcp.services.database.connectors.sqlite_connector import SQLiteConnector
 
 
@@ -47,9 +47,7 @@ class TestSQLiteConnectorMethods:
         # Insert test data
         cursor.execute("INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com')")
         cursor.execute("INSERT INTO users (name, email) VALUES ('Jane Smith', 'jane@example.com')")
-        cursor.execute(
-            "INSERT INTO posts (title, content, user_id) VALUES ('Test Post', 'Content here', 1)"
-        )
+        cursor.execute("INSERT INTO posts (title, content, user_id) VALUES ('Test Post', 'Content here', 1)")
 
         conn.commit()
         conn.close()
@@ -179,7 +177,7 @@ class TestSQLiteConnectorMethods:
         """Test list_tables error handling."""
         # Test with non-existent database path
         sqlite_connector.database_path = "C:\\nonexistent\\path\\that\\cannot\\be\\created.db"
-        with pytest.raises(ConnectionError):
+        with pytest.raises(DatabaseConnectionError):
             await sqlite_connector.list_tables()
 
     @pytest.mark.asyncio
@@ -187,5 +185,5 @@ class TestSQLiteConnectorMethods:
         """Test get_table_schema error handling."""
         # Test with non-existent database path
         sqlite_connector.database_path = "C:\\nonexistent\\path\\that\\cannot\\be\\created.db"
-        with pytest.raises(ConnectionError):
+        with pytest.raises(DatabaseConnectionError):
             await sqlite_connector.get_table_schema("users")

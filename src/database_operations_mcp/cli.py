@@ -89,9 +89,7 @@ def list_databases(connection_string: str, database_type: str, output_format: st
                 table.add_column("Size", style="yellow")
 
                 for db in databases:
-                    table.add_row(
-                        db.get("name", "N/A"), db.get("type", "N/A"), str(db.get("size", "N/A"))
-                    )
+                    table.add_row(db.get("name", "N/A"), db.get("type", "N/A"), str(db.get("size", "N/A")))
 
                 console.print(table)
 
@@ -118,9 +116,7 @@ def list_databases(connection_string: str, database_type: str, output_format: st
     default="table",
     help="Output format",
 )
-def list_tables(
-    connection_string: str, database_type: str, database_name: str | None, output_format: str
-):
+def list_tables(connection_string: str, database_type: str, database_name: str | None, output_format: str):
     """List all tables in a database."""
 
     async def _list_tables():
@@ -141,10 +137,7 @@ def list_tables(
                 console.print(json.dumps(tables, indent=2))
             elif output_format == "csv":
                 for table in tables:
-                    console.print(
-                        f"{table.get('name', '')},{table.get('type', '')},"
-                        f"{table.get('row_count', '')}"
-                    )
+                    console.print(f"{table.get('name', '')},{table.get('type', '')},{table.get('row_count', '')}")
             else:
                 # Table format
                 table = Table(title=f"Tables in {database_name or 'database'}")
@@ -212,10 +205,7 @@ def describe_table(
                 console.print(json.dumps(schema, indent=2))
             elif output_format == "csv":
                 for column in schema.get("columns", []):
-                    console.print(
-                        f"{column.get('name', '')},{column.get('type', '')},"
-                        f"{column.get('nullable', '')}"
-                    )
+                    console.print(f"{column.get('name', '')},{column.get('type', '')},{column.get('nullable', '')}")
             else:
                 # Table format
                 table = Table(title=f"Schema for {table_name}")
@@ -289,13 +279,9 @@ def health():
     try:
         profiles = get_profiles()
         if profiles.get("success"):
-            console.print(
-                f"[green]OK Firefox: {len(profiles.get('profiles', []))} profiles found[/green]"
-            )
+            console.print(f"[green]OK Firefox: {len(profiles.get('profiles', []))} profiles found[/green]")
         else:
-            console.print(
-                f"[yellow]WARN Firefox: {profiles.get('error', 'Not available')}[/yellow]"
-            )
+            console.print(f"[yellow]WARN Firefox: {profiles.get('error', 'Not available')}[/yellow]")
     except Exception as e:
         console.print(f"[yellow]WARN Firefox: {e}[/yellow]")
 

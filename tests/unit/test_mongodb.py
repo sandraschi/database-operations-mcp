@@ -15,9 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
 from database_operations_mcp.services.database.connectors.mongodb_connector import MongoDBConnector
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -64,9 +62,7 @@ def test_mongodb_connection(mongodb_config):
             result = connector.execute_query(query, db_name, collection_name)
             logger.info(f"Found {result.get('count', 0)} documents")
             if result.get("results"):
-                logger.info(
-                    f"Sample document: {json.dumps(result['results'][0], indent=2, default=str)}"
-                )
+                logger.info(f"Sample document: {json.dumps(result['results'][0], indent=2, default=str)}")
 
             # Test insert one
             test_doc = {

@@ -1,8 +1,14 @@
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { callTool } from "@/common/api";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 type ConnectionConfig = Record<string, string>;
 
@@ -54,15 +60,21 @@ export function ConnectionManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">Connection Manager</h2>
-        <p className="text-slate-400">Register, list, and validate database connections.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-white">
+          Connection Manager
+        </h2>
+        <p className="text-slate-400">
+          Register, list, and validate database connections.
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-slate-800 bg-slate-950/50">
           <CardHeader>
             <CardTitle className="text-white">Register Connection</CardTitle>
-            <CardDescription className="text-slate-400">Uses `db_connection` register operation.</CardDescription>
+            <CardDescription className="text-slate-400">
+              Uses `db_connection` register operation.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <input
@@ -107,7 +119,9 @@ export function ConnectionManager() {
                 onClick={() => registerMutation.mutate()}
                 disabled={!connectionName.trim() || registerMutation.isPending}
               >
-                {registerMutation.isPending ? "Registering..." : "Register + test"}
+                {registerMutation.isPending
+                  ? "Registering..."
+                  : "Register + test"}
               </Button>
               <Button
                 variant="outline"
@@ -128,7 +142,11 @@ export function ConnectionManager() {
           </CardHeader>
           <CardContent>
             <pre className="max-h-[520px] overflow-auto rounded border border-slate-800 bg-slate-900/40 p-3 text-xs text-slate-300">
-              {JSON.stringify(result ?? { note: "Run an action to see output." }, null, 2)}
+              {JSON.stringify(
+                result ?? { note: "Run an action to see output." },
+                null,
+                2,
+              )}
             </pre>
           </CardContent>
         </Card>

@@ -140,9 +140,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
                 {
                     "name": "chromadb_instance",
                     "type": "vector_database",
-                    "connection_type": "local_persistent"
-                    if self.persist_directory
-                    else "remote_server",
+                    "connection_type": "local_persistent" if self.persist_directory else "remote_server",
                     "location": self.persist_directory or f"{self.host}:{self.port}",
                 }
             ]
@@ -277,9 +275,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             collection = self.client.get_collection(collection_name)
 
             if query_texts:
-                results = collection.query(
-                    query_texts=query_texts, n_results=n_results, where=where
-                )
+                results = collection.query(query_texts=query_texts, n_results=n_results, where=where)
             else:
                 # Get all documents if no query specified
                 results = collection.get(limit=n_results, where=where)
@@ -392,9 +388,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
                     "total_collections": len(collections),
                     "total_documents": total_documents,
                     "collection_stats": collection_stats,
-                    "connection_type": "local_persistent"
-                    if self.persist_directory
-                    else "remote_server",
+                    "connection_type": "local_persistent" if self.persist_directory else "remote_server",
                 },
                 "performance_status": "healthy",
                 "timestamp": datetime.now().isoformat(),

@@ -291,9 +291,7 @@ async def list_connections() -> dict[str, Any]:
             )
         except Exception as e:
             logger.error(f"Error checking connection {name}: {e}")
-            connections.append(
-                {"name": name, "type": conn_info["type"], "status": "error", "error": str(e)}
-            )
+            connections.append({"name": name, "type": conn_info["type"], "status": "error", "error": str(e)})
 
     return {"status": "success", "connections": connections, "total_connections": len(connections)}
 
@@ -387,8 +385,7 @@ async def restore_saved_connections(auto_reconnect: bool = False) -> dict[str, A
             "status": "success",
             "saved_connections": saved_connections,
             "reconnected": reconnected,
-            "message": f"Found {len(saved_connections)} saved connections, "
-            f"reconnected {len(reconnected)}",
+            "message": f"Found {len(saved_connections)} saved connections, reconnected {len(reconnected)}",
         }
     except Exception as e:
         logger.error(f"Error restoring saved connections: {e}")

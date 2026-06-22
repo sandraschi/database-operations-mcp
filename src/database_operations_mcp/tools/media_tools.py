@@ -176,9 +176,7 @@ async def export_database_schema(
         cursor = conn.cursor()
 
         # Get list of tables
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
         all_tables = [row[0] for row in cursor.fetchall()]
 
         # Filter tables if specified
@@ -220,9 +218,7 @@ async def export_database_schema(
 
 
 # DEPRECATED: Use media_library portmanteau instead
-async def get_plex_library_stats(
-    db_path: str | None = None, detailed: bool = False
-) -> dict[str, Any]:
+async def get_plex_library_stats(db_path: str | None = None, detailed: bool = False) -> dict[str, Any]:
     """Get statistics about the Plex library.
 
     Args:
@@ -285,9 +281,7 @@ async def get_plex_library_stats(
                 ORDER BY added_at DESC
                 LIMIT 10
             """)
-            stats["recently_added"] = [
-                {"title": row[0], "added_at": row[1]} for row in cursor.fetchall()
-            ]
+            stats["recently_added"] = [{"title": row[0], "added_at": row[1]} for row in cursor.fetchall()]
 
         return {"status": "success", "stats": stats, "database": db_path}
 
@@ -310,12 +304,10 @@ PLEX_DB_PATHS = {
         "/var/lib/plexmediaserver/Library/Application Support/"
         "Plex Media Server/Plug-in Support/Databases/"
         "com.plexapp.plugins.library.db",
-        "~/Library/Application Support/Plex Media Server/"
-        "Plug-in Support/Databases/com.plexapp.plugins.library.db",
+        "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
     ],
     "macos": [
-        "~/Library/Application Support/Plex Media Server/"
-        "Plug-in Support/Databases/com.plexapp.plugins.library.db"
+        "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db"
     ],
 }
 
@@ -403,9 +395,7 @@ def _export_to_csv(cursor, tables, output_file, include_data):
         cursor.execute(f"SELECT * FROM {table} LIMIT 0")  # noqa: S608  # trusted table name from schema
         columns = [desc[0] for desc in cursor.description]
 
-        with open(
-            Path(output_file).parent / f"{table}.csv", "w", newline="", encoding="utf-8"
-        ) as f:
+        with open(Path(output_file).parent / f"{table}.csv", "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(columns)
 

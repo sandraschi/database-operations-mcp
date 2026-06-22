@@ -101,7 +101,9 @@ export interface LogQueryParams {
   after_id?: string;
 }
 
-const API = "/api";
+import { API_BASE } from "../lib/api";
+
+const API = API_BASE ? `${API_BASE}/api` : "/api";
 
 export async function getHealth(): Promise<HealthResponse> {
   const r = await fetch(`${API}/health`);
@@ -121,7 +123,10 @@ export async function getCapabilities(): Promise<CapabilitiesResponse> {
   return r.json();
 }
 
-export async function callTool(name: string, args: Record<string, unknown>): Promise<ToolCallResponse> {
+export async function callTool(
+  name: string,
+  args: Record<string, unknown>,
+): Promise<ToolCallResponse> {
   const r = await fetch(`${API}/tools/call`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -146,7 +151,9 @@ function buildLogParams(params: LogQueryParams): string {
   return q.toString();
 }
 
-export async function queryLogs(params: LogQueryParams = {}): Promise<LogsQueryResponse> {
+export async function queryLogs(
+  params: LogQueryParams = {},
+): Promise<LogsQueryResponse> {
   const qs = buildLogParams(params);
   const r = await fetch(`${API}/logs${qs ? `?${qs}` : ""}`);
   if (!r.ok) throw new Error(`Logs query failed: ${r.status}`);
@@ -169,7 +176,9 @@ export async function downloadLogsExport(
   filters: Omit<LogQueryParams, "limit" | "offset" | "after_id"> = {},
 ): Promise<void> {
   const q = buildLogParams({ ...filters, limit: undefined, offset: undefined });
-  const r = await fetch(`${API}/logs/export?format=${format}${q ? `&${q}` : ""}`);
+  const r = await fetch(
+    `${API}/logs/export?format=${format}${q ? `&${q}` : ""}`,
+  );
   if (!r.ok) throw new Error(`Export failed: ${r.status}`);
   const blob = await r.blob();
   const url = URL.createObjectURL(blob);

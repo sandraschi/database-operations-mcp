@@ -138,9 +138,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             self.status = ConnectionStatus.CONNECTED
             self.last_error = None
 
-            logger.info(
-                f"Connected to PostgreSQL database: {self.host}:{self.port}/{self.database}"
-            )
+            logger.info(f"Connected to PostgreSQL database: {self.host}:{self.port}/{self.database}")
             return True
 
         except Exception as e:
@@ -159,9 +157,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             self.status = ConnectionStatus.DISCONNECTED
             self.last_error = None
 
-            logger.info(
-                f"Disconnected from PostgreSQL database: {self.host}:{self.port}/{self.database}"
-            )
+            logger.info(f"Disconnected from PostgreSQL database: {self.host}:{self.port}/{self.database}")
             return True
 
         except Exception as e:
@@ -210,9 +206,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                             "name": row["database_name"],
                             "owner": row["owner"],
                             "size_bytes": row["size_bytes"],
-                            "size_mb": round(row["size_bytes"] / (1024 * 1024), 2)
-                            if row["size_bytes"]
-                            else 0,
+                            "size_mb": round(row["size_bytes"] / (1024 * 1024), 2) if row["size_bytes"] else 0,
                             "collation": row["collation"],
                             "character_type": row["character_type"],
                             "is_template": row["is_template"],
@@ -534,9 +528,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
             return {
                 "database_metrics": metrics,
-                "performance_status": "healthy"
-                if metrics.get("cache_hit_ratio", 0) > 95
-                else "needs_tuning",
+                "performance_status": "healthy" if metrics.get("cache_hit_ratio", 0) > 95 else "needs_tuning",
                 "timestamp": datetime.now().isoformat(),
             }
 

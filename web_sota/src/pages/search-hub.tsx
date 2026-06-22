@@ -1,8 +1,14 @@
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { callTool } from "@/common/api";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export function SearchHub() {
   const [query, setQuery] = useState("");
@@ -53,14 +59,20 @@ export function SearchHub() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">Search Hub</h2>
-        <p className="text-slate-400">Unified search across Calibre and browser bookmarks.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-white">
+          Search Hub
+        </h2>
+        <p className="text-slate-400">
+          Unified search across Calibre and browser bookmarks.
+        </p>
       </div>
 
       <Card className="border-slate-800 bg-slate-950/50">
         <CardHeader>
           <CardTitle className="text-white">Query</CardTitle>
-          <CardDescription className="text-slate-400">Run cross-domain search with pagination.</CardDescription>
+          <CardDescription className="text-slate-400">
+            Run cross-domain search with pagination.
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           <input
@@ -107,7 +119,9 @@ export function SearchHub() {
               Search both sources
             </Button>
           </div>
-          {error && <p className="md:col-span-2 text-sm text-red-400">{error}</p>}
+          {error && (
+            <p className="md:col-span-2 text-sm text-red-400">{error}</p>
+          )}
         </CardContent>
       </Card>
 
@@ -118,7 +132,11 @@ export function SearchHub() {
           </CardHeader>
           <CardContent>
             <pre className="max-h-[420px] overflow-auto rounded border border-slate-800 bg-slate-900/40 p-3 text-xs text-slate-300">
-              {JSON.stringify(mediaResult ?? { note: "Run search to populate." }, null, 2)}
+              {JSON.stringify(
+                mediaResult ?? { note: "Run search to populate." },
+                null,
+                2,
+              )}
             </pre>
           </CardContent>
         </Card>
@@ -128,7 +146,11 @@ export function SearchHub() {
           </CardHeader>
           <CardContent>
             <pre className="max-h-[420px] overflow-auto rounded border border-slate-800 bg-slate-900/40 p-3 text-xs text-slate-300">
-              {JSON.stringify(bookmarkResult ?? { note: "Run search to populate." }, null, 2)}
+              {JSON.stringify(
+                bookmarkResult ?? { note: "Run search to populate." },
+                null,
+                2,
+              )}
             </pre>
           </CardContent>
         </Card>

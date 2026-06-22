@@ -227,9 +227,7 @@ async def system_init(
     """
 
     if operation == "init_database":
-        return await _init_database(
-            database_type, connection_config, test_connection, create_tables, initialize_data
-        )
+        return await _init_database(database_type, connection_config, test_connection, create_tables, initialize_data)
     elif operation == "setup_system":
         return await _setup_system(create_tables, initialize_data, setup_help_system, verbose)
     elif operation == "verify_installation":

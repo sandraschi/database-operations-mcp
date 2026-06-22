@@ -125,9 +125,7 @@ async def db_analyzer(
         return result
 
     if operation == "report":
-        report = await _report_generator.generate_report(
-            db_file_path, include_samples=include_sample_data
-        )
+        report = await _report_generator.generate_report(db_file_path, include_samples=include_sample_data)
         return {
             "success": True,
             "operation": operation,

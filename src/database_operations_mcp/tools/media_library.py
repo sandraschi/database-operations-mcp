@@ -385,23 +385,15 @@ async def media_library(
             library_path, book_title, author, search_query, include_metadata, limit, offset
         )
     elif operation == "get_calibre_book_metadata":
-        return await _get_calibre_book_metadata(
-            library_path, book_title, author, include_metadata
-        )
+        return await _get_calibre_book_metadata(library_path, book_title, author, include_metadata)
     elif operation == "search_calibre_fts":
-        return await _search_calibre_fts(
-            library_path, search_query, limit=limit, offset=offset
-        )
+        return await _search_calibre_fts(library_path, search_query, limit=limit, offset=offset)
     elif operation == "search_calibre_fts_db":
-        return await _search_calibre_fts_db(
-            library_path, search_query, include_metadata, limit=limit, offset=offset
-        )
+        return await _search_calibre_fts_db(library_path, search_query, include_metadata, limit=limit, offset=offset)
     elif operation == "find_plex_database":
         return await _find_plex_database(plex_server_url)
     elif operation == "optimize_plex_database":
-        return await _optimize_plex_database(
-            plex_server_url, plex_token, optimize_database
-        )
+        return await _optimize_plex_database(plex_server_url, plex_token, optimize_database)
     elif operation == "export_database_schema":
         return await _export_database_schema(library_path, export_format, export_path)
     elif operation == "get_plex_library_stats":
@@ -629,9 +621,7 @@ async def _search_calibre_fts(
 ) -> dict[str, Any]:
     """Perform full-text search in Calibre library."""
     # Deflecting to _search_calibre_fts_db as it is the same functionality
-    return await _search_calibre_fts_db(
-        library_path, search_query, include_metadata=True, limit=limit, offset=offset
-    )
+    return await _search_calibre_fts_db(library_path, search_query, include_metadata=True, limit=limit, offset=offset)
 
 
 async def _search_calibre_fts_db(
@@ -725,10 +715,7 @@ async def _search_calibre_fts_db(
                         book_ids,
                     )
 
-                    book_metadata = {
-                        row[0]: {"title": row[1], "author": row[2]}
-                        for row in meta_cursor.fetchall()
-                    }
+                    book_metadata = {row[0]: {"title": row[1], "author": row[2]} for row in meta_cursor.fetchall()}
 
                 meta_conn.close()
             except Exception as e:
@@ -1057,16 +1044,10 @@ async def _get_plex_library_stats(
 
             stats = {}
             if target_section:
-                items = plex.get_media_items(
-                    section_id=target_section["id"], limit=10000
-                )
+                items = plex.get_media_items(section_id=target_section["id"], limit=10000)
                 stats = {
                     "total_items": len(items),
-                    "total_size_bytes": sum(
-                        item.get("file_size", 0)
-                        for item in items
-                        if item.get("file_size")
-                    ),
+                    "total_size_bytes": sum(item.get("file_size", 0) for item in items if item.get("file_size")),
                     "section_type": target_section["section_type"],
                     "created_at": target_section["created_at"],
                 }
@@ -1077,11 +1058,7 @@ async def _get_plex_library_stats(
                 for s in sections:
                     sec_items = plex.get_media_items(section_id=s["id"], limit=10000)
                     total_items += len(sec_items)
-                    total_size += sum(
-                        item.get("file_size", 0)
-                        for item in sec_items
-                        if item.get("file_size")
-                    )
+                    total_size += sum(item.get("file_size", 0) for item in sec_items if item.get("file_size"))
 
                 stats = {
                     "total_sections": len(sections),
@@ -1106,9 +1083,7 @@ async def _get_plex_library_stats(
         }
 
 
-async def _get_plex_library_sections(
-    plex_server_url: str | None, plex_token: str | None
-) -> dict[str, Any]:
+async def _get_plex_library_sections(plex_server_url: str | None, plex_token: str | None) -> dict[str, Any]:
     """Get information about Plex library sections."""
     try:
         from database_operations_mcp.tools.plex_tools import PlexDatabase

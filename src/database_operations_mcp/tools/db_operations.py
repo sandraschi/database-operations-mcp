@@ -16,9 +16,7 @@ from database_operations_mcp.tool_responses import (
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
-ENABLE_LEGACY_DB_PORTMANTEAU = (
-    os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
-)
+ENABLE_LEGACY_DB_PORTMANTEAU = os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
 
 
 def _legacy_tool_decorator():
@@ -373,9 +371,7 @@ async def db_operations(
     elif operation == "quick_data_sample":
         result = await _quick_data_sample(connection_name, table_name, limit)
     elif operation == "export_query_results":
-        result = await _export_query_results(
-            connection_name, query, params, output_format, output_path
-        )
+        result = await _export_query_results(connection_name, query, params, output_format, output_path)
     else:
         return unknown_operation_response(
             operation,
@@ -409,9 +405,7 @@ async def db_operations(
     return {"content": summary, "data": result}
 
 
-async def _execute_transaction(
-    connection_name: str, query: str, params: dict[str, Any] | None
-) -> dict[str, Any]:
+async def _execute_transaction(connection_name: str, query: str, params: dict[str, Any] | None) -> dict[str, Any]:
     """Execute a database transaction with multiple operations."""
     try:
         if not connection_name:
@@ -442,9 +436,7 @@ async def _execute_transaction(
         }
 
 
-async def _execute_write(
-    connection_name: str, query: str, params: dict[str, Any] | None
-) -> dict[str, Any]:
+async def _execute_write(connection_name: str, query: str, params: dict[str, Any] | None) -> dict[str, Any]:
     """Execute write operations (INSERT, UPDATE, DELETE)."""
     try:
         if not connection_name:
@@ -555,9 +547,7 @@ async def _execute_query(
         }
 
 
-async def _quick_data_sample(
-    connection_name: str | None, table_name: str | None, limit: int
-) -> dict[str, Any]:
+async def _quick_data_sample(connection_name: str | None, table_name: str | None, limit: int) -> dict[str, Any]:
     """Get a quick sample of data from a table."""
     try:
         if not connection_name:
@@ -631,9 +621,7 @@ async def _export_query_results(
 
                     json.dump(formatted_data, f, indent=2)
                 else:
-                    f.write(
-                        formatted_data if isinstance(formatted_data, str) else str(formatted_data)
-                    )
+                    f.write(formatted_data if isinstance(formatted_data, str) else str(formatted_data))
 
         return {
             "success": True,

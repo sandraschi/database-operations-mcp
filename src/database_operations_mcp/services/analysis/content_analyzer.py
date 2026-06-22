@@ -31,9 +31,7 @@ class ContentAnalyzer:
             "unix_timestamp": re.compile(r"^\d{10,11}$"),
         }
 
-    async def sample_content(
-        self, db_path: str, table_name: str, limit: int = 10
-    ) -> dict[str, Any]:
+    async def sample_content(self, db_path: str, table_name: str, limit: int = 10) -> dict[str, Any]:
         """Get sample data from a table.
 
         Retrieves a representative sample of rows from the table for analysis
@@ -113,9 +111,7 @@ class ContentAnalyzer:
             if detected_patterns:
                 patterns[col_name] = {
                     "detected_patterns": list(set(detected_patterns)),
-                    "confidence": len(set(detected_patterns)) / len(sample_values)
-                    if sample_values
-                    else 0,
+                    "confidence": len(set(detected_patterns)) / len(sample_values) if sample_values else 0,
                     "sample_values": sample_values,
                 }
 
@@ -142,9 +138,7 @@ class ContentAnalyzer:
                 "unique_value_count": stats["unique_values"],
                 "null_count": stats["null_count"],
                 "non_null_count": stats["non_null_count"],
-                "unique_ratio": stats["unique_values"] / stats["non_null_count"]
-                if stats["non_null_count"] > 0
-                else 0,
+                "unique_ratio": stats["unique_values"] / stats["non_null_count"] if stats["non_null_count"] > 0 else 0,
                 "sample_unique_values": stats["sample_values"][:10],
             }
 

@@ -114,9 +114,7 @@ class ToolTester:
                 if stripped.startswith("@mcp.tool"):
                     # Check indentation of MCP decorator
                     line_indent = len(line) - len(line.lstrip())
-                    analysis["mcp_decorators"].append(
-                        {"line": i, "indentation": line_indent, "text": stripped}
-                    )
+                    analysis["mcp_decorators"].append({"line": i, "indentation": line_indent, "text": stripped})
 
                     # Check if this decorator is incorrectly indented
                     if line_indent > 0:
@@ -130,9 +128,7 @@ class ToolTester:
 
                 if stripped.startswith("def ") or stripped.startswith("async def "):
                     line_indent = len(line) - len(line.lstrip())
-                    func_name = (
-                        stripped.split("(")[0].replace("def ", "").replace("async ", "").strip()
-                    )
+                    func_name = stripped.split("(")[0].replace("def ", "").replace("async ", "").strip()
 
                     analysis["function_definitions"].append(
                         {
@@ -156,8 +152,7 @@ class ToolTester:
                 if bad_decorators:
                     analysis["fastmcp_compliance"] = "non_compliant"
                     analysis["compliance_issues"] = [
-                        f"MCP decorators on lines {[d['line'] for d in bad_decorators]} "
-                        f"are incorrectly indented"
+                        f"MCP decorators on lines {[d['line'] for d in bad_decorators]} are incorrectly indented"
                     ]
                 else:
                     analysis["fastmcp_compliance"] = "compliant"
@@ -213,9 +208,7 @@ class ToolTester:
                         if func_info["module"] == module_full_name:
                             result["functions"].append(func_info)
                     elif inspect.isclass(obj):
-                        result["classes"].append(
-                            {"name": name, "module": getattr(obj, "__module__", "unknown")}
-                        )
+                        result["classes"].append({"name": name, "module": getattr(obj, "__module__", "unknown")})
 
         except Exception as e:
             result["import_error"] = str(e)
@@ -252,9 +245,7 @@ class ToolTester:
 
                 # Count functions and MCP decorators
                 self.results["summary"]["total_functions"] += len(result["functions"])
-                self.results["summary"]["mcp_decorated_functions"] += len(
-                    result["source_analysis"]["mcp_decorators"]
-                )
+                self.results["summary"]["mcp_decorated_functions"] += len(result["source_analysis"]["mcp_decorators"])
 
         # Generate FastMCP compliance analysis
         self.analyze_fastmcp_compliance()
@@ -293,10 +284,8 @@ class ToolTester:
         if issues:
             recommendations.extend(
                 [
-                    "Fix indentation: MCP decorators (@mcp.tool()) should be at "
-                    "module level (no indentation)",
-                    "Fix function definitions: Functions should be defined at "
-                    "module level after decorators",
+                    "Fix indentation: MCP decorators (@mcp.tool()) should be at module level (no indentation)",
+                    "Fix function definitions: Functions should be defined at module level after decorators",
                     "Fix imports: Use absolute imports instead of relative imports where possible",
                     "Ensure proper FastMCP 2.10.1+ structure",
                     "Test each module individually after fixes",
@@ -370,9 +359,7 @@ class ToolTester:
                     report_lines.append(f"  MCP Decorators: {len(analysis['mcp_decorators'])}")
 
                 if analysis["indentation_issues"]:
-                    report_lines.append(
-                        f"  ❌ Indentation Issues: {len(analysis['indentation_issues'])}"
-                    )
+                    report_lines.append(f"  ❌ Indentation Issues: {len(analysis['indentation_issues'])}")
 
         # Save reports
         report_path = OUTPUT_DIR / "comprehensive_test_report.txt"

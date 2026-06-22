@@ -66,9 +66,7 @@ async def sqlite_inspect_db(db_path: str) -> dict[str, Any]:
 
 
 # @mcp.tool()
-async def sqlite_get_table_data(
-    db_path: str, table_name: str, limit: int = 100, offset: int = 0
-) -> dict[str, Any]:
+async def sqlite_get_table_data(db_path: str, table_name: str, limit: int = 100, offset: int = 0) -> dict[str, Any]:
     """Get raw data from a specific table in an arbitrary SQLite database (Read-Only).
 
     Args:
@@ -116,9 +114,7 @@ async def sqlite_get_table_schema(db_path: str, table_name: str) -> dict[str, An
 
         # Also get CREATE TABLE statement
         cursor = connector.connection.cursor()
-        cursor.execute(
-            "SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table_name,)
-        )
+        cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
         row = cursor.fetchone()
         create_sql = row[0] if row else ""
 

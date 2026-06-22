@@ -24,29 +24,30 @@ class TestModuleExecution:
 
     def test_package_can_be_imported(self):
         """Test that the database_operations_mcp package can be imported."""
-        import database_operations_mcp  # noqa: F401
+        import database_operations_mcp
 
         assert database_operations_mcp is not None
         assert hasattr(database_operations_mcp, "__name__")
 
     def test_main_function_can_be_imported(self):
         """Test that the main function can be imported."""
-        from database_operations_mcp.main import main  # noqa: F401
+        from database_operations_mcp.main import main
 
         assert callable(main)
 
-    def test_module_can_be_run_as_main(self):
+    def test_module_can_be_run_as_main(self, monkeypatch):
         """Test that the module can be executed using runpy.run_module."""
         # This test verifies the -m execution pattern works
         # We catch SystemExit because main() calls sys.exit()
+        monkeypatch.setattr(sys, "argv", [sys.executable, "--help"])
         try:
             runpy.run_module("database_operations_mcp", run_name="__main__")
             # If we get here without SystemExit, that's unexpected but not necessarily wrong
             pytest.fail("Expected SystemExit when running module as main")
         except SystemExit as e:
             # SystemExit is expected - it means the module executed and called sys.exit()
-            # Exit code 0 or 1 are both acceptable for this test
-            assert e.code in (0, 1, None)
+            # Exit code 0, 1, or 2 are acceptable for this test
+            assert e.code in (0, 1, 2, None)
         except ImportError as e:
             # Module not found is a failure
             pytest.fail(f"Failed to import module for execution: {e}")

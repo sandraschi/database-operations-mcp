@@ -64,9 +64,7 @@ class ReportGenerator:
 
         # Health Summary
         report.append("## Health Summary\n")
-        report.append(
-            f"**Overall Score:** {health['overall_score']}/100 ({health['health_status']})\n"
-        )
+        report.append(f"**Overall Score:** {health['overall_score']}/100 ({health['health_status']})\n")
         report.append(f"- Integrity: {health['integrity_score']}/100\n")
         report.append(f"- Corruption: {health['corruption_score']}/100\n")
         report.append(f"- Logical: {health['logical_score']}/100\n")
@@ -76,9 +74,7 @@ class ReportGenerator:
         if health["total_issues"] > 0:
             report.append("### Issues Found\n")
             for issue in health["issues"]:
-                report.append(
-                    f"- **{issue['severity'].upper()}** ({issue['type']}): {issue['message']}\n"
-                )
+                report.append(f"- **{issue['severity'].upper()}** ({issue['type']}): {issue['message']}\n")
 
         # Recommendations
         if health["recommendations"]:

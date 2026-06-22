@@ -23,6 +23,18 @@ def test_repo(tmp_path):
     # Create some files to exclude
     (repo_path / ".venv").mkdir()
     (repo_path / ".venv" / "file.txt").write_text("should be excluded")
+    (repo_path / ".gitignore").write_text(".venv/\n")
+
+    # Initialize Git repository and commit files
+    import subprocess
+
+    subprocess.run(["git", "init"], cwd=str(repo_path), capture_output=True, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"], cwd=str(repo_path), capture_output=True, check=True
+    )
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=str(repo_path), capture_output=True, check=True)
+    subprocess.run(["git", "add", "."], cwd=str(repo_path), capture_output=True, check=True)
+    subprocess.run(["git", "commit", "-m", "initial commit"], cwd=str(repo_path), capture_output=True, check=True)
 
     return repo_path
 
@@ -65,6 +77,15 @@ class TestBackupScriptFlags:
 
     def test_whatif_flag(self, backup_script, test_repo):
         """Test -WhatIf flag shows dry-run output without creating files."""
+        # Clean up existing backups in case previous runs left them
+        desktop_backup = Path.home() / "Desktop" / "repo backup" / "test-repo"
+        if desktop_backup.exists():
+            for f in desktop_backup.glob("*.zip"):
+                try:
+                    f.unlink()
+                except Exception:
+                    pass
+
         result = run_powershell_script(backup_script, "-WhatIf", cwd=test_repo)
 
         assert result.returncode == 0, f"Script failed: {result.stderr}"
@@ -94,9 +115,7 @@ class TestBackupScriptFlags:
 
     def test_json_output_format(self, backup_script, test_repo):
         """Test -OutputFormat JSON produces valid JSON."""
-        result = run_powershell_script(
-            backup_script, "-WhatIf", "-OutputFormat", "json", cwd=test_repo
-        )
+        result = run_powershell_script(backup_script, "-WhatIf", "-OutputFormat", "json", cwd=test_repo)
 
         assert result.returncode == 0, f"Script failed: {result.stderr}"
 
@@ -138,11 +157,7 @@ class TestBackupScriptErrors:
 
         # Should error or at least not create backups
         # (Some versions might just create empty backups)
-        assert (
-            "Error" in result.stdout
-            or "Must run from repository root" in result.stdout
-            or result.returncode != 0
-        )
+        assert "Error" in result.stdout or "Must run from repository root" in result.stdout or result.returncode != 0
 
 
 class TestBackupScriptIntegration:
@@ -199,9 +214,7 @@ class TestBackupScriptValidation:
 
     def test_invalid_output_format(self, backup_script, test_repo):
         """Test invalid OutputFormat is rejected."""
-        result = run_powershell_script(
-            backup_script, "-WhatIf", "-OutputFormat", "invalid", cwd=test_repo
-        )
+        result = run_powershell_script(backup_script, "-WhatIf", "-OutputFormat", "invalid", cwd=test_repo)
 
         # Should error or use default
         # PowerShell ValidateSet should reject invalid values
@@ -212,6 +225,19 @@ class TestBackupScriptValidation:
         empty_repo = tmp_path / "empty-repo"
         empty_repo.mkdir()
         (empty_repo / "pyproject.toml").write_text("[project]\nname = 'empty'")
+        (empty_repo / ".gitignore").write_text(".venv/\n")
+
+        import subprocess
+
+        subprocess.run(["git", "init"], cwd=str(empty_repo), capture_output=True, check=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@example.com"], cwd=str(empty_repo), capture_output=True, check=True
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test User"], cwd=str(empty_repo), capture_output=True, check=True
+        )
+        subprocess.run(["git", "add", "."], cwd=str(empty_repo), capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "initial commit"], cwd=str(empty_repo), capture_output=True, check=True)
 
         result = run_powershell_script(backup_script, "-WhatIf", cwd=empty_repo)
 

@@ -80,9 +80,7 @@ class SQLiteConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from SQLite database: {e}")
             return False
 
-    async def execute_query(
-        self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any
-    ) -> QueryResult:
+    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
         """Execute query and return results."""
         try:
             if not self.connection:
@@ -208,7 +206,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                 "column_count": len(columns),
             }
 
-        except ConnectionError:
+        except DatabaseConnectionError:
             # Re-raise connection errors as-is
             raise
         except Exception as e:
@@ -282,7 +280,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                 )
 
             return tables
-        except ConnectionError:
+        except DatabaseConnectionError:
             # Re-raise connection errors as-is
             raise
         except Exception as e:
@@ -304,9 +302,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                     health_status = "warning"
                     issues.append("Database file is not writable")
 
-            file_size = (
-                os.path.getsize(self.database_path) if os.path.exists(self.database_path) else 0
-            )
+            file_size = os.path.getsize(self.database_path) if os.path.exists(self.database_path) else 0
             if file_size > 1000000000:  # 1GB
                 health_status = "warning" if health_status == "healthy" else health_status
                 issues.append("Database file is very large (>1GB)")

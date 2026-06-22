@@ -19,9 +19,7 @@ from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
-ENABLE_LEGACY_DB_PORTMANTEAU = (
-    os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
-)
+ENABLE_LEGACY_DB_PORTMANTEAU = os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
 
 
 def _legacy_tool_decorator():
@@ -405,9 +403,7 @@ async def db_connection(
     if operation == "list_supported":
         result = await _list_supported_databases()
     elif operation == "register":
-        result = await _register_database_connection(
-            connection_name, database_type, connection_config, test_connection
-        )
+        result = await _register_database_connection(connection_name, database_type, connection_config, test_connection)
     elif operation == "init":
         # Legacy init_database operation
         # Use connection_params if provided, otherwise connection_config
@@ -549,9 +545,7 @@ async def _register_database_connection(
         if test_connection:
             test_result = await connector.test_connection()
             if not test_result["success"]:
-                raise ConnectionError(
-                    f"Connection test failed: {test_result.get('error', 'Unknown error')}"
-                )
+                raise ConnectionError(f"Connection test failed: {test_result.get('error', 'Unknown error')}")
 
         # Register with manager
         db_manager.register_connector(connection_name, connector)
@@ -656,8 +650,7 @@ async def _test_all_database_connections(timeout: float | None, parallel: bool) 
             # Test connections in parallel
             with ThreadPoolExecutor(max_workers=min(len(connection_names), 10)) as executor:
                 future_to_name = {
-                    executor.submit(_test_single_connection, name, timeout): name
-                    for name in connection_names
+                    executor.submit(_test_single_connection, name, timeout): name for name in connection_names
                 }
 
                 for future in as_completed(future_to_name, timeout=timeout):
@@ -853,21 +846,13 @@ async def _get_connection_info(connection_name: str | None) -> dict[str, Any]:
             }
 
         # Get connection info
-        info = (
-            await connector.get_connection_info()
-            if hasattr(connector, "get_connection_info")
-            else {}
-        )
-        is_connected = (
-            await connector.is_connected() if hasattr(connector, "is_connected") else False
-        )
+        info = await connector.get_connection_info() if hasattr(connector, "get_connection_info") else {}
+        is_connected = await connector.is_connected() if hasattr(connector, "is_connected") else False
 
         return {
             "status": "success",
             "connection_name": connection_name,
-            "db_type": connector.database_type.value
-            if hasattr(connector, "database_type")
-            else "unknown",
+            "db_type": connector.database_type.value if hasattr(connector, "database_type") else "unknown",
             "is_connected": is_connected,
             "connection_info": info,
             "success": True,
@@ -934,9 +919,7 @@ async def _restore_saved_connections(auto_reconnect: bool) -> dict[str, Any]:
             "status": "success",
             "saved_connections": saved_connections,
             "reconnected": reconnected,
-            "message": (
-                f"Found {len(saved_connections)} saved connections, reconnected {len(reconnected)}"
-            ),
+            "message": (f"Found {len(saved_connections)} saved connections, reconnected {len(reconnected)}"),
             "success": True,
         }
     except Exception as e:

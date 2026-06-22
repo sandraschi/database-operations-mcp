@@ -216,9 +216,7 @@ async def list_tables(connection_name: str, database_name: str | None = None) ->
 
 
 # DEPRECATED: Use db_schema(operation='describe_table') instead
-async def describe_table(
-    connection_name: str, table_name: str, database_name: str | None = None
-) -> dict[str, Any]:
+async def describe_table(connection_name: str, table_name: str, database_name: str | None = None) -> dict[str, Any]:
     """Get detailed schema information about table or collection.
 
     Retrieves complete schema details including columns, data types, constraints,

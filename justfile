@@ -12,18 +12,15 @@ default:
 # ── Install ───────────────────────────────────────────────────────────────────
 
 install sync:
-    Set-Location '{{REPO}}'
     uv sync --extra dev
 
 # ── Runtime ───────────────────────────────────────────────────────────────────
 
 mcp:
-    Set-Location '{{REPO}}'
     uv run database-operations-mcp --stdio
 
 backend:
-    Set-Location '{{REPO}}'
-    uv run database-operations-mcp --http --port 10708
+    uv run database-operations-mcp --http --port 10709
 
 webapp:
     pwsh -NoProfile -ExecutionPolicy Bypass -File "{{REPO}}/web_sota/start.ps1"
@@ -32,33 +29,26 @@ webapp:
 
 # Execute Ruff SOTA v13.1 linting
 lint:
-    Set-Location '{{REPO}}'
     uv run ruff check src/ tests/
-    Set-Location '{{REPO}}/web_sota'
-    npx @biomejs/biome ci .
+    cd web_sota; npx @biomejs/biome ci --config-path=biome.json .
 
 # Execute Ruff SOTA v13.1 fix and formatting
 fix:
-    Set-Location '{{REPO}}'
     uv run ruff check src/ tests/ --fix
     uv run ruff format src/ tests/
-    Set-Location '{{REPO}}/web_sota'
-    npx @biomejs/biome check --write .
+    cd web_sota; npx @biomejs/biome check --write --config-path=biome.json .
 
 test:
-    Set-Location '{{REPO}}'
     uv run pytest tests/unit/ -q
 
 # ── Hardening ─────────────────────────────────────────────────────────────────
 
 # Execute Bandit security audit
 check-sec:
-    Set-Location '{{REPO}}'
     uv run bandit -r src/
 
 # Execute safety audit of dependencies
 audit-deps:
-    Set-Location '{{REPO}}'
     uv run safety check
 
 # ── MCPB ──────────────────────────────────────────────────────────────────────
@@ -82,11 +72,12 @@ build-native:
 
 # Install Playwright browsers (one-time)
 e2e-install:
-    cd {{REPO}}\web_sota
+    Set-Location '{{REPO}}/web_sota'
     npx playwright install chromium
 
 # Run Playwright E2E smoke tests (start backend first: just serve)
 e2e:
-    cd {{REPO}}\web_sota
+    Set-Location '{{REPO}}/web_sota'
     npx playwright test
+
 

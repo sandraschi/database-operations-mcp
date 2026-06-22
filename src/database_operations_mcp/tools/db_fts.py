@@ -141,9 +141,7 @@ async def _fts_search(
             "table_name": table_name,
             "results": search_result.get("results", []),
             "total_results": total,
-            "highlighted_results": search_result.get("highlighted_results", [])
-            if highlight
-            else [],
+            "highlighted_results": search_result.get("highlighted_results", []) if highlight else [],
             "metadata": search_result.get("metadata", {}) if include_metadata else {},
             "pagination": {
                 "limit": limit,

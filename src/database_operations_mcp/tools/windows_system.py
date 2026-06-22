@@ -55,23 +55,17 @@ VALUE_TYPES = {
 WINDOWS_DB_PATHS = {
     "chrome_history": [
         os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\User Data\Default\History"),
-        os.path.expandvars(
-            r"%USERPROFILE%\AppData\Local\Google\Chrome\User Data\Default\History"
-        ),
+        os.path.expandvars(r"%USERPROFILE%\AppData\Local\Google\Chrome\User Data\Default\History"),
     ],
     "firefox_history": [
         os.path.expandvars(r"%APPDATA%\Mozilla\Firefox\Profiles"),
     ],
     "edge_history": [
         os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\History"),
-        os.path.expandvars(
-            r"%USERPROFILE%\AppData\Local\Microsoft\Edge\User Data\Default\History"
-        ),
+        os.path.expandvars(r"%USERPROFILE%\AppData\Local\Microsoft\Edge\User Data\Default\History"),
     ],
     "brave_history": [
-        os.path.expandvars(
-            r"%LOCALAPPDATA%\BraveSoftware\Brave-Browser\User Data\Default\History"
-        ),
+        os.path.expandvars(r"%LOCALAPPDATA%\BraveSoftware\Brave-Browser\User Data\Default\History"),
         os.path.expandvars(
             r"%USERPROFILE%\AppData\Local\BraveSoftware\Brave-Browser\\"
             r"User Data\Default\History"
@@ -81,9 +75,7 @@ WINDOWS_DB_PATHS = {
         os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Outlook"),
         os.path.expandvars(r"%USERPROFILE%\AppData\Local\Microsoft\Outlook"),
     ],
-    "windows_thumbnails": [
-        os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Explorer")
-    ],
+    "windows_thumbnails": [os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Explorer")],
 }
 
 
@@ -167,9 +159,7 @@ class RegistryMonitor:
                     }
                 )
         for name in set(self.last_values) - set(current):
-            changes.append(
-                {"type": "removed", "name": name, "old": self.last_values[name]}
-            )
+            changes.append({"type": "removed", "name": name, "old": self.last_values[name]})
         return changes
 
 
@@ -243,9 +233,7 @@ async def windows_system(
         if operation == "list_windows_databases":
             return await _list_windows_databases(bruteforce_firefox)
         elif operation == "query_windows_database":
-            return await _query_windows_database(
-                database_path, query, limit, bruteforce_firefox
-            )
+            return await _query_windows_database(database_path, query, limit, bruteforce_firefox)
         elif operation == "clean_windows_database":
             return await _clean_windows_database(
                 database_path,
@@ -256,9 +244,7 @@ async def windows_system(
         elif operation == "read_registry_value":
             return await _read_registry_value(registry_key, registry_value)
         elif operation == "write_registry_value":
-            return await _write_registry_value(
-                registry_key, registry_value, value_data, value_type
-            )
+            return await _write_registry_value(registry_key, registry_value, value_data, value_type)
         elif operation == "list_registry_keys":
             return await _list_registry_keys(registry_key)
         elif operation == "list_registry_values":
@@ -371,9 +357,7 @@ async def _clean_windows_database(
         return {"success": False, "error": f"Database not found: {target}"}
 
     if backup:
-        backup_path = db_path.with_suffix(
-            f".bak_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        )
+        backup_path = db_path.with_suffix(f".bak_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
         shutil.copy2(db_path, backup_path)
 
     try:
@@ -391,9 +375,7 @@ async def _clean_windows_database(
             conn.close()
 
 
-async def _read_registry_value(
-    key_path: str | None, value_name: str | None
-) -> dict[str, Any]:
+async def _read_registry_value(key_path: str | None, value_name: str | None) -> dict[str, Any]:
     """Read value from Windows Registry."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -479,9 +461,7 @@ async def _list_registry_values(key_path: str | None) -> dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def _delete_registry_value(
-    key_path: str | None, value_name: str | None
-) -> dict[str, Any]:
+async def _delete_registry_value(key_path: str | None, value_name: str | None) -> dict[str, Any]:
     """Delete a value from the Windows Registry."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}
@@ -520,9 +500,7 @@ async def _registry_key_exists(key_path: str | None) -> dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def _monitor_registry(
-    key_path: str | None, action: str | None = "start"
-) -> dict[str, Any]:
+async def _monitor_registry(key_path: str | None, action: str | None = "start") -> dict[str, Any]:
     """Manage registry monitoring."""
     if not key_path:
         return {"success": False, "error": "Registry key path is required"}

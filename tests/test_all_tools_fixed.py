@@ -117,11 +117,7 @@ class ToolTester:
             functions = []
             for name, obj in inspect.getmembers(module, inspect.isfunction):
                 # Skip private methods, main functions, and imported functions
-                if (
-                    name.startswith("_")
-                    or name in ["main", "run", "cli"]
-                    or obj.__module__ != module_full_name
-                ):
+                if name.startswith("_") or name in ["main", "run", "cli"] or obj.__module__ != module_full_name:
                     continue
 
                 # Add function to the list
@@ -130,10 +126,7 @@ class ToolTester:
             if not functions:
                 print(f"No testable functions found in {module_name}")
             else:
-                print(
-                    f"Found {len(functions)} functions in {module_name}: "
-                    f"{[f[0] for f in functions]}"
-                )
+                print(f"Found {len(functions)} functions in {module_name}: {[f[0] for f in functions]}")
 
             return functions
 
@@ -152,9 +145,7 @@ class ToolTester:
 
         # Calculate coverage
         if self.results["summary"]["tools_tested"] > 0:
-            total_tests = (
-                self.results["summary"]["tests_passed"] + self.results["summary"]["tests_failed"]
-            )
+            total_tests = self.results["summary"]["tests_passed"] + self.results["summary"]["tests_failed"]
             if total_tests > 0:
                 self.results["summary"]["coverage_percentage"] = (
                     self.results["summary"]["tests_passed"] / total_tests
@@ -235,13 +226,11 @@ class ToolTester:
         except Exception as e:
             error_type = type(e).__name__
             result.update({"status": "FAIL", "error": str(e), "error_type": error_type})
-            print(f"✗ ({error_type}: {str(e)})")
+            print(f"✗ ({error_type}: {e!s})")
 
         return result
 
-    def test_function_with_mock_params(
-        self, module_name: str, func_name: str, func: callable
-    ) -> dict[str, Any]:
+    def test_function_with_mock_params(self, module_name: str, func_name: str, func: callable) -> dict[str, Any]:
         """Test a single tool function with mock parameters (alternative approach)."""
         print(f"Testing {module_name}.{func_name}...", end=" ")
         result = {
@@ -316,7 +305,7 @@ class ToolTester:
         except Exception as e:
             error_type = type(e).__name__
             result.update({"status": "FAIL", "error": str(e), "error_type": error_type})
-            print(f"✗ ({error_type}: {str(e)})")
+            print(f"✗ ({error_type}: {e!s})")
 
         return result
 
@@ -385,8 +374,7 @@ class ToolTester:
                 report.append(f"  Import Error: {module_results['import_error']}")
             else:
                 report.append(
-                    f"  Tests: {module_results['tests_passed']} passed, "
-                    f"{module_results['tests_failed']} failed"
+                    f"  Tests: {module_results['tests_passed']} passed, {module_results['tests_failed']} failed"
                 )
 
                 # Add function-level details for failed tests
@@ -394,9 +382,7 @@ class ToolTester:
                     status_icon = "✓" if func_result["status"] == "PASS" else "✗"
                     report.append(f"    {status_icon} {func_name}")
                     if func_result["status"] == "FAIL":
-                        report.append(
-                            f"      Error: {func_result['error_type']} - {func_result['error']}"
-                        )
+                        report.append(f"      Error: {func_result['error_type']} - {func_result['error']}")
                     if func_result.get("signature"):
                         report.append(f"      Signature: {func_result['signature']}")
 

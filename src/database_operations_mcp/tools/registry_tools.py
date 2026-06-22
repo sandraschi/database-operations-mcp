@@ -145,9 +145,7 @@ class RegistryMonitor:
                         values[name] = {
                             "value": value,
                             "type": value_type,
-                            "type_name": VALUE_TYPES.get(
-                                value_type, f"UNKNOWN (0x{value_type:X})"
-                            ),
+                            "type_name": VALUE_TYPES.get(value_type, f"UNKNOWN (0x{value_type:X})"),
                         }
                         i += 1
                     except OSError as e:
@@ -169,9 +167,7 @@ class RegistryMonitor:
         # Check for new or modified values
         for name, value_info in current.items():
             if name not in self.last_values:
-                changes.append(
-                    {"type": "value_added", "name": name, "new_value": value_info}
-                )
+                changes.append({"type": "value_added", "name": name, "new_value": value_info})
             elif (
                 self.last_values[name]["value"] != value_info["value"]
                 or self.last_values[name]["type"] != value_info["type"]
@@ -247,9 +243,7 @@ def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
 # DEPRECATED: Use windows_system portmanteau instead
 @mcp.tool()
 @HelpSystem.register_tool
-def write_registry_value(
-    path: str, value_name: str, value: Any, value_type: str | None = None
-) -> dict[str, Any]:
+def write_registry_value(path: str, value_name: str, value: Any, value_type: str | None = None) -> dict[str, Any]:
     """Write a value to the Windows Registry.
 
     Args:
@@ -374,9 +368,7 @@ def list_registry_values(path: str) -> dict[str, Any]:
 
                     values[value_name] = {
                         "value": value_data,
-                        "type": VALUE_TYPES.get(
-                            value_type, f"UNKNOWN (0x{value_type:X})"
-                        ),
+                        "type": VALUE_TYPES.get(value_type, f"UNKNOWN (0x{value_type:X})"),
                         "type_code": value_type,
                     }
                     i += 1

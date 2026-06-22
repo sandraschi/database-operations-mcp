@@ -47,9 +47,7 @@ class HealthChecker:
         logical_errors = await self.error_detector.find_logical_errors(db_path)
 
         # Calculate scores
-        integrity_score = (
-            100 if integrity["total_errors"] == 0 else max(0, 100 - integrity["total_errors"] * 20)
-        )
+        integrity_score = 100 if integrity["total_errors"] == 0 else max(0, 100 - integrity["total_errors"] * 20)
         corruption_score = 100 if not corruption["corruption_detected"] else 0
         logical_score = 100 if len(logical_errors) == 0 else max(0, 100 - len(logical_errors) * 10)
         performance_score = await self._check_performance(db_path)
@@ -109,10 +107,7 @@ class HealthChecker:
         try:
             async with aiosqlite.connect(db_path) as conn:
                 # Check for missing indexes on foreign keys
-                query = (
-                    "SELECT COUNT(*) FROM sqlite_master"
-                    " WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-                )
+                query = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
                 async with conn.execute(query) as cursor:
                     table_count = (await cursor.fetchone())[0]
 

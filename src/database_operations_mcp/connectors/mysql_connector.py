@@ -57,9 +57,7 @@ class MySQLConnector:
 
         return self.pool
 
-    async def execute_query(
-        self, query: str, parameters: dict | None = None
-    ) -> list[dict[str, Any]]:
+    async def execute_query(self, query: str, parameters: dict | None = None) -> list[dict[str, Any]]:
         """Execute SELECT query.
 
         Args:

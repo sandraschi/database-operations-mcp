@@ -114,31 +114,31 @@ def test_list_supported_databases(mock_mcp, mock_db_manager):
     assert result["total_supported"] == len(SAMPLE_DATABASES)
 
 
+@patch("database_operations_mcp.tools.connection_tools.create_connector")
 @patch("database_operations_mcp.tools.connection_tools.db_manager")
-def test_register_database_connection_success(mock_db_manager, mock_connector):
+def test_register_database_connection_success(mock_db_manager, mock_create_connector, mock_connector):
     """Test successful database connection registration."""
     from database_operations_mcp.tools.connection_tools import register_database_connection
 
     # Setup
-    mock_db_manager.get_connector.return_value = mock_connector
+    mock_create_connector.return_value = mock_connector
 
     # Act
     result = register_database_connection(
         connection_name="test_conn",
         database_type="sqlite",
-        connection_config={"database": ":memory:"},
+        connection_config={"database_path": ":memory:"},
         test_connection=True,
     )
 
     # Assert
     assert result["success"] is True or "connection_id" in result
-    mock_db_manager.get_connector.assert_called_once()
+    mock_db_manager.register_connection.assert_called_once_with("test_conn", mock_connector)
 
 
 @patch("database_operations_mcp.tools.connection_tools.db_manager")
 def test_test_database_connection_success(mock_db_manager, mock_connector):
     """Test successful database connection test."""
-    import asyncio
 
     from database_operations_mcp.tools.connection_tools import test_database_connection
 
@@ -146,7 +146,7 @@ def test_test_database_connection_success(mock_db_manager, mock_connector):
     mock_db_manager.get_connector.return_value = mock_connector
 
     # Act - call the underlying function directly
-    result = asyncio.run(test_database_connection(connection_name="test_conn"))
+    result = test_database_connection(connection_name="test_conn")
 
     # Assert
     assert result["success"] is True or "error" in result
@@ -159,21 +159,20 @@ def test_test_database_connection_success(mock_db_manager, mock_connector):
 @patch("database_operations_mcp.tools.connection_tools.db_manager")
 def test_test_all_database_connections_parallel(mock_db_manager, mock_connector):
     """Test testing all database connections in parallel mode."""
-    import asyncio
 
     from database_operations_mcp.tools.connection_tools import (
         test_all_database_connections,
     )
 
     # Setup
-    mock_db_manager.list_connections.return_value = ["conn1", "conn2"]
+    mock_db_manager.list_connectors.return_value = {"conn1": mock_connector, "conn2": mock_connector}
     mock_db_manager.get_connector.return_value = mock_connector
 
     # Act
-    result = asyncio.run(test_all_database_connections(parallel=True))
+    result = test_all_database_connections(parallel=True)
 
     # Assert
-    assert "results" in result or "error" in result
+    assert "test_results" in result or "error" in result
     # Verify connectors were retrieved
     assert mock_db_manager.get_connector.call_count >= 0
 

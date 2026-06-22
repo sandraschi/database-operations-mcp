@@ -72,9 +72,7 @@ class DatabaseOperationsStorage:
             else:  # macOS/Linux
                 home = Path.home()
                 if platform.system() == "Darwin":  # macOS
-                    self._storage_dir = (
-                        home / "Library" / "Application Support" / "database-operations-mcp"
-                    )
+                    self._storage_dir = home / "Library" / "Application Support" / "database-operations-mcp"
                 else:  # Linux
                     self._storage_dir = home / ".local" / "share" / "database-operations-mcp"
 
@@ -110,15 +108,11 @@ class DatabaseOperationsStorage:
                     # DiskStore provides the storage backend interface that FastMCP expects
                     self._storage = DiskStore(directory=str(self._storage_dir))
                     self._initialized = True
-                    logger.info(
-                        f"FastMCP 2.13 persistent storage initialized at {self._storage_dir}"
-                    )
+                    logger.info(f"FastMCP 2.13 persistent storage initialized at {self._storage_dir}")
                     return
                 except ImportError as e:
                     # py-key-value-aio[disk] should be available via fastmcp dependency
-                    logger.warning(
-                        f"DiskStore not available: {e}. Falling back to FastMCP's default storage."
-                    )
+                    logger.warning(f"DiskStore not available: {e}. Falling back to FastMCP's default storage.")
 
             # Fallback: Try to use FastMCP's storage backend (may be in-memory)
             # FastMCP 2.13+ should provide storage via mcp.storage attribute
@@ -130,8 +124,7 @@ class DatabaseOperationsStorage:
 
             # If we get here, storage is not available - graceful degradation
             logger.warning(
-                "Persistent storage not available - using in-memory fallback. "
-                "Data will not persist across restarts."
+                "Persistent storage not available - using in-memory fallback. Data will not persist across restarts."
             )
             self._initialized = False
 
@@ -142,9 +135,7 @@ class DatabaseOperationsStorage:
 
     # ==================== DATABASE CONNECTIONS ====================
 
-    async def save_connection(
-        self, connection_name: str, db_type: str, connection_params: dict[str, Any]
-    ) -> None:
+    async def save_connection(self, connection_name: str, db_type: str, connection_params: dict[str, Any]) -> None:
         """
         Save database connection configuration.
 
@@ -401,9 +392,7 @@ class DatabaseOperationsStorage:
 
     # ==================== QUERY TEMPLATES ====================
 
-    async def save_query_template(
-        self, template_name: str, query: str, description: str = ""
-    ) -> None:
+    async def save_query_template(self, template_name: str, query: str, description: str = "") -> None:
         """Save a query template."""
         await self.initialize()
         if not self._storage:
@@ -486,9 +475,7 @@ class DatabaseOperationsStorage:
 
     # ==================== SCHEMA CACHE ====================
 
-    async def cache_schema(
-        self, connection_name: str, db_name: str, schema: dict[str, Any], ttl: int = 3600
-    ) -> None:
+    async def cache_schema(self, connection_name: str, db_name: str, schema: dict[str, Any], ttl: int = 3600) -> None:
         """Cache database schema with TTL (default 1 hour)."""
         await self.initialize()
         if not self._storage:
@@ -500,9 +487,7 @@ class DatabaseOperationsStorage:
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
-    async def get_cached_schema(
-        self, connection_name: str, db_name: str
-    ) -> dict[str, Any] | None:
+    async def get_cached_schema(self, connection_name: str, db_name: str) -> dict[str, Any] | None:
         """Get cached schema if available and not expired."""
         await self.initialize()
         if not self._storage:

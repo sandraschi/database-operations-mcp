@@ -242,9 +242,7 @@ class DatabaseOperationsMCP:
             self._register_signal_handlers()
 
             # Wait for either server to finish (they shouldn't finish normally)
-            done, pending = await asyncio.wait(
-                [stdio_task, http_task], return_when=asyncio.FIRST_COMPLETED
-            )
+            done, pending = await asyncio.wait([stdio_task, http_task], return_when=asyncio.FIRST_COMPLETED)
 
             # Cancel remaining tasks
             for task in pending:
@@ -319,9 +317,7 @@ class DatabaseOperationsMCP:
                 logger.info(f"MCP Version: {self.mcp.version}")
 
                 # Run the server
-                logger.info(
-                    "Calling run_server(self.mcp, server_name='database-operations-mcp')..."
-                )
+                logger.info("Calling run_server(self.mcp, server_name='database-operations-mcp')...")
                 run_server(self.mcp, server_name="database-operations-mcp")
 
                 return 0

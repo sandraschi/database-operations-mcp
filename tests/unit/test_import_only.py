@@ -17,23 +17,23 @@ if str(src_dir) not in sys.path:
 
 class TestPackageImports:
     def test_package_import(self):
-        import database_operations_mcp  # noqa: F401
+        import database_operations_mcp
 
         assert database_operations_mcp.__name__ == "database_operations_mcp"
 
     def test_main_module_import(self):
-        from database_operations_mcp.main import main as main_fn  # noqa: F401
+        from database_operations_mcp.main import main as main_fn
 
         assert callable(main_fn)
 
     def test_config_module_import(self):
-        from database_operations_mcp.config import mcp_config  # noqa: F401
+        from database_operations_mcp.config import mcp_config
 
         assert hasattr(mcp_config, "mcp")
         assert hasattr(mcp_config, "get_mcp")
 
     def test_tools_package_import(self):
-        from database_operations_mcp import tools  # noqa: F401
+        from database_operations_mcp import tools
 
         assert tools.__name__ == "database_operations_mcp.tools"
 

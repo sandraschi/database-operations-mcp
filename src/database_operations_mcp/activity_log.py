@@ -82,10 +82,7 @@ def _matches(
         return False
     if search:
         needle = search.lower()
-        hay = (
-            f"{entry.get('kind', '')} {entry.get('detail', '')} "
-            f"{json.dumps(entry.get('meta', {}))}"
-        ).lower()
+        hay = (f"{entry.get('kind', '')} {entry.get('detail', '')} {json.dumps(entry.get('meta', {}))}").lower()
         if needle not in hay:
             return False
     return True

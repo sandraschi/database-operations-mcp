@@ -94,9 +94,7 @@ class RedisConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from Redis: {e}")
             return False
 
-    async def execute_query(
-        self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any
-    ) -> QueryResult:
+    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
         """
         Execute a pseudo-query on Redis.
         Redis doesn't use SQL, so 'query' is interpreted as a Redis command

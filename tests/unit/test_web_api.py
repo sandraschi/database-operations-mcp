@@ -54,3 +54,14 @@ def test_logs_query_and_export():
     cleared = client.delete("/api/logs")
     assert cleared.status_code == 200
     assert client.get("/api/logs/stats").json()["total"] == 1
+
+
+def test_llm_providers():
+    client = TestClient(build_web_app())
+    response = client.get("/api/llm/providers")
+    assert response.status_code == 200
+    data = response.json()
+    assert "ollama" in data
+    assert "lm_studio" in data
+    assert isinstance(data["ollama"], list)
+    assert isinstance(data["lm_studio"], list)

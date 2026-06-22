@@ -97,9 +97,7 @@ class MySQLConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from MySQL: {e}")
             return False
 
-    async def execute_query(
-        self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any
-    ) -> QueryResult:
+    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
         """Execute query and return results."""
         if not self.pool:
             if not await self.connect():

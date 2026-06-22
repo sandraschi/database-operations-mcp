@@ -143,18 +143,12 @@ class StructureAnalyzer:
                 tables.append(table_info)
 
             # Get views
-            async with conn.execute(
-                "SELECT name, sql FROM sqlite_master WHERE type='view'"
-            ) as cursor:
+            async with conn.execute("SELECT name, sql FROM sqlite_master WHERE type='view'") as cursor:
                 views = [{"name": row[0], "definition": row[1]} for row in await cursor.fetchall()]
 
             # Get triggers
-            async with conn.execute(
-                "SELECT name, sql FROM sqlite_master WHERE type='trigger'"
-            ) as cursor:
-                triggers = [
-                    {"name": row[0], "definition": row[1]} for row in await cursor.fetchall()
-                ]
+            async with conn.execute("SELECT name, sql FROM sqlite_master WHERE type='trigger'") as cursor:
+                triggers = [{"name": row[0], "definition": row[1]} for row in await cursor.fetchall()]
 
             return {
                 "database_type": "sqlite",

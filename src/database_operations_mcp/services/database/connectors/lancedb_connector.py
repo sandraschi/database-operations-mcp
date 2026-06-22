@@ -88,9 +88,7 @@ class LanceDBConnector(BaseDatabaseConnector):
             logger.error("Error disconnecting from LanceDB: %s", e)
             return False
 
-    async def execute_query(
-        self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any
-    ) -> QueryResult:
+    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
         """Execute LanceDB operation (vector search or list).
 
         Query hint: "search" for vector search, "list" to list table rows.

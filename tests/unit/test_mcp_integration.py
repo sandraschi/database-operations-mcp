@@ -83,7 +83,7 @@ async def test_mcp_server():
             server_process.terminate()
             try:
                 await asyncio.wait_for(server_process.wait(), timeout=2)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 server_process.kill()
 
 

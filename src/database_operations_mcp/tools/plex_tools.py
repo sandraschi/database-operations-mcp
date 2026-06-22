@@ -30,8 +30,7 @@ PLEX_DB_PATHS = {
         r"C:\\Plex\\Plex Media Server\\Plug-in Support\\Databases\\com.plexapp.plugins.library.db",
     ],
     "darwin": [
-        "~/Library/Application Support/Plex Media Server/"
-        "Plug-in Support/Databases/com.plexapp.plugins.library.db",
+        "~/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
         "/var/lib/plex/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db",
     ],
     "linux": [
@@ -118,9 +117,7 @@ class PlexDatabase:
         """)
         return [dict(row) for row in self.cursor.fetchall()]
 
-    def get_media_items(
-        self, section_id: int | None = None, limit: int = 100, offset: int = 0
-    ) -> list[dict[str, Any]]:
+    def get_media_items(self, section_id: int | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """Get media items from the library.
 
         Args:
@@ -156,9 +153,7 @@ class PlexDatabase:
         self.cursor.execute(query, params)
         return [dict(row) for row in self.cursor.fetchall()]
 
-    def export_library(
-        self, output_format: str = "json", output_path: str | Path | None = None
-    ) -> dict[str, Any]:
+    def export_library(self, output_format: str = "json", output_path: str | Path | None = None) -> dict[str, Any]:
         """Export the Plex library to a file.
 
         Args:

@@ -27,9 +27,7 @@ class HelpSystem:
     }
 
     @classmethod
-    def register_tool(
-        cls, tool_func: F | None = None, *, category: str = "database"
-    ) -> Callable[[F], F] | F:
+    def register_tool(cls, tool_func: F | None = None, *, category: str = "database") -> Callable[[F], F] | F:
         """Register a tool with its documentation.
 
         Args:
@@ -51,9 +49,7 @@ class HelpSystem:
             params = {}
             param_section = re.search(r"Args:(.*?)(?=\n\w+:|\Z)", doc, re.DOTALL)
             if param_section:
-                param_lines = [
-                    line.strip() for line in param_section.group(1).split("\n") if line.strip()
-                ]
+                param_lines = [line.strip() for line in param_section.group(1).split("\n") if line.strip()]
                 for line in param_lines:
                     if ":" in line:
                         param_name, param_desc = line.split(":", 1)
@@ -85,9 +81,7 @@ class HelpSystem:
         """
         if category:
             category = category.lower()
-            tools = {
-                name: info for name, info in cls._tools.items() if info["category"] == category
-            }
+            tools = {name: info for name, info in cls._tools.items() if info["category"] == category}
         else:
             tools = cls._tools
 
@@ -100,9 +94,7 @@ class HelpSystem:
                     "description": cls._categories.get(cat, "Uncategorized"),
                     "tools": [],
                 }
-            categorized[cat]["tools"].append(
-                {"name": tool_name, "description": tool_info["description"]}
-            )
+            categorized[cat]["tools"].append({"name": tool_name, "description": tool_info["description"]})
 
         return {
             "status": "success",

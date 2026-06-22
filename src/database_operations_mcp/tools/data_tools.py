@@ -26,9 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 # DEPRECATED: Use db_operations(operation='execute_transaction') instead
-async def execute_transaction(
-    queries: list[dict[str, Any]], connection_name: str = "default"
-) -> dict[str, Any]:
+async def execute_transaction(queries: list[dict[str, Any]], connection_name: str = "default") -> dict[str, Any]:
     """Execute multiple queries in a transaction.
 
     Args:

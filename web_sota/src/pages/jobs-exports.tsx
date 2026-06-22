@@ -1,8 +1,14 @@
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { callTool } from "@/common/api";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 type Job = {
   id: string;
@@ -20,10 +26,14 @@ export function JobsExports() {
   const [jobs, setJobs] = useState<Job[]>([]);
 
   const exportMutation = useMutation({
-    mutationFn: (payload: Record<string, unknown>) => callTool("db_operations", payload),
+    mutationFn: (payload: Record<string, unknown>) =>
+      callTool("db_operations", payload),
     onMutate: (payload) => {
       const id = `${Date.now()}-export`;
-      setJobs((prev) => [{ id, type: "db-export", status: "running", payload }, ...prev]);
+      setJobs((prev) => [
+        { id, type: "db-export", status: "running", payload },
+        ...prev,
+      ]);
       return { id };
     },
     onSuccess: (data, _vars, ctx) => {
@@ -56,8 +66,12 @@ export function JobsExports() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">Jobs & Exports</h2>
-        <p className="text-slate-400">Track export-oriented jobs and inspect responses.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-white">
+          Jobs & Exports
+        </h2>
+        <p className="text-slate-400">
+          Track export-oriented jobs and inspect responses.
+        </p>
       </div>
 
       <Card className="border-slate-800 bg-slate-950/50">
@@ -98,12 +112,19 @@ export function JobsExports() {
       <Card className="border-slate-800 bg-slate-950/50">
         <CardHeader>
           <CardTitle className="text-white">Job History</CardTitle>
-          <CardDescription className="text-slate-400">Most recent jobs first.</CardDescription>
+          <CardDescription className="text-slate-400">
+            Most recent jobs first.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {jobs.length === 0 && <p className="text-sm text-slate-500">No jobs yet.</p>}
+          {jobs.length === 0 && (
+            <p className="text-sm text-slate-500">No jobs yet.</p>
+          )}
           {jobs.map((job) => (
-            <div key={job.id} className="rounded border border-slate-800 bg-slate-900/30 p-3">
+            <div
+              key={job.id}
+              className="rounded border border-slate-800 bg-slate-900/30 p-3"
+            >
               <div className="flex items-center justify-between">
                 <p className="font-mono text-sm text-slate-100">{job.id}</p>
                 <p className="text-xs text-slate-400">{job.status}</p>
@@ -116,7 +137,9 @@ export function JobsExports() {
                   {JSON.stringify(job.result, null, 2)}
                 </pre>
               )}
-              {job.error && <p className="mt-2 text-xs text-red-400">{job.error}</p>}
+              {job.error && (
+                <p className="mt-2 text-xs text-red-400">{job.error}</p>
+              )}
             </div>
           ))}
         </CardContent>

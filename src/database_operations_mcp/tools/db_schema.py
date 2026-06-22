@@ -104,9 +104,7 @@ async def _list_databases(connection_name: str) -> dict[str, Any]:
         }
 
 
-async def _list_tables(
-    connection_name: str, database_name: str | None, schema_name: str | None
-) -> dict[str, Any]:
+async def _list_tables(connection_name: str, database_name: str | None, schema_name: str | None) -> dict[str, Any]:
     """List all tables in a database or across all databases."""
     try:
         if not connection_name:
@@ -158,9 +156,7 @@ async def _describe_table(
         if not connector:
             raise ValueError(f"Connection '{connection_name}' not found")
 
-        table_info = await connector.describe_table(
-            table_name, include_metadata, include_indexes, include_constraints
-        )
+        table_info = await connector.describe_table(table_name, include_metadata, include_indexes, include_constraints)
 
         return {
             "success": True,
@@ -218,12 +214,9 @@ async def _get_schema_diff(connection_name: str, compare_with: str | None) -> di
                 "tables_added": len(diff_result.get("tables_added", [])),
                 "tables_removed": len(diff_result.get("tables_removed", [])),
                 "tables_modified": len(diff_result.get("tables_modified", [])),
-                "columns_added": sum(
-                    len(t.get("columns_added", [])) for t in diff_result.get("tables_modified", [])
-                ),
+                "columns_added": sum(len(t.get("columns_added", [])) for t in diff_result.get("tables_modified", [])),
                 "columns_removed": sum(
-                    len(t.get("columns_removed", []))
-                    for t in diff_result.get("tables_modified", [])
+                    len(t.get("columns_removed", [])) for t in diff_result.get("tables_modified", [])
                 ),
             },
         }
@@ -269,12 +262,8 @@ async def _compare_schemas(schema1: dict[str, Any], schema2: dict[str, Any]) -> 
                 columns1 = {col["name"]: col for col in table1.get("columns", [])}
                 columns2 = {col["name"]: col for col in table2.get("columns", [])}
 
-                columns_added = [
-                    col for col_name, col in columns2.items() if col_name not in columns1
-                ]
-                columns_removed = [
-                    col for col_name, col in columns1.items() if col_name not in columns2
-                ]
+                columns_added = [col for col_name, col in columns2.items() if col_name not in columns1]
+                columns_removed = [col for col_name, col in columns1.items() if col_name not in columns2]
                 columns_modified = []
 
                 for col_name in columns1:

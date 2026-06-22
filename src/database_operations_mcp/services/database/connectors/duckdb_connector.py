@@ -79,9 +79,7 @@ class DuckDBConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from DuckDB: {e}")
             return False
 
-    async def execute_query(
-        self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any
-    ) -> QueryResult:
+    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
         """Execute DuckDB query."""
         if not self.conn:
             if not await self.connect():

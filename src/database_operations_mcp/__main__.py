@@ -7,4 +7,6 @@ This module provides the command-line entry point for the Database Operations MC
 from database_operations_mcp.main import main
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    sys.exit(main())

@@ -2,9 +2,6 @@
 
 mod backend;
 
-// Optional: uncomment for MCP client registration (Cursor / Claude Desktop)
-// mod mcp_client;
-
 use backend::{BackendProcess, spawn_backend};
 use tauri::{Emitter, Manager};
 
@@ -24,17 +21,13 @@ fn main() {
         .manage(BackendProcess(std::sync::Mutex::new(None)))
         .invoke_handler(tauri::generate_handler![
             start_backend,
-            // Optional: uncomment for MCP client registration
-            // mcp_client::get_mcp_registration_status,
-            // mcp_client::register_mcp_clients
         ])
         .setup(|app| {
             let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                if let Err(e) = start_backend(handle.clone(), handle.state::<BackendProcess>()).await {
-                    let _ = handle.emit("backend-status", format!("error: {e}"));
-                }
-            });
+            let state: &BackendProcess = &app.state::<BackendProcess>();
+            if let Err(e) = spawn_backend(handle.clone(), state) {
+                let _ = handle.emit("backend-status", format!("error: {e}"));
+            }
             Ok(())
         })
         .build(tauri::generate_context!())

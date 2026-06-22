@@ -86,9 +86,7 @@ class TableSchema(BaseDBModel):
     columns: dict[str, TableColumn] = Field(default_factory=dict)
     indexes: list[TableIndex] = Field(default_factory=list)
     primary_key: list[str] = Field(default_factory=list)
-    foreign_keys: dict[str, dict[str, str]] = Field(
-        default_factory=dict
-    )  # {column: {table: ref_column}}
+    foreign_keys: dict[str, dict[str, str]] = Field(default_factory=dict)  # {column: {table: ref_column}}
     description: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 

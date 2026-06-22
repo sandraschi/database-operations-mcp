@@ -53,9 +53,7 @@ async def server_lifespan(mcp_instance: FastMCP) -> AsyncIterator[None]:
         # Restore saved connections from persistent storage
         saved_connections = await storage_instance.get_all_connections()
         if saved_connections:
-            logger.info(
-                f"Restored {len(saved_connections)} saved connections from persistent storage"
-            )
+            logger.info(f"Restored {len(saved_connections)} saved connections from persistent storage")
 
         # Restore active connection preference
         active_conn = await storage_instance.get_active_connection()
@@ -130,10 +128,7 @@ def is_portmanteau_import():
             if frame is None:
                 break
             filename = frame.f_code.co_filename
-            if (
-                "portmanteau" in filename.lower()
-                or "db_connection" in filename
-            ):
+            if "portmanteau" in filename.lower() or "db_connection" in filename:
                 return True
     finally:
         del frame

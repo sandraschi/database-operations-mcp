@@ -22,7 +22,7 @@ class TestQuickImports:
 
     def test_database_operations_package_import(self):
         """Test that the database_operations_mcp package can be imported."""
-        import database_operations_mcp  # noqa: F401
+        import database_operations_mcp
 
         assert database_operations_mcp is not None
         assert hasattr(database_operations_mcp, "__name__")
@@ -30,14 +30,14 @@ class TestQuickImports:
 
     def test_main_module_import(self):
         """Test that the main module and main function can be imported."""
-        from database_operations_mcp.main import DatabaseOperationsMCP, main  # noqa: F401
+        from database_operations_mcp.main import DatabaseOperationsMCP, main
 
         assert callable(main)
         assert DatabaseOperationsMCP is not None
 
     def test_config_module_import(self):
         """Test that the config module can be imported."""
-        from database_operations_mcp.config import mcp_config  # noqa: F401
+        from database_operations_mcp.config import mcp_config
 
         assert mcp_config is not None
         assert hasattr(mcp_config, "mcp")
@@ -45,7 +45,7 @@ class TestQuickImports:
 
     def test_tools_package_import(self):
         """Test that the tools package can be imported."""
-        from database_operations_mcp import tools  # noqa: F401
+        from database_operations_mcp import tools
 
         assert tools is not None
         assert hasattr(tools, "__name__")

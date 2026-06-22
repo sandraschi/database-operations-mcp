@@ -184,9 +184,7 @@ class ToolTester:
                                 {
                                     "name": name,
                                     "is_async": inspect.iscoroutinefunction(obj),
-                                    "signature": str(inspect.signature(obj))
-                                    if callable(obj)
-                                    else None,
+                                    "signature": str(inspect.signature(obj)) if callable(obj) else None,
                                 }
                             )
                     elif inspect.isclass(obj):
@@ -210,9 +208,7 @@ class ToolTester:
         # Calculate coverage
         total_tested = self.results["summary"]["tools_tested"]
         if total_tested > 0:
-            total_tests = (
-                self.results["summary"]["tests_passed"] + self.results["summary"]["tests_failed"]
-            )
+            total_tests = self.results["summary"]["tests_passed"] + self.results["summary"]["tests_failed"]
             if total_tests > 0:
                 self.results["summary"]["coverage_percentage"] = (
                     self.results["summary"]["tests_passed"] / total_tests
@@ -289,14 +285,10 @@ class ToolTester:
         tools_with_issues = self.results["summary"]["tools_with_issues"]
 
         if import_failures > 0:
-            recommendations.append(
-                f"Fix {import_failures} import failures - mainly caused by relative import issues"
-            )
+            recommendations.append(f"Fix {import_failures} import failures - mainly caused by relative import issues")
 
         if tools_with_issues > 0:
-            recommendations.append(
-                "Fix FastMCP decorator indentation - decorators should be at module level"
-            )
+            recommendations.append("Fix FastMCP decorator indentation - decorators should be at module level")
 
         # Specific recommendations based on patterns found
         indentation_modules = []
@@ -373,9 +365,7 @@ class ToolTester:
 
             if import_analysis.get("import_success"):
                 report.append("  ✅ Import: SUCCESS")
-                report.append(
-                    f"  Functions Imported: {len(import_analysis.get('functions_imported', []))}"
-                )
+                report.append(f"  Functions Imported: {len(import_analysis.get('functions_imported', []))}")
             else:
                 report.append("  ❌ Import: FAILED")
                 error = import_analysis.get("import_error", "Unknown error")

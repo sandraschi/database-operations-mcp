@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Any
 
 from fastapi import APIRouter, Query
@@ -20,6 +21,21 @@ from database_operations_mcp.activity_log import (
     log_stats,
     query_logs,
 )
+from database_operations_mcp.chat import ChatService
+
+
+class ChatRequest(BaseModel):
+    message: str
+    history: list[dict[str, str]] = []
+    model: str | None = None
+    personality: str | None = None
+    session_id: str | None = None
+
+
+class RefinePromptRequest(BaseModel):
+    prompt: str
+    model: str | None = None
+
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +171,7 @@ router = APIRouter(prefix="/api")
 
 def setup_webapp(app, mcp_app=None) -> None:
     install_log_handler()
+    chat_service = ChatService()
 
     if not mcp_app:
         app.include_router(router)
@@ -163,6 +180,38 @@ def setup_webapp(app, mcp_app=None) -> None:
     @router.get("/health")
     async def api_health():
         return {"status": "ok", "mcp": "database-operations-mcp"}
+
+    @router.get("/llm/providers")
+    async def get_llm_providers():
+        import httpx
+
+        ollama_models = []
+        lm_studio_models = []
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get("http://localhost:11434/api/tags", timeout=2.0)
+                if response.status_code == 200:
+                    data = response.json()
+                    ollama_models = [{"name": m["name"]} for m in data.get("models", [])]
+        except Exception as e:
+            err_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
+            logger.debug(f"Ollama discovery failed: {err_msg}")
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get("http://localhost:1234/v1/models", timeout=2.0)
+                if response.status_code == 200:
+                    data = response.json()
+                    lm_studio_models = [{"name": m["id"]} for m in data.get("data", [])]
+        except Exception as e:
+            err_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
+            logger.debug(f"LM Studio discovery failed: {err_msg}")
+
+        return {
+            "ollama": ollama_models,
+            "lm_studio": lm_studio_models,
+        }
 
     @router.get("/capabilities")
     async def api_capabilities():
@@ -256,5 +305,21 @@ def setup_webapp(app, mcp_app=None) -> None:
         clear_logs()
         log_activity("system", "Log buffer cleared", level="WARNING")
         return {"success": True}
+
+    @router.post("/v1/chat")
+    async def chat_interaction(request: ChatRequest):
+        return await chat_service.ask(request)
+
+    @router.post("/v1/chat/refine")
+    async def refine_prompt(request: RefinePromptRequest):
+        return {"refined": request.prompt}
+
+    @router.get("/v1/settings/llm")
+    async def get_llm_settings():
+        return {
+            "provider": "ollama",
+            "model": "gemma4:e4b",
+            "endpoint": os.getenv("OLLAMA_HOST", "http://localhost:11434"),
+        }
 
     app.include_router(router)

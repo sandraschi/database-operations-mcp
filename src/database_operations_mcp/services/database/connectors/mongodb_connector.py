@@ -284,9 +284,7 @@ class MongoDBConnector(BaseDatabaseConnector):
 
             db = self.client[database_name] if database_name else self.connection
             if not db:
-                raise ValueError(
-                    "Database name must be provided or connection must specify a database"
-                )
+                raise ValueError("Database name must be provided or connection must specify a database")
 
             collections = []
             for coll_name in db.list_collection_names():
@@ -320,9 +318,7 @@ class MongoDBConnector(BaseDatabaseConnector):
 
             db = self.client[database_name] if database_name else self.connection
             if not db:
-                raise ValueError(
-                    "Database name must be provided or connection must specify a database"
-                )
+                raise ValueError("Database name must be provided or connection must specify a database")
 
             # Get basic collection stats
             stats = db.command("collstats", collection_name)
@@ -344,9 +340,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             }
 
         except Exception as e:
-            logger.error(
-                f"Failed to get stats for collection {database_name}.{collection_name}: {e}"
-            )
+            logger.error(f"Failed to get stats for collection {database_name}.{collection_name}: {e}")
             raise QueryError(f"Failed to get collection stats: {e}") from e
 
     def health_check(self) -> dict[str, Any]:
