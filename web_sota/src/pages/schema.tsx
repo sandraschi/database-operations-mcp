@@ -41,8 +41,21 @@ export function Schema() {
     onSuccess: (data) => {
       setError(null);
       const d = extractData(data?.result);
-      const list = (d?.databases as string[]) ?? (d?.items as string[]) ?? [];
-      setDatabases(Array.isArray(list) ? list : []);
+      const list = (d?.databases as unknown[]) ?? (d?.items as unknown[]) ?? [];
+      const dbNames = list.map((item: unknown) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object") {
+          const obj = item as Record<string, unknown>;
+          return String(
+            obj.database_name ??
+              obj.name ??
+              obj.database ??
+              JSON.stringify(item),
+          );
+        }
+        return String(item);
+      });
+      setDatabases(Array.isArray(dbNames) ? dbNames : []);
       setTables([]);
       setDescribe(null);
       setSelectedDb(null);
@@ -61,8 +74,22 @@ export function Schema() {
     onSuccess: (data) => {
       setError(null);
       const d = extractData(data?.result);
-      const list = (d?.tables as string[]) ?? (d?.items as string[]) ?? [];
-      setTables(Array.isArray(list) ? list : []);
+      const list = (d?.tables as unknown[]) ?? (d?.items as unknown[]) ?? [];
+      const tableNames = list.map((item: unknown) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object") {
+          const obj = item as Record<string, unknown>;
+          return String(
+            obj.table_name ??
+              obj.name ??
+              obj.full_name ??
+              obj.table ??
+              JSON.stringify(item),
+          );
+        }
+        return String(item);
+      });
+      setTables(Array.isArray(tableNames) ? tableNames : []);
       setDescribe(null);
       setSelectedTable(null);
     },
