@@ -36,7 +36,7 @@ class SQLiteConnector(BaseDatabaseConnector):
         super().__init__(connection_config)
         database_path = connection_config.get("database_path") or connection_config.get("database")
         if database_path and isinstance(database_path, str):
-            database_path = database_path.strip('"\'')
+            database_path = database_path.strip("\"'")
         self.database_path = database_path
         if not self.database_path:
             raise ValueError("SQLite connector requires 'database_path' or 'database' in connection config")

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { Activity, AlertTriangle, CheckCircle2, Zap } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { callTool } from "@/common/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,9 +37,11 @@ export function Health() {
     onSuccess: (data) => {
       setError(null);
       const d = extractData(data?.result);
-      const list =
-        (d?.connections as { name?: string; connection_name?: string }[]) ?? [];
-      const names = list.map((c) => c.connection_name ?? c.name ?? String(c));
+      const list = d?.connections ? Object.values(d.connections) : [];
+      const names = list.map((c) => {
+        const connObj = c as Record<string, unknown>;
+        return String(connObj.connection_name ?? connObj.name ?? c);
+      });
       setConnections(names.map((n) => ({ name: n })));
     },
     onError: (e: Error) => setError(e.message),
@@ -71,6 +73,10 @@ export function Health() {
     },
     onError: (e: Error) => setError(e.message),
   });
+
+  useEffect(() => {
+    listMutation.mutate();
+  }, []);
 
   const runScan = () => {
     const conn = connectionName.trim();

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Database, Loader2, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { callTool } from "@/common/api";
 import { cn } from "@/common/utils";
 import { Badge } from "@/components/ui/badge";
@@ -82,7 +82,9 @@ export function Connections() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const connections = (listResult?.connections as unknown[]) ?? [];
+  const connections = listResult?.connections
+    ? Object.values(listResult.connections)
+    : [];
   const activeName =
     (activeResult?.connection_name as string) ??
     (activeResult?.active as string) ??
@@ -92,6 +94,11 @@ export function Connections() {
     listMutation.mutate();
     activeMutation.mutate();
   };
+
+  useEffect(() => {
+    refreshAll();
+    supportedMutation.mutate();
+  }, []);
 
   return (
     <div className="space-y-6">
