@@ -20,8 +20,8 @@ a = Analysis(
     noarchive=True,
 )
 
-# Strip all .dist-info from all TOC lists except mcp and opentelemetry (they need metadata at runtime)
-_keep_dist = ['mcp-', 'opentelemetry']
+# Strip all .dist-info from all TOC lists except mcp, opentelemetry, and email-validator (needed at runtime)
+_keep_dist = ['mcp-', 'opentelemetry', 'email-validator', 'email_validator']
 _saved = [e for e in a.datas if isinstance(e, tuple) and any(k in str(e[0]) for k in _keep_dist) and '.dist-info' in str(e[0])]
 for _list in [a.datas, a.binaries, a.zipfiles, a.scripts]:
     _list[:] = [e for e in _list if not (isinstance(e, tuple) and '.dist-info' in str(e[0]))]
