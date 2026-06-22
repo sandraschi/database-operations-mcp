@@ -540,6 +540,8 @@ async def _register_database_connection(
 
         # Create connector
         connector = create_connector(database_type, connection_config)
+        if not connector:
+            raise ValueError(f"Failed to create connector for '{database_type}' with the provided configuration. Please check that all required parameters are provided.")
 
         # Test connection if requested
         if test_connection:

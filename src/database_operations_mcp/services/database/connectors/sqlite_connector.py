@@ -34,9 +34,12 @@ class SQLiteConnector(BaseDatabaseConnector):
     def __init__(self, connection_config: dict[str, Any]):
         """Initialize SQLite connector."""
         super().__init__(connection_config)
-        self.database_path = connection_config.get("database_path")
+        database_path = connection_config.get("database_path") or connection_config.get("database")
+        if database_path and isinstance(database_path, str):
+            database_path = database_path.strip('"\'')
+        self.database_path = database_path
         if not self.database_path:
-            raise ValueError("SQLite connector requires 'database_path' in connection config")
+            raise ValueError("SQLite connector requires 'database_path' or 'database' in connection config")
 
         if not os.path.isabs(self.database_path):
             self.database_path = os.path.abspath(self.database_path)
