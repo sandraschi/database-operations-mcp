@@ -43,6 +43,7 @@ async def db_operations(
     output_format: str = "json",
     output_path: str | None = None,
     limit: int = 100,
+    offset: int = 0,
 ) -> dict[str, Any]:
     """Database operations portmanteau tool.
 
@@ -369,7 +370,7 @@ async def db_operations(
     elif operation == "execute_query":
         result = await _execute_query(connection_name, query, params, limit)
     elif operation == "quick_data_sample":
-        result = await _quick_data_sample(connection_name, table_name, limit)
+        result = await _quick_data_sample(connection_name, table_name, limit, offset)
     elif operation == "export_query_results":
         result = await _export_query_results(connection_name, query, params, output_format, output_path)
     else:
@@ -547,7 +548,9 @@ async def _execute_query(
         }
 
 
-async def _quick_data_sample(connection_name: str | None, table_name: str | None, limit: int) -> dict[str, Any]:
+async def _quick_data_sample(
+    connection_name: str | None, table_name: str | None, limit: int, offset: int = 0
+) -> dict[str, Any]:
     """Get a quick sample of data from a table."""
     try:
         if not connection_name:
@@ -560,10 +563,71 @@ async def _quick_data_sample(connection_name: str | None, table_name: str | None
             return connection_not_found(connection_name)
 
         # Generate appropriate query based on database type
-        query = _generate_sample_query(connector.database_type, table_name, None, limit, None, None)
+        query = _generate_sample_query(connector.database_type, table_name, None, limit, None, None, offset)
 
         # Execute the query
         result = await connector.execute_query(query, {})
+
+        # Safely extract rows and columns depending on response type (dict vs QueryResult)
+        rows = []
+        columns = []
+        if isinstance(result, dict):
+            rows = result.get("rows", [])
+            columns = result.get("columns", [])
+        elif hasattr(result, "data"):
+            rows = getattr(result, "data", [])
+            columns = getattr(result, "columns", [])
+        else:
+            rows = getattr(result, "rows", [])
+            columns = getattr(result, "columns", [])
+
+        # Fetch total count of records in the database table/collection
+        total_count = None
+        if connector.database_type in [
+            DatabaseType.POSTGRESQL,
+            DatabaseType.SQLITE,
+            DatabaseType.MYSQL,
+            DatabaseType.DUCKDB,
+        ]:
+            try:
+                count_query = f"SELECT COUNT(*) as total_count FROM {table_name}"  # noqa: S608  # trusted table name from schema introspection
+                count_result = await connector.execute_query(count_query, {})
+                count_rows = []
+                if isinstance(count_result, dict):
+                    count_rows = count_result.get("rows", [])
+                elif hasattr(count_result, "data"):
+                    count_rows = getattr(count_result, "data", [])
+                else:
+                    count_rows = getattr(count_result, "rows", [])
+
+                if count_rows:
+                    first_row = count_rows[0]
+                    if isinstance(first_row, dict):
+                        total_count = int(next(iter(first_row.values())))
+                    elif isinstance(first_row, (list, tuple)):
+                        total_count = int(first_row[0])
+                    else:
+                        total_count = int(first_row)
+            except Exception as ce:
+                logger.warning(f"Failed to get total row count via query: {ce}")
+        elif connector.database_type == DatabaseType.MONGODB:
+            try:
+                if hasattr(connector, "get_collection_stats"):
+                    stats = connector.get_collection_stats(collection_name=table_name)
+                    total_count = stats.get("count")
+            except Exception as ce:
+                logger.warning(f"Failed to get total document count for MongoDB: {ce}")
+        elif connector.database_type == DatabaseType.CHROMADB:
+            try:
+                if hasattr(connector, "client") and connector.client:
+                    col_obj = connector.client.get_collection(table_name)
+                    total_count = col_obj.count()
+            except Exception as ce:
+                logger.warning(f"Failed to get total document count for ChromaDB: {ce}")
+
+        # Fallback to current rows length if total count cannot be fetched
+        if total_count is None:
+            total_count = len(rows)
 
         return {
             "success": True,
@@ -572,9 +636,10 @@ async def _quick_data_sample(connection_name: str | None, table_name: str | None
             "sample_size": limit,
             "generated_query": query,
             "result": {
-                "rows": result.get("rows", []),
-                "columns": result.get("columns", []),
-                "row_count": len(result.get("rows", [])),
+                "rows": rows,
+                "columns": columns,
+                "row_count": len(rows),
+                "total_row_count": total_count,
             },
         }
 
@@ -669,9 +734,15 @@ def _generate_sample_query(
     sample_size: int,
     include_columns: list[str] | None,
     exclude_columns: list[str] | None,
+    offset: int = 0,
 ) -> str:
     """Generate appropriate sample query based on database type."""
-    if database_type in [DatabaseType.POSTGRESQL, DatabaseType.SQLITE]:
+    if database_type in [
+        DatabaseType.POSTGRESQL,
+        DatabaseType.SQLITE,
+        DatabaseType.MYSQL,
+        DatabaseType.DUCKDB,
+    ]:
         table_ref = f"{database_name}.{table_name}" if database_name else table_name
 
         # Build column list if specified
@@ -680,7 +751,10 @@ def _generate_sample_query(
         else:
             columns = "*"
 
-        return f"SELECT {columns} FROM {table_ref} LIMIT {sample_size}"  # noqa: S608  # trusted table/column names from schema
+        query = f"SELECT {columns} FROM {table_ref} LIMIT {sample_size}"  # noqa: S608  # trusted table/column names from schema
+        if offset > 0:
+            query += f" OFFSET {offset}"
+        return query
     elif database_type == DatabaseType.MONGODB:
         # MongoDB query will be handled in connector
         return f"db.{table_name}.find().limit({sample_size})"

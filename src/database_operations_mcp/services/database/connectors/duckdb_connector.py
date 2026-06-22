@@ -135,6 +135,30 @@ class DuckDBConnector(BaseDatabaseConnector):
             return []
         return [next(iter(row.values())) for row in res.data]
 
+    async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
+        """Get schema information for a specific table."""
+        res = await self.execute_query(f"DESCRIBE {table_name}")
+        if not res.success:
+            return {"table_name": table_name, "error": f"Failed to describe table: {res.message}"}
+
+        columns = []
+        for i, row in enumerate(res.data):
+            columns.append(
+                {
+                    "name": row.get("column_name"),
+                    "type": row.get("column_type"),
+                    "nullable": row.get("null") == "YES",
+                    "default": row.get("key"),
+                    "primary_key": row.get("key") == "PRI",
+                    "position": i,
+                }
+            )
+        return {
+            "table_name": table_name,
+            "columns": columns,
+            "column_count": len(columns),
+        }
+
     async def health_check(self) -> dict[str, Any]:
         """Check DuckDB health."""
         connected = self.conn is not None

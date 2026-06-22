@@ -150,6 +150,14 @@ class RedisConnector(BaseDatabaseConnector):
 
         return {"type": "redis", "keys_count": keys_count, "info": info}
 
+    async def get_tables(self, **kwargs: Any) -> list[str]:
+        """Get list of tables (returns empty for Redis)."""
+        return []
+
+    async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
+        """Get table schema (returns empty for Redis)."""
+        return {}
+
     async def health_check(self) -> dict[str, Any]:
         """Check Redis health."""
         if not self.client:

@@ -2,25 +2,18 @@
 Test script for PostgreSQL connection using the database-operations-mcp package.
 """
 
-import pytest
+from database_operations_mcp.services.database.connectors.postgresql_connector import PostgreSQLConnector
 
 
-def test_postgres_connection(postgresql_config):
-    """Test PostgreSQL connection with the provided configuration."""
-    # Skip this test due to abstract class instantiation issues
-    pytest.skip("Skipping due to PostgreSQLConnector being an abstract class")
-
-
-if __name__ == "__main__":
-    # Replace these with your PostgreSQL connection details
-    POSTGRES_CONFIG = {
-        "host": "localhost",  # Your PostgreSQL server host
-        "port": 5432,  # Default PostgreSQL port is 5432
-        "database": "postgres",  # Default database to connect to
-        "user": "postgres",  # Your PostgreSQL username
-        "password": "your_password",  # Your PostgreSQL password
-        "sslmode": "prefer",  # SSL mode (prefer, require, disable, etc.)
+def test_postgres_instantiation():
+    """Verify that PostgreSQLConnector can be instantiated and is no longer abstract."""
+    config = {
+        "host": "localhost",
+        "port": 5432,
+        "database": "postgres",
+        "user": "postgres",
+        "password": "password",
     }
-
-    print("Testing PostgreSQL connection...")
-    test_postgres_connection(POSTGRES_CONFIG)
+    connector = PostgreSQLConnector(config)
+    assert connector is not None
+    assert connector.database_type == "postgresql"

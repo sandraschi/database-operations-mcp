@@ -343,6 +343,22 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to get stats for collection {database_name}.{collection_name}: {e}")
             raise QueryError(f"Failed to get collection stats: {e}") from e
 
+    async def get_schema(self, **kwargs: Any) -> dict[str, Any]:
+        """Get database schema (list of collections)."""
+        collections = await self.get_tables()
+        return {"database": self.connection_config.get("database", "admin"), "collections": collections}
+
+    async def get_tables(self, **kwargs: Any) -> list[str]:
+        """Get list of collections in the database."""
+        db_name = self.connection_config.get("database", "admin")
+        collections = self.list_collections(db_name)
+        return [c["name"] for c in collections]
+
+    async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
+        """Get schema information (collection stats) for a collection."""
+        db_name = self.connection_config.get("database", "admin")
+        return self.get_collection_stats(db_name, table_name)
+
     def health_check(self) -> dict[str, Any]:
         """Perform a health check on the MongoDB connection."""
         try:

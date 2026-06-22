@@ -25,7 +25,8 @@ export function TableViewer() {
   const [connectionName, setConnectionName] = useState("");
   const [tables, setTables] = useState<string[]>([]);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
-  const [limit, setLimit] = useState(100);
+  const [pageSize, setPageSize] = useState(25);
+  const [page, setPage] = useState(1);
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [rowCount, setRowCount] = useState<number | null>(null);
@@ -68,16 +69,19 @@ export function TableViewer() {
       conn,
       table,
       lim,
+      offs,
     }: {
       conn: string;
       table: string;
       lim: number;
+      offs: number;
     }) =>
       callTool("db_operations", {
         operation: "quick_data_sample",
         connection_name: conn,
         table_name: table,
         limit: lim,
+        offset: offs,
       }),
     onSuccess: (data) => {
       setError(null);
@@ -91,7 +95,11 @@ export function TableViewer() {
         (sample.length > 0 ? Object.keys(sample[0] as object) : []);
       setRows(Array.isArray(sample) ? sample : []);
       setColumns(Array.isArray(cols) ? cols : []);
-      setRowCount((d?.row_count as number) ?? sample.length);
+      setRowCount(
+        (d?.total_row_count as number) ??
+          (d?.row_count as number) ??
+          sample.length,
+      );
     },
     onError: (e: Error) => setError(e.message),
   });
@@ -104,10 +112,20 @@ export function TableViewer() {
     listTablesMutation.mutate(connectionName.trim());
   };
 
-  const loadTableData = (table: string) => {
+  const loadTableData = (
+    table: string,
+    currentPage: number = page,
+    currentPageSize: number = pageSize,
+  ) => {
     setSelectedTable(table);
     if (!connectionName.trim()) return;
-    loadDataMutation.mutate({ conn: connectionName.trim(), table, lim: limit });
+    const offset = (currentPage - 1) * currentPageSize;
+    loadDataMutation.mutate({
+      conn: connectionName.trim(),
+      table,
+      lim: currentPageSize,
+      offs: offset,
+    });
   };
 
   return (
@@ -148,24 +166,16 @@ export function TableViewer() {
           {tables.length > 0 && (
             <>
               <div className="grid gap-2">
-                <Label className="text-slate-300">Rows to show</Label>
-                <input
-                  type="number"
-                  min={1}
-                  max={1000}
-                  className="h-9 w-20 rounded-md border border-slate-800 bg-slate-900 px-2 text-sm text-slate-100"
-                  value={limit}
-                  onChange={(e) => setLimit(Number(e.target.value) || 100)}
-                />
-              </div>
-              <div className="grid gap-2">
                 <Label className="text-slate-300">Table</Label>
                 <select
                   className="h-9 min-w-[180px] rounded-md border border-slate-800 bg-slate-900 px-3 text-sm text-slate-100"
                   value={selectedTable ?? ""}
                   onChange={(e) => {
                     const t = e.target.value;
-                    if (t) loadTableData(t);
+                    if (t) {
+                      setPage(1);
+                      loadTableData(t, 1, pageSize);
+                    }
                   }}
                 >
                   <option value="">Select table</option>
@@ -180,7 +190,7 @@ export function TableViewer() {
                 <Button
                   variant="outline"
                   className="border-slate-700 text-slate-300 hover:bg-slate-800"
-                  onClick={() => loadTableData(selectedTable)}
+                  onClick={() => loadTableData(selectedTable, page, pageSize)}
                   disabled={loadDataMutation.isPending}
                 >
                   {loadDataMutation.isPending ? (
@@ -208,7 +218,7 @@ export function TableViewer() {
             {selectedTable ?? "Data"}
             {rowCount != null && (
               <span className="text-sm font-normal text-slate-400">
-                ({rows.length} rows)
+                ({rowCount} total rows, displaying {rows.length})
               </span>
             )}
           </CardTitle>
@@ -227,49 +237,117 @@ export function TableViewer() {
           ) : columns.length === 0 && rows.length === 0 ? (
             <p className="text-slate-500 py-4">No data.</p>
           ) : (
-            <ScrollArea className="w-full rounded border border-slate-800">
-              <div className="min-w-0 overflow-x-auto">
-                <table className="w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-700 bg-slate-900/50">
-                      {columns.map((col) => (
-                        <th
-                          key={col}
-                          className="text-left px-4 py-2 font-medium text-slate-300 whitespace-nowrap"
-                        >
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row, i) => (
-                      <tr
-                        key={i}
-                        className={cn(
-                          "border-b border-slate-800 hover:bg-slate-800/30",
-                          i % 2 === 0 ? "bg-slate-950/30" : "bg-slate-900/20",
-                        )}
-                      >
+            <>
+              <ScrollArea className="w-full rounded border border-slate-800">
+                <div className="min-w-0 overflow-x-auto">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-700 bg-slate-900/50">
                         {columns.map((col) => (
-                          <td
+                          <th
                             key={col}
-                            className="px-4 py-2 text-slate-300 whitespace-nowrap max-w-[200px] truncate"
-                            title={String(
-                              (row as Record<string, unknown>)[col] ?? "",
-                            )}
+                            className="text-left px-4 py-2 font-medium text-slate-300 whitespace-nowrap"
                           >
-                            {String(
-                              (row as Record<string, unknown>)[col] ?? "",
-                            )}
-                          </td>
+                            {col}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {rows.map((row, i) => (
+                        <tr
+                          key={i}
+                          className={cn(
+                            "border-b border-slate-800 hover:bg-slate-800/30",
+                            i % 2 === 0 ? "bg-slate-950/30" : "bg-slate-900/20",
+                          )}
+                        >
+                          {columns.map((col) => (
+                            <td
+                              key={col}
+                              className="px-4 py-2 text-slate-300 whitespace-nowrap max-w-[200px] truncate"
+                              title={String(
+                                (row as Record<string, unknown>)[col] ?? "",
+                              )}
+                            >
+                              {String(
+                                (row as Record<string, unknown>)[col] ?? "",
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </ScrollArea>
+
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800">
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <span>Show</span>
+                  <select
+                    className="h-8 rounded border border-slate-800 bg-slate-900 px-2 text-sm text-slate-200"
+                    value={pageSize}
+                    onChange={(e) => {
+                      const newSize = Number(e.target.value);
+                      setPageSize(newSize);
+                      setPage(1);
+                      if (selectedTable) {
+                        loadTableData(selectedTable, 1, newSize);
+                      }
+                    }}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <span>rows per page</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-slate-800 bg-slate-950 text-slate-300 hover:bg-slate-800 hover:text-white"
+                    onClick={() => {
+                      const prevPage = Math.max(1, page - 1);
+                      setPage(prevPage);
+                      if (selectedTable) {
+                        loadTableData(selectedTable, prevPage, pageSize);
+                      }
+                    }}
+                    disabled={page === 1 || loadDataMutation.isPending}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm font-medium text-slate-200">
+                    Page {page}{" "}
+                    {rowCount !== null &&
+                      rowCount > 0 &&
+                      `of ${Math.ceil(rowCount / pageSize)}`}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-slate-800 bg-slate-950 text-slate-300 hover:bg-slate-800 hover:text-white"
+                    onClick={() => {
+                      const nextPage = page + 1;
+                      setPage(nextPage);
+                      if (selectedTable) {
+                        loadTableData(selectedTable, nextPage, pageSize);
+                      }
+                    }}
+                    disabled={
+                      (rowCount !== null && page * pageSize >= rowCount) ||
+                      rows.length < pageSize ||
+                      loadDataMutation.isPending
+                    }
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
-            </ScrollArea>
+            </>
           )}
         </CardContent>
       </Card>

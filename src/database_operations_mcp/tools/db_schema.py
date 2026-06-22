@@ -75,6 +75,9 @@ async def db_schema(
 
 async def _list_databases(connection_name: str) -> dict[str, Any]:
     """List all databases available on the connection."""
+    import inspect
+    import os
+
     try:
         if not connection_name:
             raise ValueError("Connection name is required")
@@ -83,7 +86,28 @@ async def _list_databases(connection_name: str) -> dict[str, Any]:
         if not connector:
             raise ValueError(f"Connection '{connection_name}' not found")
 
-        databases = await connector.list_databases()
+        if hasattr(connector, "list_databases"):
+            method = connector.list_databases
+            if inspect.iscoroutinefunction(method):
+                databases = await method()
+            else:
+                databases = method()
+        else:
+            # Fallback for connectors that do not define list_databases
+            db_name = (
+                connector.connection_config.get("database")
+                or connector.connection_config.get("database_path")
+                or "main"
+            )
+            if isinstance(db_name, str):
+                db_name = os.path.basename(db_name.strip("\"'"))
+            databases = [
+                {
+                    "database_name": db_name,
+                    "type": "main",
+                    "allow_connections": True,
+                }
+            ]
 
         return {
             "success": True,
@@ -106,6 +130,8 @@ async def _list_databases(connection_name: str) -> dict[str, Any]:
 
 async def _list_tables(connection_name: str, database_name: str | None, schema_name: str | None) -> dict[str, Any]:
     """List all tables in a database or across all databases."""
+    import inspect
+
     try:
         if not connection_name:
             raise ValueError("Connection name is required")
@@ -114,7 +140,37 @@ async def _list_tables(connection_name: str, database_name: str | None, schema_n
         if not connector:
             raise ValueError(f"Connection '{connection_name}' not found")
 
-        tables = await connector.list_tables(database_name, schema_name)
+        if hasattr(connector, "list_tables"):
+            method = connector.list_tables
+            sig = inspect.signature(method)
+            params = sig.parameters
+
+            kwargs = {}
+            if "database" in params:
+                kwargs["database"] = database_name
+            elif "database_name" in params:
+                kwargs["database_name"] = database_name
+
+            if "schema" in params:
+                kwargs["schema"] = schema_name
+            elif "schema_name" in params:
+                kwargs["schema_name"] = schema_name
+
+            if inspect.iscoroutinefunction(method):
+                tables = await method(**kwargs)
+            else:
+                tables = method(**kwargs)
+        else:
+            # Fallback to get_tables
+            method = getattr(connector, "get_tables", None)
+            if method:
+                if inspect.iscoroutinefunction(method):
+                    raw_tables = await method()
+                else:
+                    raw_tables = method()
+                tables = [{"table_name": t} for t in raw_tables]
+            else:
+                tables = []
 
         return {
             "success": True,
@@ -146,6 +202,8 @@ async def _describe_table(
     include_constraints: bool,
 ) -> dict[str, Any]:
     """Get detailed information about a specific table."""
+    import inspect
+
     try:
         if not connection_name:
             raise ValueError("Connection name is required")
@@ -156,7 +214,21 @@ async def _describe_table(
         if not connector:
             raise ValueError(f"Connection '{connection_name}' not found")
 
-        table_info = await connector.describe_table(table_name, include_metadata, include_indexes, include_constraints)
+        if hasattr(connector, "describe_table"):
+            method = connector.describe_table
+            if inspect.iscoroutinefunction(method):
+                table_info = await method(table_name, include_metadata, include_indexes, include_constraints)
+            else:
+                table_info = method(table_name, include_metadata, include_indexes, include_constraints)
+        else:
+            # Fallback to get_table_schema
+            method = getattr(connector, "get_table_schema", None)
+            if not method:
+                raise AttributeError("Connector has no describe_table or get_table_schema method")
+            if inspect.iscoroutinefunction(method):
+                table_info = await method(table_name)
+            else:
+                table_info = method(table_name)
 
         return {
             "success": True,

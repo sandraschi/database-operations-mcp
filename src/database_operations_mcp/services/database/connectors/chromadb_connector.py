@@ -180,6 +180,24 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error listing ChromaDB collections: {e}")
             raise QueryError(f"Failed to list collections: {e}") from e
 
+    async def get_schema(self, **kwargs: Any) -> dict[str, Any]:
+        """Get database schema."""
+        tables = await self.get_tables()
+        return {
+            "database": self.connection_config.get("database", "default"),
+            "table_count": len(tables),
+            "tables": tables,
+        }
+
+    async def get_tables(self, **kwargs: Any) -> list[str]:
+        """Get list of tables (collections) in ChromaDB."""
+        tables = self.list_tables()
+        return [t["name"] for t in tables]
+
+    async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
+        """Get schema for a table (collection)."""
+        return self.describe_table(table_name)
+
     def describe_table(self, table_name: str, database: str | None = None) -> dict[str, Any]:
         """Get collection schema and metadata."""
         try:
