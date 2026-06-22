@@ -1,6 +1,7 @@
 # Database connection management portmanteau tool.
 # Consolidates all database connection operations into a single interface.
 
+import inspect
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,6 +21,32 @@ from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 ENABLE_LEGACY_DB_PORTMANTEAU = os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
+
+
+async def _run_connector_test(connector) -> dict[str, Any]:
+    """Safely run connection test on a connector, supporting both sync/async and default fallbacks."""
+    if hasattr(connector, "test_connection"):
+        res = connector.test_connection()
+        if inspect.isawaitable(res):
+            return await res
+        return res
+
+    # Default fallback: connect and disconnect
+    try:
+        connect_res = connector.connect()
+        if inspect.isawaitable(connect_res):
+            success = await connect_res
+        else:
+            success = connect_res
+
+        if success:
+            disconnect_res = connector.disconnect()
+            if inspect.isawaitable(disconnect_res):
+                await disconnect_res
+            return {"success": True}
+        return {"success": False, "error": getattr(connector, "last_error", None) or "Failed to establish connection"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 def _legacy_tool_decorator():
@@ -541,11 +568,13 @@ async def _register_database_connection(
         # Create connector
         connector = create_connector(database_type, connection_config)
         if not connector:
-            raise ValueError(f"Failed to create connector for '{database_type}' with the provided configuration. Please check that all required parameters are provided.")
+            raise ValueError(
+                f"Failed to create connector for '{database_type}' with the provided configuration. Please check that all required parameters are provided."
+            )
 
         # Test connection if requested
         if test_connection:
-            test_result = await connector.test_connection()
+            test_result = await _run_connector_test(connector)
             if not test_result["success"]:
                 raise ConnectionError(f"Connection test failed: {test_result.get('error', 'Unknown error')}")
 
@@ -598,7 +627,7 @@ async def _test_database_connection(connection_name: str) -> dict[str, Any]:
             raise ValueError(f"Connection '{connection_name}' not found")
 
         start_time = time()
-        test_result = await connector.test_connection()
+        test_result = await _run_connector_test(connector)
         latency = time() - start_time
 
         return {
@@ -708,7 +737,7 @@ async def _test_single_connection(connection_name: str, timeout: float | None) -
             return {"success": False, "error": f"Connection '{connection_name}' not found"}
 
         start_time = time()
-        test_result = await connector.test_connection()
+        test_result = await _run_connector_test(connector)
         latency = time() - start_time
 
         return {
