@@ -2,24 +2,13 @@ name: CI/CD Pipeline (Full)
 
 on:
   push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master, develop ]
+    tags: ["v*"]
   workflow_dispatch:
-    inputs:
-      run_full_ci:
-        description: 'Run full CI pipeline (may have warnings)'
-        required: false
-        default: false
-        type: boolean
-
-env:
-  PYTHON_VERSION: "3.12"
 
 jobs:
   lint:
     name: Lint and Format Check
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,7 +73,7 @@ jobs:
 
   test:
     name: Test Suite
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
@@ -112,7 +101,7 @@ jobs:
 
   security:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -142,7 +131,7 @@ jobs:
 
   build:
     name: Build Package
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [lint, security]
     if: always() && (needs.lint.result == 'success' || needs.lint.result == 'skipped')
     steps:
@@ -168,7 +157,7 @@ jobs:
 
   mcpb-build:
     name: Build MCPB Package
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [lint]
     if: always() && (needs.lint.result == 'success' || needs.lint.result == 'skipped')
     steps:
@@ -203,7 +192,7 @@ jobs:
 
   integration-test:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [build]
     steps:
       - name: Checkout code
@@ -233,7 +222,7 @@ jobs:
 
   quality-gate:
     name: Quality Gate
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [lint, powershell-lint, security, build, mcpb-build]
     if: always()
     steps:
@@ -246,5 +235,4 @@ jobs:
             echo "❌ Quality gate failed"
             exit 1
           fi
-
 

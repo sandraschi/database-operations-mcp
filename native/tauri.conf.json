@@ -27,7 +27,8 @@
         "targets": ["nsis"],
         "icon": ["icons/icon.png", "icons/icon.ico"],
         "resources": [
-            "resources/database-operations-mcp-backend.exe"
+            "resources/database-operations-mcp-backend.exe",
+            "resources/.env"
         ],
         "windows": {
             "webviewInstallMode": {
@@ -41,6 +42,7 @@
     }
 
 }
+
 
 
 
