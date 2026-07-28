@@ -286,7 +286,7 @@ class ChatService:
                         # try fallback port 1234
                         try:
                             fallback_url = "http://127.0.0.1:1234/v1/chat/completions"
-                            oreq = _req.Request(fallback_url, data=payload, headers=headers)  # noqa: S310
+                            oreq = _req.Request(fallback_url, data=payload, headers=headers)
                             with _req.urlopen(oreq, timeout=60) as r:  # noqa: S310
                                 data = _json.loads(r.read())
                             reply = data.get("choices", [{}])[0].get("message", {}).get("content", "")
