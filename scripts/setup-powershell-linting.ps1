@@ -27,12 +27,12 @@ param(
     [switch]$Test = $false
 )
 
-Write-Host "`nâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•-" -ForegroundColor Cyan
-Write-Host "â•‘      PowerShell Linting Setup (PSScriptAnalyzer)      â•‘" -ForegroundColor Cyan
+Write-Host "`nâ•"â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•-" -ForegroundColor Cyan
+Write-Host "â•'      PowerShell Linting Setup (PSScriptAnalyzer)      â•'" -ForegroundColor Cyan
 Write-Host "â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•`n" -ForegroundColor Cyan
 
 if ($Install) {
-    Write-Host "ðŸ“¦ Checking PSScriptAnalyzer installation..." -ForegroundColor Yellow
+    Write-Host "ðŸ"¦ Checking PSScriptAnalyzer installation..." -ForegroundColor Yellow
 
     $module = Get-Module -ListAvailable PSScriptAnalyzer | Select-Object -First 1
 
@@ -40,14 +40,14 @@ if ($Install) {
         Write-Host "  Installing PSScriptAnalyzer..." -ForegroundColor Gray
         try {
             Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop
-            Write-Host "  âœ… PSScriptAnalyzer installed successfully" -ForegroundColor Green
+            Write-Host "  âœ... PSScriptAnalyzer installed successfully" -ForegroundColor Green
         } catch {
             Write-Host "  âŒ Failed to install: $_" -ForegroundColor Red
-            Write-Host "  ðŸ’¡ Try running: Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser" -ForegroundColor Yellow
+            Write-Host "  ðŸ'¡ Try running: Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser" -ForegroundColor Yellow
             exit 1
         }
     } else {
-        Write-Host "  âœ… PSScriptAnalyzer already installed (v$($module.Version))" -ForegroundColor Green
+        Write-Host "  âœ... PSScriptAnalyzer already installed (v$($module.Version))" -ForegroundColor Green
     }
 
     # Import module
@@ -56,7 +56,7 @@ if ($Install) {
 }
 
 if ($Test) {
-    Write-Host "ðŸ” Linting PowerShell scripts..." -ForegroundColor Yellow
+    Write-Host "ðŸ" Linting PowerShell scripts..." -ForegroundColor Yellow
 
     $scripts = Get-ChildItem -Path . -Filter "*.ps1" -Recurse | Where-Object {
         $_.FullName -notmatch '\.venv|node_modules|__pycache__'
@@ -72,18 +72,18 @@ if ($Test) {
 
     $totalIssues = 0
     foreach ($script in $scripts) {
-        Write-Host "  ðŸ“„ $($script.Name)" -ForegroundColor White
+        Write-Host "  ðŸ"„ $($script.Name)" -ForegroundColor White
         $results = Invoke-ScriptAnalyzer -Path $script.FullName
 
         if ($results.Count -eq 0) {
-            Write-Host "    âœ… No issues found" -ForegroundColor Green
+            Write-Host "    âœ... No issues found" -ForegroundColor Green
         } else {
             $totalIssues += $results.Count
             foreach ($issue in $results) {
                 $severity = switch ($issue.Severity) {
-                    "Error" { "ðŸ”´" }
+                    "Error" { "ðŸ"´" }
                     "Warning" { "ðŸŸ¡" }
-                    "Information" { "ðŸ”µ" }
+                    "Information" { "ðŸ"µ" }
                     default { "âšª" }
                 }
                 Write-Host "    $severity $($issue.RuleName): $($issue.Message)" -ForegroundColor Gray
@@ -95,24 +95,17 @@ if ($Test) {
 
     if ($totalIssues -gt 0) {
         Write-Host "âš ï¸  Total issues found: $totalIssues" -ForegroundColor Yellow
-        Write-Host "ðŸ’¡ Run with -Fix parameter to auto-fix some issues" -ForegroundColor Cyan
+        Write-Host "ðŸ'¡ Run with -Fix parameter to auto-fix some issues" -ForegroundColor Cyan
         Write-Host ""
         exit 1
     } else {
-        Write-Host "âœ… All scripts passed linting!" -ForegroundColor Green
+        Write-Host "âœ... All scripts passed linting!" -ForegroundColor Green
         Write-Host ""
     }
 } else {
-    Write-Host "ðŸ’¡ Usage examples:" -ForegroundColor Cyan
+    Write-Host "ðŸ'¡ Usage examples:" -ForegroundColor Cyan
     Write-Host "  Invoke-ScriptAnalyzer -Path scripts\backup-repo.ps1" -ForegroundColor Gray
     Write-Host "  Invoke-ScriptAnalyzer -Path scripts\*.ps1 -Recurse" -ForegroundColor Gray
     Write-Host "  Invoke-ScriptAnalyzer -Path scripts\backup-repo.ps1 -Fix  # Auto-fix" -ForegroundColor Gray
     Write-Host ""
 }
-
-
-
-
-
-
-
