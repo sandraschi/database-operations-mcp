@@ -3,13 +3,13 @@ set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
 REPO := justfile_directory()
 NAME := "database-operations-mcp"
 
-# ── Dashboard ─────────────────────────────────────────────────────────────────
+# --- Dashboard ---
 
 # Open the interactive recipe dashboard in the browser
 default:
     @just --list
 
-# ── Install ───────────────────────────────────────────────────────────────────
+# --- Install ---
 
 install sync:
     uv sync --extra dev
@@ -20,7 +20,7 @@ bootstrap:
     Set-Location web_sota; npm ci; if ($LASTEXITCODE -ne 0) { npm install }
     Write-Host "Pre-commit hooks installed." -ForegroundColor Green
 
-# ── Runtime ───────────────────────────────────────────────────────────────────
+# --- Runtime ---
 
 mcp:
     uv run database-operations-mcp --stdio
@@ -31,7 +31,7 @@ backend:
 webapp:
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File "{{REPO}}/web_sota/start.ps1"
 
-# ── Quality ───────────────────────────────────────────────────────────────────
+# --- Quality ---
 
 # Execute Ruff SOTA v13.1 linting
 lint:
@@ -47,7 +47,7 @@ fix:
 test:
     uv run pytest tests/unit/ -q
 
-# ── Hardening ─────────────────────────────────────────────────────────────────
+# --- Hardening ---
 
 # Execute Bandit security audit
 check-sec:
@@ -57,7 +57,7 @@ check-sec:
 audit-deps:
     uv run safety check
 
-# ── MCPB ──────────────────────────────────────────────────────────────────────
+# --- MCPB ---
 
 MCPB_IGNORE := "{{REPO}}/.mcpbignore"
 
@@ -65,7 +65,7 @@ MCPB_IGNORE := "{{REPO}}/.mcpbignore"
 pack mcpb-pack:
     powershell.exe -NoProfile -File "{{REPO}}/scripts/mcpb-pack.ps1" -RepoRoot "{{REPO}}"
 
-# ── Native / Tauri ─────────────────────────────────────────────────────────────
+# --- Native  Tauri ---
 
 # Build the PyInstaller backend .exe and copy to Tauri resources
 build-sidecar:
@@ -74,7 +74,7 @@ build-sidecar:
 # Build the Tauri NSIS desktop installer (full pipeline)
 build-native:
     powershell.exe -NoProfile -File "{{REPO}}/native/build.ps1"
-# ── Playwright E2E ─────────────────────────────────────────────────────
+# --- Playwright E2E ---
 
 # Install Playwright browsers (one-time)
 e2e-install:
@@ -85,3 +85,13 @@ e2e-install:
 e2e:
     Set-Location '{{REPO}}/web_sota'
     npx playwright test
+
+# Bootstrap: install dev deps + pre-commit hook
+
+# Run CUA-NSIS smoke test (install -> launch -> nav walk -> uninstall)
+cua-nsis-test:
+    powershell.exe -NoProfile -File "{{justfile_directory()}}\scripts\just\cua-nsis-test.ps1"
+
+# Run CUA webapp test (pre-Tauri: start.ps1 stack + nav walk in browser)
+cua-webapp-test:
+    powershell.exe -NoProfile -File "{{justfile_directory()}}\scripts\just\cua-webapp-test.ps1"
