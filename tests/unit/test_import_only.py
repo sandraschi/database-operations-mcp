@@ -96,13 +96,19 @@ class TestToolRegistration:
         assert hasattr(server.mcp, "name")
 
     def test_tool_registration_count(self):
+        import asyncio
+
         from database_operations_mcp.main import DatabaseOperationsMCP
 
         server = DatabaseOperationsMCP()
-        tool_manager = getattr(server.mcp, "_tool_manager", None)
-        if tool_manager is not None and hasattr(tool_manager, "list_tools"):
-            tools = tool_manager.list_tools()
-            assert len(tools) >= 10, f"Expected at least 10 tools, got {len(tools)}"
+
+        async def _count() -> int:
+            return len(await server.mcp.list_tools())
+
+        loop = asyncio.get_event_loop()
+        if not loop.is_running():
+            tool_count = asyncio.run(_count())
+            assert tool_count >= 10, f"Expected at least 10 tools, got {tool_count}"
         else:
             assert server.mcp is not None
 

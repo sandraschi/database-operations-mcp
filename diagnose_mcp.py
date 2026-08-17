@@ -1,6 +1,6 @@
 import asyncio
-import sys
 import os
+import sys
 
 # Add src to sys.path
 sys.path.append(os.path.join(os.getcwd(), "src"))
@@ -32,19 +32,15 @@ async def diagnose():
             print("Could not import fastmcp.utilities.inspect.get_tools")
 
         if not tools:
-            if hasattr(mcp, "get_tools") and callable(mcp.get_tools):
-                tools = mcp.get_tools()
-                print("Found tools via mcp.get_tools()")
-            elif hasattr(mcp, "list_tools") and callable(mcp.list_tools):
-                tools = mcp.list_tools()
-                print("Found tools via mcp.list_tools()")
-            elif hasattr(mcp, "_tool_manager"):
-                if hasattr(mcp._tool_manager, "get_tools"):
-                    tools = mcp._tool_manager.get_tools()
-                    print("Found tools via mcp._tool_manager.get_tools()")
-                elif hasattr(mcp._tool_manager, "list_tools"):
-                    tools = mcp._tool_manager.list_tools()
-                    print("Found tools via mcp._tool_manager.list_tools()")
+            import asyncio
+
+            try:
+                loop = asyncio.get_event_loop()
+                if not loop.is_running():
+                    tools = asyncio.run(mcp.list_tools())
+                    print("Found tools via mcp.list_tools()")
+            except Exception:
+                pass
 
         print(f"\nRegistered tools ({len(tools)}):")
         for i, t in enumerate(tools, 1):
