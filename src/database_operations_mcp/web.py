@@ -217,6 +217,31 @@ def setup_webapp(app, mcp_app=None) -> None:
     async def api_capabilities():
         return await _build_capabilities(mcp_app)
 
+    @router.get("/v1/diagnostics")
+    async def api_diagnostics():
+        """Full diagnostics for CUA-NSIS smoke testing (tool list + system info)."""
+        import platform
+        import sys
+
+        tools = await _list_mcp_tools(mcp_app)
+        return {
+            "status": "ok",
+            "server": "database-operations-mcp",
+            "python": sys.version,
+            "platform": platform.platform(),
+            "tool_count": len(tools),
+            "tools": [t["name"] for t in tools],
+            "errors": [],
+        }
+
+    @router.post("/shutdown")
+    async def api_shutdown():
+        """Graceful self-termination (agent shutdown path)."""
+        import os as _os
+
+        log_activity("system", "Shutdown requested via POST /api/shutdown", level="WARNING")
+        _os._exit(0)
+
     @router.get("/tools")
     async def list_tools():
         return {"tools": await _list_mcp_tools(mcp_app)}

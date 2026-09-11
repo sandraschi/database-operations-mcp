@@ -6,6 +6,19 @@ __pycache__/
 *.pyc
 .venv/
 
+# Fleet standard (GITIGNORE_STANDARDS.md)
+node_modules/
+**/node_modules/
+reports/
+*.mcpb
+mcpb/src/
+native/gen/
+data/
+*.sqlite3
+*.db*
+*.bak
+*.bak.*
+
 build/
 dist/
 *.bak
@@ -23,4 +36,3 @@ _dashboard/
 
 # Runtime logs
 *.log
-

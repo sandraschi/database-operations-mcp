@@ -47,6 +47,22 @@ fix:
 test:
     uv run pytest tests/unit/ -q
 
+# Serve backend (fleet standard alias; canonical target is `backend` on 10709)
+serve:
+    uv run database-operations-mcp --http --port 10709
+
+# Format alias (fleet standard name; canonical recipe is `fix`)
+fmt:
+    uv run ruff check src/ tests/ --fix
+    uv run ruff format src/ tests/
+
+# Five-gate local CI (ruff + format-check + pyright + pytest)
+ci:
+    uv run ruff check src/ tests/
+    uv run ruff format src/ tests/ --check
+    uv run pyright src/
+    uv run pytest tests/ -q
+
 # --- Hardening ---
 
 # Execute Bandit security audit
@@ -63,7 +79,7 @@ MCPB_IGNORE := "{{REPO}}/.mcpbignore"
 
 # Build .mcpb bundle for Claude Desktop
 pack mcpb-pack:
-    powershell.exe -NoProfile -File "{{REPO}}/scripts/mcpb-pack.ps1" -RepoRoot "{{REPO}}"
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "D:\Dev\repos\mcp-central-docs\scripts\make-mcpb.ps1" -RepoPath "{{REPO}}"
 
 # --- Native  Tauri ---
 

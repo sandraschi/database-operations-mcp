@@ -1,5 +1,10 @@
 # database-operations-mcp
-> This folder contains all documentation related to achieving and maintaining **Gold Standard** status on the [Glama.ai](https://glama.ai) MCP server directory platform. --- **Current roadmap to achieve...
+> FastMCP 3.4 server for database operations (SQL, NoSQL, vector) + media + Windows system tools.
+
+Full tool/endpoint reference: [llms-full.txt](llms-full.txt)
+Ports: frontend 10708 (Vite) / backend 10709 (FastAPI + MCP at /mcp, REST at /api/*).
+Entry: `uv run database-operations-mcp` (stdio) or `--http` for the web bridge.
+
 
 This project includes automated llms.txt generation for AI accessibility.
 

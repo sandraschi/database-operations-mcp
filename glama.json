@@ -5,7 +5,7 @@
   "description": "FastMCP 2.14.3 server for database operations on Windows with bookmark tools as secondary feature. 24 portmanteau tools consolidating 124+ operations.",
   "type": "mcp_server",
   "status": "beta",
-  "framework": "FastMCP 2.14.3",
+  "framework": "FastMCP 3.4.4",
   "tools": 23,
   "transport": ["stdio"],
   "keywords": [
@@ -32,4 +32,3 @@
     }
   }
 }
-

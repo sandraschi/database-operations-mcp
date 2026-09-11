@@ -1,0 +1,1 @@
+{"hooks": {"SessionStart": [{"action": "Before starting work on database-operations-mcp: read pyproject.toml (ports 10708/10709) and src/database_operations_mcp/main.py; use db_connection/db_operations/db_schema portmanteau tools. At end of work: run ruff + pytest and update CHANGELOG.md.", "type": "text"}]}}

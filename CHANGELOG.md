@@ -1,4 +1,18 @@
 
+## [Unreleased] — 2026-09-11 (assfix)
+
+### Fixed
+- CORS default no longer `*`: explicit localhost:10708/10709 + tauri origins with Tailscale/LAN regex.
+- Ruff enforcement: added T20 (print ban) with CLI/test per-file-ignores; removed S110/S112 footgun ignores.
+- Added `GET /api/v1/diagnostics` (was documented but missing) and `POST /api/shutdown` (agent self-termination).
+- Added root `.env.example`, `just serve`/`fmt`/`ci` aliases, docs stack (CONFIGURATION/DEVELOPMENT/TOOLS/TROUBLESHOOTING/ONBOARDING).
+- Session-ctx scaffolds: `.cursorrules` Session Context, `.windsurfrules`, `.github/copilot-instructions.md`, `.claude-plugin` + `hooks/`.
+- `start.ps1`: port zombie clearing + TCP readiness poll; `start.bat`: %* passthrough.
+- Biome format: fixed topbar.tsx + index.css (biome ci green).
+
+### Deferred (documented in reports/assess-2026-09-11.md)
+- Pyright 278 errors (possibly-unbound conn/backup_path), chat skill-first rework, font/contrast sweep, Zustand store, @tauri-apps/api install, Inbox/Skills/Help pages, bun migration.
+
 ## [Unreleased] — 2026-06-14
 
 ### Added
@@ -159,7 +173,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Firefox Tools Consolidation**: Reduced from 6 separate tools to 2 comprehensive portmanteau tools
   - `firefox_bookmarks`: Consolidates all bookmark operations (bookmarks, tagging, curated, backup)
   - `firefox_profiles`: Consolidates all profile operations (profiles, utilities, system)
-- **CI/CD Improvements**: 
+- **CI/CD Improvements**:
   - Fixed test paths to use `tests/unit/` directory
   - Removed duplicate workflow files (`release-workflow.yml`, `build-and-release.yml`)
   - Standardized on `uv` package manager and Python 3.12
@@ -233,4 +247,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Repository**: database-operations-mcp
 **Last Updated**: 2025-01-01
-

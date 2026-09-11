@@ -1,4 +1,4 @@
-"""FastAPI web bridge — REST /api/* for web_sota (ports 10708/10709)."""
+"""FastAPI web bridge - REST /api/* for web_sota (ports 10708/10709)."""
 
 from __future__ import annotations
 
@@ -48,12 +48,20 @@ def build_web_app() -> FastAPI:
 
     app = FastAPI(title="database-operations-mcp")
 
-    cors_origins = os.environ.get("CORS_ORIGINS", "*")
-    cors_origins_list = [o.strip() for o in cors_origins.split(",") if o.strip()]
+    cors_default = (
+        "http://127.0.0.1:10708,http://localhost:10708,"
+        "http://127.0.0.1:10709,http://localhost:10709,"
+        "tauri://localhost,http://tauri.localhost,https://tauri.localhost"
+    )
+    cors_origins = os.environ.get("CORS_ORIGINS", cors_default)
+    cors_origins_list = [o.strip() for o in cors_origins.split(",") if o.strip() and o.strip() != "*"]
+    if not cors_origins_list:
+        cors_origins_list = [o.strip() for o in cors_default.split(",") if o.strip()]
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins_list,
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|100\.\d+\.\d+\.\d+)(:\d+)?",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

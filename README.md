@@ -15,6 +15,7 @@
 
 
 > 📖 **[Installation Guide](INSTALL.md)** — quick start, manual setup, and troubleshooting
+> 🧭 **[Onboarding](docs/ONBOARDING.md)** — no wrappee/account needed; sanity-check steps
 
 FastMCP 3.3 MCP server for database operations on Windows. Includes MCP prompts and a bundled database-expert skill. Browser bookmark management lives in [bookmarks-mcp](https://github.com/sandraschi/bookmarks-mcp).
 

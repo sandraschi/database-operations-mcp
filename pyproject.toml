@@ -77,6 +77,7 @@ dev = [
     "bandit>=1.7.0",
     "safety>=3.0.0",
     "pyinstaller>=6.21.0",
+    "pywin32>=311",
 ]
 
 [tool.mypy]
@@ -97,11 +98,13 @@ target-version = "py312"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "S", "UP", "RUF", "N", "A", "C4"]
-ignore = ["S101", "B008", "E501", "S106", "S110", "S112", "S101", "B008", "E501", "S106", "S110", "S112", "RUF012", "S603", "S607", "S324", "E402"]
+select = ["E", "F", "W", "I", "B", "S", "UP", "RUF", "N", "A", "C4", "T20"]
+ignore = ["S101", "B008", "E501", "S106", "RUF012", "S603", "S607", "S324", "E402"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S603", "S607", "S110", "S112", "RUF013", "RUF059", "W291"]
+"tests/**" = ["S603", "S607", "S110", "S112", "RUF013", "RUF059", "W291", "T201"]
+"src/database_operations_mcp/cli.py" = ["T201"]
+"src/database_operations_mcp/main.py" = ["T201"]
 
 [tool.ruff.format]
 quote-style = "double"
