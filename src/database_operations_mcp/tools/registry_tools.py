@@ -204,12 +204,12 @@ class RegistryMonitor:
 def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
     """Read a value from the Windows Registry.
 
-    Args:
-        path: Registry key path (e.g., 'HKLM\\SOFTWARE\\Microsoft\\Windows')
-        value_name: Name of the value to read (empty string for default value)
+    ## Return Format
+    Returns success plus value/type metadata, or an error dict.
 
-    Returns:
-        Dictionary containing the value data and metadata
+    ## Examples
+    Read a value:
+        result = read_registry_value("HKLM\\SOFTWARE\\Microsoft\\Windows", "Version")
     """
     try:
         hive, subkey = _parse_registry_path(path)
@@ -246,14 +246,12 @@ def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
 def write_registry_value(path: str, value_name: str, value: Any, value_type: str | None = None) -> dict[str, Any]:
     """Write a value to the Windows Registry.
 
-    Args:
-        path: Registry key path (e.g., 'HKCU\\Software\\MyApp')
-        value_name: Name of the value to write (empty string for default value)
-        value: Value to write
-        value_type: Type of the value (e.g., 'REG_SZ', 'REG_DWORD')
+    ## Return Format
+    Returns success plus a confirmation message, or an error dict.
 
-    Returns:
-        Dictionary with operation status
+    ## Examples
+    Write a string value:
+        result = write_registry_value("HKCU\\Software\\MyApp", "Theme", "dark")
     """
     try:
         hive, subkey = _parse_registry_path(path)
@@ -305,11 +303,12 @@ def write_registry_value(path: str, value_name: str, value: Any, value_type: str
 def list_registry_keys(path: str) -> dict[str, Any]:
     """List all subkeys under a registry key.
 
-    Args:
-        path: Registry key path (e.g., 'HKLM\\SOFTWARE\\Microsoft')
+    ## Return Format
+    Returns success plus subkeys/count, or an error dict.
 
-    Returns:
-        Dictionary containing the list of subkeys
+    ## Examples
+    List subkeys:
+        result = list_registry_keys("HKLM\\SOFTWARE\\Microsoft")
     """
     try:
         hive, subkey = _parse_registry_path(path)
@@ -343,11 +342,12 @@ def list_registry_keys(path: str) -> dict[str, Any]:
 def list_registry_values(path: str) -> dict[str, Any]:
     """List all values under a registry key.
 
-    Args:
-        path: Registry key path (e.g., 'HKCU\\Software\\MyApp')
+    ## Return Format
+    Returns success plus the values dict, or an error dict.
 
-    Returns:
-        Dictionary containing the list of values and their data
+    ## Examples
+    List values:
+        result = list_registry_values("HKCU\\Software\\MyApp")
     """
     try:
         hive, subkey = _parse_registry_path(path)

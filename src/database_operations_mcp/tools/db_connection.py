@@ -11,6 +11,7 @@ from typing import Any
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.database_manager import (
+    BaseDatabaseConnector,
     create_connector,
     db_manager,
     get_supported_databases,
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 ENABLE_LEGACY_DB_PORTMANTEAU = os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
 
 
-async def _run_connector_test(connector) -> dict[str, Any]:
+async def _run_connector_test(connector: BaseDatabaseConnector) -> dict[str, Any]:
     """Safely run connection test on a connector, supporting both sync/async and default fallbacks."""
     if hasattr(connector, "test_connection"):
         res = connector.test_connection()
@@ -548,9 +549,9 @@ async def _list_supported_databases() -> dict[str, Any]:
 
 
 async def _register_database_connection(
-    connection_name: str,
-    database_type: str,
-    connection_config: dict[str, Any],
+    connection_name: str | None,
+    database_type: str | None,
+    connection_config: dict[str, Any] | None,
     test_connection: bool,
 ) -> dict[str, Any]:
     """Register a new database connection with the connection manager."""
@@ -616,7 +617,7 @@ async def _list_database_connections() -> dict[str, Any]:
         }
 
 
-async def _test_database_connection(connection_name: str) -> dict[str, Any]:
+async def _test_database_connection(connection_name: str | None) -> dict[str, Any]:
     """Test connectivity for a specific database connection."""
     try:
         if not connection_name or not isinstance(connection_name, str):
@@ -652,6 +653,8 @@ async def _test_database_connection(connection_name: str) -> dict[str, Any]:
 async def _test_all_database_connections(timeout: float | None, parallel: bool) -> dict[str, Any]:
     """Test connectivity for all registered database connections."""
     start_time = time()
+    connection_names: list[str] = []
+    test_results: dict[str, Any] = {}
 
     try:
         # Validate parameters
@@ -722,8 +725,8 @@ async def _test_all_database_connections(timeout: float | None, parallel: bool) 
             "error": f"Failed to test all database connections: {e!s}",
             "test_results": {},
             "summary": {
-                "total_connections": len(connection_names) if "connection_names" in locals() else 0,
-                "tested": len(test_results) if "test_results" in locals() else 0,
+                "total_connections": len(connection_names),
+                "tested": len(test_results),
                 "error": str(e),
             },
         }
@@ -836,7 +839,7 @@ async def _close_connection(connection_name: str | None) -> dict[str, Any]:
             await connector.close()
 
         # Remove from manager
-        db_manager.unregister_connector(connection_name)
+        await db_manager.unregister_connector(connection_name)
 
         # Remove from persistent storage
         try:
@@ -877,8 +880,8 @@ async def _get_connection_info(connection_name: str | None) -> dict[str, Any]:
             }
 
         # Get connection info
-        info = await connector.get_connection_info() if hasattr(connector, "get_connection_info") else {}
-        is_connected = await connector.is_connected() if hasattr(connector, "is_connected") else False
+        info = await connector.get_connection_info()
+        is_connected = connector.is_connected
 
         return {
             "status": "success",

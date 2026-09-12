@@ -12,133 +12,86 @@ This module is kept for backwards compatibility but tools are no longer register
 """
 
 import logging
-from typing import Any, TypeVar
+from typing import Any
 
 # NOTE: @mcp.tool decorators removed - functionality moved to db_operations portmanteau
 # Import kept for backwards compatibility in case code references these functions
-from database_operations_mcp.database_manager import QueryError
-from database_operations_mcp.tools import init_tools as init_connections
-
-# Type variable for generic type hints
-T = TypeVar("T")
+from database_operations_mcp.database_manager import QueryError, db_manager
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_connector(connection_name: str) -> tuple[Any, dict[str, Any] | None]:
+    """Return (connector, error_dict) for a connection name."""
+    connector = db_manager.get_connector(connection_name)
+    if not connector:
+        return None, {
+            "status": "error",
+            "message": f"No such connection: {connection_name}",
+            "error_type": "ConnectionError",
+        }
+    return connector, None
 
 
 # DEPRECATED: Use db_operations(operation='execute_transaction') instead
 async def execute_transaction(queries: list[dict[str, Any]], connection_name: str = "default") -> dict[str, Any]:
     """Execute multiple queries in a transaction.
 
-    Args:
-        queries: List of query objects with 'query' and 'parameters' keys
-        connection_name: Name of the database connection to use
+    ## Return Format
+    Returns status plus per-query results, or an error dict.
 
-    Returns:
-        Dict containing the results of all queries and transaction status
-
-    Example:
-        ```python
-        queries = [
-            {
-                'query': 'INSERT INTO users (name, email) VALUES (?, ?)',
-                'parameters': ['John Doe', 'john@example.com']
-            },
-            {
-                'query': 'UPDATE counters SET value = value + 1 WHERE name = ?',
-                'parameters': ['user_count']
-            }
-        ]
-        result = await execute_transaction(queries, 'sqlite')
-        ```
+    ## Examples
+    Run two writes atomically:
+        result = await execute_transaction(
+            [{"query": "INSERT INTO users (name) VALUES (?)", "parameters": ["Ann"]}],
+            "sqlite",
+        )
     """
-    if connection_name not in init_connections:
-        return {
-            "status": "error",
-            "message": f"No such connection: {connection_name}",
-            "error_type": "ConnectionError",
-        }
-
-    connector = init_connections[connection_name].get("connector")
-    if not connector:
-        return {
-            "status": "error",
-            "message": f"No connector found for connection: {connection_name}",
-            "error_type": "ConnectionError",
-        }
-
-    results = {"status": "success", "results": []}
+    connector, error = _resolve_connector(connection_name)
+    if error:
+        return error
 
     try:
-        async with await connector.connection() as conn:
-            for query_info in queries:
-                query = query_info.get("query")
-                parameters = query_info.get("parameters", {})
-
-                if not query:
-                    raise ValueError("Query is required for each operation")
-
-                result = await conn.execute_query(query, parameters)
-                results["results"].append(
-                    {
-                        "status": "success",
-                        "data": result.data,
-                        "rowcount": result.rowcount,
-                        "execution_time": result.execution_time,
-                        "columns": result.columns,
-                    }
-                )
-
-        return results
-
+        result = await connector.execute_transaction(queries)
+        return {
+            "status": "success" if result.success else "error",
+            "results": result.data,
+            "rowcount": result.rowcount,
+            "message": result.message,
+        }
     except QueryError as e:
-        return {
-            "status": "error",
-            "message": "Transaction failed",
-            "error": str(e),
-            "completed_queries": len(results["results"]),
-        }
+        return {"status": "error", "message": "Transaction failed", "error": str(e)}
     except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Unexpected error: {e!s}",
-            "completed_queries": len(results["results"]),
-        }
+        return {"status": "error", "message": f"Unexpected error: {e!s}"}
 
 
 # DEPRECATED: Use db_operations(operation='execute_write') instead
 async def execute_write(
     query: str,
-    parameters: dict[str, Any] | list[Any] | None = None,
+    parameters: dict[str, Any] | None = None,
     connection_name: str = "default",
 ) -> dict[str, Any]:
     """Execute a write operation (INSERT, UPDATE, DELETE, etc.) on the database.
 
-    Args:
-        query: SQL or database-specific write operation string
-        parameters: Optional parameters for the query
-        connection_name: Name of the database connection to use
+    ## Return Format
+    Returns status plus rowcount/execution_time, or an error dict.
 
-    Returns:
-        Dict containing the operation result and status
+    ## Examples
+    Insert a row:
+        result = await execute_write("INSERT INTO users (name) VALUES (?)", ["Ann"], "sqlite")
     """
-    if connection_name not in init_connections:
-        return {"status": "error", "message": f"No such connection: {connection_name}"}
-
-    connector = init_connections[connection_name].get("connector")
-    if not connector:
-        return {
-            "status": "error",
-            "message": f"No connector found for connection: {connection_name}",
-        }
+    connector, error = _resolve_connector(connection_name)
+    if error:
+        return error
 
     try:
-        async with await connector.connection() as conn:
-            result = await conn.execute_query(query, parameters or {})
-            return {
-                "status": "success",
-                "rowcount": result.rowcount,
-                "execution_time": result.execution_time,
-            }
+        result = await connector.execute_write(query, parameters or {})
+        return {
+            "status": "success" if result.success else "error",
+            "rowcount": result.rowcount,
+            "execution_time": result.execution_time,
+            "message": result.message,
+        }
     except Exception as e:
         return {
             "status": "error",
@@ -153,61 +106,33 @@ async def batch_insert(
 ) -> dict[str, Any]:
     """Insert multiple rows into a table in batches.
 
-    Args:
-        table: Name of the table to insert into
-        data: List of dictionaries where keys are column names
-        connection_name: Name of the database connection to use
-        batch_size: Number of rows to insert per batch
+    ## Return Format
+    Returns status plus processed count, or an error dict.
 
-    Returns:
-        Dict containing the insert status and statistics
+    ## Examples
+    Insert rows:
+        result = await batch_insert("users", [{"name": "Ann"}], "sqlite")
     """
     if not data:
         return {"status": "error", "message": "No data provided"}
 
-    if connection_name not in init_connections:
-        return {"status": "error", "message": f"No such connection: {connection_name}"}
+    connector, error = _resolve_connector(connection_name)
+    if error:
+        return error
 
-    connector = init_connections[connection_name].get("connector")
-    if not connector:
-        return {
-            "status": "error",
-            "message": f"No connector found for connection: {connection_name}",
-        }
-
-    # Get column names from the first row
-    columns = list(data[0].keys())
-    if not columns:
-        return {"status": "error", "message": "No columns found in data"}
-
-    # Prepare the base query
-    columns_str = ", ".join(f'"{col}"' for col in columns)
-    placeholders = ", ".join(["?"] * len(columns))
-    query = f'INSERT INTO "{table}" ({columns_str}) VALUES ({placeholders})'  # noqa: S608  # trusted table/column names from schema
-
-    total_rows = len(data)
+    chunk = max(int(batch_size or 1000), 1)
     processed = 0
 
     try:
-        async with await connector.connection() as conn:
-            # Process in batches
-            for i in range(0, total_rows, batch_size):
-                batch = data[i : i + batch_size]
+        for start in range(0, len(data), chunk):
+            batch_result = await connector.batch_insert(table, data[start : start + chunk])
+            processed += batch_result.rowcount
 
-                # Flatten parameters for the batch
-                params = []
-                for row in batch:
-                    params.append([row.get(col) for col in columns])
-
-                # Execute the batch insert
-                await conn.executemany(query, params)
-                processed += len(batch)
-
-            return {
-                "status": "success",
-                "processed": processed,
-                "message": f"Successfully inserted {processed} rows into {table}",
-            }
+        return {
+            "status": "success",
+            "processed": processed,
+            "message": f"Successfully inserted {processed} rows into {table}",
+        }
 
     except Exception as e:
         logger.exception("Error in batch insert")

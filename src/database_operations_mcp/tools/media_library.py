@@ -897,10 +897,12 @@ async def _optimize_plex_database(
 
 
 async def _manage_plex_metadata(
-    action: str, library_section: str | None = None, item_id: int | None = None
+    action: str | None, library_section: str | None = None, item_id: int | None = None
 ) -> dict[str, Any]:
     """Manage Plex metadata through analysis or export."""
     try:
+        if not action:
+            return {"success": False, "error": "action is required for manage_plex_metadata"}
         from database_operations_mcp.tools.plex_tools import PlexDatabase
 
         with PlexDatabase() as plex:

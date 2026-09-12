@@ -130,11 +130,7 @@ def _find_windows_db(db_type: str) -> Path | None:
 
 
 def register_tools(mcp: "FastMCP") -> None:
-    """Register all Windows tools with the MCP server.
-
-    Args:
-    mcp: The FastMCP instance to register tools with
-    """
+    """Register all Windows tools with the MCP server (deprecated no-op)."""
 
 
 # DEPRECATED: Use windows_system portmanteau instead
@@ -142,12 +138,12 @@ def register_tools(mcp: "FastMCP") -> None:
 async def list_windows_databases(bruteforce_firefox: bool = False) -> dict[str, Any]:
     """List all discoverable Windows databases with their locations and sizes.
 
-    Args:
-        bruteforce_firefox: If True, attempt to access Firefox database even when locked
-                           using dirty tricks (file copying, SQLite URI tricks, etc.)
+    ## Return Format
+    Returns status plus databases keyed by type, or an error dict.
 
-    Returns:
-    Dictionary containing database information
+    ## Examples
+    Discover databases:
+        result = await list_windows_databases()
     """
     result = {}
     for db_type, paths in WINDOWS_DB_PATHS.items():
@@ -216,19 +212,18 @@ async def manage_plex_metadata(
 ) -> dict[str, Any]:
     """Manage Plex metadata for media items.
 
-    Args:
-        action: Action to perform (analyze, refresh, delete, export)
-        library_section: Optional library section ID or name
-        item_id: Optional specific item ID
-        refresh: Whether to refresh metadata from online sources
+    ## Return Format
+    Returns status plus counts/items, or an error dict.
 
-    Returns:
-        Dictionary with operation results
+    ## Examples
+    Analyze the Plex database:
+        result = await manage_plex_metadata(action="analyze")
     """
     plex_path = _find_windows_db("plex")
     if not plex_path or not os.path.exists(plex_path):
         return {"status": "error", "message": "Plex database not found"}
 
+    conn = None
     try:
         conn = sqlite3.connect(f"file:{plex_path}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
@@ -305,7 +300,7 @@ async def manage_plex_metadata(
         return {"status": "error", "message": str(e)}
 
     finally:
-        if "conn" in locals():
+        if conn is not None:
             conn.close()
 
 
@@ -320,15 +315,12 @@ async def query_windows_database(
 ) -> dict[str, Any]:
     """Execute a query against a Windows database.
 
-    Args:
-        db_type: Type of database (chrome_history, firefox_history, etc.)
-        query: SQL query to execute
-        params: Optional query parameters
-        limit: Maximum number of results to return
-        bruteforce_firefox: If True, attempt to access Firefox database even when locked
+    ## Return Format
+    Returns status plus columns/results, or an error dict.
 
-    Returns:
-        Query results and metadata
+    ## Examples
+    Query browser history:
+        result = await query_windows_database("chrome_history", "SELECT url FROM urls LIMIT 5")
     """
     # Check Firefox status for Firefox databases
     if db_type == "firefox_history":
@@ -348,6 +340,7 @@ async def query_windows_database(
     if params is None:
         params = {}
 
+    conn = None
     try:
         # Add limit to query if not already present
         if "LIMIT" not in query.upper() and limit > 0:
@@ -398,7 +391,7 @@ async def query_windows_database(
         return {"status": "error", "database": db_type, "query": query, "error": str(e)}
 
     finally:
-        if "conn" in locals():
+        if conn is not None:
             conn.close()
 
 
@@ -409,15 +402,12 @@ async def clean_windows_database(
 ) -> dict[str, Any]:
     """Clean and optimize a Windows database.
 
-    Args:
-        db_type: Type of database to clean
-        action: Action to perform (vacuum, reindex, analyze)
-        backup: Whether to create a backup before cleaning
-        bruteforce_firefox: If True, attempt to access Firefox database
-        even when locked (dangerous!)
+    ## Return Format
+    Returns status plus integrity/size info, or an error dict.
 
-    Returns:
-        Dictionary with cleaning results
+    ## Examples
+    Vacuum a database:
+        result = await clean_windows_database("chrome_history", action="vacuum")
     """
     # Check Firefox status for Firefox databases
     if db_type == "firefox_history":
@@ -451,6 +441,7 @@ async def clean_windows_database(
             logger.exception(f"Failed to create backup of {db_type}")
             return {"status": "error", "message": f"Backup failed: {e!s}"}
 
+    conn = None
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -464,6 +455,8 @@ async def clean_windows_database(
         elif action == "analyze":
             cursor.execute("ANALYZE")
             message = "Database analysis completed"
+        else:
+            return {"status": "error", "message": f"Unsupported action: {action}"}
 
         conn.commit()
 
@@ -472,16 +465,19 @@ async def clean_windows_database(
         integrity = cursor.fetchone()
 
         cursor.execute("PRAGMA page_count")
-        page_count = cursor.fetchone()[0]
+        page_row = cursor.fetchone()
+        page_count = page_row[0] if page_row else 0
 
         cursor.execute("PRAGMA page_size")
-        page_size = cursor.fetchone()[0]
+        size_row = cursor.fetchone()
+        page_size = size_row[0] if size_row else 0
 
         return {
             "status": "success",
             "action": action,
             "database": db_type,
             "path": str(db_path),
+            "message": message,
             "backup_created": bool(backup_path),
             "backup_path": str(backup_path) if backup_path else None,
             "integrity_check": integrity[0] if integrity else "unknown",
@@ -493,9 +489,5 @@ async def clean_windows_database(
         return {"status": "error", "database": db_type, "action": action, "error": str(e)}
 
     finally:
-        if "conn" in locals():
+        if conn is not None:
             conn.close()
-
-
-# Set up logging
-logger = logging.getLogger(__name__)

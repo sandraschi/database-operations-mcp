@@ -319,6 +319,7 @@ async def _query_windows_database(
     if not db_path.exists():
         return {"success": False, "error": f"Database not found: {target}"}
 
+    conn = None
     try:
         conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
@@ -338,7 +339,7 @@ async def _query_windows_database(
             "count": len(rows),
         }
     finally:
-        if "conn" in locals():
+        if conn is not None:
             conn.close()
 
 
@@ -356,10 +357,12 @@ async def _clean_windows_database(
     if not db_path.exists():
         return {"success": False, "error": f"Database not found: {target}"}
 
+    backup_path = None
     if backup:
         backup_path = db_path.with_suffix(f".bak_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
         shutil.copy2(db_path, backup_path)
 
+    conn = None
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -371,7 +374,7 @@ async def _clean_windows_database(
             "backup": str(backup_path) if backup else None,
         }
     finally:
-        if "conn" in locals():
+        if conn is not None:
             conn.close()
 
 

@@ -34,50 +34,19 @@ async def db_operations_extended(
     PostgreSQL, MySQL, Redis, DuckDB, MongoDB, and more. Routes operations
     to the appropriate database-specific connector based on database type.
 
-    Parameters:
-        database_type: Type of database to operate on
-            - 'sqlite': SQLite database (file-based)
-            - 'postgresql': PostgreSQL database
-            - 'mysql': MySQL/MariaDB database
-            - 'redis': Redis key-value store
-            - 'duckdb': DuckDB analytical database
-            - 'mongodb': MongoDB document database
-        operation: Database operation to perform
-            - 'execute_query': Execute SELECT query
-            - 'execute_non_query': Execute INSERT/UPDATE/DELETE
-            - 'get_tables': List all tables/collections
-            - 'get_table_structure': Describe table structure
-            - 'get_keys': Get Redis keys matching pattern
-            - 'get_value': Get Redis value by key
-            - 'set_value': Set Redis key-value pair
-            - 'health_check': Check connection health
-        connection_string: Database connection string
-            - For SQLite: file path
-            - For MySQL/PostgreSQL: "host:port:user:password:database"
-            - For Redis: "host:port:password:db"
-            - For DuckDB: file path or ":memory:"
-        query: SQL query string
-            - Used for execute_query and execute_non_query operations
-            - Parameterized queries supported
-        table_name: Name of table/collection to operate on
-            - Used for table-specific operations
-        key: Redis key for key-value operations
-            - Used with get_value, set_value operations
-        value: Value to set for Redis operations
-            - Used with set_value operation
-        parameters: Query parameters for parameterized queries
-            - Dictionary of parameter name-value pairs
+    ## Return Format
+    Returns success plus database_type/operation/result/message, or an error dict.
 
-    Returns:
-        Dictionary containing operation result:
-            {
-                'success': bool,
-                'database_type': str,
-                'operation': str,
-                'result': Any,
-                'message': str
-            }
+    ## Examples
+    Run a SQLite query:
+        result = await db_operations_extended(
+            database_type="sqlite",
+            operation="execute_query",
+            connection_string="C:/data/app.db",
+            query="SELECT * FROM users LIMIT 5",
+        )
     """
+    connector = None
     try:
         # Parse connection string into a config dict
         # Format depends on database type
@@ -221,5 +190,5 @@ async def db_operations_extended(
         }
     finally:
         # Disconnect if we created a temporary connector
-        if "connector" in locals() and connector:
+        if connector is not None:
             await connector.disconnect()

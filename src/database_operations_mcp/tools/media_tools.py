@@ -34,25 +34,25 @@ def register_tools(mcp):
 async def find_plex_database(custom_path: str | None = None) -> dict[str, Any]:
     """Locate the Plex Media Server database file.
 
-    Args:
-        custom_path: Optional custom path to check first
+    ## Return Format
+    Returns status plus path/size metadata, or a not_found/error dict.
 
-    Returns:
-        Dictionary with database path and metadata if found
+    ## Examples
+    Auto-detect the database:
+        result = await find_plex_database()
     """
     import os
     import platform
-    from pathlib import Path
 
     # Check custom path first if provided
     if custom_path:
-        custom_path = Path(os.path.expandvars(os.path.expanduser(custom_path)))
-        if custom_path.exists():
+        resolved = Path(os.path.expandvars(os.path.expanduser(custom_path)))
+        if resolved.exists():
             return {
                 "status": "success",
-                "path": str(custom_path.absolute()),
+                "path": str(resolved.absolute()),
                 "source": "custom_path",
-                "size_mb": custom_path.stat().st_size / (1024 * 1024),
+                "size_mb": resolved.stat().st_size / (1024 * 1024),
             }
 
     # Determine OS and check common locations
@@ -77,7 +77,7 @@ async def find_plex_database(custom_path: str | None = None) -> dict[str, Any]:
                 "size_mb": expanded_path.stat().st_size / (1024 * 1024),
             }
 
-        return {"status": "not_found", "message": "Plex database not found in common locations"}
+    return {"status": "not_found", "message": "Plex database not found in common locations"}
 
 
 # DEPRECATED: Use media_library portmanteau instead
@@ -86,21 +86,22 @@ async def optimize_plex_database(
 ) -> dict[str, Any]:
     """Optimize the Plex Media Server database.
 
-    Args:
-        db_path: Path to the Plex database (auto-detected if not provided)
-        vacuum: Whether to run VACUUM to rebuild the database
-        analyze: Whether to update query planner statistics
-        backup: Whether to create a backup before optimization
+    ## Return Format
+    Returns status plus size/space-saved metadata, or an error dict.
 
-    Returns:
-        Dictionary with optimization results
+    ## Examples
+    Optimize the auto-detected database:
+        result = await optimize_plex_database()
     """
     # Find the database if path not provided
     if not db_path:
         db_info = await find_plex_database()
         if db_info["status"] != "success":
             return db_info
-        db_path = db_info["path"]
+        resolved_path = db_info.get("path")
+        if not resolved_path:
+            return {"status": "error", "message": "Plex database path could not be resolved"}
+        db_path = str(resolved_path)
 
     # Create backup if requested
     backup_path = None
@@ -110,6 +111,7 @@ async def optimize_plex_database(
 
         shutil.copy2(db_path, backup_path)
 
+    conn = None
     try:
         # Connect to the database
         conn = sqlite3.connect(f"file:{db_path}?mode=rw", uri=True)
@@ -146,7 +148,7 @@ async def optimize_plex_database(
         }
 
     finally:
-        if "conn" in locals():
+        if conn is not None:
             conn.close()
 
 
@@ -160,16 +162,14 @@ async def export_database_schema(
 ) -> dict[str, Any]:
     """Export database schema and optionally data to a file.
 
-    Args:
-        db_path: Path to the database file
-        output_format: Output format (sql, json, csv)
-        output_file: Output file path (defaults to [db_name]_schema.[format])
-        include_data: Whether to include table data
-        tables: List of tables to export (all if None)
+    ## Return Format
+    Returns status plus output_file/tables_exported metadata, or an error dict.
 
-    Returns:
-        Dictionary with export results
+    ## Examples
+    Export schema as SQL:
+        result = await export_database_schema("/path/to/app.db", output_format="sql")
     """
+    conn = None
     try:
         conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
@@ -213,7 +213,7 @@ async def export_database_schema(
         return {"status": "error", "message": str(e)}
 
     finally:
-        if "conn" in locals():
+        if conn is not None:
             conn.close()
 
 
@@ -221,20 +221,24 @@ async def export_database_schema(
 async def get_plex_library_stats(db_path: str | None = None, detailed: bool = False) -> dict[str, Any]:
     """Get statistics about the Plex library.
 
-    Args:
-        db_path: Path to the Plex database (auto-detected if not provided)
-        detailed: Whether to include detailed statistics
+    ## Return Format
+    Returns status plus library statistics, or an error dict.
 
-    Returns:
-        Dictionary with library statistics
+    ## Examples
+    Get stats for the auto-detected database:
+        result = await get_plex_library_stats()
     """
     # Find the database if path not provided
     if not db_path:
         db_info = await find_plex_database()
         if db_info["status"] != "success":
             return db_info
-        db_path = db_info["path"]
+        resolved_path = db_info.get("path")
+        if not resolved_path:
+            return {"status": "error", "message": "Plex database path could not be resolved"}
+        db_path = str(resolved_path)
 
+    conn = None
     try:
         conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         cursor = conn.cursor()
@@ -289,7 +293,7 @@ async def get_plex_library_stats(db_path: str | None = None, detailed: bool = Fa
         return {"status": "error", "message": str(e)}
 
     finally:
-        if "conn" in locals():
+        if conn is not None:
             conn.close()
 
 
@@ -313,14 +317,7 @@ PLEX_DB_PATHS = {
 
 
 def _export_to_sql(cursor, tables, output_file, include_data):
-    """Export database schema and data to SQL format.
-
-    Args:
-        cursor: Database cursor
-        tables: List of tables to export
-        output_file: Output file path
-        include_data: Whether to include table data
-    """
+    """Export database schema and data to SQL format."""
     with open(output_file, "w", encoding="utf-8") as f:
         for table in tables:
             cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table,))
@@ -352,14 +349,7 @@ def _export_to_sql(cursor, tables, output_file, include_data):
 
 
 def _export_to_json(cursor, tables, output_file, include_data):
-    """Export database schema and data to JSON format.
-
-    Args:
-        cursor: Database cursor
-        tables: List of tables to export
-        output_file: Output file path
-        include_data: Whether to include table data
-    """
+    """Export database schema and data to JSON format."""
     result = {}
     for table in tables:
         cursor.execute(f"SELECT * FROM {table} LIMIT 0")  # noqa: S608  # trusted table name from schema
@@ -379,14 +369,7 @@ def _export_to_json(cursor, tables, output_file, include_data):
 
 
 def _export_to_csv(cursor, tables, output_file, include_data):
-    """Export database schema and data to CSV format.
-
-    Args:
-        cursor: Database cursor
-        tables: List of tables to export
-        output_file: Output file path
-        include_data: Whether to include table data
-    """
+    """Export database schema and data to CSV format."""
     from pathlib import Path
 
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)

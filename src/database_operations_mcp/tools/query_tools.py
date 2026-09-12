@@ -16,7 +16,12 @@ from typing import Any
 
 # NOTE: @mcp.tool decorators removed - functionality moved to db_operations portmanteau
 # Import kept for backwards compatibility in case code references these functions
-from database_operations_mcp.database_manager import DatabaseType, db_manager
+from database_operations_mcp.database_manager import (
+    DatabaseType,
+    QueryResult,
+    db_manager,
+    normalize_query_result,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,60 +36,11 @@ async def execute_query(
     parameter binding, and comprehensive result formatting. Supports SQL (PostgreSQL, SQLite),
     NoSQL (MongoDB), and Vector (ChromaDB) databases.
 
-    Parameters:
-        connection_name: Name of registered database connection
-            - Must be previously registered via register_database_connection
-            - Case-sensitive string
-            - Only alphanumeric and underscores allowed
+    ## Return Format
+    Returns success plus connection/query echo and a result dict (rows/columns/row_count),
+    or an error dict. Always use parameterized queries for user input.
 
-        query: SQL or database-specific query to execute
-            - SQL: Standard SQL SELECT, INSERT, UPDATE, DELETE
-            - MongoDB: Query syntax as string
-            - ChromaDB: Vector query syntax
-            - Maximum length: 10,000 characters
-            - Parameterized queries recommended for security
-
-        parameters: Query parameters for prepared statements (default: None)
-            - Dictionary mapping parameter names to values
-            - Prevents SQL injection attacks
-            - Example: {"user_id": 123, "status": "active"}
-
-        limit: Maximum rows to return (default: 1000)
-            - Applied automatically if not in query
-            - Range: 1-10000
-            - Helps prevent memory issues
-
-    Returns:
-        Dictionary containing:
-            - success: Boolean indicating query execution success
-            - connection_name: Echo of connection used
-            - query: Echo of query executed
-            - parameters: Echo of parameters used
-            - applied_limit: Actual limit applied
-            - result: Query results dictionary with:
-                - rows: List of result rows
-                - columns: List of column names
-                - row_count: Number of rows returned
-            - error: Error message if success is False
-
-    Usage:
-        Use this tool to execute any database query safely. It automatically applies
-        limits, handles parameters, and formats results consistently across all
-        database types. Best for data retrieval and analysis.
-
-        Common scenarios:
-        - Retrieve data for analysis or reporting
-        - Check data quality or validate migrations
-        - Perform ad-hoc database queries
-        - Debug application data issues
-
-        Best practices:
-        - Always use parameterized queries for user input
-        - Start with small limits for exploratory queries
-        - Use specific column names instead of SELECT *
-        - Consider using quick_data_sample for quick peeks
-
-    Examples:
+    ## Examples
         Basic SELECT query:
             result = await execute_query(
                 connection_name="production_db",
@@ -149,24 +105,6 @@ async def execute_query(
                 limit=20
             )
             # Returns: Top 20 categories by revenue
-
-    Raises:
-        ConnectionError: When database connection is unavailable
-        QueryError: When query syntax is invalid
-        TimeoutError: When query execution exceeds 30 seconds
-        PermissionError: When user lacks query permissions
-
-    Notes:
-        - Large result sets may consume significant memory
-        - Query timeout is 30 seconds by default
-        - Limit is automatically applied if not present in query
-        - Connection must be registered before use
-        - Parameterized queries prevent SQL injection
-
-    See Also:
-        - quick_data_sample: Get sample data without writing queries
-        - export_query_results: Execute and export results to file
-        - list_tables: Discover available tables to query
     """
     try:
         connector = db_manager.get_connector(connection_name)
@@ -176,9 +114,8 @@ async def execute_query(
         # Add limit to query if not already present (database-specific logic needed)
         limited_query = _apply_query_limit(query, limit, connector.database_type)
 
-        # Execute the query (assuming connector.execute_query is synchronous)
-        # In a real async context, you might need to use asyncio.to_thread here
-        result = connector.execute_query(limited_query, parameters)
+        # Execute the query
+        result = await connector.execute_query(limited_query, parameters)
 
         return {
             "success": True,
@@ -209,62 +146,10 @@ async def quick_data_sample(
     schema validation, or data quality checks. Automatically generates appropriate
     queries for different database types.
 
-    Parameters:
-        connection_name: Name of registered database connection
-            - Must be previously registered
-            - Case-sensitive
+    ## Return Format
+    Returns success plus result rows and the generated query, or an error dict.
 
-        table_name: Name of table/collection to sample
-            - SQL: Table name (e.g., 'users', 'orders')
-            - MongoDB: Collection name
-            - ChromaDB: Collection name
-
-        database_name: Database/schema name (default: None)
-            - Optional for most databases
-            - Required for PostgreSQL with schemas
-            - Not used for SQLite or MongoDB
-
-        sample_size: Number of rows to retrieve (default: 10)
-            - Range: 1-1000
-            - Recommended: 10-50 for quick inspection
-
-        include_columns: List of columns to include (default: None)
-            - None means all columns
-            - SQL: Column names as strings
-            - MongoDB: Field names
-
-        exclude_columns: List of columns to exclude (default: None)
-            - Useful for hiding sensitive data
-            - Applied after include_columns
-
-    Returns:
-        Dictionary containing:
-            - success: Boolean indicating operation success
-            - connection_name: Echo of connection used
-            - table_name: Echo of table sampled
-            - database_name: Database name if provided
-            - sample_size: Requested sample size
-            - generated_query: Auto-generated query used
-            - result: Sample data dictionary with rows and columns
-            - error: Error message if success is False
-
-    Usage:
-        Use this for quick data inspection without writing queries. Perfect for
-        exploring unfamiliar databases, validating migrations, or checking data
-        quality. The tool auto-generates appropriate queries for each database type.
-
-        Common scenarios:
-        - Explore new database tables
-        - Verify migration results
-        - Check data types and formats
-        - Quick sanity checks during development
-
-        Best practices:
-        - Start with small sample sizes (10-20 rows)
-        - Use column filters to reduce data transfer
-        - Combine with describe_table for complete context
-
-    Examples:
+    ## Examples
         Basic table sample:
             result = await quick_data_sample(
                 connection_name="production_db",
@@ -309,17 +194,6 @@ async def quick_data_sample(
             if not result['success']:
                 print(f"Sampling failed: {result['error']}")
             # Logs: Sampling failed: Table 'nonexistent_table' does not exist
-
-    Notes:
-        - Auto-generates database-specific queries
-        - Column filtering applied client-side for some databases
-        - Large sample sizes may impact database performance
-        - Does not modify data (read-only operation)
-
-    See Also:
-        - describe_table: Get table schema before sampling
-        - execute_query: For custom queries with complex logic
-        - list_tables: Discover available tables
     """
     try:
         connector = db_manager.get_connector(connection_name)
@@ -336,8 +210,8 @@ async def quick_data_sample(
             exclude_columns,
         )
 
-        # Execute the query (assuming connector.execute_query is synchronous)
-        result = connector.execute_query(query)
+        # Execute the query
+        result = await connector.execute_query(query)
 
         return {
             "success": True,
@@ -369,60 +243,10 @@ async def export_query_results(
     data export, reporting, and integration with other tools. Handles large
     result sets with automatic limiting.
 
-    Parameters:
-        connection_name: Name of registered database connection
-            - Must be previously registered
-            - Case-sensitive
+    ## Return Format
+    Returns success plus export_format/row_count/exported_data (or file_path), or an error dict.
 
-        query: SQL or database query to execute
-            - Same syntax as execute_query
-            - Supports parameterized queries
-
-        export_format: Output format (default: "json")
-            - "json": Structured JSON with metadata
-            - "csv": Comma-separated values
-            - "excel": Excel-compatible structure
-
-        output_file: File path for export (default: None)
-            - None returns data in response
-            - Provide path to save to file
-
-        parameters: Query parameters (default: None)
-            - Same as execute_query
-            - Prevents SQL injection
-
-        limit: Maximum rows to export (default: 1000)
-            - Auto-applied if not in query
-            - Range: 1-10000
-
-    Returns:
-        Dictionary containing:
-            - success: Boolean indicating operation success
-            - connection_name: Echo of connection used
-            - query: Query executed
-            - export_format: Format used
-            - row_count: Number of rows exported
-            - exported_data: Formatted data (if no output_file)
-            - file_path: Path where data saved (if output_file provided)
-            - error: Error message if success is False
-
-    Usage:
-        Use this to export query results for reporting, analysis, or integration
-        with other tools. Supports multiple formats and can save directly to files.
-
-        Common scenarios:
-        - Export data for Excel analysis
-        - Generate CSV for data imports
-        - Create JSON for API integration
-        - Backup specific data subsets
-
-        Best practices:
-        - Use CSV for Excel compatibility
-        - Use JSON for programmatic processing
-        - Set appropriate limits to control file sizes
-        - Use parameterized queries for dynamic exports
-
-    Examples:
+    ## Examples
         Export to JSON:
             result = await export_query_results(
                 connection_name="analytics_db",
@@ -458,16 +282,6 @@ async def export_query_results(
                 limit=2000
             )
             # Returns: Excel-formatted data with 2000 rows
-
-    Notes:
-        - Large exports may consume significant memory
-        - File paths must be writable
-        - CSV format is most compatible across tools
-        - Excel format is structured JSON, not actual .xlsx
-
-    See Also:
-        - execute_query: For queries without export
-        - quick_data_sample: For quick data inspection
     """
     try:
         connector = db_manager.get_connector(connection_name)
@@ -477,18 +291,19 @@ async def export_query_results(
         # Execute query with limit
         limited_query = _apply_query_limit(query, limit, connector.database_type)
 
-        # Execute the query (assuming connector.execute_query is synchronous)
-        result = connector.execute_query(limited_query, parameters)
+        # Execute the query
+        result = await connector.execute_query(limited_query, parameters)
 
         # Format results based on export format
         formatted_data = _format_export_data(result, export_format)
+        normalized = normalize_query_result(result)
 
         return {
             "success": True,
             "connection_name": connection_name,
             "query": query,
             "export_format": export_format,
-            "row_count": len(result.get("rows", [])),
+            "row_count": len(normalized.get("rows", [])),
             "exported_data": formatted_data,
         }
 
@@ -497,7 +312,7 @@ async def export_query_results(
         return {"success": False, "error": str(e)}
 
 
-def _apply_query_limit(query: str, limit: int | None, database_type) -> str:
+def _apply_query_limit(query: str, limit: int | None, database_type: DatabaseType) -> str:
     """Apply LIMIT clause to query based on database type."""
     if not limit:
         return query
@@ -516,11 +331,24 @@ def _apply_query_limit(query: str, limit: int | None, database_type) -> str:
         return query
 
 
-def _generate_sample_query(database_type, table_name: str, database_name: str | None, sample_size: int) -> str:
+def _generate_sample_query(
+    database_type: DatabaseType,
+    table_name: str,
+    database_name: str | None,
+    sample_size: int,
+    include_columns: list[str] | None = None,
+    exclude_columns: list[str] | None = None,
+    offset: int = 0,
+) -> str:
     """Generate appropriate sample query based on database type."""
+    _ = exclude_columns
+    columns = ", ".join(include_columns) if include_columns else "*"
     if database_type in [DatabaseType.POSTGRESQL, DatabaseType.SQLITE]:
         table_ref = f"{database_name}.{table_name}" if database_name else table_name
-        return f"SELECT * FROM {table_ref} LIMIT {sample_size}"  # noqa: S608  # table_ref from trusted schema introspection
+        query = f"SELECT {columns} FROM {table_ref} LIMIT {sample_size}"  # noqa: S608  # table_ref from trusted schema introspection
+        if offset:
+            query += f" OFFSET {offset}"
+        return query
     elif database_type == DatabaseType.MONGODB:
         # MongoDB query will be handled in connector
         return f"db.{table_name}.find().limit({sample_size})"
@@ -531,10 +359,11 @@ def _generate_sample_query(database_type, table_name: str, database_name: str | 
         return f"/* Sample query for {table_name} */"
 
 
-def _format_export_data(result: dict[str, Any], export_format: str) -> Any:
+def _format_export_data(result: QueryResult | dict[str, Any], export_format: str) -> Any:
     """Format query results for export."""
-    rows = result.get("rows", [])
-    columns = result.get("columns", [])
+    normalized = normalize_query_result(result)
+    rows = normalized.get("rows", [])
+    columns = normalized.get("columns", [])
 
     if export_format.lower() == "json":
         return {

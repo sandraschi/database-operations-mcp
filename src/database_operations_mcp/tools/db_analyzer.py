@@ -44,7 +44,7 @@ async def db_analyzer(
 
     Errors:
         Unknown operation returns error_type=invalid_input with available_operations.
-        File access failures: user_fixable — verify db_file_path exists and is readable.
+        File access failures: user_fixable - verify db_file_path exists and is readable.
     """
     _known: set[str] = {"structure", "analyze", "content", "health", "errors", "report"}
     if operation not in _known:

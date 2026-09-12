@@ -36,11 +36,12 @@ async def get_connector(db_path: str) -> SQLiteConnector | None:
 async def sqlite_inspect_db(db_path: str) -> dict[str, Any]:
     """Inspect an arbitrary SQLite database file and return its schema summary.
 
-    Args:
-        db_path: Absolute path to the .db file on the filesystem.
+    ## Return Format
+    Returns success plus tables/table_count, or an error dict.
 
-    Returns:
-        Summary of tables and row counts.
+    ## Examples
+    Inspect a file:
+        result = await sqlite_inspect_db("C:/data/app.db")
     """
     connector = await get_connector(db_path)
     if not connector:
@@ -69,11 +70,12 @@ async def sqlite_inspect_db(db_path: str) -> dict[str, Any]:
 async def sqlite_get_table_data(db_path: str, table_name: str, limit: int = 100, offset: int = 0) -> dict[str, Any]:
     """Get raw data from a specific table in an arbitrary SQLite database (Read-Only).
 
-    Args:
-        db_path: Absolute path to the .db file.
-        table_name: The table to query.
-        limit: Max rows (default 100).
-        offset: Skip rows.
+    ## Return Format
+    Returns success plus data/columns/row_count, or an error dict.
+
+    ## Examples
+    Read rows:
+        result = await sqlite_get_table_data("C:/data/app.db", "users", limit=10)
     """
     connector = await get_connector(db_path)
     if not connector:
@@ -101,9 +103,12 @@ async def sqlite_get_table_data(db_path: str, table_name: str, limit: int = 100,
 async def sqlite_get_table_schema(db_path: str, table_name: str) -> dict[str, Any]:
     """Get the schema (columns, types, indices) for a table in an arbitrary SQLite database.
 
-    Args:
-        db_path: Absolute path to the .db file.
-        table_name: The table to inspect.
+    ## Return Format
+    Returns success plus schema/create_sql, or an error dict.
+
+    ## Examples
+    Describe a table:
+        result = await sqlite_get_table_schema("C:/data/app.db", "users")
     """
     connector = await get_connector(db_path)
     if not connector:
@@ -113,7 +118,10 @@ async def sqlite_get_table_schema(db_path: str, table_name: str) -> dict[str, An
         schema = await connector.get_table_schema(table_name)
 
         # Also get CREATE TABLE statement
-        cursor = connector.connection.cursor()
+        connection = connector.connection
+        if connection is None:
+            raise ValueError("SQLite connection was lost")
+        cursor = connection.cursor()
         cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
         row = cursor.fetchone()
         create_sql = row[0] if row else ""

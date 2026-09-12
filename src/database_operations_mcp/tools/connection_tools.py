@@ -11,8 +11,9 @@
 #
 # This module is kept for backwards compatibility but tools are no longer registered.
 
+import asyncio
 import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import UTC, datetime
 from time import time
 from typing import Any, TypedDict
 
@@ -25,6 +26,11 @@ from database_operations_mcp.database_manager import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _utcnow() -> str:
+    """Current UTC time as an ISO-8601 string (validates timestamps without float.isoformat bugs)."""
+    return datetime.now(UTC).isoformat()
 
 
 # Type definitions for better type checking
@@ -56,39 +62,20 @@ class ConnectionResult(TypedDict, total=False):
 async def list_supported_databases() -> dict[str, Any]:
     """List all supported database types with categories and descriptions.
 
-    Returns:
-        A dictionary containing:
-        - success: Boolean indicating if the operation was successful
-        - databases_by_category: Dictionary of databases grouped by category
-        - total_supported: Total number of supported database types
-        - categories: List of all available database categories
-        - error: Error message if the operation failed
+    ## Return Format
+    Returns success plus databases_by_category, total_supported, and categories.
 
-    Example:
-        {
-            "success": True,
-            "databases_by_category": {
-                "SQL": [
-                    {
-                        "name": "postgresql",
-                        "display_name": "PostgreSQL",
-                        "description": "Advanced open-source relational database",
-                        "default_port": 5432,
-                        "supports_ssl": True
-                    }
-                ]
-            },
-            "total_supported": 8,
-            "categories": ["SQL", "NoSQL", "Vector"]
-        }
+    ## Examples
+    List everything:
+        result = await list_supported_databases()
     """
     try:
-        databases: list[DatabaseInfo] = get_supported_databases()
+        databases: list[dict[str, Any]] = get_supported_databases()
 
         # Group by category for better organization
-        categorized: dict[str, list[DatabaseInfo]] = {}
+        categorized: dict[str, list[dict[str, Any]]] = {}
         for db in databases:
-            category = db["category"]
+            category = str(db.get("category", "Other"))
             if category not in categorized:
                 categorized[category] = []
             categorized[category].append(db)
@@ -111,54 +98,24 @@ async def list_supported_databases() -> dict[str, Any]:
 
 
 # DEPRECATED: Use db_connection(operation='register') instead
-def register_database_connection(
-    connection_name: str,
-    database_type: str,
-    connection_config: dict[str, Any],
+async def register_database_connection(
+    connection_name: str | None,
+    database_type: str | None,
+    connection_config: dict[str, Any] | None,
     test_connection: bool = True,
 ) -> dict[str, Any]:
     """Register a new database connection with the connection manager.
 
-    Args:
-        connection_name: Unique identifier for this connection (alphanumeric + underscores)
-        database_type: Type of database (e.g., 'postgresql', 'mongodb', 'sqlite')
-        connection_config: Dictionary containing connection parameters such as:
-            - host: Database server hostname or IP
-            - port: Database server port
-            - username: Authentication username
-            - password: Authentication password
-            - database: Database/schema name
-            - ssl: Boolean or SSL configuration dictionary
-            - Additional database-specific parameters
-        test_connection: If True, verifies the connection before registration
+    ## Return Format
+    Returns success plus connection_name/database_type/connection_id, or an error dict.
 
-    Returns:
-        A dictionary containing:
-        - success: Boolean indicating if the operation was successful
-        - message: Status message
-        - connection_name: The registered connection name
-        - database_type: The database type
-        - connection_id: Internal ID of the connection
-        - error: Error message if the operation failed
-
-    Example:
-        # Register a PostgreSQL connection
-        result = register_database_connection(
+    ## Examples
+    Register a PostgreSQL connection:
+        result = await register_database_connection(
             connection_name="my_postgres",
             database_type="postgresql",
-            connection_config={
-                "host": "localhost",
-                "port": 5432,
-                "username": "user",
-                "password": "password",
-                "database": "mydb",
-                "sslmode": "prefer"
-            }
+            connection_config={"host": "localhost", "port": 5432, "database": "mydb"},
         )
-
-    Raises:
-        ValueError: If any required parameters are missing or invalid
-        ConnectionError: If the connection test fails (when test_connection=True)
     """
     try:
         # Input validation
@@ -176,10 +133,12 @@ def register_database_connection(
 
         # Create the database connector
         connector = create_connector(database_type, connection_config)
+        if not connector:
+            raise ValueError(f"Unsupported database type or invalid config for '{database_type}'")
 
         # Test the connection if requested
         if test_connection:
-            test_result = connector.test_connection()
+            test_result = await connector.test_connection()
             if not test_result.get("success"):
                 error_msg = test_result.get("error", "Connection test failed")
                 logger.error(f"Connection test failed: {error_msg}")
@@ -225,36 +184,12 @@ def register_database_connection(
 def list_database_connections() -> dict[str, Any]:
     """List all registered database connections with their current status.
 
-    Returns:
-        A dictionary containing:
-        - success: Boolean indicating if the operation was successful
-        - connections: Dictionary of connection names to their details
-        - total_connections: Total number of registered connections
-        - error: Error message if the operation failed
+    ## Return Format
+    Returns success plus connections and total_connections, or an error dict.
 
-    The connection details for each connection include:
-        - type: Database type (e.g., 'postgresql', 'mongodb')
-        - status: Current connection status (connected, disconnected, error)
-        - info: Additional connection information (host, port, etc.)
-        - last_activity: Timestamp of last activity (if available)
-
-    Example:
-        {
-            "success": True,
-            "connections": {
-                "production_db": {
-                    "type": "postgresql",
-                    "status": "connected",
-                    "info": {
-                        "host": "db.example.com",
-                        "port": 5432,
-                        "database": "production"
-                    },
-                    "last_activity": "2023-07-30T15:30:00Z"
-                }
-            },
-            "total_connections": 1
-        }
+    ## Examples
+    List connections:
+        result = list_database_connections()
     """
     try:
         connections = db_manager.list_connectors()
@@ -272,69 +207,17 @@ def list_database_connections() -> dict[str, Any]:
 
 
 # DEPRECATED: Use db_connection(operation='test') instead
-def test_database_connection(connection_name: str) -> dict[str, Any]:
+async def test_database_connection(connection_name: str | None) -> dict[str, Any]:
     """Test connectivity for a specific database connection.
 
-    This function verifies that the database connection is working by executing a simple
-    test query or ping operation. It provides detailed diagnostics about the connection
-    status and any potential issues.
+    ## Return Format
+    Returns success plus test_result/connection_info, or an error dict.
 
-    Args:
-        connection_name: Name of the registered connection to test
-
-    Returns:
-        A dictionary containing:
-        - success: Boolean indicating if the test was successful
-        - connection_name: The name of the tested connection
-        - test_result: Dictionary with test details including:
-            - success: Boolean indicating if the test passed
-            - latency: Connection latency in milliseconds (if available)
-            - server_version: Database server version (if available)
-            - error: Error message if the test failed
-        - connection_info: Additional connection details
-        - error: Error message if an exception occurred
-
-    Example:
-        ```python
-        # Test a connection
-        result = test_database_connection("production_db")
-
-        # Success response
-        {
-            "success": True,
-            "connection_name": "production_db",
-            "test_result": {
-                "success": True,
-                "latency": 24.5,
-                "server_version": "PostgreSQL 14.5"
-            },
-            "connection_info": {
-                "type": "postgresql",
-                "host": "db.example.com",
-                "port": 5432,
-                "database": "mydb",
-                "status": "connected"
-            }
-        }
-
-        # Error response
-        {
-            "success": False,
-            "connection_name": "production_db",
-            "test_result": {
-                "success": False,
-                "error": "Connection refused",
-                "details": "Connection to db.example.com:5432 failed: Connection refused"
-            },
-            "connection_info": {
-                "type": "postgresql",
-                "host": "db.example.com",
-                "port": 5432,
-                "status": "error"
-            }
-        }
-        ```
+    ## Examples
+    Test a connection:
+        result = await test_database_connection("production_db")
     """
+    connector = None
     try:
         if not connection_name or not isinstance(connection_name, str):
             raise ValueError("Connection name is required and must be a string")
@@ -349,10 +232,10 @@ def test_database_connection(connection_name: str) -> dict[str, Any]:
             }
 
         # Get connection info before testing (in case test fails)
-        connection_info = connector.get_connection_info()
+        connection_info = await connector.get_connection_info()
 
         # Test the connection
-        test_result = connector.test_connection()
+        test_result = await connector.test_connection()
 
         # Log the test result
         if test_result.get("success"):
@@ -371,10 +254,10 @@ def test_database_connection(connection_name: str) -> dict[str, Any]:
         logger.error(f"Error testing connection {connection_name}: {e}", exc_info=True)
 
         # Try to get partial connection info even if test failed
-        connection_info = {}
+        connection_info: dict[str, Any] = {}
         try:
-            if "connector" in locals():
-                connection_info = connector.get_connection_info()
+            if connector is not None:
+                connection_info = await connector.get_connection_info()
         except Exception as info_error:
             logger.warning(f"Failed to get connection info after test failure: {info_error}")
 
@@ -388,80 +271,22 @@ def test_database_connection(connection_name: str) -> dict[str, Any]:
 
 
 # DEPRECATED: Use db_connection(operation='test_all') instead
-def test_all_database_connections(parallel: bool = True, timeout: float | None = 10.0) -> dict[str, Any]:
+async def test_all_database_connections(parallel: bool = True, timeout: float | None = 10.0) -> dict[str, Any]:
     """Test connectivity for all registered database connections.
 
     This function tests all registered database connections and provides a summary
     of the results. It can test connections in parallel for better performance.
 
-    Args:
-        parallel: If True, test connections concurrently (faster). If False,
-                test connections sequentially (easier to debug).
-        timeout: Maximum time in seconds to wait for all tests to complete.
-               If None, no timeout is enforced.
+    ## Return Format
+    Returns success plus per-connection test_results and a summary, or an error dict.
 
-    Returns:
-        A dictionary containing:
-        - success: Boolean indicating if all tests completed (not necessarily passed)
-        - test_results: Dictionary mapping connection names to their test results
-        - summary: Summary statistics about the test results
-        - error: Error message if an exception occurred
-
-        The test result for each connection includes:
-        - success: Boolean indicating if the test passed
-        - latency: Connection latency in milliseconds (if available)
-        - server_version: Database server version (if available)
-        - error: Error message if the test failed
-        - timestamp: When the test was performed
-
-    Example:
-        ```python
-        # Test all connections in parallel with a 10-second timeout
-        result = test_all_database_connections(parallel=True, timeout=10.0)
-
-        # Example response
-        {
-            "success": True,
-            "test_results": {
-                "production_db": {
-                    "success": True,
-                    "latency": 24.5,
-                    "server_version": "PostgreSQL 14.5",
-                    "timestamp": "2023-07-30T15:30:00Z"
-                },
-                "analytics_db": {
-                    "success": False,
-                    "error": "Connection timeout",
-                    "timestamp": "2023-07-30T15:30:02Z"
-                }
-            },
-            "summary": {
-                "total_connections": 2,
-                "successful": 1,
-                "failed": 1,
-                "success_rate": "50.0%",
-                "execution_time": 2.1
-            }
-        }
-
-        # Error response
-        {
-            "success": False,
-            "error": "Timeout while testing connections",
-            "test_results": {
-                # Partial results if any tests completed
-            },
-            "summary": {
-                "total_connections": 2,
-                "tested": 1,
-                "pending": 1,
-                "successful": 0,
-                "failed": 1
-            }
-        }
-        ```
+    ## Examples
+    Test everything with a 10-second budget:
+        result = await test_all_database_connections(parallel=True, timeout=10.0)
     """
     start_time = time()
+    connection_names: list[str] = []
+    test_results: dict[str, Any] = {}
 
     try:
         # Validate parameters
@@ -488,50 +313,33 @@ def test_all_database_connections(parallel: bool = True, timeout: float | None =
                 },
             }
 
-        # Test connections
-        test_results = {}
+        async def _test_one(name: str) -> tuple[str, dict[str, Any]]:
+            if timeout is not None and (time() - start_time) > timeout:
+                logger.warning(f"Timeout reached while testing {name}")
+                return name, {"success": False, "error": "Test timed out", "timestamp": _utcnow()}
+            try:
+                res = await asyncio.wait_for(db_manager.test_connection(name), timeout)
+                res["timestamp"] = _utcnow()
+                return name, res
+            except TimeoutError:
+                logger.warning(f"Timeout reached while testing {name}")
+                return name, {"success": False, "error": "Test timed out", "timestamp": _utcnow()}
+            except Exception as e:
+                logger.error(f"Error testing connection {name}: {e}")
+                return name, {"success": False, "error": str(e), "timestamp": _utcnow()}
 
         if parallel:
-            # Create a thread pool for parallel testing
-            with ThreadPoolExecutor(max_workers=min(10, len(connection_names))) as executor:
-                # Start all tests
-                future_to_name = {executor.submit(db_manager.test_connection, name): name for name in connection_names}
-
-                # Process results as they complete
-                for future in as_completed(future_to_name, timeout=timeout):
-                    name = future_to_name[future]
-                    try:
-                        test_results[name] = future.result()
-                    except Exception as e:
-                        logger.error(f"Error testing connection {name}: {e}")
-                        test_results[name] = {
-                            "success": False,
-                            "error": str(e),
-                            "timestamp": time().isoformat(),
-                        }
+            # Test connections concurrently
+            results = await asyncio.gather(*(_test_one(name) for name in connection_names))
+            test_results = dict(results)
 
         else:
             # Test connections sequentially
             for name in connection_names:
-                if timeout is not None and (time() - start_time) > timeout:
-                    logger.warning(f"Timeout reached while testing {name}")
-                    test_results[name] = {
-                        "success": False,
-                        "error": "Test timed out",
-                        "timestamp": time().isoformat(),
-                    }
+                key, res = await _test_one(name)
+                test_results[key] = res
+                if res.get("error") == "Test timed out":
                     break
-
-                try:
-                    test_results[name] = db_manager.test_connection(name)
-                    test_results[name]["timestamp"] = time().isoformat()
-                except Exception as e:
-                    logger.error(f"Error testing connection {name}: {e}")
-                    test_results[name] = {
-                        "success": False,
-                        "error": str(e),
-                        "timestamp": time().isoformat(),
-                    }
 
         # Generate summary
         total = len(test_results)
@@ -577,10 +385,10 @@ def test_all_database_connections(parallel: bool = True, timeout: float | None =
         return {
             "success": False,
             "error": f"Failed to test connections: {e!s}",
-            "test_results": test_results if "test_results" in locals() else {},
+            "test_results": test_results,
             "summary": {
-                "total_connections": len(connection_names) if "connection_names" in locals() else 0,
-                "tested": len(test_results) if "test_results" in locals() else 0,
+                "total_connections": len(connection_names),
+                "tested": len(test_results),
                 "error": str(e),
             },
         }

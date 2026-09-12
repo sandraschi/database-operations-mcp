@@ -32,15 +32,19 @@ def _get_timestamp() -> str:
 async def database_health_check(connection_name: str) -> dict[str, Any]:
     """Perform comprehensive health check on a database connection.
 
-    Args:
-        connection_name: Name of the registered connection
+    ## Return Format
+    Returns success plus the health report, or an error dict.
+
+    ## Examples
+    Check a connection:
+        result = await database_health_check("production_db")
     """
     try:
         connector = db_manager.get_connector(connection_name)
         if not connector:
             return {"success": False, "error": f"Connection not found: {connection_name}"}
 
-        health_check = connector.health_check()
+        health_check = await connector.health_check()
 
         return {
             "success": True,
@@ -63,16 +67,21 @@ async def database_health_check(connection_name: str) -> dict[str, Any]:
 async def get_database_metrics(connection_name: str, metric_names: list[str] | None = None) -> dict[str, Any]:
     """Get performance metrics for a database connection.
 
-    Args:
-        connection_name: Name of the registered connection
-        metric_names: Optional list of specific metrics to retrieve
+    ## Return Format
+    Returns success plus metrics, or an error dict.
+
+    ## Examples
+    Fetch metrics:
+        result = await get_database_metrics("production_db")
     """
     try:
         connector = db_manager.get_connector(connection_name)
         if not connector:
             return {"success": False, "error": f"Connection not found: {connection_name}"}
 
-        metrics = connector.get_metrics(metric_names)
+        metrics = await connector.get_metrics()
+        if metric_names:
+            metrics = {k: v for k, v in metrics.items() if k in metric_names}
 
         return {
             "success": True,
@@ -95,17 +104,20 @@ async def get_database_metrics(connection_name: str, metric_names: list[str] | N
 async def vacuum_database(connection_name: str, analyze: bool = True, full: bool = False) -> dict[str, Any]:
     """Run VACUUM on a database to optimize storage.
 
-    Args:
-        connection_name: Name of the registered connection
-        analyze: Whether to run ANALYZE after VACUUM
-        full: Whether to perform a full VACUUM (locks the database)
+    ## Return Format
+    Returns success plus the vacuum result, or an error dict.
+
+    ## Examples
+    Vacuum a database:
+        result = await vacuum_database("production_db")
     """
     try:
         connector = db_manager.get_connector(connection_name)
         if not connector:
             return {"success": False, "error": f"Connection not found: {connection_name}"}
 
-        result = connector.vacuum(analyze=analyze, full=full)
+        mode = "full" if full else ("analyze" if analyze else "auto")
+        result = await connector.vacuum(mode)
 
         return {
             "success": True,
@@ -129,14 +141,15 @@ async def vacuum_database(connection_name: str, analyze: bool = True, full: bool
 async def disconnect_database(connection_name: str) -> dict[str, Any]:
     """Safely disconnect from a database.
 
-    Args:
-        connection_name: Name of the registered connection to disconnect
+    ## Return Format
+    Returns success plus a message, or an error dict.
 
-    Returns:
-        Dictionary with operation status and details
+    ## Examples
+    Disconnect:
+        result = await disconnect_database("production_db")
     """
     try:
-        success = db_manager.disconnect(connection_name)
+        success = await db_manager.disconnect(connection_name)
         return {
             "success": success,
             "connection_name": connection_name,

@@ -30,12 +30,13 @@ class HelpSystem:
     def register_tool(cls, tool_func: F | None = None, *, category: str = "database") -> Callable[[F], F] | F:
         """Register a tool with its documentation.
 
-        Args:
-            tool_func: The tool function to register
-            category: Category for the tool (default: 'database')
+        ## Return Format
+        Returns the decorated function (or a decorator when used with arguments).
 
-        Returns:
-            The decorated function or a decorator
+        ## Examples
+        Register under a category:
+            @HelpSystem.register_tool(category="database")
+            async def my_tool(): ...
         """
 
         def decorator(func: F) -> F:
@@ -73,11 +74,12 @@ class HelpSystem:
     def get_help(cls, category: str | None = None) -> dict[str, Any]:
         """Get help for all tools or filter by category.
 
-        Args:
-            category: Optional category to filter tools
+        ## Return Format
+        Returns status plus categorized tools and the total count.
 
-        Returns:
-            Dictionary with help information
+        ## Examples
+        Browse database tools:
+            result = HelpSystem.get_help("database")
         """
         if category:
             category = category.lower()
@@ -103,15 +105,18 @@ class HelpSystem:
         }
 
     @classmethod
-    def get_tool_help(cls, tool_name: str) -> dict[str, Any]:
+    def get_tool_help(cls, tool_name: str | None) -> dict[str, Any]:
         """Get detailed help for a specific tool.
 
-        Args:
-            tool_name: Name of the tool to get help for
+        ## Return Format
+        Returns status plus the tool info dict, or an error for unknown names.
 
-        Returns:
-            Dictionary with detailed tool information
+        ## Examples
+        Look up a tool:
+            result = HelpSystem.get_tool_help("db_connection")
         """
+        if not tool_name:
+            return {"status": "error", "error": "tool_name is required"}
         if tool_name not in cls._tools:
             return {"status": "error", "error": f"Tool not found: {tool_name}"}
 

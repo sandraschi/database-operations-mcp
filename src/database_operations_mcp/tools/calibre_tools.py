@@ -35,61 +35,38 @@ async def search_calibre_library(
 ) -> dict[str, Any]:
     """Search a Calibre library for books matching the query.
 
-    Args:
-        query: Search query string
-        library_path: Path to the Calibre library
-        search_fields: Optional list of fields to search (title, author, tags, etc.)
-        limit: Maximum number of results to return
-        offset: Number of results to skip (for pagination)
+    ## Return Format
+    Always returns not_implemented - use the media_library portmanteau.
 
-    Returns:
-        Dictionary containing search results and metadata
+    ## Examples
+    Use the portmanteau instead:
+        result = await media_library(operation="search_calibre_library", ...)
     """
-    try:
-        # Implementation of search_calibre_library
-        # ... existing implementation ...
-        return {
-            "status": "success",
-            "results": [],  # Replace with actual results
-            "total": 0,  # Replace with actual total
-            "query": query,
-            "library_path": str(library_path),
-        }
-    except Exception as e:
-        logger.error(f"Error searching Calibre library: {e}", exc_info=True)
-        return {
-            "status": "error",
-            "message": f"Failed to search Calibre library: {e!s}",
-            "error_type": type(e).__name__,
-        }
+    _ = (query, library_path, search_fields, limit, offset)
+    return {
+        "status": "error",
+        "error": "not_implemented: use media_library(operation='search_calibre_library')",
+        "error_type": "NotImplementedError",
+    }
 
 
 # DEPRECATED: Use media_library(operation='get_calibre_book_metadata') instead
 async def get_calibre_book_metadata(book_id: int, library_path: str) -> dict[str, Any]:
     """Get metadata for a specific Calibre book.
 
-    Args:
-        book_id: ID of the book in the Calibre library
-        library_path: Path to the Calibre library
+    ## Return Format
+    Always returns not_implemented - use the media_library portmanteau.
 
-    Returns:
-        Dictionary containing the book's metadata
+    ## Examples
+    Use the portmanteau instead:
+        result = await media_library(operation="get_calibre_book_metadata", ...)
     """
-    try:
-        # Implementation of get_calibre_book_metadata
-        # ... existing implementation ...
-        return {
-            "status": "success",
-            "book_id": book_id,
-            "metadata": {},  # Replace with actual metadata
-        }
-    except Exception as e:
-        logger.error(f"Error getting book metadata: {e}", exc_info=True)
-        return {
-            "status": "error",
-            "message": f"Failed to get book metadata: {e!s}",
-            "error_type": type(e).__name__,
-        }
+    _ = (book_id, library_path)
+    return {
+        "status": "error",
+        "error": "not_implemented: use media_library(operation='get_calibre_book_metadata')",
+        "error_type": "NotImplementedError",
+    }
 
 
 # DEPRECATED: Use media_library(operation='search_calibre_fts') instead
@@ -98,33 +75,19 @@ async def search_calibre_fts(
 ) -> dict[str, Any]:
     """Perform a full-text search in a Calibre library.
 
-    Args:
-        query: Search query string
-        library_path: Path to the Calibre library
-        highlight: Whether to include highlighted snippets in results
-        limit: Maximum number of results to return
-        offset: Number of results to skip (for pagination)
+    ## Return Format
+    Always returns not_implemented - use the media_library portmanteau.
 
-    Returns:
-        Dictionary containing full-text search results and metadata
+    ## Examples
+    Use the portmanteau instead:
+        result = await media_library(operation="search_calibre_fts", ...)
     """
-    try:
-        # Implementation of search_calibre_fts
-        # ... existing implementation ...
-        return {
-            "status": "success",
-            "results": [],  # Replace with actual results
-            "total": 0,  # Replace with actual total
-            "query": query,
-            "highlight": highlight,
-        }
-    except Exception as e:
-        logger.error(f"Error in Calibre FTS: {e}", exc_info=True)
-        return {
-            "status": "error",
-            "message": f"Full-text search failed: {e!s}",
-            "error_type": type(e).__name__,
-        }
+    _ = (query, library_path, highlight, limit, offset)
+    return {
+        "status": "error",
+        "error": "not_implemented: use media_library(operation='search_calibre_fts')",
+        "error_type": "NotImplementedError",
+    }
 
 
 # Add other tool functions with @mcp.tool() decorator as needed

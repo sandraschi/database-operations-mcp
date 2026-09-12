@@ -7,7 +7,12 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.database_manager import DatabaseType, db_manager
+from database_operations_mcp.database_manager import (
+    DatabaseType,
+    QueryResult,
+    db_manager,
+    normalize_query_result,
+)
 from database_operations_mcp.operation_types import DbOperationsOperation
 from database_operations_mcp.tool_responses import (
     connection_not_found,
@@ -406,7 +411,9 @@ async def db_operations(
     return {"content": summary, "data": result}
 
 
-async def _execute_transaction(connection_name: str, query: str, params: dict[str, Any] | None) -> dict[str, Any]:
+async def _execute_transaction(
+    connection_name: str | None, query: str | None, params: dict[str, Any] | None
+) -> dict[str, Any]:
     """Execute a database transaction with multiple operations."""
     try:
         if not connection_name:
@@ -418,14 +425,14 @@ async def _execute_transaction(connection_name: str, query: str, params: dict[st
         if not connector:
             raise ValueError(f"Connection '{connection_name}' not found")
 
-        result = await connector.execute_transaction(query, params or {})
+        result = await connector.execute_transaction([{"query": query, "parameters": params or {}}])
 
         return {
             "success": True,
             "message": "Transaction executed successfully",
             "connection_name": connection_name,
-            "rows_affected": result.get("rows_affected", 0),
-            "transaction_id": result.get("transaction_id"),
+            "rows_affected": result.rowcount,
+            "transaction_id": None,
         }
 
     except Exception as e:
@@ -437,7 +444,9 @@ async def _execute_transaction(connection_name: str, query: str, params: dict[st
         }
 
 
-async def _execute_write(connection_name: str, query: str, params: dict[str, Any] | None) -> dict[str, Any]:
+async def _execute_write(
+    connection_name: str | None, query: str | None, params: dict[str, Any] | None
+) -> dict[str, Any]:
     """Execute write operations (INSERT, UPDATE, DELETE)."""
     try:
         if not connection_name:
@@ -455,8 +464,8 @@ async def _execute_write(connection_name: str, query: str, params: dict[str, Any
             "success": True,
             "message": "Write operation executed successfully",
             "connection_name": connection_name,
-            "rows_affected": result.get("rows_affected", 0),
-            "last_insert_id": result.get("last_insert_id"),
+            "rows_affected": result.rowcount,
+            "last_insert_id": None,
         }
 
     except Exception as e:
@@ -469,7 +478,10 @@ async def _execute_write(connection_name: str, query: str, params: dict[str, Any
 
 
 async def _batch_insert(
-    connection_name: str, table_name: str, data: list[dict[str, Any]], batch_size: int
+    connection_name: str | None,
+    table_name: str | None,
+    data: list[dict[str, Any]] | None,
+    batch_size: int,
 ) -> dict[str, Any]:
     """Insert multiple records in batches for better performance."""
     try:
@@ -484,15 +496,21 @@ async def _batch_insert(
         if not connector:
             raise ValueError(f"Connection '{connection_name}' not found")
 
-        result = await connector.batch_insert(table_name, data, batch_size)
+        chunk = max(int(batch_size or 1000), 1)
+        records_inserted = 0
+        batches_processed = 0
+        for start in range(0, len(data), chunk):
+            batch_result = await connector.batch_insert(table_name, data[start : start + chunk])
+            records_inserted += batch_result.rowcount
+            batches_processed += 1
 
         return {
             "success": True,
             "message": "Batch insert completed successfully",
             "connection_name": connection_name,
             "table_name": table_name,
-            "records_inserted": result.get("records_inserted", 0),
-            "batches_processed": result.get("batches_processed", 0),
+            "records_inserted": records_inserted,
+            "batches_processed": batches_processed,
         }
 
     except Exception as e:
@@ -524,6 +542,7 @@ async def _execute_query(
 
         # Execute the query
         result = await connector.execute_query(limited_query, params or {})
+        normalized = normalize_query_result(result)
 
         return {
             "success": True,
@@ -532,9 +551,9 @@ async def _execute_query(
             "parameters": params,
             "applied_limit": limit,
             "result": {
-                "rows": result.get("rows", []),
-                "columns": result.get("columns", []),
-                "row_count": len(result.get("rows", [])),
+                "rows": normalized.get("rows", []),
+                "columns": normalized.get("columns", []),
+                "row_count": len(normalized.get("rows", [])),
             },
         }
 
@@ -569,17 +588,9 @@ async def _quick_data_sample(
         result = await connector.execute_query(query, {})
 
         # Safely extract rows and columns depending on response type (dict vs QueryResult)
-        rows = []
-        columns = []
-        if isinstance(result, dict):
-            rows = result.get("rows", [])
-            columns = result.get("columns", [])
-        elif hasattr(result, "data"):
-            rows = getattr(result, "data", [])
-            columns = getattr(result, "columns", [])
-        else:
-            rows = getattr(result, "rows", [])
-            columns = getattr(result, "columns", [])
+        normalized = normalize_query_result(result)
+        rows = normalized.get("rows", [])
+        columns = normalized.get("columns", [])
 
         # Fetch total count of records in the database table/collection
         total_count = None
@@ -613,7 +624,8 @@ async def _quick_data_sample(
         elif connector.database_type == DatabaseType.MONGODB:
             try:
                 if hasattr(connector, "get_collection_stats"):
-                    stats = connector.get_collection_stats(collection_name=table_name)
+                    db_name = connector.connection_config.get("database", "admin")
+                    stats = await connector.get_collection_stats(db_name, table_name)
                     total_count = stats.get("count")
             except Exception as ce:
                 logger.warning(f"Failed to get total document count for MongoDB: {ce}")
@@ -677,6 +689,7 @@ async def _export_query_results(
 
         # Format results based on export format
         formatted_data = _format_export_data(result, output_format)
+        normalized = normalize_query_result(result)
 
         # Save to file if path provided
         if output_path:
@@ -693,7 +706,7 @@ async def _export_query_results(
             "connection_name": connection_name,
             "query": query,
             "export_format": output_format,
-            "row_count": len(result.get("rows", [])),
+            "row_count": len(normalized.get("rows", [])),
             "exported_data": formatted_data if not output_path else None,
             "file_path": output_path if output_path else None,
         }
@@ -765,10 +778,11 @@ def _generate_sample_query(
         return f"/* Sample query for {table_name} */"
 
 
-def _format_export_data(result: dict[str, Any], export_format: str) -> Any:
+def _format_export_data(result: QueryResult | dict[str, Any], export_format: str) -> Any:
     """Format query results for export."""
-    rows = result.get("rows", [])
-    columns = result.get("columns", [])
+    normalized = normalize_query_result(result)
+    rows = normalized.get("rows", [])
+    columns = normalized.get("columns", [])
 
     if export_format.lower() == "json":
         return {

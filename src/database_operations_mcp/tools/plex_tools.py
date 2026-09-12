@@ -46,12 +46,7 @@ class PlexDatabase:
     """Class for interacting with Plex Media Server's database."""
 
     def __init__(self, db_path: str | None = None):
-        """Initialize with path to Plex database.
-
-        Args:
-            db_path: Path to the Plex database file. If not provided, will attempt
-                   to find it automatically.
-        """
+        """Initialize with path to the Plex database (auto-detected when omitted)."""
         self.db_path = self._locate_database(db_path) if not db_path else Path(db_path)
         self.conn = None
         self.cursor = None
@@ -92,6 +87,13 @@ class PlexDatabase:
             self.conn.row_factory = sqlite3.Row
             self.cursor = self.conn.cursor()
 
+    def _require_cursor(self):
+        """Return a live cursor, connecting first."""
+        self.connect()
+        if self.cursor is None:
+            raise ConnectionError("Plex database cursor unavailable")
+        return self.cursor
+
     def close(self):
         """Close the database connection."""
         if self.conn:
@@ -108,27 +110,26 @@ class PlexDatabase:
 
     def get_library_sections(self) -> list[dict[str, Any]]:
         """Get a list of all library sections."""
-        self.connect()
-        self.cursor.execute("""
+        cursor = self._require_cursor()
+        cursor.execute("""
             SELECT id, name, section_type, language, agent, scanner,
                    created_at, updated_at, scanned_at
             FROM library_sections
             ORDER BY name
         """)
-        return [dict(row) for row in self.cursor.fetchall()]
+        return [dict(row) for row in cursor.fetchall()]
 
     def get_media_items(self, section_id: int | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """Get media items from the library.
 
-        Args:
-            section_id: Filter by library section ID. If None, returns all sections.
-            limit: Maximum number of items to return.
-            offset: Offset for pagination.
+        ## Return Format
+        Returns a list of media item dicts.
 
-        Returns:
-            List of media items with metadata.
+        ## Examples
+        Fetch items:
+            items = plex.get_media_items(limit=10)
         """
-        self.connect()
+        cursor = self._require_cursor()
         query = """
             SELECT mi.id, mi.library_section_id, ls.name as section_name,
                    mi.metadata_type, mi.guid, mi.media_item_title,
@@ -150,18 +151,18 @@ class PlexDatabase:
         query += " LIMIT ? OFFSET ?"
         params.extend([limit, offset])
 
-        self.cursor.execute(query, params)
-        return [dict(row) for row in self.cursor.fetchall()]
+        cursor.execute(query, params)
+        return [dict(row) for row in cursor.fetchall()]
 
     def export_library(self, output_format: str = "json", output_path: str | Path | None = None) -> dict[str, Any]:
         """Export the Plex library to a file.
 
-        Args:
-            output_format: Output format ('json', 'csv', or 'sqlite').
-            output_path: Path to save the exported file. If None, returns the data.
+        ## Return Format
+        Returns status plus the export payload, or an error dict.
 
-        Returns:
-            Dictionary with export results.
+        ## Examples
+        Export as JSON:
+            result = plex.export_library(output_format="json")
         """
         try:
             self.connect()
@@ -361,23 +362,19 @@ class PlexDatabase:
 
 
 def register_tools(mcp):
-    """Register Plex Media Server tools with the MCP server.
-
-    Args:
-        mcp: The MCP server instance to register tools with.
-    """
+    """Register Plex Media Server tools with the MCP server (deprecated no-op)."""
 
 
 # DEPRECATED: Use media_library portmanteau instead
-def get_plex_library_sections(db_path: str | None = None) -> list[dict[str, Any]]:
+def get_plex_library_sections(db_path: str | None = None) -> dict[str, Any]:
     """Get a list of all library sections from Plex.
 
-    Args:
-        db_path: Path to the Plex database file. If not provided, will attempt
-               to find it automatically.
+    ## Return Format
+    Returns status plus sections, or an error dict.
 
-    Returns:
-        A list of library sections with their metadata.
+    ## Examples
+    List sections:
+        result = get_plex_library_sections()
     """
     try:
         with PlexDatabase(db_path) as plex_db:

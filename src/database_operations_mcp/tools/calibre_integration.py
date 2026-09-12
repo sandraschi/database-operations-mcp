@@ -39,12 +39,12 @@ async def get_calibre_connector():
 async def calibre_list_books(limit: int = 50, offset: int = 0) -> dict[str, Any]:
     """List books from the Calibre library.
 
-    Args:
-        limit: Maximum number of books to return.
-        offset: Number of books to skip.
+    ## Return Format
+    Returns success plus books/count, or an error dict.
 
-    Returns:
-        A list of books with basic metadata (title, authors, series).
+    ## Examples
+    List the newest books:
+        result = await calibre_list_books(limit=20)
     """
     connector = await get_calibre_connector()
     if not connector:
@@ -90,11 +90,12 @@ async def calibre_list_books(limit: int = 50, offset: int = 0) -> dict[str, Any]
 async def calibre_get_book_details(book_id: int) -> dict[str, Any]:
     """Get detailed information for a specific book.
 
-    Args:
-        book_id: The ID of the book in the Calibre database.
+    ## Return Format
+    Returns success plus the book dict (tags, formats), or an error dict.
 
-    Returns:
-        Detailed metadata including tags, comments, and formats.
+    ## Examples
+    Fetch book 42:
+        result = await calibre_get_book_details(42)
     """
     connector = await get_calibre_connector()
     if not connector:
@@ -148,6 +149,13 @@ async def calibre_query(query: str, params: list[Any] | None = None) -> dict[str
     """Execute a custom SQL query against the Calibre database.
 
     Only SELECT queries are allowed for safety.
+
+    ## Return Format
+    Returns success plus rows, or an error dict.
+
+    ## Examples
+    Count books:
+        result = await calibre_query("SELECT COUNT(*) AS n FROM books")
     """
     if not query.strip().lower().startswith("select"):
         return {"success": False, "error": "Only SELECT queries are allowed for safety."}

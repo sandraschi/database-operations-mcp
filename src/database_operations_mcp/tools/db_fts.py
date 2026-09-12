@@ -120,17 +120,15 @@ async def _fts_search(
         if not connector:
             return connection_not_found(connection_name)
 
-        search_params = {
-            "query": search_query,
-            "table_name": table_name,
-            "columns": columns,
-            "limit": limit,
-            "offset": offset,
-            "highlight": highlight,
-            "include_metadata": include_metadata,
-        }
-
-        search_result = await connector.fts_search(search_params)
+        search_result = await connector.fts_search(
+            search_query,
+            table_name=table_name,
+            columns=columns,
+            limit=limit,
+            offset=offset,
+            highlight=highlight,
+            include_metadata=include_metadata,
+        )
         total = int(search_result.get("total_results", 0) or 0)
 
         return {
@@ -230,7 +228,7 @@ async def _fts_suggest(connection_name: str, search_query: str | None, limit: in
         if not connector:
             return connection_not_found(connection_name)
 
-        suggestions = await connector.fts_suggest(search_query, limit)
+        suggestions = await connector.fts_suggest(search_query, limit=limit)
 
         return {
             "success": True,

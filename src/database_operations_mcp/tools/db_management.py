@@ -258,9 +258,9 @@ async def db_management(
 
 
 async def _init_database(
-    connection_name: str,
-    database_type: str,
-    connection_config: dict[str, Any],
+    connection_name: str | None,
+    database_type: str | None,
+    connection_config: dict[str, Any] | None,
     test_connection: bool,
 ) -> dict[str, Any]:
     """Initialize a new database connection."""
@@ -284,6 +284,8 @@ async def _init_database(
         from database_operations_mcp.database_manager import create_connector
 
         connector = create_connector(database_type, connection_config)
+        if not connector:
+            raise ValueError(f"Unsupported database type or invalid config for '{database_type}'")
 
         if test_connection:
             test_result = await connector.test_connection()
@@ -332,7 +334,7 @@ async def _list_connections() -> dict[str, Any]:
         }
 
 
-async def _close_connection(connection_name: str) -> dict[str, Any]:
+async def _close_connection(connection_name: str | None) -> dict[str, Any]:
     """Close a specific database connection."""
     try:
         if not connection_name:
@@ -343,7 +345,7 @@ async def _close_connection(connection_name: str) -> dict[str, Any]:
             raise ValueError(f"Connection '{connection_name}' not found")
 
         await connector.close()
-        db_manager.unregister_connector(connection_name)
+        await db_manager.unregister_connector(connection_name)
 
         return {
             "success": True,
@@ -360,7 +362,7 @@ async def _close_connection(connection_name: str) -> dict[str, Any]:
         }
 
 
-async def _test_connection(connection_name: str) -> dict[str, Any]:
+async def _test_connection(connection_name: str | None) -> dict[str, Any]:
     """Test connectivity for a specific connection."""
     try:
         if not connection_name:
@@ -388,7 +390,7 @@ async def _test_connection(connection_name: str) -> dict[str, Any]:
         }
 
 
-async def _get_connection_info(connection_name: str) -> dict[str, Any]:
+async def _get_connection_info(connection_name: str | None) -> dict[str, Any]:
     """Get detailed information about a connection."""
     try:
         if not connection_name:
@@ -416,7 +418,7 @@ async def _get_connection_info(connection_name: str) -> dict[str, Any]:
         }
 
 
-async def _database_health_check(connection_name: str, include_metrics: bool) -> dict[str, Any]:
+async def _database_health_check(connection_name: str | None, include_metrics: bool) -> dict[str, Any]:
     """Perform comprehensive health check on database."""
     try:
         if not connection_name:
@@ -426,7 +428,7 @@ async def _database_health_check(connection_name: str, include_metrics: bool) ->
         if not connector:
             raise ValueError(f"Connection '{connection_name}' not found")
 
-        health_result = await connector.health_check(include_metrics)
+        health_result = await connector.health_check()
 
         return {
             "success": True,
@@ -447,7 +449,7 @@ async def _database_health_check(connection_name: str, include_metrics: bool) ->
         }
 
 
-async def _get_database_metrics(connection_name: str) -> dict[str, Any]:
+async def _get_database_metrics(connection_name: str | None) -> dict[str, Any]:
     """Get performance and usage metrics."""
     try:
         if not connection_name:
@@ -476,7 +478,7 @@ async def _get_database_metrics(connection_name: str) -> dict[str, Any]:
         }
 
 
-async def _vacuum_database(connection_name: str, vacuum_mode: str) -> dict[str, Any]:
+async def _vacuum_database(connection_name: str | None, vacuum_mode: str) -> dict[str, Any]:
     """Perform database maintenance (vacuum/optimize)."""
     try:
         if not connection_name:
@@ -506,7 +508,7 @@ async def _vacuum_database(connection_name: str, vacuum_mode: str) -> dict[str, 
         }
 
 
-async def _disconnect_database(connection_name: str) -> dict[str, Any]:
+async def _disconnect_database(connection_name: str | None) -> dict[str, Any]:
     """Disconnect from database and clean up resources."""
     try:
         if not connection_name:
@@ -517,7 +519,7 @@ async def _disconnect_database(connection_name: str) -> dict[str, Any]:
             raise ValueError(f"Connection '{connection_name}' not found")
 
         await connector.disconnect()
-        db_manager.unregister_connector(connection_name)
+        await db_manager.unregister_connector(connection_name)
 
         return {
             "success": True,

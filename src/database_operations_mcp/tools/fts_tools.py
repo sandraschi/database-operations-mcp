@@ -38,18 +38,12 @@ async def fts_search(
 ) -> dict[str, Any]:
     """Execute a full-text search query on an SQLite FTS table.
 
-    Args:
-        query: The search query (supports FTS5 query syntax)
-        connection_name: Name of the database connection
-        table: Name of the FTS virtual table
-        columns: List of columns to search (default: all columns)
-        limit: Maximum number of results to return
-        offset: Number of results to skip
-        highlight: Whether to include highlighted snippets
-        snippet_size: Number of context words around each match
+    ## Return Format
+    Returns status plus results/total, or an error dict.
 
-    Returns:
-        Dictionary containing search results and metadata
+    ## Examples
+    Search an FTS index:
+        result = await fts_search("database", table="docs_fts")
     """
     if connection_name not in DATABASE_CONNECTIONS:
         return {"status": "error", "message": f"No such connection: {connection_name}"}
@@ -123,11 +117,12 @@ async def fts_search(
 async def fts_tables(connection_name: str = "default") -> dict[str, Any]:
     """List all FTS virtual tables in the database.
 
-    Args:
-        connection_name: Name of the database connection
+    ## Return Format
+    Returns status plus the tables list, or an error dict.
 
-    Returns:
-        List of FTS virtual tables with their types (FTS3/4/5)
+    ## Examples
+    List FTS tables:
+        result = await fts_tables()
     """
     if connection_name not in DATABASE_CONNECTIONS:
         return {"status": "error", "message": f"No such connection: {connection_name}"}
@@ -176,15 +171,12 @@ async def fts_suggest(
 ) -> dict[str, Any]:
     """Get search suggestions based on a prefix (for autocomplete).
 
-    Args:
-        prefix: The prefix to get suggestions for
-        connection_name: Name of the database connection
-        table: FTS table name
-        column: Column to get suggestions from
-        limit: Maximum number of suggestions to return
+    ## Return Format
+    Returns status plus suggestions/count, or an error dict.
 
-    Returns:
-        List of suggested completions
+    ## Examples
+    Suggest completions:
+        result = await fts_suggest("data")
     """
     if connection_name not in DATABASE_CONNECTIONS:
         return {"status": "error", "message": f"No such connection: {connection_name}"}
