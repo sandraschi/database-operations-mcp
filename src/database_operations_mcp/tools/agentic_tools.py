@@ -19,7 +19,8 @@ async def agentic_workflow_tool(
     max_steps: int = 5,
     target_database: str | None = None,
     context_depth: str = "comprehensive",
-    safety_override: bool = False,
+    confirm: bool = False,
+    dry_run: bool = True,
 ) -> dict[str, Any]:
     """[SEP-1577] Autonomous database orchestration using FastMCP sampling.
 
@@ -28,16 +29,18 @@ async def agentic_workflow_tool(
     It leverages ctx.sample() to think through multi-step plans and provides
     intelligent, dialogic feedback.
 
-    Args:
-        goal: Natural language description of the database workflow to execute.
-        ctx: FastMCP context for sampling (injected automatically).
-        available_operations: List of operations the LLM can choose from.
-        max_steps: Maximum number of autonomous steps (default: 5).
-        target_database: Specific database connection to use.
-        context_depth: Depth of context to provide for sampling (basic, comprehensive, detailed).
-        safety_override: If True, bypasses standard safety guardrails (not recommended).
+    Safety is always-on. There is no bypass flag. Writes require confirm=True.
+    Plans run as dry_run=True by default and only suggest next actions.
+
+    ## Return Format
+    Returns success plus the orchestration plan, or an error dict.
+
+    ## Examples
+    Plan a maintenance workflow:
+        result = await agentic_workflow_tool(goal="Analyze slow queries and suggest indexes")
     """
     logger.info(f"Initiating autonomous database workflow: {goal}")
+    max_steps = max(1, min(max_steps, 10))
 
     # Construct a highly detailed prompt for the sampling LLM
     # This prompt instructs the "brain" to think step-by-step
@@ -83,7 +86,7 @@ async def agentic_workflow_tool(
         )
 
         sample_result = await ctx.sample(
-            prompt=sampling_prompt,
+            messages=sampling_prompt,
             max_tokens=2048,
             temperature=0.3,
         )
@@ -96,12 +99,14 @@ async def agentic_workflow_tool(
             "goal": goal,
             "status": "autonomous_orchestration_active",
             "orchestration_plan": {
-                "analysis": sample_result.content,
-                "model_used": sample_result.model,
+                "analysis": sample_result.text,
+                "model_used": "sampling-llm",
             },
             "autonomous_capabilities": {
-                "can_execute": True,
-                "safety_guard": "STANDBY" if not safety_override else "BYPASSED",
+                "can_execute": False if dry_run else confirm,
+                "safety_guard": "ENFORCED",
+                "confirm_required": True,
+                "dry_run": dry_run,
                 "sep_compliance": "1577.3.0",
             },
             "next_action": "Review the plan and execute the recommended steps via the specific database tools.",
@@ -125,16 +130,22 @@ async def agentic_workflow_tool(
 async def safety_guard_status(action: str = "status") -> dict[str, Any]:
     """Check or update the status of the Agentic Safety Guard.
 
-    Args:
-        action: 'status' to check, 'lock' to enable maximum safety, 'unlock' to allow autonomous action.
+    ## Return Format
+    Returns success plus the current guard status, with a fresh timestamp.
+
+    ## Examples
+    Check the guard:
+        result = await safety_guard_status(action="status")
     """
+    from datetime import UTC, datetime
+
     states = {
         "status": "MONITORING",
         "lock": "Maximum Safety Enabled",
-        "unlock": "Autonomous Operations Permitted (Manual Override)",
+        "unlock": "Autonomous Planning Permitted - writes still require confirm=True",
     }
     return {
         "success": True,
         "current_status": states.get(action, "UNKNOWN"),
-        "timestamp": "2026-02-28",
+        "timestamp": datetime.now(UTC).isoformat(),
     }
