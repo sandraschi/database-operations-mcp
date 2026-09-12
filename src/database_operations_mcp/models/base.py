@@ -1,10 +1,9 @@
 """Base model definitions for database operations."""
 
-import builtins
 from datetime import datetime
-from typing import Any, ClassVar, TypeVar
+from typing import Any, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T", bound="BaseDBModel")
 
@@ -12,16 +11,14 @@ T = TypeVar("T", bound="BaseDBModel")
 class BaseDBModel(BaseModel):
     """Base model for all database models."""
 
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+    )
+
     id: str | None = Field(default=None, alias="_id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-    class Config:
-        """Pydantic config."""
-
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders: ClassVar[dict] = {datetime: lambda v: v.isoformat()}
 
     def update(self, **kwargs) -> None:
         """Update model fields."""
@@ -30,16 +27,17 @@ class BaseDBModel(BaseModel):
                 setattr(self, field, value)
         self.updated_at = datetime.utcnow()
 
-    def dict(self, *args, **kwargs) -> dict[str, Any]:
-        """Convert model to dictionary."""
-        data = super().dict(*args, **kwargs)
+    def model_dump(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """Convert model to dictionary (alias-aware)."""
+        data = super().model_dump(*args, **kwargs)
         if "_id" in data and "id" not in data:
             data["id"] = data.pop("_id")
         return data
 
     @classmethod
-    def from_dict(cls: type[T], data: builtins.dict[str, Any]) -> T:
+    def from_dict(cls: type[T], data: dict[str, Any]) -> T:
         """Create model from dictionary."""
-        if "id" in data and "_id" not in data:
-            data["_id"] = data.pop("id")
-        return cls(**data)
+        payload = dict(data)
+        if "id" in payload and "_id" not in payload:
+            payload["_id"] = payload.pop("id")
+        return cls(**payload)

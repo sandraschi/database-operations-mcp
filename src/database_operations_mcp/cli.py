@@ -8,22 +8,47 @@ This CLI provides direct access to database operations without requiring an MCP 
 import asyncio
 import json
 import sys
+from typing import Any
+from urllib.parse import unquote, urlparse
 
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from database_operations_mcp.services.database.connectors.mongodb_connector import MongoDBConnector
-from database_operations_mcp.services.database.connectors.postgresql_connector import (
-    PostgreSQLConnector,
-)
-from database_operations_mcp.services.database.connectors.sqlite_connector import SQLiteConnector
-from database_operations_mcp.tools.firefox.utils import (
-    get_firefox_profiles as get_profiles,
-)
+from database_operations_mcp.database_manager import BaseDatabaseConnector, create_connector
 
 console = Console()
+
+
+def _make_connector(database_type: str, connection_string: str) -> BaseDatabaseConnector:
+    """Build a connector from a CLI connection string.
+
+    ## Examples
+    SQLite file:
+        connector = _make_connector("sqlite", "C:/data/app.db")
+    """
+    if database_type == "sqlite":
+        config: dict[str, Any] = {"database_path": connection_string}
+    elif database_type == "postgresql":
+        parsed = urlparse(connection_string)
+        if not parsed.scheme.startswith("postgres"):
+            raise ValueError("PostgreSQL connection string must look like postgresql://user:pass@host:port/db")
+        config = {
+            "host": parsed.hostname or "localhost",
+            "port": parsed.port or 5432,
+            "database": (parsed.path or "/postgres").lstrip("/"),
+            "user": unquote(parsed.username or ""),
+            "password": unquote(parsed.password or ""),
+        }
+    elif database_type == "mongodb":
+        config = {"connection_string": connection_string}
+    else:
+        raise ValueError(f"Unsupported database type: {database_type}")
+    connector = create_connector(database_type, config)
+    if not connector:
+        raise ValueError(f"Could not create connector for '{database_type}'")
+    return connector
 
 
 @click.group()
@@ -63,15 +88,7 @@ def list_databases(connection_string: str, database_type: str, output_format: st
 
     async def _list_databases():
         try:
-            if database_type == "sqlite":
-                connector = SQLiteConnector(connection_string)
-            elif database_type == "postgresql":
-                connector = PostgreSQLConnector(connection_string)
-            elif database_type == "mongodb":
-                connector = MongoDBConnector(connection_string)
-            else:
-                console.print(f"[red]Unsupported database type: {database_type}[/red]")
-                return
+            connector = _make_connector(database_type, connection_string)
 
             databases = await connector.list_databases()
 
@@ -121,15 +138,7 @@ def list_tables(connection_string: str, database_type: str, database_name: str |
 
     async def _list_tables():
         try:
-            if database_type == "sqlite":
-                connector = SQLiteConnector(connection_string)
-            elif database_type == "postgresql":
-                connector = PostgreSQLConnector(connection_string)
-            elif database_type == "mongodb":
-                connector = MongoDBConnector(connection_string)
-            else:
-                console.print(f"[red]Unsupported database type: {database_type}[/red]")
-                return
+            connector = _make_connector(database_type, connection_string)
 
             tables = await connector.list_tables(database=database_name)
 
@@ -189,15 +198,7 @@ def describe_table(
 
     async def _describe_table():
         try:
-            if database_type == "sqlite":
-                connector = SQLiteConnector(connection_string)
-            elif database_type == "postgresql":
-                connector = PostgreSQLConnector(connection_string)
-            elif database_type == "mongodb":
-                connector = MongoDBConnector(connection_string)
-            else:
-                console.print(f"[red]Unsupported database type: {database_type}[/red]")
-                return
+            connector = _make_connector(database_type, connection_string)
 
             schema = await connector.get_table_schema(table_name, database=database_name)
 
@@ -230,39 +231,6 @@ def describe_table(
     asyncio.run(_describe_table())
 
 
-@cli.group()
-def firefox():
-    """Firefox bookmark operations."""
-    pass
-
-
-@firefox.command()
-def list_profiles():
-    """List available Firefox profiles."""
-    try:
-        profiles = get_profiles()
-
-        if profiles.get("success"):
-            table = Table(title="Firefox Profiles")
-            table.add_column("Name", style="cyan")
-            table.add_column("Path", style="green")
-            table.add_column("Default", style="yellow")
-
-            for profile in profiles.get("profiles", []):
-                table.add_row(
-                    profile.get("name", "N/A"),
-                    profile.get("path", "N/A"),
-                    "OK" if profile.get("is_default", False) else "",
-                )
-
-            console.print(table)
-        else:
-            console.print(f"[red]Error: {profiles.get('error', 'Unknown error')}[/red]")
-
-    except Exception as e:
-        console.print(f"[red]Error: {e}[/red]")
-
-
 @cli.command()
 def health():
     """Check system health and dependencies."""
@@ -274,16 +242,6 @@ def health():
     # Check available connectors
     connectors = ["SQLite", "PostgreSQL", "MongoDB"]
     console.print(f"Available connectors: {', '.join(connectors)}")
-
-    # Check Firefox availability
-    try:
-        profiles = get_profiles()
-        if profiles.get("success"):
-            console.print(f"[green]OK Firefox: {len(profiles.get('profiles', []))} profiles found[/green]")
-        else:
-            console.print(f"[yellow]WARN Firefox: {profiles.get('error', 'Not available')}[/yellow]")
-    except Exception as e:
-        console.print(f"[yellow]WARN Firefox: {e}[/yellow]")
 
     console.print(Panel("Health check complete", style="bold green"))
 

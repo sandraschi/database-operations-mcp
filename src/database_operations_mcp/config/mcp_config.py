@@ -124,6 +124,8 @@ def is_portmanteau_import():
     try:
         # Go up the call stack to find the importing module
         for _i in range(10):  # Check up to 10 frames up
+            if frame is None:
+                break
             frame = frame.f_back
             if frame is None:
                 break

@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 from .base import BaseDBModel
 
@@ -59,10 +59,7 @@ class DatabaseQuery(BaseDBModel):
     executed_at: datetime | None = None
     completed_at: datetime | None = None
 
-    class Config:
-        """Pydantic config."""
-
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
     def start_execution(self) -> None:
         """Mark query as started."""

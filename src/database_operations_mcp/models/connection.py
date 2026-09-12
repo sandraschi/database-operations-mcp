@@ -4,7 +4,8 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import ConfigDict, Field, field_validator
+from pydantic_core.core_schema import ValidationInfo
 
 from .base import BaseDBModel
 
@@ -44,18 +45,16 @@ class ConnectionConfig(BaseDBModel):
     database: str | None = None
     options: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        """Pydantic config."""
+    model_config = ConfigDict(use_enum_values=True)
 
-        use_enum_values = True
-
-    @validator("port", always=True)
-    def set_default_port(self, v, values):
+    @field_validator("port")
+    @classmethod
+    def set_default_port(cls, v: int | None, info: ValidationInfo) -> int | None:
         """Set default port based on database type."""
         if v is not None:
             return v
 
-        db_type = values.get("db_type")
+        db_type = (info.data or {}).get("db_type")
         if db_type == DatabaseType.POSTGRESQL:
             return 5432
         elif db_type == DatabaseType.MONGODB:

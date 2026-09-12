@@ -63,14 +63,14 @@ def get_transport_config() -> dict:
 
 
 def create_argument_parser(server_name: str) -> argparse.ArgumentParser:
-    """
-    Create standardized CLI argument parser for MCP servers.
+    """Create the standardized CLI argument parser for MCP servers.
 
-    Args:
-        server_name: Name of the MCP server for help text.
+    ## Return Format
+    Returns the configured ArgumentParser.
 
-    Returns:
-        Configured ArgumentParser instance.
+    ## Examples
+    Build a parser:
+        parser = create_argument_parser("database-operations-mcp")
     """
     parser = argparse.ArgumentParser(
         description=f"{server_name} - FastMCP 2.14.4+ Server",
@@ -113,19 +113,16 @@ Examples:
 
 
 def resolve_transport(args: argparse.Namespace) -> TransportType:
-    """
-    Resolve transport type from CLI args with environment fallback.
+    """Resolve transport type from CLI args with environment fallback.
 
-    Priority:
-        1. CLI arguments (--http, --stdio, --sse)
-        2. Environment variable (MCP_TRANSPORT)
-        3. Default (stdio)
+    Priority: CLI arguments, then MCP_TRANSPORT, then stdio.
 
-    Args:
-        args: Parsed CLI arguments.
+    ## Return Format
+    Returns one of "stdio", "http", or "sse".
 
-    Returns:
-        Transport type string.
+    ## Examples
+    Resolve from flags:
+        transport = resolve_transport(args)
     """
     if args.http:
         return "http"
@@ -145,20 +142,23 @@ def resolve_transport(args: argparse.Namespace) -> TransportType:
             return "stdio"
         if env_transport == "sse":
             logger.warning("SSE transport is deprecated. Consider using MCP_TRANSPORT=http instead.")
-        return env_transport  # type: ignore
+            return "sse"
+        if env_transport == "http":
+            return "http"
+        return "stdio"
 
 
 def resolve_config(args: argparse.Namespace) -> dict:
-    """
-    Resolve full transport configuration from CLI args and environment.
+    """Resolve full transport configuration from CLI args and environment.
 
     CLI args take precedence over environment variables.
 
-    Args:
-        args: Parsed CLI arguments.
+    ## Return Format
+    Returns a dict with transport, host, port, and path settings.
 
-    Returns:
-        Dictionary with transport, host, port, path settings.
+    ## Examples
+    Resolve config:
+        config = resolve_config(args)
     """
     env_config = get_transport_config()
 
@@ -171,36 +171,27 @@ def resolve_config(args: argparse.Namespace) -> dict:
 
 
 def run_server(mcp_app, args: argparse.Namespace | None = None, server_name: str = "mcp-server") -> None:
-    """
-    Unified server runner for all transport modes.
+    """Run the server for all transport modes (blocking entry point).
 
-    This is the main entry point for running an MCP server with proper
-    transport configuration based on CLI arguments and environment variables.
-
-    Args:
-        mcp_app: FastMCP application instance.
-        args: Parsed CLI arguments (optional, will parse if None).
-        server_name: Server name for logging and help text.
-
-    Raises:
-        Exception: If server fails to start.
+    ## Examples
+    Start with defaults:
+        run_server(mcp, server_name="my-server")
     """
     # Simply run the async version
     asyncio.run(run_server_async(mcp_app, args, server_name))
 
 
 async def run_server_async(mcp_app, args: argparse.Namespace | None = None, server_name: str = "mcp-server") -> None:
-    """
-    Asynchronous unified server runner for all transport modes.
+    """Run the server for all transport modes (async entry point).
 
-    Args:
-        mcp_app: FastMCP application instance.
-        args: Parsed CLI arguments (optional, will parse if None).
-        server_name: Server name for logging and help text.
+    ## Examples
+    Start with defaults:
+        await run_server_async(mcp, server_name="my-server")
     """
     if args is None:
         parser = create_argument_parser(server_name)
-        args = parser.parse_args()
+        # Strip unknown launcher-injected args (MCP hosts append their own flags)
+        args, _ = parser.parse_known_args()
 
     # Configure logging
     if args.debug:
@@ -224,7 +215,13 @@ async def run_server_async(mcp_app, args: argparse.Namespace | None = None, serv
             path = config["path"]
             endpoint = f"http://{host}:{port}{path}"
             logger.info(f"Running in HTTP Streamable mode: {endpoint}")
-            await mcp_app.run_http_async(host=host, port=port, path=path)
+            # Serve via uvicorn on the FastMCP ASGI app so CORSMiddleware
+            # stays in effect (mcp.run_http_async() would drop it).
+            import uvicorn
+
+            app = mcp_app.http_app(path=path)
+            server = uvicorn.Server(uvicorn.Config(app, host=host, port=port, log_level="info"))
+            await server.serve()
 
         elif transport == "sse":
             host = config["host"]

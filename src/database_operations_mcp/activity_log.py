@@ -1,4 +1,4 @@
-"""In-memory event log for web dashboard — tail, filter, export, rotation."""
+"""In-memory event log for web dashboard - tail, filter, export, rotation."""
 
 from __future__ import annotations
 

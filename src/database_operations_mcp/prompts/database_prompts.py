@@ -18,8 +18,12 @@ def database_expert(
 ) -> str:
     """Return system-style instructions for database expert behavior.
 
-    Args:
-        focus: Optional focus area: 'general', 'sql', 'connections', or 'export'.
+    ## Return Format
+    Returns the instruction text, optionally extended for the focus area.
+
+    ## Examples
+    Load SQL-focused guidance:
+        text = database_expert(focus="sql")
     """
     base = """You are a database expert assistant. You have access to the Database Operations MCP server with these tools. Use them in this order when helping users.
 

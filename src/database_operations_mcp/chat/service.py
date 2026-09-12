@@ -262,8 +262,9 @@ class ChatService:
 
                 # LM Studio provider
                 if provider == "lmstudio":
+                    headers: dict[str, str] = {"Content-Type": "application/json"}
+                    payload: bytes = b""
                     try:
-                        headers = {"Content-Type": "application/json"}
                         lm_url = endpoint.rstrip("/") + "/v1/chat/completions"
                         payload = _json.dumps(
                             {

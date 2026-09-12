@@ -126,13 +126,11 @@ class DatabaseOperationsMCP:
             logger.error(f"Failed to import tool modules: {e}")
             raise
 
-    def _import_handlers(self) -> None:
+    async def _import_handlers(self) -> None:
         """Import handler modules to trigger @mcp.tool decorators."""
         # All imports are done in __init__ to trigger decorators
         # This method is kept for backward compatibility
-        from fastmcp.utilities.inspect import get_tools
-
-        tools = get_tools(self.mcp)
+        tools = await self.mcp.list_tools()
         logger.info(f"Registered {len(tools)} tools with FastMCP")
 
     def _detect_transport(self) -> Literal["stdio", "http", "dual"]:
@@ -141,54 +139,37 @@ class DatabaseOperationsMCP:
         Returns:
             str: Transport type ("stdio", "http", or "dual")
         """
-        # Check environment variable first
-        transport = os.getenv("MCP_TRANSPORT", "").lower()
-
-        # Check command line arguments
+        # Check command line arguments first (explicit flags win)
         if "--dual" in sys.argv or "--both" in sys.argv:
-            transport = "dual"
+            transport: str = "dual"
         elif "--http" in sys.argv:
             transport = "http"
         elif "--stdio" in sys.argv:
             transport = "stdio"
-
-        # Default to dual interface for maximum compatibility
-        if transport not in ["stdio", "http", "dual"]:
-            transport = "dual"
+        else:
+            # Fall back to environment variable, defaulting to dual
+            transport = os.getenv("MCP_TRANSPORT", "").lower()
+            if transport not in ("stdio", "http", "dual"):
+                transport = "dual"
 
         logger.info(f"Detected transport: {transport}")
-        return transport
+        if transport == "http":
+            return "http"
+        if transport == "stdio":
+            return "stdio"
+        return "dual"
 
     async def _run_http_server(self) -> int:
-        """Run the MCP server using HTTP transport.
+        """Run the MCP server using HTTP transport (uvicorn FastAPI bridge with CORS).
 
         Returns:
             int: Exit code (0 for success, non-zero for error)
         """
         try:
             logger.info("Starting Database Operations MCP Server (HTTP transport)...")
+            from database_operations_mcp.http_app import run_http_web
 
-            # Log MCP configuration
-            logger.info(f"MCP Name: {self.mcp.name}")
-            logger.info(f"MCP Version: {self.mcp.version}")
-
-            # Get HTTP configuration from environment
-            host = os.getenv("MCP_HOST", "127.0.0.1")
-            port = int(os.getenv("MCP_PORT", "8000"))
-
-            logger.info(f"HTTP server will bind to {host}:{port}")
-
-            # Register signal handlers for graceful shutdown
-
-            # Register signal handlers for graceful shutdown
-            self._register_signal_handlers()
-
-            # Run the HTTP server
-            logger.info("Starting HTTP server...")
-            await self.mcp.run_http_async(host=host, port=port, show_banner=True)
-
-            return 0
-
+            return await asyncio.to_thread(run_http_web)
         except Exception as e:
             logger.error(f"Error running HTTP server: {e}", exc_info=True)
             return 1
@@ -209,9 +190,9 @@ class DatabaseOperationsMCP:
             # Register signal handlers for graceful shutdown
             self._register_signal_handlers()
 
-            # Run the stdio server
+            # Run the stdio server (blocking) in a worker thread
             logger.info("Starting stdio server...")
-            await run_server(self.mcp, server_name="database-operations-mcp")
+            await asyncio.to_thread(run_server, self.mcp, None, "database-operations-mcp")
 
             return 0
 
@@ -229,12 +210,7 @@ class DatabaseOperationsMCP:
             logger.info("Starting Database Operations MCP Server (dual interface)...")
             logger.info("Running both stdio and HTTP transports concurrently")
 
-            # Get HTTP configuration
-            host = os.getenv("MCP_HOST", "127.0.0.1")
-            port = int(os.getenv("MCP_PORT", "8000"))
-            logger.info(f"HTTP server will bind to {host}:{port}")
-
-            # Create tasks for both servers
+            # Create tasks for both servers (blocking runners in worker threads)
             stdio_task = asyncio.create_task(self._run_stdio_server())
             http_task = asyncio.create_task(self._run_http_server())
 
@@ -295,13 +271,16 @@ class DatabaseOperationsMCP:
             transport = self._detect_transport()
 
             if transport == "http":
-                # Run HTTP server asynchronously
+                # Run HTTP server (uvicorn FastAPI bridge)
                 logger.info("Running HTTP server...")
-                return run_server(self.mcp, server_name="database-operations-mcp")
+                from database_operations_mcp.http_app import run_http_web
+
+                return run_http_web()
             elif transport == "dual":
                 # Run both servers concurrently
                 logger.info("Running dual interface (stdio + HTTP)...")
-                return run_server(self.mcp, server_name="database-operations-mcp")
+                run_server(self.mcp, server_name="database-operations-mcp")
+                return 0
             else:
                 # Run stdio server (backward compatibility)
                 logger.info("Running stdio server...")
@@ -337,8 +316,8 @@ def main() -> int:
 
     Environment variables:
         MCP_TRANSPORT: Set transport type (stdio, http, dual)
-        MCP_HOST: HTTP server host (default: 0.0.0.0)
-        MCP_PORT: HTTP server port (default: 8000)
+        MCP_HOST: HTTP server host (default: 127.0.0.1)
+        MCP_PORT: HTTP server port (default: 10709)
     """
     # Configure basic logging first
     logging.basicConfig(
@@ -365,8 +344,8 @@ def main() -> int:
         print()
         print("Environment Variables:")
         print("  MCP_TRANSPORT    Transport type (stdio, http, dual)")
-        print("  MCP_HOST         HTTP server host (default: 0.0.0.0)")
-        print("  MCP_PORT         HTTP server port (default: 8000)")
+        print("  MCP_HOST         HTTP server host (default: 127.0.0.1)")
+        print("  MCP_PORT         HTTP server port (default: 10709)")
         return 0
 
     logger.info("Starting Database Operations MCP Server...")
@@ -384,7 +363,8 @@ def main() -> int:
 
         # Run the server
         logger.info("Starting server...")
-        return run_server(server.mcp, server_name="database-operations-mcp")
+        run_server(server.mcp, server_name="database-operations-mcp")
+        return 0
 
     except KeyboardInterrupt:
         logger.info("Server stopped by user")

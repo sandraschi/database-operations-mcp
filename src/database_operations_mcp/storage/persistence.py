@@ -51,16 +51,15 @@ class DatabaseOperationsStorage:
     """
 
     def __init__(self, mcp: FastMCP, use_disk_storage: bool = True):
-        """
-        Initialize storage with FastMCP instance.
+        """Initialize storage with a FastMCP instance.
 
-        Args:
-            mcp: FastMCP server instance
-            use_disk_storage: If True (default), use DiskStore for persistence.
-                            If False, use default in-memory storage (won't persist).
+        ## Examples
+        Create storage bound to the server instance:
+            storage = DatabaseOperationsStorage(mcp)
         """
         self.mcp = mcp
-        self._storage = None
+        self._storage: Any = None
+        self._memory: dict[str, Any] = {}
         self._initialized = False
         self._use_disk_storage = use_disk_storage
 
@@ -114,24 +113,37 @@ class DatabaseOperationsStorage:
                     # py-key-value-aio[disk] should be available via fastmcp dependency
                     logger.warning(f"DiskStore not available: {e}. Falling back to FastMCP's default storage.")
 
-            # Fallback: Try to use FastMCP's storage backend (may be in-memory)
-            # FastMCP 2.13+ should provide storage via mcp.storage attribute
-            if hasattr(self.mcp, "storage") and self.mcp.storage:
-                self._storage = self.mcp.storage
-                self._initialized = True
-                logger.info("Using FastMCP's provided storage backend")
-                return
-
-            # If we get here, storage is not available - graceful degradation
-            logger.warning(
-                "Persistent storage not available - using in-memory fallback. Data will not persist across restarts."
-            )
-            self._initialized = False
+            # Fallback: in-memory store (FastMCP exposes no `.storage` backend;
+            # py-key-value-aio DiskStore above is the persistent path).
+            self._storage = None
+            self._initialized = True
+            logger.info("Using in-memory storage fallback (data will not persist across restarts)")
+            return
 
         except Exception as e:
-            # Storage might not be available yet - that's ok
+            # Storage might not be available yet - fall back to memory
             logger.debug(f"Storage initialization error (non-fatal): {e}")
-            self._initialized = False
+            self._storage = None
+            self._initialized = True
+
+    async def _put(self, key: str, value: Any, ttl: int | None = None) -> None:
+        """Write through DiskStore (Mapping envelope) or the memory fallback."""
+        if self._storage is not None:
+            if ttl is not None:
+                await self._storage.put(key, {"__wrapped__": True, "value": value}, ttl=ttl)
+            else:
+                await self._storage.put(key, {"__wrapped__": True, "value": value})
+        else:
+            self._memory[key] = value
+
+    async def _get_raw(self, key: str) -> Any:
+        """Read through DiskStore (unwrapping the envelope) or the memory fallback."""
+        if self._storage is not None:
+            value = await self._get_raw(key)
+            if isinstance(value, dict) and value.get("__wrapped__") is True:
+                return value.get("value")
+            return value
+        return self._memory.get(key)
 
     # ==================== DATABASE CONNECTIONS ====================
 
@@ -143,8 +155,6 @@ class DatabaseOperationsStorage:
                   Only use during development. Passwords saved in plaintext!
         """
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
             # Get existing connections
@@ -170,18 +180,16 @@ class DatabaseOperationsStorage:
                 "last_used": time.time(),
             }
 
-            await self._storage.set(CONNECTIONS_KEY, connections)
+            await self._put(CONNECTIONS_KEY, connections)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
     async def get_all_connections(self) -> dict[str, dict[str, Any]]:
         """Get all saved database connection configurations."""
         await self.initialize()
-        if not self._storage:
-            return {}
 
         try:
-            value = await self._storage.get(CONNECTIONS_KEY)
+            value = await self._get_raw(CONNECTIONS_KEY)
             if isinstance(value, dict):
                 return value
             elif isinstance(value, str):
@@ -193,36 +201,30 @@ class DatabaseOperationsStorage:
     async def delete_connection(self, connection_name: str) -> None:
         """Delete a saved connection configuration."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
             connections = await self.get_all_connections()
             if connection_name in connections:
                 del connections[connection_name]
-                await self._storage.set(CONNECTIONS_KEY, connections)
+                await self._put(CONNECTIONS_KEY, connections)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
     async def set_active_connection(self, connection_name: str) -> None:
         """Set the active/default database connection."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
-            await self._storage.set(ACTIVE_CONNECTION_KEY, connection_name)
+            await self._put(ACTIVE_CONNECTION_KEY, connection_name)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
     async def get_active_connection(self) -> str | None:
         """Get the active/default database connection name."""
         await self.initialize()
-        if not self._storage:
-            return None
 
         try:
-            value = await self._storage.get(ACTIVE_CONNECTION_KEY)
+            value = await self._get_raw(ACTIVE_CONNECTION_KEY)
             return value if isinstance(value, str) else None
         except Exception:
             return None
@@ -232,11 +234,9 @@ class DatabaseOperationsStorage:
     async def get_user_preferences(self) -> dict[str, Any]:
         """Get user preferences from persistent storage."""
         await self.initialize()
-        if not self._storage:
-            return {}
 
         try:
-            value = await self._storage.get(USER_PREFS_KEY)
+            value = await self._get_raw(USER_PREFS_KEY)
             if isinstance(value, dict):
                 return value
             elif isinstance(value, str):
@@ -248,14 +248,12 @@ class DatabaseOperationsStorage:
     async def set_user_preferences(self, prefs: dict[str, Any]) -> None:
         """Store user preferences persistently."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
             # Merge with existing preferences
             existing = await self.get_user_preferences()
             existing.update(prefs)
-            await self._storage.set(USER_PREFS_KEY, existing)
+            await self._put(USER_PREFS_KEY, existing)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
@@ -277,11 +275,9 @@ class DatabaseOperationsStorage:
     ) -> None:
         """Add a search query to history."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
-            history = await self.get_search_history(max_history=max_history * 2)
+            history = await self.get_search_history(limit=max_history * 2)
             entry = {
                 "query": query,
                 "filters": filters or {},
@@ -289,18 +285,16 @@ class DatabaseOperationsStorage:
             }
             history.insert(0, entry)
             history = history[:max_history]
-            await self._storage.set(SEARCH_HISTORY_KEY, history)
+            await self._put(SEARCH_HISTORY_KEY, history)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
     async def get_search_history(self, limit: int = 20) -> list[dict[str, Any]]:
         """Get recent search history."""
         await self.initialize()
-        if not self._storage:
-            return []
 
         try:
-            value = await self._storage.get(SEARCH_HISTORY_KEY)
+            value = await self._get_raw(SEARCH_HISTORY_KEY)
             if isinstance(value, list):
                 return value[:limit]
             elif isinstance(value, str):
@@ -313,11 +307,9 @@ class DatabaseOperationsStorage:
     async def clear_search_history(self) -> None:
         """Clear all search history."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
-            await self._storage.set(SEARCH_HISTORY_KEY, [])
+            await self._put(SEARCH_HISTORY_KEY, [])
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
@@ -326,11 +318,9 @@ class DatabaseOperationsStorage:
     async def get_bookmark_sync_state(self) -> dict[str, Any]:
         """Get bookmark sync state (last sync times, preferences)."""
         await self.initialize()
-        if not self._storage:
-            return {}
 
         try:
-            value = await self._storage.get(BOOKMARK_SYNC_STATE_KEY)
+            value = await self._get_raw(BOOKMARK_SYNC_STATE_KEY)
             if isinstance(value, dict):
                 return value
             elif isinstance(value, str):
@@ -342,11 +332,9 @@ class DatabaseOperationsStorage:
     async def set_bookmark_sync_state(self, state: dict[str, Any]) -> None:
         """Store bookmark sync state."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
-            await self._storage.set(BOOKMARK_SYNC_STATE_KEY, state)
+            await self._put(BOOKMARK_SYNC_STATE_KEY, state)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
@@ -364,24 +352,20 @@ class DatabaseOperationsStorage:
     async def add_windows_db_path(self, app_name: str, db_path: str) -> None:
         """Add a remembered Windows app database path."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
             paths = await self.get_windows_db_paths()
             paths[app_name] = {"path": db_path, "last_used": time.time()}
-            await self._storage.set(WINDOWS_DB_PATHS_KEY, paths)
+            await self._put(WINDOWS_DB_PATHS_KEY, paths)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
     async def get_windows_db_paths(self) -> dict[str, dict[str, Any]]:
         """Get all remembered Windows app database paths."""
         await self.initialize()
-        if not self._storage:
-            return {}
 
         try:
-            value = await self._storage.get(WINDOWS_DB_PATHS_KEY)
+            value = await self._get_raw(WINDOWS_DB_PATHS_KEY)
             if isinstance(value, dict):
                 return value
             elif isinstance(value, str):
@@ -395,8 +379,6 @@ class DatabaseOperationsStorage:
     async def save_query_template(self, template_name: str, query: str, description: str = "") -> None:
         """Save a query template."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
             templates = await self.get_query_templates()
@@ -405,18 +387,16 @@ class DatabaseOperationsStorage:
                 "description": description,
                 "created": time.time(),
             }
-            await self._storage.set(QUERY_TEMPLATES_KEY, templates)
+            await self._put(QUERY_TEMPLATES_KEY, templates)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
     async def get_query_templates(self) -> dict[str, dict[str, Any]]:
         """Get all saved query templates."""
         await self.initialize()
-        if not self._storage:
-            return {}
 
         try:
-            value = await self._storage.get(QUERY_TEMPLATES_KEY)
+            value = await self._get_raw(QUERY_TEMPLATES_KEY)
             if isinstance(value, dict):
                 return value
             elif isinstance(value, str):
@@ -428,14 +408,12 @@ class DatabaseOperationsStorage:
     async def delete_query_template(self, template_name: str) -> None:
         """Delete a query template."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
             templates = await self.get_query_templates()
             if template_name in templates:
                 del templates[template_name]
-                await self._storage.set(QUERY_TEMPLATES_KEY, templates)
+                await self._put(QUERY_TEMPLATES_KEY, templates)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
@@ -444,8 +422,6 @@ class DatabaseOperationsStorage:
     async def add_backup_location(self, location: str, description: str = "") -> None:
         """Add a recent backup location."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
             locations = await self.get_backup_locations()
@@ -453,18 +429,16 @@ class DatabaseOperationsStorage:
                 "description": description,
                 "last_used": time.time(),
             }
-            await self._storage.set(BACKUP_LOCATIONS_KEY, locations)
+            await self._put(BACKUP_LOCATIONS_KEY, locations)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
     async def get_backup_locations(self) -> dict[str, dict[str, Any]]:
         """Get all recent backup locations."""
         await self.initialize()
-        if not self._storage:
-            return {}
 
         try:
-            value = await self._storage.get(BACKUP_LOCATIONS_KEY)
+            value = await self._get_raw(BACKUP_LOCATIONS_KEY)
             if isinstance(value, dict):
                 return value
             elif isinstance(value, str):
@@ -478,24 +452,20 @@ class DatabaseOperationsStorage:
     async def cache_schema(self, connection_name: str, db_name: str, schema: dict[str, Any], ttl: int = 3600) -> None:
         """Cache database schema with TTL (default 1 hour)."""
         await self.initialize()
-        if not self._storage:
-            return
 
         try:
             cache_key = f"{SCHEMA_CACHE_PREFIX}{connection_name}:{db_name}"
-            await self._storage.set(cache_key, schema, ttl=ttl)
+            await self._put(cache_key, schema, ttl=ttl)
         except Exception:
             logger.warning("Graceful degradation in persistence storage")
 
     async def get_cached_schema(self, connection_name: str, db_name: str) -> dict[str, Any] | None:
         """Get cached schema if available and not expired."""
         await self.initialize()
-        if not self._storage:
-            return None
 
         try:
             cache_key = f"{SCHEMA_CACHE_PREFIX}{connection_name}:{db_name}"
-            value = await self._storage.get(cache_key)
+            value = await self._get_raw(cache_key)
             if isinstance(value, dict):
                 return value
             elif isinstance(value, str):
