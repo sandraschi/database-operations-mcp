@@ -37,24 +37,17 @@ class ContentAnalyzer:
         Retrieves a representative sample of rows from the table for analysis
         and preview purposes.
 
-        Args:
-            db_path: Path to database file
-            table_name: Name of table to sample
-            limit: Number of sample rows to return
+        ## Return Format
+        Returns table_name/row_count/sample_rows/column_statistics.
 
-        Returns:
-            Dictionary containing sample data and statistics:
-                {
-                    'table_name': str,
-                    'row_count': int,
-                    'sample_rows': List[Dict],
-                    'column_statistics': {...}
-                }
+        ## Examples
+        Sample a table:
+            result = await analyzer.sample_content("C:/data/app.db", "users")
         """
         async with aiosqlite.connect(db_path) as conn:
             # Get total row count
             async with conn.execute(f'SELECT COUNT(*) FROM "{table_name}"') as cursor:  # noqa: S608  # trusted schema name
-                row_count = (await cursor.fetchone())[0]
+                row_count = (await cursor.fetchone() or [None])[0]
 
             # Get sample rows
             async with conn.execute(f'SELECT * FROM "{table_name}" LIMIT ?', (limit,)) as cursor:  # noqa: S608  # trusted schema name
@@ -88,12 +81,12 @@ class ContentAnalyzer:
         Analyzes column values to detect common patterns like emails, URLs,
         phone numbers, dates, etc.
 
-        Args:
-            db_path: Path to database file
-            table_name: Name of table to analyze
+        ## Return Format
+        Returns the detected patterns per column.
 
-        Returns:
-            Dictionary containing detected patterns for each column
+        ## Examples
+        Detect patterns:
+            result = await analyzer.detect_patterns("C:/data/app.db", "users")
         """
         sample = await self.sample_content(db_path, table_name, limit=100)
         patterns = {}
@@ -123,12 +116,12 @@ class ContentAnalyzer:
         Provides statistics about value distributions including unique counts,
         null counts, value ranges, and data types.
 
-        Args:
-            db_path: Path to database file
-            table_name: Name of table to analyze
+        ## Return Format
+        Returns the distribution analysis per column.
 
-        Returns:
-            Dictionary containing distribution analysis
+        ## Examples
+        Analyze a table:
+            result = await analyzer.analyze_distributions("C:/data/app.db", "users")
         """
         sample = await self.sample_content(db_path, table_name, limit=1000)
         distributions = {}
@@ -150,11 +143,12 @@ class ContentAnalyzer:
         Attempts to detect potential foreign key relationships by analyzing
         column names, value ranges, and naming patterns.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns the list of inferred relationships.
 
-        Returns:
-            List of inferred relationships
+        ## Examples
+        Infer relationships:
+            result = await analyzer.infer_relationships("C:/data/app.db")
         """
         relationships = []
 

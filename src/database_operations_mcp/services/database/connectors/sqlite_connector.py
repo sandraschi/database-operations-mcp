@@ -17,6 +17,7 @@ from ....database_manager import (
     DatabaseConnectionError,
     DatabaseType,
     QueryError,
+    QueryParameters,
     QueryResult,
 )
 
@@ -34,17 +35,23 @@ class SQLiteConnector(BaseDatabaseConnector):
     def __init__(self, connection_config: dict[str, Any]):
         """Initialize SQLite connector."""
         super().__init__(connection_config)
-        database_path = connection_config.get("database_path") or connection_config.get("database")
-        if database_path and isinstance(database_path, str):
-            database_path = database_path.strip("\"'")
-        self.database_path = database_path
-        if not self.database_path:
+        raw_path = connection_config.get("database_path") or connection_config.get("database")
+        if isinstance(raw_path, str):
+            raw_path = raw_path.strip("\"'")
+        if not raw_path:
             raise ValueError("SQLite connector requires 'database_path' or 'database' in connection config")
+        self.database_path: str = str(raw_path)
 
         if not os.path.isabs(self.database_path):
             self.database_path = os.path.abspath(self.database_path)
 
-        self.connection = None
+        self.connection: sqlite3.Connection | None = None
+
+    def _require_connection(self) -> sqlite3.Connection:
+        """Return the live connection or raise."""
+        if self.connection is None:
+            raise DatabaseConnectionError("Not connected to SQLite database")
+        return self.connection
 
     async def connect(self) -> bool:
         """Establish SQLite database connection."""
@@ -83,14 +90,15 @@ class SQLiteConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from SQLite database: {e}")
             return False
 
-    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
+    async def execute_query(self, query: str, parameters: QueryParameters = None, **kwargs: Any) -> QueryResult:
         """Execute query and return results."""
         try:
             if not self.connection:
                 if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to SQLite database")
 
-            cursor = self.connection.cursor()
+            connection = self._require_connection()
+            cursor = connection.cursor()
             start_time = datetime.now()
 
             if parameters:
@@ -115,7 +123,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                 )
             else:
                 affected_rows = cursor.rowcount
-                self.connection.commit()
+                connection.commit()
 
                 return QueryResult(
                     success=True,
@@ -153,7 +161,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                 if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to SQLite database")
 
-            cursor = self.connection.cursor()
+            cursor = self._require_connection().cursor()
             cursor.execute("""
                 SELECT name
                 FROM sqlite_master
@@ -178,7 +186,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                 if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to SQLite database")
 
-            cursor = self.connection.cursor()
+            cursor = self._require_connection().cursor()
             cursor.execute(f"PRAGMA table_info([{table_name}])")
             columns_info = cursor.fetchall()
 
@@ -200,7 +208,8 @@ class SQLiteConnector(BaseDatabaseConnector):
                 )
 
             cursor.execute(f"SELECT COUNT(*) FROM [{table_name}]")  # noqa: S608  # trusted schema name from PRAGMA
-            row_count = cursor.fetchone()[0]
+            count_row = cursor.fetchone()
+            row_count = count_row[0] if count_row else 0
 
             return {
                 "table_name": table_name,
@@ -250,7 +259,7 @@ class SQLiteConnector(BaseDatabaseConnector):
                 if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to SQLite database")
 
-            cursor = self.connection.cursor()
+            cursor = self._require_connection().cursor()
             cursor.execute("""
                 SELECT
                     name as table_name,
@@ -268,7 +277,8 @@ class SQLiteConnector(BaseDatabaseConnector):
                 # Get row count for each table
                 try:
                     cursor.execute(f"SELECT COUNT(*) FROM [{row[0]}]")  # noqa: S608  # trusted table name from sqlite_master
-                    row_count = cursor.fetchone()[0]
+                    table_count_row = cursor.fetchone()
+                    row_count = table_count_row[0] if table_count_row else 0
                 except Exception:
                     row_count = 0
 
@@ -289,6 +299,20 @@ class SQLiteConnector(BaseDatabaseConnector):
         except Exception as e:
             logger.error(f"Error listing SQLite tables: {e}")
             raise QueryError(f"Failed to list tables: {e}") from e
+
+    async def vacuum(self, mode: str = "auto") -> dict[str, Any]:
+        """Reclaim storage with VACUUM (mode is accepted for API parity, SQLite VACUUM has no modes)."""
+        try:
+            if not self.connection:
+                if not await self.connect():
+                    raise DatabaseConnectionError("Failed to connect to SQLite database")
+            connection = self._require_connection()
+            connection.execute("VACUUM")
+            connection.commit()
+            return {"success": True, "mode": mode, "message": "SQLite VACUUM completed"}
+        except Exception as e:
+            logger.error(f"Error vacuuming SQLite database: {e}")
+            return {"success": False, "mode": mode, "error": str(e)}
 
     async def health_check(self) -> dict[str, Any]:
         """Perform comprehensive SQLite health check."""
@@ -312,7 +336,7 @@ class SQLiteConnector(BaseDatabaseConnector):
 
             if self.connection or await self.connect():
                 try:
-                    cursor = self.connection.cursor()
+                    cursor = self._require_connection().cursor()
                     cursor.execute("SELECT 1")
                     cursor.fetchone()
                 except Exception as e:

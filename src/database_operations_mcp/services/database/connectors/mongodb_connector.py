@@ -28,6 +28,8 @@ from ....database_manager import (
     DatabaseConnectionError,
     DatabaseType,
     QueryError,
+    QueryParameters,
+    QueryResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,20 +46,9 @@ class MongoDBConnector(BaseDatabaseConnector):
     def __init__(self, connection_config: dict[str, Any]):
         """Initialize MongoDB connector.
 
-        Args:
-            connection_config: Must contain connection parameters
-                - connection_string: MongoDB connection string (preferred)
-                OR
-                - host: MongoDB server host (default: localhost)
-                - port: MongoDB server port (default: 27017)
-                - username: Authentication username (optional)
-                - password: Authentication password (optional)
-                - auth_source: Authentication database (default: admin)
-                - auth_mechanism: Authentication mechanism (e.g., SCRAM-SHA-256)
-                - tls: Enable TLS/SSL (default: False)
-                - tlsCAFile: Path to CA certificate file (optional)
-                - replica_set: Replica set name (optional)
-                - read_preference: Read preference (e.g., 'primary', 'secondary')
+        ## Examples
+        Create a connector:
+            connector = MongoDBConnector({"host": "localhost", "port": 27017})
         """
         super().__init__(connection_config)
 
@@ -75,11 +66,16 @@ class MongoDBConnector(BaseDatabaseConnector):
         self.read_preference = connection_config.get("read_preference", "primary")
 
         # Connection objects
-        self.client = None
+        self.client: Any = None
         self.connection = None
 
-    def connect(self) -> bool:
+    async def connect(self) -> bool:
         """Establish MongoDB connection."""
+        if MongoClient is None:
+            self.status = ConnectionStatus.ERROR
+            self.last_error = "pymongo package is not installed"
+            logger.error("Failed to connect to MongoDB: pymongo package is not installed")
+            return False
         try:
             # Close existing connection if any
             if self.client:
@@ -126,7 +122,7 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to connect to MongoDB: {e}")
             return False
 
-    def disconnect(self) -> bool:
+    async def disconnect(self) -> bool:
         """Close MongoDB connection."""
         try:
             if self.client:
@@ -145,63 +141,82 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from MongoDB: {e}")
             return False
 
-    def execute_query(
+    async def execute_query(
         self,
-        query: dict,
+        query: str | dict[str, Any],
+        parameters: QueryParameters = None,
         database_name: str | None = None,
         collection_name: str | None = None,
-        **kwargs,
-    ) -> dict[str, Any]:
+        **kwargs: Any,
+    ) -> QueryResult:
         """Execute a MongoDB query.
 
-        Args:
-            query: MongoDB query document
-            database_name: Target database name (optional if specified in connection)
-            collection_name: Target collection name
-            **kwargs: Additional query options
+        ## Return Format
+        Returns a QueryResult whose data holds the operation payload dict.
 
-        Returns:
-            Dictionary with query results and metadata
+        ## Examples
+        Query a collection:
+            result = await connector.execute_query(
+                {"operation": "find", "filter": {"status": "active"}},
+                database_name="mydb",
+                collection_name="users",
+            )
         """
+        import json as _json
+
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to MongoDB")
 
+            if isinstance(query, str):
+                try:
+                    query_doc = _json.loads(query)
+                except ValueError:
+                    query_doc = {"operation": "find", "filter": {}}
+            else:
+                query_doc = query
+            if not isinstance(query_doc, dict):
+                raise ValueError("MongoDB query must be a document or JSON string")
+            if isinstance(parameters, dict):
+                query_doc = {**query_doc, **parameters}
+
             db = self.client[database_name] if database_name else self.connection
+            if db is None:
+                raise DatabaseConnectionError("No database selected and connection has no default database")
             collection = db[collection_name] if collection_name else None
 
-            if not collection:
+            if collection is None:
                 raise ValueError("Collection name must be provided")
 
             # Determine operation type from query
-            operation = query.get("operation")
+            operation = query_doc.get("operation")
 
             if operation == "find":
                 cursor = collection.find(
-                    filter=query.get("filter", {}),
-                    projection=query.get("projection"),
-                    sort=query.get("sort"),
-                    limit=query.get("limit"),
-                    skip=query.get("skip"),
+                    filter=query_doc.get("filter", {}),
+                    projection=query_doc.get("projection"),
+                    sort=query_doc.get("sort"),
+                    limit=query_doc.get("limit"),
+                    skip=query_doc.get("skip"),
                     **kwargs,
                 )
                 results = list(cursor)
-                return {"operation": "find", "count": len(results), "results": results}
+                payload = {"operation": "find", "count": len(results), "results": results}
 
             elif operation == "aggregate":
-                pipeline = query.get("pipeline", [])
+                pipeline = query_doc.get("pipeline", [])
                 cursor = collection.aggregate(pipeline, **kwargs)
                 results = list(cursor)
-                return {
+                payload = {
                     "operation": "aggregate",
                     "count": len(results),
                     "results": results,
                 }
 
             elif operation == "insert_one":
-                result = collection.insert_one(query.get("document", {}), **kwargs)
-                return {
+                result = collection.insert_one(query_doc.get("document", {}), **kwargs)
+                payload = {
                     "operation": "insert_one",
                     "inserted_id": str(result.inserted_id),
                     "acknowledged": result.acknowledged,
@@ -209,12 +224,12 @@ class MongoDBConnector(BaseDatabaseConnector):
 
             elif operation == "update_one":
                 result = collection.update_one(
-                    filter=query.get("filter", {}),
-                    update=query.get("update", {}),
-                    upsert=query.get("upsert", False),
+                    filter=query_doc.get("filter", {}),
+                    update=query_doc.get("update", {}),
+                    upsert=query_doc.get("upsert", False),
                     **kwargs,
                 )
-                return {
+                payload = {
                     "operation": "update_one",
                     "matched_count": result.matched_count,
                     "modified_count": result.modified_count,
@@ -222,8 +237,8 @@ class MongoDBConnector(BaseDatabaseConnector):
                 }
 
             elif operation == "delete_one":
-                result = collection.delete_one(query.get("filter", {}), **kwargs)
-                return {
+                result = collection.delete_one(query_doc.get("filter", {}), **kwargs)
+                payload = {
                     "operation": "delete_one",
                     "deleted_count": result.deleted_count,
                 }
@@ -231,15 +246,22 @@ class MongoDBConnector(BaseDatabaseConnector):
             else:
                 raise ValueError(f"Unsupported MongoDB operation: {operation}")
 
+            return QueryResult(
+                success=True,
+                data=[payload],
+                rowcount=payload.get("count", payload.get("deleted_count", 1)),
+                message=f"MongoDB {payload.get('operation')} completed",
+            )
+
         except Exception as e:
             logger.error(f"MongoDB query failed: {e}")
             raise QueryError(f"MongoDB operation failed: {e}") from e
 
-    def list_databases(self) -> list[dict[str, Any]]:
+    async def list_databases(self) -> list[dict[str, Any]]:
         """List all databases on the MongoDB server."""
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             databases = []
@@ -268,22 +290,23 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to list MongoDB databases: {e}")
             raise QueryError(f"Failed to list databases: {e}") from e
 
-    def list_collections(self, database_name: str | None = None) -> list[dict[str, Any]]:
+    async def list_collections(self, database_name: str | None = None) -> list[dict[str, Any]]:
         """List collections in a database.
 
-        Args:
-            database_name: Name of the database (optional if specified in connection)
+        ## Return Format
+        Returns a list of collection info dicts.
 
-        Returns:
-            List of collection information dictionaries
+        ## Examples
+        List collections:
+            collections = await connector.list_collections("mydb")
         """
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             db = self.client[database_name] if database_name else self.connection
-            if not db:
+            if db is None:
                 raise ValueError("Database name must be provided or connection must specify a database")
 
             collections = []
@@ -309,15 +332,15 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to list collections in database {database_name}: {e}")
             raise QueryError(f"Failed to list collections: {e}") from e
 
-    def get_collection_stats(self, database_name: str, collection_name: str) -> dict[str, Any]:
+    async def get_collection_stats(self, database_name: str, collection_name: str) -> dict[str, Any]:
         """Get statistics for a specific collection."""
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             db = self.client[database_name] if database_name else self.connection
-            if not db:
+            if db is None:
                 raise ValueError("Database name must be provided or connection must specify a database")
 
             # Get basic collection stats
@@ -351,19 +374,19 @@ class MongoDBConnector(BaseDatabaseConnector):
     async def get_tables(self, **kwargs: Any) -> list[str]:
         """Get list of collections in the database."""
         db_name = self.connection_config.get("database", "admin")
-        collections = self.list_collections(db_name)
+        collections = await self.list_collections(db_name)
         return [c["name"] for c in collections]
 
     async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
         """Get schema information (collection stats) for a collection."""
         db_name = self.connection_config.get("database", "admin")
-        return self.get_collection_stats(db_name, table_name)
+        return await self.get_collection_stats(db_name, table_name)
 
-    def health_check(self) -> dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform a health check on the MongoDB connection."""
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     return {
                         "status": "error",
                         "message": "Failed to connect to MongoDB",
@@ -420,11 +443,11 @@ class MongoDBConnector(BaseDatabaseConnector):
                 "timestamp": datetime.utcnow().isoformat(),
             }
 
-    def get_performance_metrics(self) -> dict[str, Any]:
+    async def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics from MongoDB."""
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to MongoDB")
 
             server_status = self.client.admin.command("serverStatus")
@@ -449,12 +472,12 @@ class MongoDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to get MongoDB performance metrics: {e}")
             raise QueryError(f"Failed to get performance metrics: {e}") from e
 
-    def test_connection(self) -> dict[str, Any]:
+    async def test_connection(self) -> dict[str, Any]:
         """Test the MongoDB connection."""
         start_time = datetime.now()
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     return {
                         "success": False,
                         "error": "Failed to connect to MongoDB",

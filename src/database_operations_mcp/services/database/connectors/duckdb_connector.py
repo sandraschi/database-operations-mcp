@@ -17,6 +17,7 @@ from ....database_manager import (
     BaseDatabaseConnector,
     ConnectionStatus,
     DatabaseType,
+    QueryParameters,
     QueryResult,
 )
 
@@ -34,15 +35,14 @@ class DuckDBConnector(BaseDatabaseConnector):
     def __init__(self, connection_config: dict[str, Any]):
         """Initialize DuckDB connector.
 
-        Args:
-            connection_config: Must contain connection parameters
-                - path: Path to DuckDB file (optional, uses :memory: if omitted)
-                - read_only: Boolean for read-only access
+        ## Examples
+        Create an in-memory connector:
+            connector = DuckDBConnector({})
         """
         super().__init__(connection_config)
         self.path = connection_config.get("path", ":memory:")
         self.read_only = connection_config.get("read_only", False)
-        self.conn = None
+        self.conn: Any = None
 
     async def connect(self) -> bool:
         """Establish DuckDB connection."""
@@ -79,7 +79,7 @@ class DuckDBConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from DuckDB: {e}")
             return False
 
-    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
+    async def execute_query(self, query: str, parameters: QueryParameters = None, **kwargs: Any) -> QueryResult:
         """Execute DuckDB query."""
         if not self.conn:
             if not await self.connect():

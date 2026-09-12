@@ -18,6 +18,7 @@ from ....database_manager import (
     BaseDatabaseConnector,
     ConnectionStatus,
     DatabaseType,
+    QueryParameters,
     QueryResult,
 )
 
@@ -35,11 +36,9 @@ class LanceDBConnector(BaseDatabaseConnector):
     def __init__(self, connection_config: dict[str, Any]):
         """Initialize LanceDB connector.
 
-        Args:
-            connection_config: Connection parameters
-                - uri or path (str): Local path or LanceDB Cloud URI (e.g. "data/lancedb" or "db://project")
-                - api_key (str, optional): For LanceDB Cloud
-                - region (str, optional): For LanceDB Cloud (e.g. "us-east-1")
+        ## Examples
+        Create a local connector:
+            connector = LanceDBConnector({"uri": "data/lancedb"})
         """
         super().__init__(connection_config)
         self.uri = connection_config.get("uri") or connection_config.get("path", "./lancedb")
@@ -88,7 +87,7 @@ class LanceDBConnector(BaseDatabaseConnector):
             logger.error("Error disconnecting from LanceDB: %s", e)
             return False
 
-    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
+    async def execute_query(self, query: str, parameters: QueryParameters = None, **kwargs: Any) -> QueryResult:
         """Execute LanceDB operation (vector search or list).
 
         Query hint: "search" for vector search, "list" to list table rows.
@@ -102,7 +101,7 @@ class LanceDBConnector(BaseDatabaseConnector):
             if not await self.connect():
                 return QueryResult(success=False, data=[], message="Not connected to LanceDB")
 
-        params = parameters or {}
+        params = parameters if isinstance(parameters, dict) else {}
         op = query.strip().lower() or "search"
         table_name = params.get("table")
         if not table_name:

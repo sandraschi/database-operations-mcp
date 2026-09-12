@@ -20,16 +20,14 @@ class DuckDBConnector:
         self.conn: Any | None = None
 
     async def connect(self, db_path: str | None = None) -> Any:
-        """Connect to DuckDB database.
+        """Connect to DuckDB database (in-memory when db_path is omitted).
 
-        Args:
-            db_path: Path to DuckDB database file (optional, uses in-memory by default)
+        ## Return Format
+        Returns the DuckDB connection object.
 
-        Returns:
-            DuckDB connection object
-
-        Raises:
-            RuntimeError: If duckdb not installed
+        ## Examples
+        Connect in-memory:
+            conn = await connector.connect()
         """
         if duckdb is None:
             raise RuntimeError("duckdb not installed. Install with: pip install duckdb")
@@ -44,12 +42,12 @@ class DuckDBConnector:
     async def execute_query(self, query: str, parameters: dict | None = None) -> list[dict[str, Any]]:
         """Execute SELECT query.
 
-        Args:
-            query: SQL query string
-            parameters: Query parameters
+        ## Return Format
+        Returns the result rows as a list of dicts.
 
-        Returns:
-            List of result rows as dictionaries
+        ## Examples
+        Show tables:
+            rows = await connector.execute_query("SHOW TABLES")
         """
         if not self.conn:
             raise RuntimeError("Not connected to database")
@@ -63,12 +61,12 @@ class DuckDBConnector:
     async def execute_non_query(self, query: str, parameters: dict | None = None) -> int:
         """Execute non-SELECT query (INSERT, UPDATE, DELETE).
 
-        Args:
-            query: SQL query string
-            parameters: Query parameters
+        ## Return Format
+        Returns the number of affected rows.
 
-        Returns:
-            Number of affected rows
+        ## Examples
+        Create a table:
+            n = await connector.execute_non_query("CREATE TABLE t (id INT)")
         """
         if not self.conn:
             raise RuntimeError("Not connected to database")
@@ -79,12 +77,12 @@ class DuckDBConnector:
     async def read_parquet(self, file_path: str, table_name: str | None = None) -> int:
         """Read Parquet file into DuckDB.
 
-        Args:
-            file_path: Path to Parquet file
-            table_name: Optional table name to create
+        ## Return Format
+        Returns the number of rows read.
 
-        Returns:
-            Number of rows read
+        ## Examples
+        Load a file:
+            n = await connector.read_parquet("data/part.parquet", "events")
         """
         if not self.conn:
             raise RuntimeError("Not connected to database")
@@ -113,11 +111,12 @@ class DuckDBConnector:
     async def get_table_structure(self, table_name: str) -> list[dict[str, Any]]:
         """Get table structure information.
 
-        Args:
-            table_name: Name of table
+        ## Return Format
+        Returns the column info rows.
 
-        Returns:
-            List of column information dictionaries
+        ## Examples
+        Describe a table:
+            cols = await connector.get_table_structure("events")
         """
         if not self.conn:
             raise RuntimeError("Not connected to database")

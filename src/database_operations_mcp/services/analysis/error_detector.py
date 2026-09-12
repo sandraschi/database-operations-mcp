@@ -25,28 +25,24 @@ class ErrorDetector:
 
         Performs SQLite integrity checks to detect corruption and consistency issues.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns integrity/quick_check/foreign_key_check plus errors and warnings.
 
-        Returns:
-            Dictionary containing integrity check results:
-                {
-                    'integrity_check': str,
-                    'quick_check': str,
-                    'foreign_key_check': str,
-                    'errors': List[str],
-                    'warnings': List[str]
-                }
+        ## Examples
+        Check a file:
+            result = await detector.check_integrity("C:/data/app.db")
         """
         errors = []
         warnings = []
+        quick_check_result = "unknown"
 
         async with aiosqlite.connect(db_path) as conn:
             # Quick integrity check
             try:
                 async with conn.execute("PRAGMA quick_check") as cursor:
-                    result = await cursor.fetchone()
-                    quick_check = result[0] if result else "unknown"
+                    row = await cursor.fetchone()
+                    quick_check = row[0] if row else "unknown"
+                    quick_check_result = str(quick_check)
                     if quick_check != "ok":
                         errors.append(f"Quick check failed: {quick_check}")
             except Exception as e:
@@ -55,7 +51,7 @@ class ErrorDetector:
             # Foreign key check
             try:
                 async with conn.execute("PRAGMA foreign_key_check") as cursor:
-                    fk_errors = await cursor.fetchall()
+                    fk_errors = list(await cursor.fetchall())
                     if fk_errors:
                         errors.append(f"Foreign key violations: {len(fk_errors)}")
             except Exception as e:
@@ -72,7 +68,7 @@ class ErrorDetector:
 
         return {
             "integrity_check": "ok" if not errors else "failed",
-            "quick_check": result[0] if "result" in locals() else "unknown",
+            "quick_check": quick_check_result,
             "foreign_key_check": "ok" if not errors else "failed",
             "errors": errors,
             "warnings": warnings,
@@ -86,11 +82,12 @@ class ErrorDetector:
         Performs comprehensive corruption detection including header checks,
         page validation, and data consistency checks.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns corruption_detected plus issues/severity/recommendation.
 
-        Returns:
-            Dictionary containing corruption detection results
+        ## Examples
+        Scan a file:
+            result = await detector.detect_corruption("C:/data/app.db")
         """
         corruption_issues = []
 
@@ -98,13 +95,15 @@ class ErrorDetector:
             try:
                 # Page count check
                 async with conn.execute("PRAGMA page_count") as cursor:
-                    page_count = (await cursor.fetchone())[0]
+                    page_row = await cursor.fetchone()
+                    page_count = page_row[0] if page_row else 0
                     if page_count == 0:
                         corruption_issues.append("Empty database - 0 pages")
 
                 # Page size check
                 async with conn.execute("PRAGMA page_size") as cursor:
-                    page_size = (await cursor.fetchone())[0]
+                    size_row = await cursor.fetchone()
+                    page_size = size_row[0] if size_row else 0
                     if page_size not in [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]:
                         corruption_issues.append(f"Unusual page size: {page_size}")
 
@@ -126,11 +125,12 @@ class ErrorDetector:
         Detects logical errors like duplicate primary keys, NULL in NOT NULL
         columns, invalid foreign keys, etc.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns the list of logical errors found.
 
-        Returns:
-            List of logical errors found
+        ## Examples
+        Scan a file:
+            errors = await detector.find_logical_errors("C:/data/app.db")
         """
         errors = []
 
@@ -152,7 +152,8 @@ class ErrorDetector:
                             async with conn.execute(
                                 f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col_name}" IS NULL'  # noqa: S608  # trusted schema identifiers
                             ) as cursor:
-                                null_count = (await cursor.fetchone())[0]
+                                count_row = await cursor.fetchone()
+                                null_count = count_row[0] if count_row else 0
                                 if null_count > 0:
                                     errors.append(
                                         {
@@ -173,11 +174,12 @@ class ErrorDetector:
 
         Analyzes detected errors and generates SQL statements to fix them.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns the list of suggested SQL fixes.
 
-        Returns:
-            List of suggested SQL fixes
+        ## Examples
+        Suggest fixes:
+            fixes = await detector.suggest_fixes("C:/data/app.db")
         """
         integrity = await self.check_integrity(db_path)
         corruption = await self.detect_corruption(db_path)

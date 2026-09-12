@@ -16,7 +16,9 @@ except ImportError:
 from ....database_manager import (
     BaseDatabaseConnector,
     ConnectionStatus,
+    DatabaseConnectionError,
     DatabaseType,
+    QueryParameters,
     QueryResult,
 )
 
@@ -34,12 +36,9 @@ class RedisConnector(BaseDatabaseConnector):
     def __init__(self, connection_config: dict[str, Any]):
         """Initialize Redis connector.
 
-        Args:
-            connection_config: Must contain connection parameters
-                - host: Redis server host
-                - port: Redis server port (default: 6379)
-                - password: Password (optional)
-                - db: Database number (default: 0)
+        ## Examples
+        Create a connector:
+            connector = RedisConnector({"host": "localhost", "port": 6379, "db": 0})
         """
         super().__init__(connection_config)
         self.host = connection_config.get("host", "localhost")
@@ -94,7 +93,7 @@ class RedisConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from Redis: {e}")
             return False
 
-    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
+    async def execute_query(self, query: str, parameters: QueryParameters = None, **kwargs: Any) -> QueryResult:
         """
         Execute a pseudo-query on Redis.
         Redis doesn't use SQL, so 'query' is interpreted as a Redis command
@@ -143,7 +142,8 @@ class RedisConnector(BaseDatabaseConnector):
     async def get_schema(self, **kwargs: Any) -> dict[str, Any]:
         """Get Redis info as schema."""
         if not self.client:
-            await self.connect()
+            if not await self.connect():
+                raise DatabaseConnectionError("Failed to connect to Redis")
 
         info = await self.client.info()
         keys_count = await self.client.dbsize()

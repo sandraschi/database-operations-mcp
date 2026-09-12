@@ -29,18 +29,12 @@ class MySQLConnector:
     ) -> Any:
         """Connect to MySQL database.
 
-        Args:
-            host: MySQL host address
-            port: MySQL port (default: 3306)
-            user: MySQL username
-            password: MySQL password
-            database: Database name
+        ## Return Format
+        Returns the connection pool object.
 
-        Returns:
-            Connection pool object
-
-        Raises:
-            RuntimeError: If aiomysql not installed
+        ## Examples
+        Connect locally:
+            pool = await connector.connect(user="root", database="mydb")
         """
         if aiomysql is None:
             raise RuntimeError("aiomysql not installed. Install with: pip install aiomysql")
@@ -60,15 +54,17 @@ class MySQLConnector:
     async def execute_query(self, query: str, parameters: dict | None = None) -> list[dict[str, Any]]:
         """Execute SELECT query.
 
-        Args:
-            query: SQL query string
-            parameters: Query parameters
+        ## Return Format
+        Returns the result rows as a list of dicts.
 
-        Returns:
-            List of result rows as dictionaries
+        ## Examples
+        Select rows:
+            rows = await connector.execute_query("SELECT * FROM users LIMIT 5")
         """
         if not self.pool:
             raise RuntimeError("Not connected to database")
+        if aiomysql is None:
+            raise RuntimeError("aiomysql not installed. Install with: pip install aiomysql")
 
         async with self.pool.acquire() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cursor:
@@ -78,12 +74,12 @@ class MySQLConnector:
     async def execute_non_query(self, query: str, parameters: dict | None = None) -> int:
         """Execute non-SELECT query (INSERT, UPDATE, DELETE).
 
-        Args:
-            query: SQL query string
-            parameters: Query parameters
+        ## Return Format
+        Returns the number of affected rows.
 
-        Returns:
-            Number of affected rows
+        ## Examples
+        Delete rows:
+            n = await connector.execute_non_query("DELETE FROM sessions WHERE expired = 1")
         """
         if not self.pool:
             raise RuntimeError("Not connected to database")
@@ -107,11 +103,12 @@ class MySQLConnector:
     async def get_table_structure(self, table_name: str) -> list[dict[str, Any]]:
         """Get table structure information.
 
-        Args:
-            table_name: Name of table
+        ## Return Format
+        Returns the column info rows.
 
-        Returns:
-            List of column information dictionaries
+        ## Examples
+        Describe a table:
+            cols = await connector.get_table_structure("users")
         """
         query = f"DESCRIBE {table_name}"
         return await self.execute_query(query)

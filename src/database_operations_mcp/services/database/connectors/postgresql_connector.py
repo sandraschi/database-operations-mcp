@@ -18,6 +18,8 @@ from ....database_manager import (
     DatabaseConnectionError,
     DatabaseType,
     QueryError,
+    QueryParameters,
+    QueryResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,14 +36,11 @@ class PostgreSQLConnector(BaseDatabaseConnector):
     def __init__(self, connection_config: dict[str, Any]):
         """Initialize PostgreSQL connector.
 
-        Args:
-            connection_config: Must contain connection parameters
-                - host: PostgreSQL server host
-                - port: PostgreSQL server port (default: 5432)
-                - database: Database name
-                - user: Username
-                - password: Password
-                - sslmode: SSL mode (optional, default: prefer)
+        ## Examples
+        Create a connector:
+            connector = PostgreSQLConnector(
+                {"host": "localhost", "database": "mydb", "user": "admin", "password": "secret"}
+            )
         """
         super().__init__(connection_config)
 
@@ -58,9 +57,9 @@ class PostgreSQLConnector(BaseDatabaseConnector):
         self.password = connection_config["password"]
         self.sslmode = connection_config.get("sslmode", "prefer")
 
-        self.connection = None
+        self.connection: Any = None
 
-    def test_connection(self) -> dict[str, Any]:
+    async def test_connection(self) -> dict[str, Any]:
         """Test PostgreSQL database connectivity."""
         try:
             # Build connection string
@@ -72,16 +71,20 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             # Get server information
             with test_conn.cursor() as cursor:
                 cursor.execute("SELECT version()")
-                server_version = cursor.fetchone()[0]
+                version_row = cursor.fetchone()
+                server_version = version_row[0] if version_row else "unknown"
 
                 cursor.execute("SELECT current_database()")
-                current_db = cursor.fetchone()[0]
+                db_row = cursor.fetchone()
+                current_db = db_row[0] if db_row else self.database
 
                 cursor.execute("SELECT current_user")
-                current_user = cursor.fetchone()[0]
+                user_row = cursor.fetchone()
+                current_user = user_row[0] if user_row else self.user
 
                 cursor.execute("SELECT pg_database_size(current_database())")
-                db_size = cursor.fetchone()[0]
+                size_row = cursor.fetchone()
+                db_size = size_row[0] if size_row else 0
 
                 # Check if we can create tables (write permissions)
                 try:
@@ -123,7 +126,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"PostgreSQL test error: {e}")
             return {"success": False, "error": str(e), "timestamp": datetime.now().isoformat()}
 
-    def connect(self) -> bool:
+    async def connect(self) -> bool:
         """Establish PostgreSQL database connection."""
         try:
             if self.connection:
@@ -147,7 +150,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Failed to connect to PostgreSQL database: {e}")
             return False
 
-    def disconnect(self) -> bool:
+    async def disconnect(self) -> bool:
         """Close PostgreSQL database connection."""
         try:
             if self.connection:
@@ -176,11 +179,11 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             f"sslmode={self.sslmode}"
         )
 
-    def list_databases(self) -> list[dict[str, Any]]:
+    async def list_databases(self) -> list[dict[str, Any]]:
         """List all databases on the PostgreSQL server."""
         try:
             if not self.connection:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             with self.connection.cursor() as cursor:
@@ -220,11 +223,11 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error listing PostgreSQL databases: {e}")
             raise QueryError(f"Failed to list databases: {e}") from e
 
-    def list_tables(self, database: str | None = None) -> list[dict[str, Any]]:
+    async def list_tables(self, database: str | None = None) -> list[dict[str, Any]]:
         """List tables in the PostgreSQL database."""
         try:
             if not self.connection:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             with self.connection.cursor() as cursor:
@@ -249,7 +252,8 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                         cursor.execute(
                             f'SELECT COUNT(*) FROM "{row["schemaname"]}"."{row["tablename"]}"'  # noqa: S608  # trusted catalog identifiers
                         )
-                        row_count = cursor.fetchone()[0]
+                        count_row = cursor.fetchone()
+                        row_count = count_row[0] if count_row else 0
                     except Exception:
                         row_count = 0
 
@@ -280,18 +284,18 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
     async def get_tables(self, **kwargs: Any) -> list[str]:
         """Get list of tables in the database."""
-        tables = self.list_tables(database=self.database)
+        tables = await self.list_tables(database=self.database)
         return [t["name"] for t in tables]
 
     async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
         """Get schema information for a specific table."""
-        return self.describe_table(table_name, database=self.database)
+        return await self.describe_table(table_name, database=self.database)
 
-    def describe_table(self, table_name: str, database: str | None = None) -> dict[str, Any]:
+    async def describe_table(self, table_name: str, database: str | None = None) -> dict[str, Any]:
         """Get table schema and metadata."""
         try:
             if not self.connection:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             # Parse schema and table name
@@ -424,11 +428,19 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error describing PostgreSQL table {table_name}: {e}")
             raise QueryError(f"Failed to describe table: {e}") from e
 
-    def execute_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
-        """Execute query and return results."""
+    async def execute_query(self, query: str, parameters: QueryParameters = None, **kwargs: Any) -> QueryResult:
+        """Execute query and return results.
+
+        ## Return Format
+        Returns a QueryResult with rows/columns for SELECT, affected rows otherwise.
+
+        ## Examples
+        Select rows:
+            result = await connector.execute_query("SELECT * FROM users LIMIT 10")
+        """
         try:
             if not self.connection:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             with self.connection.cursor() as cursor:
@@ -453,19 +465,24 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                         else:
                             row_data.append(list(row))
 
-                    return {
-                        "query_type": "SELECT",
-                        "columns": columns,
-                        "rows": row_data,
-                        "row_count": len(row_data),
-                        "column_count": len(columns),
-                    }
+                    return QueryResult(
+                        success=True,
+                        data=row_data,
+                        columns=columns,
+                        rowcount=len(row_data),
+                        message=f"SELECT returned {len(row_data)} rows",
+                    )
                 else:
                     # For INSERT, UPDATE, DELETE, etc.
                     affected_rows = cursor.rowcount
                     self.connection.commit()
 
-                    return {"query_type": "MODIFICATION", "affected_rows": affected_rows}
+                    return QueryResult(
+                        success=True,
+                        data=[],
+                        rowcount=affected_rows,
+                        message=f"Query affected {affected_rows} rows",
+                    )
 
         except Exception as e:
             if self.connection:
@@ -473,11 +490,11 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error executing PostgreSQL query: {e}")
             raise QueryError(f"Query execution failed: {e}") from e
 
-    def get_performance_metrics(self) -> dict[str, Any]:
+    async def get_performance_metrics(self) -> dict[str, Any]:
         """Get PostgreSQL performance metrics."""
         try:
             if not self.connection:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to PostgreSQL database")
 
             metrics = {}
@@ -485,7 +502,8 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             with self.connection.cursor() as cursor:
                 # Database size
                 cursor.execute("SELECT pg_database_size(current_database())")
-                db_size = cursor.fetchone()[0]
+                size_row = cursor.fetchone()
+                db_size = size_row[0] if size_row else 0
                 metrics["database_size_bytes"] = db_size
                 metrics["database_size_mb"] = round(db_size / (1024 * 1024), 2)
 
@@ -506,10 +524,10 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
                 conn_stats = cursor.fetchone()
                 metrics["connections"] = {
-                    "max_connections": conn_stats[0],
-                    "used_connections": conn_stats[1],
-                    "reserved_connections": conn_stats[2],
-                    "available_connections": conn_stats[3],
+                    "max_connections": conn_stats[0] if conn_stats else 0,
+                    "used_connections": conn_stats[1] if conn_stats else 0,
+                    "reserved_connections": conn_stats[2] if conn_stats else 0,
+                    "available_connections": conn_stats[3] if conn_stats else 0,
                 }
 
                 # Cache hit ratio
@@ -520,8 +538,8 @@ class PostgreSQLConnector(BaseDatabaseConnector):
                     FROM pg_statio_user_tables
                 """)
 
-                cache_hit = cursor.fetchone()[0]
-                metrics["cache_hit_ratio"] = round(float(cache_hit or 0) * 100, 2)
+                cache_hit = cursor.fetchone()
+                metrics["cache_hit_ratio"] = round(float((cache_hit[0] if cache_hit else 0) or 0) * 100, 2)
 
                 # Transaction stats
                 cursor.execute("""
@@ -535,9 +553,9 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
                 tx_stats = cursor.fetchone()
                 metrics["transactions"] = {
-                    "committed": tx_stats[0],
-                    "rolled_back": tx_stats[1],
-                    "total": tx_stats[2],
+                    "committed": tx_stats[0] if tx_stats else 0,
+                    "rolled_back": tx_stats[1] if tx_stats else 0,
+                    "total": tx_stats[2] if tx_stats else 0,
                 }
 
             return {
@@ -550,20 +568,20 @@ class PostgreSQLConnector(BaseDatabaseConnector):
             logger.error(f"Error getting PostgreSQL performance metrics: {e}")
             return {"error": str(e), "timestamp": datetime.now().isoformat()}
 
-    def health_check(self) -> dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform comprehensive PostgreSQL health check."""
         try:
             health_status = "healthy"
             issues = []
 
             # Test connection
-            connection_test = self.test_connection()
+            connection_test = await self.test_connection()
             if not connection_test["success"]:
                 health_status = "unhealthy"
                 issues.append(f"Connection failed: {connection_test['error']}")
 
             # Get performance metrics
-            metrics = self.get_performance_metrics()
+            metrics = await self.get_performance_metrics()
 
             # Check connection usage
             conn_stats = metrics.get("database_metrics", {}).get("connections", {})
@@ -581,7 +599,7 @@ class PostgreSQLConnector(BaseDatabaseConnector):
 
             # Try a simple query if connected
             query_test = None
-            if self.connection or self.connect():
+            if self.connection or await self.connect():
                 try:
                     with self.connection.cursor() as cursor:
                         cursor.execute("SELECT 1")

@@ -28,17 +28,12 @@ class RedisConnector:
     ) -> Any:
         """Connect to Redis database.
 
-        Args:
-            host: Redis host address
-            port: Redis port (default: 6379)
-            password: Redis password
-            db: Database number (0-15)
+        ## Return Format
+        Returns the Redis client object.
 
-        Returns:
-            Redis client object
-
-        Raises:
-            RuntimeError: If aioredis not installed
+        ## Examples
+        Connect locally:
+            client = await connector.connect()
         """
         if aioredis is None:
             raise RuntimeError("redis not installed. Install with: pip install redis")
@@ -53,11 +48,12 @@ class RedisConnector:
     async def get_value(self, key: str) -> Any:
         """Get value by key.
 
-        Args:
-            key: Redis key
+        ## Return Format
+        Returns the stored value (or None).
 
-        Returns:
-            Value stored at key
+        ## Examples
+        Read a key:
+            value = await connector.get_value("session:1")
         """
         if not self.client:
             raise RuntimeError("Not connected to Redis")
@@ -67,13 +63,12 @@ class RedisConnector:
     async def set_value(self, key: str, value: Any, ttl: int | None = None) -> bool:
         """Set key-value pair.
 
-        Args:
-            key: Redis key
-            value: Value to store
-            ttl: Time to live in seconds
+        ## Return Format
+        Returns True on success.
 
-        Returns:
-            True if successful
+        ## Examples
+        Store a key:
+            ok = await connector.set_value("session:1", "abc", ttl=3600)
         """
         if not self.client:
             raise RuntimeError("Not connected to Redis")
@@ -84,11 +79,12 @@ class RedisConnector:
     async def delete_key(self, key: str) -> int:
         """Delete key.
 
-        Args:
-            key: Redis key to delete
+        ## Return Format
+        Returns the number of keys deleted.
 
-        Returns:
-            Number of keys deleted
+        ## Examples
+        Delete a key:
+            n = await connector.delete_key("session:1")
         """
         if not self.client:
             raise RuntimeError("Not connected to Redis")
@@ -98,11 +94,12 @@ class RedisConnector:
     async def get_keys(self, pattern: str = "*") -> list[str]:
         """Get keys matching pattern.
 
-        Args:
-            pattern: Key pattern (supports wildcards)
+        ## Return Format
+        Returns the list of matching keys.
 
-        Returns:
-            List of matching keys
+        ## Examples
+        List session keys:
+            keys = await connector.get_keys("session:*")
         """
         if not self.client:
             raise RuntimeError("Not connected to Redis")

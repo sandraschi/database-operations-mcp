@@ -37,12 +37,12 @@ class ReportGenerator:
 
         Creates a human-readable report covering all aspects of database analysis.
 
-        Args:
-            db_path: Path to database file
-            include_samples: Whether to include data samples
+        ## Return Format
+        Returns the Markdown-formatted report string.
 
-        Returns:
-            Markdown-formatted report string
+        ## Examples
+        Generate a report:
+            report = await generator.generate_report("C:/data/app.db")
         """
         # Gather all information
         db_info = await self.structure_analyzer.get_database_info(db_path)

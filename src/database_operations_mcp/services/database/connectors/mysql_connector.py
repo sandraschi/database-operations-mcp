@@ -16,8 +16,10 @@ except ImportError:
 from ....database_manager import (
     BaseDatabaseConnector,
     ConnectionStatus,
+    DatabaseConnectionError,
     DatabaseType,
     QueryError,
+    QueryParameters,
     QueryResult,
 )
 
@@ -35,13 +37,9 @@ class MySQLConnector(BaseDatabaseConnector):
     def __init__(self, connection_config: dict[str, Any]):
         """Initialize MySQL connector.
 
-        Args:
-            connection_config: Must contain connection parameters
-                - host: MySQL server host
-                - port: MySQL server port (default: 3306)
-                - database: Database name
-                - user: Username
-                - password: Password
+        ## Examples
+        Create a connector:
+            connector = MySQLConnector({"host": "localhost", "database": "mydb", "user": "root"})
         """
         super().__init__(connection_config)
         self.host = connection_config.get("host", "localhost")
@@ -49,7 +47,13 @@ class MySQLConnector(BaseDatabaseConnector):
         self.database = connection_config.get("database")
         self.user = connection_config.get("user")
         self.password = connection_config.get("password")
-        self.pool = None
+        self.pool: Any = None
+
+    def _require_pool(self) -> Any:
+        """Return the live pool or raise."""
+        if self.pool is None:
+            raise DatabaseConnectionError("Not connected to MySQL database")
+        return self.pool
 
     async def connect(self) -> bool:
         """Establish MySQL database connection pool."""
@@ -97,15 +101,17 @@ class MySQLConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from MySQL: {e}")
             return False
 
-    async def execute_query(self, query: str, parameters: dict[str, Any] | None = None, **kwargs: Any) -> QueryResult:
+    async def execute_query(self, query: str, parameters: QueryParameters = None, **kwargs: Any) -> QueryResult:
         """Execute query and return results."""
         if not self.pool:
             if not await self.connect():
                 return QueryResult(success=False, data=[], message="Not connected to MySQL")
+        if aiomysql is None:
+            return QueryResult(success=False, data=[], message="aiomysql is not installed")
 
         try:
             start_time = datetime.now()
-            async with self.pool.acquire() as conn:
+            async with self._require_pool().acquire() as conn:
                 async with conn.cursor(aiomysql.DictCursor) as cur:
                     await cur.execute(query, parameters)
 

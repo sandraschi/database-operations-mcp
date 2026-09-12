@@ -39,15 +39,12 @@ class StructureAnalyzer:
         Analyzes the file header to determine database type based on magic
         numbers and signature patterns.
 
-        Args:
-            file_path: Path to database file
+        ## Return Format
+        Returns the database type identifier (sqlite, postgresql, mysql, etc.).
 
-        Returns:
-            Database type identifier (sqlite, postgresql, mysql, etc.)
-
-        Raises:
-            FileNotFoundError: If database file doesn't exist
-            ValueError: If database type cannot be determined
+        ## Examples
+        Detect a file:
+            db_type = analyzer.detect_database_type("C:/data/app.db")
         """
         db_path = Path(file_path)
         if not db_path.exists():
@@ -79,33 +76,12 @@ class StructureAnalyzer:
         Analyzes the database structure to extract all schema elements including
         tables, columns, indexes, foreign keys, views, and triggers.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns database_type plus tables/views/triggers/functions/summary.
 
-        Returns:
-            Dictionary containing complete schema information:
-                {
-                    'database_type': str,
-                    'tables': [
-                        {
-                            'name': str,
-                            'columns': [...],
-                            'indexes': [...],
-                            'foreign_keys': [...],
-                            'primary_key': str,
-                            'row_count': int,
-                            'size_bytes': int
-                        },
-                        ...
-                    ],
-                    'views': [...],
-                    'triggers': [...],
-                    'functions': [...],
-                    'summary': {...}
-                }
-
-        Raises:
-            ValueError: If database is invalid or unsupported
+        ## Examples
+        Analyze a file:
+            schema = await analyzer.analyze_schema("C:/data/app.db")
         """
         db_type = self.detect_database_type(db_path)
 
@@ -120,11 +96,12 @@ class StructureAnalyzer:
         Extracts comprehensive schema information from SQLite database including
         table definitions, column types, indexes, constraints, and foreign keys.
 
-        Args:
-            db_path: Path to SQLite database file
+        ## Return Format
+        Returns the complete schema information dictionary.
 
-        Returns:
-            Complete schema information dictionary
+        ## Examples
+        Analyze a SQLite file:
+            schema = await analyzer._analyze_sqlite_schema("C:/data/app.db")
         """
         async with aiosqlite.connect(db_path) as conn:
             tables = []
@@ -170,12 +147,12 @@ class StructureAnalyzer:
         Extracts detailed information about a table including columns, indexes,
         constraints, and foreign keys.
 
-        Args:
-            conn: Database connection
-            table_name: Name of table to analyze
+        ## Return Format
+        Returns the table information dictionary.
 
-        Returns:
-            Table information dictionary
+        ## Examples
+        Analyze a table:
+            info = await analyzer._analyze_table(conn, "users")
         """
         # Get column information
         async with conn.execute(f'PRAGMA table_info("{table_name}")') as cursor:
@@ -216,7 +193,7 @@ class StructureAnalyzer:
 
         # Get row count
         async with conn.execute(f'SELECT COUNT(*) FROM "{table_name}"') as cursor:  # noqa: S608  # trusted schema name
-            row_count = (await cursor.fetchone())[0]
+            row_count = (await cursor.fetchone() or [0])[0] or 0
 
         # Estimate table size
         size_bytes = await self._estimate_table_size(conn, table_name)
@@ -234,19 +211,19 @@ class StructureAnalyzer:
     async def _estimate_table_size(self, conn: aiosqlite.Connection, table_name: str) -> int:
         """Estimate table size in bytes.
 
-        Args:
-            conn: Database connection
-            table_name: Name of table
+        ## Return Format
+        Returns the estimated size in bytes (0 on error).
 
-        Returns:
-            Estimated size in bytes
+        ## Examples
+        Estimate size:
+            size = await analyzer._estimate_table_size(conn, "users")
         """
         try:
             async with conn.execute("PRAGMA page_count") as cursor:
-                page_count = (await cursor.fetchone())[0]
+                page_count = (await cursor.fetchone() or [0])[0] or 0
 
             async with conn.execute("PRAGMA page_size") as cursor:
-                page_size = (await cursor.fetchone())[0]
+                page_size = (await cursor.fetchone() or [0])[0] or 0
 
             return page_count * page_size
         except Exception:
@@ -255,20 +232,12 @@ class StructureAnalyzer:
     async def get_database_info(self, db_path: str) -> dict[str, Any]:
         """Get basic database information and statistics.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns database_type/file_path/file_size plus SQLite PRAGMA details.
 
-        Returns:
-            Dictionary with database information:
-                {
-                    'database_type': str,
-                    'file_path': str,
-                    'file_size': int,
-                    'page_count': int,
-                    'page_size': int,
-                    'encoding': str,
-                    'sqlite_version': str
-                }
+        ## Examples
+        Inspect a file:
+            info = await analyzer.get_database_info("C:/data/app.db")
         """
         db_type = self.detect_database_type(db_path)
 
@@ -282,15 +251,15 @@ class StructureAnalyzer:
             async with aiosqlite.connect(db_path) as conn:
                 # Get SQLite-specific info
                 async with conn.execute("PRAGMA page_count") as cursor:
-                    info["page_count"] = (await cursor.fetchone())[0]
+                    info["page_count"] = (await cursor.fetchone() or [None])[0]
 
                 async with conn.execute("PRAGMA page_size") as cursor:
-                    info["page_size"] = (await cursor.fetchone())[0]
+                    info["page_size"] = (await cursor.fetchone() or [None])[0]
 
                 async with conn.execute("PRAGMA encoding") as cursor:
-                    info["encoding"] = (await cursor.fetchone())[0]
+                    info["encoding"] = (await cursor.fetchone() or [None])[0]
 
                 async with conn.execute("SELECT sqlite_version()") as cursor:
-                    info["sqlite_version"] = (await cursor.fetchone())[0]
+                    info["sqlite_version"] = (await cursor.fetchone() or [None])[0]
 
         return info

@@ -26,20 +26,12 @@ class HealthChecker:
         Evaluates database health across multiple dimensions including integrity,
         corruption, logical consistency, and performance.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns overall/integrity/corruption/logical/performance scores plus issues.
 
-        Returns:
-            Dictionary containing comprehensive health information:
-                {
-                    'overall_score': float (0-100),
-                    'integrity_score': float,
-                    'corruption_score': float,
-                    'logical_score': float,
-                    'performance_score': float,
-                    'issues': List[Dict],
-                    'recommendations': List[str]
-                }
+        ## Examples
+        Check a file:
+            result = await checker.check_health("C:/data/app.db")
         """
         # Run all checks
         integrity = await self.error_detector.check_integrity(db_path)
@@ -96,11 +88,12 @@ class HealthChecker:
     async def _check_performance(self, db_path: str) -> float:
         """Check database performance indicators.
 
-        Args:
-            db_path: Path to database file
+        ## Return Format
+        Returns the performance score (0-100).
 
-        Returns:
-            Performance score (0-100)
+        ## Examples
+        Score a file:
+            score = await checker._check_performance("C:/data/app.db")
         """
         import aiosqlite
 
@@ -109,7 +102,7 @@ class HealthChecker:
                 # Check for missing indexes on foreign keys
                 query = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
                 async with conn.execute(query) as cursor:
-                    table_count = (await cursor.fetchone())[0]
+                    table_count = (await cursor.fetchone() or [0])[0] or 0
 
                 score = 100  # Start with perfect score
                 if table_count > 10:
@@ -124,11 +117,12 @@ class HealthChecker:
     def _get_health_status(self, score: float) -> str:
         """Get health status text from score.
 
-        Args:
-            score: Health score (0-100)
+        ## Return Format
+        Returns one of excellent/good/fair/poor/critical.
 
-        Returns:
-            Health status string
+        ## Examples
+        Map a score:
+            status = checker._get_health_status(82)
         """
         if score >= 90:
             return "excellent"

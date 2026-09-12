@@ -20,6 +20,8 @@ from ....database_manager import (
     DatabaseConnectionError,
     DatabaseType,
     QueryError,
+    QueryParameters,
+    QueryResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -45,17 +47,21 @@ class ChromaDBConnector(BaseDatabaseConnector):
         if not self.persist_directory and not self.host:
             raise ValueError("ChromaDB connector requires either 'persist_directory' or 'host'")
 
-        self.client = None
+        self.client: Any = None
         self.connection = None
 
-    def test_connection(self) -> dict[str, Any]:
+    async def test_connection(self) -> dict[str, Any]:
         """Test ChromaDB connectivity."""
+        if chromadb is None:
+            raise ImportError("chromadb package is not installed")
         try:
             if self.persist_directory:
                 test_client = chromadb.PersistentClient(path=self.persist_directory)
                 connection_type = "local_persistent"
                 connection_info = {"persist_directory": self.persist_directory}
             else:
+                if not self.host:
+                    raise ValueError("ChromaDB remote connection requires 'host'")
                 test_client = chromadb.HttpClient(host=self.host, port=self.port)
                 connection_type = "remote_server"
                 connection_info = {"host": self.host, "port": self.port}
@@ -93,13 +99,20 @@ class ChromaDBConnector(BaseDatabaseConnector):
                 "timestamp": datetime.now().isoformat(),
             }
 
-    def connect(self) -> bool:
+    async def connect(self) -> bool:
         """Establish ChromaDB connection."""
+        if chromadb is None:
+            self.status = ConnectionStatus.ERROR
+            self.last_error = "chromadb package is not installed"
+            logger.error("Failed to connect to ChromaDB: chromadb package is not installed")
+            return False
         try:
             if self.persist_directory:
                 self.client = chromadb.PersistentClient(path=self.persist_directory)
                 logger.info(f"Connected to local ChromaDB: {self.persist_directory}")
             else:
+                if not self.host:
+                    raise ValueError("ChromaDB remote connection requires 'host'")
                 self.client = chromadb.HttpClient(host=self.host, port=self.port)
                 logger.info(f"Connected to remote ChromaDB: {self.host}:{self.port}")
 
@@ -115,7 +128,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Failed to connect to ChromaDB: {e}")
             return False
 
-    def disconnect(self) -> bool:
+    async def disconnect(self) -> bool:
         """Close ChromaDB connection."""
         try:
             self.client = None
@@ -129,11 +142,11 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error disconnecting from ChromaDB: {e}")
             return False
 
-    def list_databases(self) -> list[dict[str, Any]]:
+    async def list_databases(self) -> list[dict[str, Any]]:
         """List databases (ChromaDB instance info)."""
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             return [
@@ -149,11 +162,11 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error listing ChromaDB databases: {e}")
             raise QueryError(f"Failed to list databases: {e}") from e
 
-    def list_tables(self, database: str | None = None) -> list[dict[str, Any]]:
+    async def list_tables(self, database: str | None = None) -> list[dict[str, Any]]:
         """List collections (tables) in ChromaDB."""
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             collections = self.client.list_collections()
@@ -191,18 +204,18 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
     async def get_tables(self, **kwargs: Any) -> list[str]:
         """Get list of tables (collections) in ChromaDB."""
-        tables = self.list_tables()
+        tables = await self.list_tables()
         return [t["name"] for t in tables]
 
     async def get_table_schema(self, table_name: str, **kwargs: Any) -> dict[str, Any]:
         """Get schema for a table (collection)."""
-        return self.describe_table(table_name)
+        return await self.describe_table(table_name)
 
-    def describe_table(self, table_name: str, database: str | None = None) -> dict[str, Any]:
+    async def describe_table(self, table_name: str, database: str | None = None) -> dict[str, Any]:
         """Get collection schema and metadata."""
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             try:
@@ -251,11 +264,11 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.warning("Failed to get embedding dimension")
         return None
 
-    def execute_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
+    async def execute_query(self, query: str, parameters: QueryParameters = None, **kwargs: Any) -> QueryResult:
         """Execute ChromaDB operations (similarity search, etc.)."""
         try:
             if not self.client:
-                if not self.connect():
+                if not await self.connect():
                     raise DatabaseConnectionError("Failed to connect to ChromaDB")
 
             # Parse query type - simplified implementation
@@ -263,28 +276,35 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
             if query_lower.startswith("search"):
                 # Semantic search operation
-                return self._execute_search_query(query, parameters)
+                payload = self._execute_search_query(query, parameters)
             elif query_lower.startswith("insert") or query_lower.startswith("add"):
                 # Insert documents
-                return self._execute_insert_query(query, parameters)
+                payload = self._execute_insert_query(query, parameters)
             elif query_lower.startswith("delete"):
                 # Delete documents
-                return self._execute_delete_query(query, parameters)
+                payload = self._execute_delete_query(query, parameters)
             else:
-                return {
+                payload = {
                     "query_type": "UNSUPPORTED",
                     "error": "ChromaDB supports search, insert, and delete operations",
                     "supported_operations": ["search", "insert", "delete"],
                 }
 
+            return QueryResult(
+                success="error" not in payload,
+                data=[payload],
+                rowcount=payload.get("result_count", payload.get("inserted_count", 1)),
+                message=f"ChromaDB {payload.get('query_type', 'operation')} completed",
+            )
+
         except Exception as e:
             logger.error(f"Error executing ChromaDB query: {e}")
             raise QueryError(f"Query execution failed: {e}") from e
 
-    def _execute_search_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
+    def _execute_search_query(self, query: str, parameters: QueryParameters = None) -> dict[str, Any]:
         """Execute similarity search."""
         try:
-            params = parameters or {}
+            params = parameters if isinstance(parameters, dict) else {}
             collection_name = params.get("collection", self.collection_name)
             query_texts = params.get("query_texts", [])
             n_results = params.get("n_results", 10)
@@ -308,10 +328,10 @@ class ChromaDBConnector(BaseDatabaseConnector):
         except Exception as e:
             raise QueryError(f"Search query failed: {e}") from e
 
-    def _execute_insert_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
+    def _execute_insert_query(self, query: str, parameters: QueryParameters = None) -> dict[str, Any]:
         """Execute document insertion."""
         try:
-            params = parameters or {}
+            params = parameters if isinstance(parameters, dict) else {}
             collection_name = params.get("collection", self.collection_name)
 
             # Get or create collection
@@ -343,10 +363,10 @@ class ChromaDBConnector(BaseDatabaseConnector):
         except Exception as e:
             raise QueryError(f"Insert query failed: {e}") from e
 
-    def _execute_delete_query(self, query: str, parameters: dict | None = None) -> dict[str, Any]:
+    def _execute_delete_query(self, query: str, parameters: QueryParameters = None) -> dict[str, Any]:
         """Execute document deletion."""
         try:
-            params = parameters or {}
+            params = parameters if isinstance(parameters, dict) else {}
             collection_name = params.get("collection", self.collection_name)
 
             collection = self.client.get_collection(collection_name)
@@ -416,13 +436,13 @@ class ChromaDBConnector(BaseDatabaseConnector):
             logger.error(f"Error getting ChromaDB performance metrics: {e}")
             return {"error": str(e), "timestamp": datetime.now().isoformat()}
 
-    def health_check(self) -> dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform ChromaDB health check."""
         try:
             health_status = "healthy"
             issues = []
 
-            connection_test = self.test_connection()
+            connection_test = await self.test_connection()
             if not connection_test["success"]:
                 health_status = "unhealthy"
                 issues.append(f"Connection failed: {connection_test['error']}")
@@ -431,7 +451,7 @@ class ChromaDBConnector(BaseDatabaseConnector):
 
             # Test basic operations if connected
             operation_test = None
-            if self.client or self.connect():
+            if self.client or await self.connect():
                 try:
                     self.client.list_collections()
                     operation_test = {"success": True}
