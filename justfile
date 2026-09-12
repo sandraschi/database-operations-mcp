@@ -63,6 +63,12 @@ ci:
     uv run pyright src/
     uv run pytest tests/ -q
 
+# Fleet release-certification alias (runs the full local gate set)
+certify:
+    just ci
+    cd web_sota; npx tsc --noEmit
+    cd web_sota; npx "@biomejs/biome" ci --config-path=biome.json .
+
 # --- Hardening ---
 
 # Execute Bandit security audit

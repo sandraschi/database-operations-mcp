@@ -11,3 +11,5 @@ just ci                    # five-gate: ruff, format-check, pyright, pytest
 Entry points: `src/database_operations_mcp/main.py` (stdio/HTTP/dual),
 `src/database_operations_mcp/http_app.py` (FastAPI bridge),
 `web_sota/` (Vite frontend 10708 → proxy /api → 10709).
+
+Onboarding: N/A — no wrappee install and no online account required (see ONBOARDING.md).

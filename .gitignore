@@ -13,11 +13,14 @@ reports/
 *.mcpb
 mcpb/src/
 native/gen/
+# Tauri / PyInstaller frozen backend staging (regenerable build output)
+native/resources/database-operations-mcp-backend/
 data/
 *.sqlite3
 *.db*
 *.bak
 *.bak.*
+*.bak*
 
 build/
 dist/
