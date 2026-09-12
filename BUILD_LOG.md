@@ -38,11 +38,13 @@ Required by the NSIS build gate: document failures, regressions, fixes.
 4. `Start-Process dist/...-backend.exe` failed once with `spawn EPERM` - cause was
    a stale backend process from the earlier smoke test holding state.
    Fixed by killing leftovers first (Phase 0 precondition). No code change.
-5. `npx playwright test` fails: `@playwright/test` not in `web_sota/package.json`
-   (runner missing) + `playwright.config.ts` webServer points at nonexistent
-   `database_operations_mcp.server` module on port 10708. Pre-existing broken
-   e2e track, unrelated to this build. Left as residual (see below), verified
-   via sidecar smoke + route checks instead.
+5. `npx playwright test` failed on 2026-09-12: `@playwright/test` not in
+   `web_sota/package.json` + `playwright.config.ts` webServer pointed at
+   nonexistent `database_operations_mcp.server` module on port 10708.
+   FIXED same day: added `@playwright/test@1.51.1` devDep, rewrote webServer
+   as backend (`uv run database-operations-mcp --http --port 10709`, full uv
+   path, cwd `..`) + vite dev (`--port 10708 --strictPort`), both with
+   `reuseExistingServer: true`. `just e2e` now passes 2/2 self-contained.
 
 ### Source changes shipped with this build
 - `src/.../tools/agentic_tools.py`: removed `safety_override` bypass,
@@ -60,6 +62,6 @@ Required by the NSIS build gate: document failures, regressions, fixes.
 - `@tauri-apps/api` not in frontend deps: no `backend-status` event bridge;
   chat polls via fetch, works without it. Add when wiring instant refresh.
 - Tauri `csp: null` (no CSP enforcement). Fine for localhost backend, tighten later.
-- Playwright e2e track broken (missing runner dep + stale webServer command).
-  Repair = add `@playwright/test`, fix webServer to real backend + vite FE.
+- Playwright e2e track repaired 2026-09-12 (`just e2e` 2/2 green, self-contained
+  backend + vite via webServer array). See failure #5 above.
 - `native/resources/*.exe` (112 MB) and `.agents/` / `.opencode/` stay untracked.

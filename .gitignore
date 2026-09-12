@@ -39,3 +39,7 @@ _dashboard/
 
 # Runtime logs
 *.log
+
+# Playwright test output (regenerable)
+test-results/
+playwright-report/

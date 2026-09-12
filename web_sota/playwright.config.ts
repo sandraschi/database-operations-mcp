@@ -8,10 +8,20 @@ export default defineConfig({
     headless: true,
     screenshot: "only-on-failure",
   },
-  webServer: {
-    command: "uv run python -m database_operations_mcp.server --port 10708",
-    port: 10708,
-    timeout: 30000,
-    reuseExistingServer: false,
-  },
+  webServer: [
+    {
+      command:
+        "C:/Users/sandr/.local/bin/uv.exe run database-operations-mcp --http --port 10709",
+      cwd: "..",
+      port: 10709,
+      timeout: 120000,
+      reuseExistingServer: true,
+    },
+    {
+      command: "npx vite --port 10708 --strictPort",
+      port: 10708,
+      timeout: 120000,
+      reuseExistingServer: true,
+    },
+  ],
 });
