@@ -1,4 +1,4 @@
-# database-operations-mcp (MCPB Bundle)
+﻿# database-operations-mcp (MCPB Bundle)
 
 Comprehensive FastMCP 3.3 server for database operations (SQL, NoSQL, Vector) and system tools.
 
@@ -10,8 +10,8 @@ Add to \claude_desktop_config.json\:
   "mcpServers": {
     "database-operations-mcp": {
       "command": "uv",
-      "args": ["run", "--directory", "\D:\Dev\repos", "python", "-m", "database_operations_mcp"],
-      "env": { "PYTHONPATH": "\D:\Dev\repos/src" }
+      "args": ["run", "--directory", "\D:\Dev\repos\database-operations-mcp", "python", "-m", "database_operations_mcp"],
+      "env": { "PYTHONPATH": "\D:\Dev\repos\database-operations-mcp/src" }
     }
   }
 }
@@ -29,7 +29,10 @@ Add to \claude_desktop_config.json\:
 - **main_http**: main(http)
 - **main_sse**: main(sse)
 - **api_health**: api_health
+- **get_llm_providers**: get_llm_providers
 - **api_capabilities**: api_capabilities
+- **api_diagnostics**: Full diagnostics for CUA-NSIS smoke testing (tool list + system info).
+- **api_shutdown**: Graceful self-termination (agent shutdown path).
 - **list_tools**: list_tools
 - **call_tool_endpoint**: call_tool_endpoint
 - **activity_feed**: activity_feed
@@ -38,12 +41,15 @@ Add to \claude_desktop_config.json\:
 - **logs_stats**: logs_stats
 - **logs_export**: logs_export
 - **logs_clear**: logs_clear
+- **chat_interaction**: chat_interaction
+- **refine_prompt**: refine_prompt
+- **get_llm_settings**: get_llm_settings
 - **agentic_workflow_tool**: agentic_workflow_tool
 - **safety_guard_status**: safety_guard_status
 - **calibre_list_books**: calibre_list_books
 - **calibre_get_book_details**: calibre_get_book_details
 - **calibre_query**: calibre_query
-- **postgresql**: Advanced open-source relational database
+- **Ann**: Ann
 - **db_analyzer**: db_analyzer
 - **list_supported_databases**: list_supported_databases
 - **register_database_connection**: register_database_connection
