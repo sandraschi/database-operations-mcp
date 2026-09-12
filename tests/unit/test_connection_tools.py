@@ -7,7 +7,7 @@ including listing supported databases, registering connections, and testing conn
 
 import os
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -60,10 +60,10 @@ def mock_db_manager():
 
 @pytest.fixture
 def mock_connector():
-    """Create a mock database connector with test_connection method."""
+    """Create a mock database connector with async test_connection method."""
     connector = MagicMock()
-    connector.test_connection.return_value = {"success": True, "version": "1.0.0"}
-    connector.get_connection_info.return_value = {"host": "test", "port": 1234}
+    connector.test_connection = AsyncMock(return_value={"success": True, "version": "1.0.0"})
+    connector.get_connection_info = AsyncMock(return_value={"host": "test", "port": 1234})
     return connector
 
 
@@ -116,7 +116,7 @@ def test_list_supported_databases(mock_mcp, mock_db_manager):
 
 @patch("database_operations_mcp.tools.connection_tools.create_connector")
 @patch("database_operations_mcp.tools.connection_tools.db_manager")
-def test_register_database_connection_success(mock_db_manager, mock_create_connector, mock_connector):
+async def test_register_database_connection_success(mock_db_manager, mock_create_connector, mock_connector):
     """Test successful database connection registration."""
     from database_operations_mcp.tools.connection_tools import register_database_connection
 
@@ -124,7 +124,7 @@ def test_register_database_connection_success(mock_db_manager, mock_create_conne
     mock_create_connector.return_value = mock_connector
 
     # Act
-    result = register_database_connection(
+    result = await register_database_connection(
         connection_name="test_conn",
         database_type="sqlite",
         connection_config={"database_path": ":memory:"},
@@ -137,7 +137,7 @@ def test_register_database_connection_success(mock_db_manager, mock_create_conne
 
 
 @patch("database_operations_mcp.tools.connection_tools.db_manager")
-def test_test_database_connection_success(mock_db_manager, mock_connector):
+async def test_test_database_connection_success(mock_db_manager, mock_connector):
     """Test successful database connection test."""
 
     from database_operations_mcp.tools.connection_tools import test_database_connection
@@ -146,7 +146,7 @@ def test_test_database_connection_success(mock_db_manager, mock_connector):
     mock_db_manager.get_connector.return_value = mock_connector
 
     # Act - call the underlying function directly
-    result = test_database_connection(connection_name="test_conn")
+    result = await test_database_connection(connection_name="test_conn")
 
     # Assert
     assert result["success"] is True or "error" in result
@@ -157,7 +157,7 @@ def test_test_database_connection_success(mock_db_manager, mock_connector):
 
 
 @patch("database_operations_mcp.tools.connection_tools.db_manager")
-def test_test_all_database_connections_parallel(mock_db_manager, mock_connector):
+async def test_test_all_database_connections_parallel(mock_db_manager, mock_connector):
     """Test testing all database connections in parallel mode."""
 
     from database_operations_mcp.tools.connection_tools import (
@@ -167,9 +167,10 @@ def test_test_all_database_connections_parallel(mock_db_manager, mock_connector)
     # Setup
     mock_db_manager.list_connectors.return_value = {"conn1": mock_connector, "conn2": mock_connector}
     mock_db_manager.get_connector.return_value = mock_connector
+    mock_db_manager.test_connection = AsyncMock(return_value={"success": True})
 
     # Act
-    result = test_all_database_connections(parallel=True)
+    result = await test_all_database_connections(parallel=True)
 
     # Assert
     assert "test_results" in result or "error" in result

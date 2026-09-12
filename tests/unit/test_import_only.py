@@ -105,12 +105,10 @@ class TestToolRegistration:
         async def _count() -> int:
             return len(await server.mcp.list_tools())
 
-        loop = asyncio.get_event_loop()
-        if not loop.is_running():
-            tool_count = asyncio.run(_count())
-            assert tool_count >= 10, f"Expected at least 10 tools, got {tool_count}"
-        else:
-            assert server.mcp is not None
+        # asyncio.run() owns a fresh loop; get_event_loop() is order-dependent
+        # (a prior test may have closed the shared loop) and flaky in-suite.
+        tool_count = asyncio.run(_count())
+        assert tool_count >= 10, f"Expected at least 10 tools, got {tool_count}"
 
 
 class TestServerInitialization:
