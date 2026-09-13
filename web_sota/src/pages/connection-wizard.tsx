@@ -7,6 +7,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { callTool } from "@/common/api";
 import { getHelpForType } from "@/common/database-types-help";
 import { Button } from "@/components/ui/button";
@@ -38,9 +39,14 @@ function extractData(res: unknown): Record<string, unknown> | null {
 }
 
 export function ConnectionWizard() {
+  const [searchParams] = useSearchParams();
+  const requestedType = searchParams.get("type");
+  const initialType = DB_TYPES.some((t) => t.value === requestedType)
+    ? (requestedType as string)
+    : "sqlite";
   const [step, setStep] = useState(1);
   const [connectionName, setConnectionName] = useState("");
-  const [databaseType, setDatabaseType] = useState<string>("sqlite");
+  const [databaseType, setDatabaseType] = useState<string>(initialType);
   const [config, setConfig] = useState<Record<string, string>>({});
   const [showHelp, setShowHelp] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);

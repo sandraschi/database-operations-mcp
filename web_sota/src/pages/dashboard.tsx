@@ -199,22 +199,26 @@ export function Dashboard() {
 
   const supported = supportedQuery.data;
   const dbByCategory = asRecord(supported?.databases_by_category);
-  const enginesByCategory: { category: string; names: string[] }[] = [];
+  const enginesByCategory: {
+    category: string;
+    engines: { name: string; type: string }[];
+  }[] = [];
   if (dbByCategory) {
     for (const [category, list] of Object.entries(dbByCategory)) {
       if (!Array.isArray(list)) {
         continue;
       }
-      const names: string[] = [];
+      const engines: { name: string; type: string }[] = [];
       for (const item of list) {
         const rec = asRecord(item);
         const name = rec ? (asString(rec.name) ?? asString(rec.type)) : null;
-        if (name) {
-          names.push(name);
+        const type = rec ? asString(rec.type) : null;
+        if (name && type) {
+          engines.push({ name, type });
         }
       }
-      if (names.length > 0) {
-        enginesByCategory.push({ category, names });
+      if (engines.length > 0) {
+        enginesByCategory.push({ category, engines });
       }
     }
   }
@@ -222,7 +226,7 @@ export function Dashboard() {
   const engineTotal =
     typeof engineTotalRaw === "number"
       ? engineTotalRaw
-      : enginesByCategory.reduce((n, g) => n + g.names.length, 0);
+      : enginesByCategory.reduce((n, g) => n + g.engines.length, 0);
 
   const logTotal = logStatsQuery.data?.total ?? null;
   const recentEntries = recentLogsQuery.data?.entries ?? [];
@@ -606,14 +610,19 @@ export function Dashboard() {
                       {group.category}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {group.names.map((name) => (
-                        <Badge
-                          key={`${group.category}-${name}`}
-                          variant="outline"
-                          className="border-slate-700 px-2.5 py-1 text-xs text-slate-300"
+                      {group.engines.map((engine) => (
+                        <Link
+                          key={`${group.category}-${engine.type}`}
+                          to={`/connection-wizard?type=${engine.type}`}
+                          title={`Connect with ${engine.name}`}
                         >
-                          {name}
-                        </Badge>
+                          <Badge
+                            variant="outline"
+                            className="border-slate-700 px-2.5 py-1 text-xs text-slate-300 transition-colors hover:border-cyan-600 hover:bg-cyan-950/40 hover:text-cyan-200"
+                          >
+                            {engine.name}
+                          </Badge>
+                        </Link>
                       ))}
                     </div>
                   </div>
