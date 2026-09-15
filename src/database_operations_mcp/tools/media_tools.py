@@ -12,6 +12,7 @@ All operations have been consolidated into media_library():
 This module is kept for backwards compatibility but tools are no longer registered.
 """
 
+import asyncio
 import csv
 import json
 import logging
@@ -109,7 +110,7 @@ async def optimize_plex_database(
         backup_path = f"{db_path}.{int(datetime.now().timestamp())}.bak"
         import shutil
 
-        shutil.copy2(db_path, backup_path)
+        await asyncio.to_thread(shutil.copy2, db_path, backup_path)
 
     conn = None
     try:

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import shutil
@@ -360,7 +361,7 @@ async def _clean_windows_database(
     backup_path = None
     if backup:
         backup_path = db_path.with_suffix(f".bak_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
-        shutil.copy2(db_path, backup_path)
+        await asyncio.to_thread(shutil.copy2, db_path, backup_path)
 
     conn = None
     try:

@@ -12,6 +12,7 @@ All operations have been consolidated into windows_system():
 This module is kept for backwards compatibility but tools are no longer registered.
 """
 
+import asyncio
 import logging
 import os
 import shutil
@@ -436,7 +437,7 @@ async def clean_windows_database(
         backup_path = os.path.join(backup_dir, backup_filename)
 
         try:
-            shutil.copy2(db_path, backup_path)
+            await asyncio.to_thread(shutil.copy2, db_path, backup_path)
         except Exception as e:
             logger.exception(f"Failed to create backup of {db_type}")
             return {"status": "error", "message": f"Backup failed: {e!s}"}
