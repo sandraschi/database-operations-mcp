@@ -100,13 +100,11 @@ build-native:
 
 # Install Playwright browsers (one-time)
 e2e-install:
-    Set-Location '{{REPO}}/web_sota'
-    npx playwright install chromium
+    Set-Location '{{REPO}}/web_sota'; npx playwright install chromium
 
 # Run Playwright E2E smoke tests (start backend first: just serve)
 e2e:
-    Set-Location '{{REPO}}/web_sota'
-    npx playwright test
+    Set-Location '{{REPO}}/web_sota'; npx playwright test
 
 # Bootstrap: install dev deps + pre-commit hook
 
