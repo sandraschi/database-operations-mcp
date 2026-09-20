@@ -72,7 +72,7 @@ class TestPlexDatabase(unittest.TestCase):
         # Insert test data
         cursor.execute(
             """
-            INSERT INTO library_sections 
+            INSERT INTO library_sections
             (id, name, section_type, agent, created_at, updated_at)
             VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
         """,
@@ -81,9 +81,9 @@ class TestPlexDatabase(unittest.TestCase):
 
         cursor.execute(
             """
-            INSERT INTO media_items 
-            (id, library_section_id, metadata_type, media_item_title, 
-             summary, rating, view_count, duration, 
+            INSERT INTO media_items
+            (id, library_section_id, metadata_type, media_item_title,
+             summary, rating, view_count, duration,
              created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
         """,
@@ -98,16 +98,18 @@ class TestPlexDatabase(unittest.TestCase):
         db = PlexDatabase(str(self.db_path))
         self.assertEqual(db.db_path, self.db_path)
 
-    @patch("os.path.exists")
+    @patch("pathlib.Path.exists")
     @patch("platform.system")
     def test_init_auto_detect_windows(self, mock_system, mock_exists):
-        """Test automatic database detection on Windows."""
+        """Test automatic database detection on Windows.
+
+        _locate_database() checks Path(candidate).exists(), not os.path.exists() --
+        patching os.path.exists (the old version of this test) mocked a function the
+        code never calls, so the test only passed by coincidence on machines with a
+        real Plex install and raised FileNotFoundError everywhere else (e.g. CI).
+        """
         mock_system.return_value = "Windows"
-        test_path = (
-            r"C:\\Plex\\Plex Media Server\\Plug-in Support\\"
-            r"Databases\\com.plexapp.plugins.library.db"
-        )
-        mock_exists.side_effect = lambda x: x == test_path
+        mock_exists.return_value = True
 
         db = PlexDatabase()
         # Just check that it was created successfully - don't check specific path
