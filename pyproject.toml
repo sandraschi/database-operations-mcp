@@ -79,6 +79,9 @@ dev = [
     "safety>=3.0.0",
     "pyinstaller>=6.21.0",
     "pywin32>=311",
+    "pywinauto>=0.6.9",
+    "pillow>=12.3.0",
+    "pytesseract>=0.3.13",
 ]
 
 [tool.mypy]
