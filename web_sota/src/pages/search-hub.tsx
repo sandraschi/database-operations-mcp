@@ -57,9 +57,12 @@ export function SearchHub() {
   const bookmarkResult = bookmarksMutation.data?.result;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="search-hub-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="search-hub-heading"
+        >
           Search Hub
         </h2>
         <p className="text-slate-400">
@@ -80,6 +83,7 @@ export function SearchHub() {
             placeholder="Search query"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            data-testid="search-hub-query-input"
           />
           <input
             className="h-10 rounded-md border border-slate-800 bg-slate-900 px-3 text-sm text-slate-100"

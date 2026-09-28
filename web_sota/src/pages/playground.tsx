@@ -72,9 +72,12 @@ export function Playground() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="playground-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="playground-heading"
+        >
           Playground
         </h2>
         <p className="text-slate-400">
@@ -95,6 +98,7 @@ export function Playground() {
               className="h-10 w-full rounded-md border border-slate-800 bg-slate-900 px-3 text-sm text-slate-100"
               value={selected}
               onChange={(e) => setSelected(e.target.value)}
+              data-testid="playground-tool-select"
             >
               <option value="">Select tool...</option>
               {tools.map((t) => (
@@ -131,6 +135,7 @@ export function Playground() {
               className="bg-blue-600 hover:bg-blue-700"
               onClick={run}
               disabled={callMutation.isPending}
+              data-testid="playground-run-button"
             >
               {callMutation.isPending ? "Running..." : "Run"}
             </Button>

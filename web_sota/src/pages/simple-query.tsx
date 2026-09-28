@@ -165,9 +165,12 @@ export function SimpleQuery() {
         : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="simple-query-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="simple-query-heading"
+        >
           Simple query
         </h2>
         <p className="text-slate-400">
@@ -196,6 +199,7 @@ export function SimpleQuery() {
             className="bg-blue-600 hover:bg-blue-700"
             onClick={loadTables}
             disabled={listTablesMutation.isPending || !connectionName.trim()}
+            data-testid="simple-query-load-tables-button"
           >
             {listTablesMutation.isPending ? "Loading..." : "Load tables"}
           </Button>

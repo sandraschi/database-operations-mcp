@@ -132,10 +132,13 @@ export function Schema() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="schema-page">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+          <h2
+            className="text-2xl font-bold tracking-tight text-white"
+            data-testid="schema-heading"
+          >
             Schema
           </h2>
           <p className="text-slate-400">
@@ -165,6 +168,7 @@ export function Schema() {
             className="bg-blue-600 hover:bg-blue-700"
             onClick={loadActiveAndList}
             disabled={listDbMutation.isPending || !connectionName.trim()}
+            data-testid="schema-load-button"
           >
             {listDbMutation.isPending ? "Loading..." : "Load databases"}
           </Button>

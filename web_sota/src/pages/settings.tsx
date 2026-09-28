@@ -90,6 +90,7 @@ function LLMSettings() {
             className="h-10 w-full rounded-md border border-slate-800 bg-slate-900 px-3 text-sm text-slate-100"
             value={selectedProvider}
             onChange={(e) => handleProviderChange(e.target.value)}
+            data-testid="settings-llm-provider-select"
           >
             <option value="ollama">Ollama</option>
             <option value="lm_studio">LM Studio</option>
@@ -138,9 +139,12 @@ export function Settings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="settings-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="settings-heading"
+        >
           Configuration
         </h2>
         <p className="text-slate-400">
