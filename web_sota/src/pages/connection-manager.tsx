@@ -58,9 +58,12 @@ export function ConnectionManager() {
   const fieldNames = DB_FIELDS[databaseType] ?? ["database"];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="connection-manager-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="connection-manager-heading"
+        >
           Connection Manager
         </h2>
         <p className="text-slate-400">
@@ -82,6 +85,7 @@ export function ConnectionManager() {
               placeholder="Connection name"
               value={connectionName}
               onChange={(e) => setConnectionName(e.target.value)}
+              data-testid="connection-manager-name-input"
             />
             <select
               className="h-10 w-full rounded-md border border-slate-800 bg-slate-900 px-3 text-sm text-slate-100"
@@ -118,6 +122,7 @@ export function ConnectionManager() {
                 className="bg-blue-600 hover:bg-blue-700"
                 onClick={() => registerMutation.mutate()}
                 disabled={!connectionName.trim() || registerMutation.isPending}
+                data-testid="connection-manager-register-button"
               >
                 {registerMutation.isPending
                   ? "Registering..."

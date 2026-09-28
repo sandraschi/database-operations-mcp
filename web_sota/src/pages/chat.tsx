@@ -149,7 +149,10 @@ export function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-5xl mx-auto border border-slate-800 bg-slate-950/40 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+    <div
+      className="flex flex-col h-[calc(100vh-8rem)] max-w-5xl mx-auto border border-slate-800 bg-slate-950/40 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl shadow-black/50"
+      data-testid="chat-page"
+    >
       {/* Chat Header */}
       <div className="p-4 border-b border-slate-800 bg-white/5 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
@@ -239,6 +242,7 @@ export function Chat() {
             }
             placeholder="Ask anything about your databases..."
             className="w-full bg-slate-950/60 border border-white/5 rounded-2xl p-4 pr-32 min-h-[90px] max-h-[160px] resize-none text-slate-100 placeholder-slate-500 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-300 group-hover:border-white/10"
+            data-testid="chat-input"
           />
           <div className="absolute right-3 bottom-3 flex items-center gap-2">
             <button
@@ -278,6 +282,7 @@ export function Chat() {
               onClick={handleSend}
               title="Send Message"
               aria-label="Send"
+              data-testid="chat-send"
               className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
             >
               <Send className="w-4 h-4" />

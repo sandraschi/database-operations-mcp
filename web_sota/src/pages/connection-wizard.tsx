@@ -185,9 +185,12 @@ export function ConnectionWizard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="connection-wizard-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="connection-wizard-heading"
+        >
           Add a connection
         </h2>
         <p className="text-slate-400">
@@ -373,6 +376,7 @@ export function ConnectionWizard() {
                     className="bg-blue-600 hover:bg-blue-700"
                     onClick={handleRegister}
                     disabled={registerMutation.isPending}
+                    data-testid="connection-wizard-register-button"
                   >
                     {registerMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

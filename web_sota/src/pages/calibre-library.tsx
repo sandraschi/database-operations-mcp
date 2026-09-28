@@ -118,10 +118,13 @@ export default function CalibreLibrary() {
   const totalPages = Math.ceil(sortedBooks.length / booksPerPage);
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-6" data-testid="calibre-library-page">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
+          <h1
+            className="text-3xl font-bold text-slate-100 tracking-tight"
+            data-testid="calibre-library-heading"
+          >
             Calibre Library
           </h1>
           <p className="text-slate-400 mt-1">
@@ -149,6 +152,7 @@ export default function CalibreLibrary() {
                   className="pl-9 w-64 bg-slate-950/50 border-slate-800 focus:ring-blue-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  data-testid="calibre-library-search"
                 />
               </div>
               <Button

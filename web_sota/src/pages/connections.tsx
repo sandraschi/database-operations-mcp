@@ -101,10 +101,13 @@ export function Connections() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="connections-page">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+          <h2
+            className="text-2xl font-bold tracking-tight text-white"
+            data-testid="connections-heading"
+          >
             Connections
           </h2>
           <p className="text-slate-400">
@@ -124,6 +127,7 @@ export function Connections() {
             className="bg-blue-600 hover:bg-blue-700"
             onClick={refreshAll}
             disabled={listMutation.isPending || activeMutation.isPending}
+            data-testid="connections-refresh-button"
           >
             <RefreshCw
               className={cn(
