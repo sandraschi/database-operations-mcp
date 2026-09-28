@@ -17,9 +17,12 @@ export function McpCapabilities() {
   const data = capsQuery.data;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="mcp-capabilities-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="mcp-capabilities-heading"
+        >
           MCP Capabilities
         </h2>
         <p className="text-slate-400">
@@ -28,7 +31,10 @@ export function McpCapabilities() {
         </p>
       </div>
 
-      <Card className="border-slate-800 bg-slate-950/50">
+      <Card
+        className="border-slate-800 bg-slate-950/50"
+        data-testid="mcp-capabilities-feature-flags"
+      >
         <CardHeader>
           <CardTitle className="text-white">Feature Flags</CardTitle>
           <CardDescription className="text-slate-400">

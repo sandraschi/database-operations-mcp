@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 
 export default function NoSQLManager() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="nosql-manager-page">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+          <h2
+            className="text-2xl font-bold tracking-tight text-white"
+            data-testid="nosql-manager-heading"
+          >
             NoSQL Manager
           </h2>
           <p className="text-slate-400">
@@ -31,6 +34,7 @@ export default function NoSQLManager() {
           <Input
             placeholder="Filter keys (e.g. user:*)"
             className="pl-10 bg-slate-950 border-slate-800 focus:ring-blue-500"
+            data-testid="nosql-manager-filter-input"
           />
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700 text-white">

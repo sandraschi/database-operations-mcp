@@ -163,7 +163,10 @@ export function LogsPage() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div
+      className="space-y-6 animate-in fade-in duration-500"
+      data-testid="logs-page"
+    >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="flex items-center gap-2 text-blue-400">
@@ -172,7 +175,10 @@ export function LogsPage() {
               Operations
             </span>
           </div>
-          <h2 className="mt-1 text-3xl font-bold tracking-tight text-white">
+          <h2
+            className="mt-1 text-3xl font-bold tracking-tight text-white"
+            data-testid="logs-heading"
+          >
             Event logs
           </h2>
           <p className="text-slate-400">
@@ -279,6 +285,7 @@ export function LogsPage() {
                 placeholder="tool name, error…"
                 value={searchDraft}
                 onChange={(e) => setSearchDraft(e.target.value)}
+                data-testid="logs-search"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     setSearch(searchDraft);

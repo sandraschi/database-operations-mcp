@@ -95,10 +95,13 @@ export function Health() {
     status === "ok" || status === true || healthResult?.success === true;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="health-page">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+          <h2
+            className="text-2xl font-bold tracking-tight text-white"
+            data-testid="health-heading"
+          >
             Health &amp; Diagnostics
           </h2>
           <p className="text-slate-400">Database health check and metrics</p>
@@ -120,6 +123,7 @@ export function Health() {
               healthMutation.isPending ||
               metricsMutation.isPending
             }
+            data-testid="health-run-scan-button"
           >
             <Zap className="mr-2 h-4 w-4" />
             {healthMutation.isPending || metricsMutation.isPending

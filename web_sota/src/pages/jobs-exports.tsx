@@ -64,9 +64,12 @@ export function JobsExports() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="jobs-exports-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="jobs-exports-heading"
+        >
           Jobs & Exports
         </h2>
         <p className="text-slate-400">
@@ -103,6 +106,7 @@ export function JobsExports() {
             className="bg-blue-600 hover:bg-blue-700"
             onClick={startExport}
             disabled={!connectionName.trim() || exportMutation.isPending}
+            data-testid="jobs-exports-start-button"
           >
             {exportMutation.isPending ? "Starting..." : "Start export"}
           </Button>
