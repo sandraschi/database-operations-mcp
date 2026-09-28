@@ -129,10 +129,13 @@ export function TableViewer() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="table-viewer-page">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+          <h2
+            className="text-2xl font-bold tracking-tight text-white"
+            data-testid="table-viewer-heading"
+          >
             Table viewer
           </h2>
           <p className="text-slate-400">Browse tables and view rows</p>
@@ -160,6 +163,7 @@ export function TableViewer() {
             className="bg-blue-600 hover:bg-blue-700"
             onClick={loadTables}
             disabled={listTablesMutation.isPending || !connectionName.trim()}
+            data-testid="table-viewer-load-button"
           >
             {listTablesMutation.isPending ? "Loading..." : "Load tables"}
           </Button>

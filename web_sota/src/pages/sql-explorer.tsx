@@ -14,10 +14,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function SQLExplorer() {
   return (
-    <div className="grid grid-cols-12 gap-6">
+    <div className="grid grid-cols-12 gap-6" data-testid="sql-explorer-page">
       {/* Sidebar: Schema Browser */}
       <div className="col-span-3 space-y-4">
-        <Card className="border-slate-800 bg-slate-950/50">
+        <Card
+          className="border-slate-800 bg-slate-950/50"
+          data-testid="sql-explorer-schema-browser"
+        >
           <CardHeader className="p-4">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
               Schema Browser
@@ -66,6 +69,7 @@ export default function SQLExplorer() {
               <Button
                 size="sm"
                 className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                data-testid="sql-explorer-run-button"
               >
                 <Play className="h-3 w-3 mr-2" />
                 Run Query

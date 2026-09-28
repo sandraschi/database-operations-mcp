@@ -66,9 +66,12 @@ export function ToolExplorer() {
   }, [filtered]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="tool-explorer-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="tool-explorer-heading"
+        >
           Tool Explorer
         </h2>
         <p className="text-slate-400">
@@ -109,6 +112,7 @@ export function ToolExplorer() {
             placeholder="Search by tool name or description"
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            data-testid="tool-explorer-search-input"
           />
         </CardContent>
       </Card>

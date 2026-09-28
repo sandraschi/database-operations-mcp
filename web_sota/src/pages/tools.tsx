@@ -58,9 +58,12 @@ export function Tools() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="tools-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="tools-heading"
+        >
           MCP Tools
         </h2>
         <p className="text-slate-400">
@@ -145,6 +148,7 @@ export function Tools() {
                   onClick={handleCall}
                   disabled={callMutation.isPending}
                   className="bg-blue-600 hover:bg-blue-700"
+                  data-testid="tools-call-button"
                 >
                   {callMutation.isPending ? "Calling..." : "Call tool"}
                 </Button>
