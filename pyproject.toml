@@ -109,6 +109,7 @@ ignore = ["S101", "B008", "E501", "S106", "RUF012", "S603", "S607", "S324", "E40
 "tests/**" = ["S603", "S607", "S110", "S112", "RUF013", "RUF059", "W291", "T201"]
 "src/database_operations_mcp/cli.py" = ["T201"]
 "src/database_operations_mcp/main.py" = ["T201"]
+"scripts/**" = ["T201", "S110", "S310", "C401", "N806", "N818"]
 
 [tool.ruff.format]
 quote-style = "double"
