@@ -109,10 +109,16 @@ export default function DatabaseBrowser() {
   );
 
   return (
-    <div className="flex flex-col gap-6 p-6 max-h-screen overflow-hidden">
+    <div
+      className="flex flex-col gap-6 p-6 max-h-screen overflow-hidden"
+      data-testid="db-browser-page"
+    >
       <div className="flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100 tracking-tight flex items-center gap-3">
+          <h1
+            className="text-3xl font-bold text-slate-100 tracking-tight flex items-center gap-3"
+            data-testid="db-browser-heading"
+          >
             <HardDrive className="h-8 w-8 text-blue-500" />
             Filesystem DB Browser
           </h1>
@@ -132,12 +138,14 @@ export default function DatabaseBrowser() {
                 value={dbPath}
                 onChange={(e) => setDbPath(e.target.value)}
                 className="pl-9 bg-slate-950/50 border-slate-800"
+                data-testid="db-browser-path-input"
               />
             </div>
             <Button
               onClick={inspectDb}
               disabled={loading || !dbPath}
               className="bg-blue-600 hover:bg-blue-500 text-white min-w-[120px]"
+              data-testid="db-browser-inspect-button"
             >
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin mr-2" />

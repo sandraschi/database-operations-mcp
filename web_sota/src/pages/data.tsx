@@ -97,9 +97,14 @@ export function Data() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="data-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">Data</h2>
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="data-heading"
+        >
+          Data
+        </h2>
         <p className="text-slate-400">Run queries and quick table samples</p>
       </div>
 
@@ -148,6 +153,7 @@ export function Data() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="SELECT * FROM ..."
+                data-testid="data-query-input"
               />
             </div>
             <Button
@@ -158,6 +164,7 @@ export function Data() {
                 !connectionName.trim() ||
                 !query.trim()
               }
+              data-testid="data-run-query-button"
             >
               {queryMutation.isPending ? "Running..." : "Run query"}
             </Button>

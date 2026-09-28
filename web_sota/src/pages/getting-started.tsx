@@ -124,9 +124,12 @@ const PAGES = [
 
 export function GettingStarted() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-testid="getting-started-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white flex items-center gap-2"
+          data-testid="getting-started-heading"
+        >
           <BookOpen className="h-7 w-7 text-amber-500" />
           Getting started
         </h2>
@@ -135,7 +138,10 @@ export function GettingStarted() {
         </p>
       </div>
 
-      <Card className="border-slate-800 bg-slate-950/50">
+      <Card
+        className="border-slate-800 bg-slate-950/50"
+        data-testid="getting-started-workflow"
+      >
         <CardHeader>
           <CardTitle className="text-white">Workflow</CardTitle>
           <CardDescription className="text-slate-400">

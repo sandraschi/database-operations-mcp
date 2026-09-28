@@ -232,9 +232,12 @@ export function ExportImport() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="export-import-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white"
+          data-testid="export-import-heading"
+        >
           Export / Import
         </h2>
         <p className="text-slate-400">
@@ -294,11 +297,13 @@ export function ExportImport() {
                 value={exportQuery}
                 onChange={(e) => setExportQuery(e.target.value)}
                 placeholder="SELECT * FROM ..."
+                data-testid="export-import-query-input"
               />
             </div>
             <Button
               className="bg-blue-600 hover:bg-blue-700"
               onClick={runExport}
+              data-testid="export-import-run-button"
               disabled={
                 exportMutation.isPending ||
                 !connectionName.trim() ||

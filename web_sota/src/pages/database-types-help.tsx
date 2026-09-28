@@ -127,9 +127,12 @@ export function DatabaseTypesHelp() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="database-types-help-page">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+        <h2
+          className="text-2xl font-bold tracking-tight text-white flex items-center gap-2"
+          data-testid="database-types-help-heading"
+        >
           <BookOpen className="h-7 w-7 text-amber-500" />
           Database types
         </h2>
@@ -146,6 +149,7 @@ export function DatabaseTypesHelp() {
           <TabsList
             aria-label="Database types"
             className="flex h-auto w-full flex-wrap justify-start gap-1.5 bg-slate-900/60 p-1.5"
+            data-testid="database-types-help-tabs"
           >
             {DATABASE_TYPES_HELP.map((db) => (
               <TabsTrigger
