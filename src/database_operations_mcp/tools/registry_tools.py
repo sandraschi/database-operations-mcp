@@ -23,6 +23,7 @@ from typing import Any, TypeVar
 # Import the global MCP instance
 from database_operations_mcp.config.mcp_config import mcp
 
+from ._annotations import MUTATING, READ_ONLY
 from .help_tools import HelpSystem
 
 # Type variable for function type
@@ -199,7 +200,7 @@ class RegistryMonitor:
 
 
 # DEPRECATED: Use windows_system portmanteau instead
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY)
 @HelpSystem.register_tool
 def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
     """Read a value from the Windows Registry.
@@ -241,7 +242,7 @@ def read_registry_value(path: str, value_name: str = "") -> dict[str, Any]:
 
 
 # DEPRECATED: Use windows_system portmanteau instead
-@mcp.tool()
+@mcp.tool(annotations=MUTATING)
 @HelpSystem.register_tool
 def write_registry_value(path: str, value_name: str, value: Any, value_type: str | None = None) -> dict[str, Any]:
     """Write a value to the Windows Registry.

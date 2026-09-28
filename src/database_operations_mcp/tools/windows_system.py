@@ -15,6 +15,7 @@ from typing import Any
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.operation_types import WindowsSystemOperation
 from database_operations_mcp.tool_responses import unknown_operation_response
+from database_operations_mcp.tools._annotations import DESTRUCTIVE
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -207,7 +208,7 @@ def _find_windows_db(db_type: str) -> Path | None:
     return None
 
 
-@mcp.tool()
+@mcp.tool(annotations=DESTRUCTIVE)
 @HelpSystem.register_tool(category="windows")
 async def windows_system(
     operation: WindowsSystemOperation,

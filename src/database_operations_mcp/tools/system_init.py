@@ -6,12 +6,13 @@ from typing import Any
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.tools._annotations import DESTRUCTIVE
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
 
-@mcp.tool()
+@mcp.tool(annotations=DESTRUCTIVE)
 @HelpSystem.register_tool(category="system")
 async def system_init(
     operation: str,
