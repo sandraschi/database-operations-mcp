@@ -12,11 +12,12 @@ from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.database_manager import create_connector
 from database_operations_mcp.operation_types import DbOperationsExtendedOperation
 from database_operations_mcp.tool_responses import unknown_operation_response
+from database_operations_mcp.tools._annotations import DESTRUCTIVE
 
 logger = logging.getLogger(__name__)
 
 
-@mcp.tool()
+@mcp.tool(annotations=DESTRUCTIVE)
 async def db_operations_extended(
     database_type: str,
     operation: DbOperationsExtendedOperation,

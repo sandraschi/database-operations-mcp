@@ -8,6 +8,7 @@ from typing import Any
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.operation_types import MediaLibraryOperation
 from database_operations_mcp.tool_responses import unknown_operation_response
+from database_operations_mcp.tools._annotations import MUTATING
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ _MEDIA_MAX_LIMIT = 500
 _MEDIA_MAX_OFFSET = 100_000
 
 
-@mcp.tool()
+@mcp.tool(annotations=MUTATING)
 @HelpSystem.register_tool(category="media")
 async def media_library(
     operation: MediaLibraryOperation,

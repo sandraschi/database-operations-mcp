@@ -8,12 +8,13 @@ from typing import Any
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.operation_types import HelpSystemOperation
 from database_operations_mcp.tool_responses import unknown_operation_response
+from database_operations_mcp.tools._annotations import READ_ONLY
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY)
 @HelpSystem.register_tool(category="help")
 async def help_system(
     operation: HelpSystemOperation,
