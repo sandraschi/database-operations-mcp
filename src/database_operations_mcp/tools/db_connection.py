@@ -18,6 +18,7 @@ from database_operations_mcp.database_manager import (
 )
 from database_operations_mcp.operation_types import DbConnectionOperation
 from database_operations_mcp.tool_responses import unknown_operation_response
+from database_operations_mcp.tools._annotations import MUTATING
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -50,10 +51,10 @@ async def _run_connector_test(connector: BaseDatabaseConnector) -> dict[str, Any
         return {"success": False, "error": str(e)}
 
 
-def _legacy_tool_decorator():
+def _legacy_tool_decorator(annotations: dict[str, Any] | None = None):
     """Register legacy dispatcher tool only when explicitly enabled."""
     if ENABLE_LEGACY_DB_PORTMANTEAU:
-        return mcp.tool()
+        return mcp.tool(annotations=annotations)
 
     def _identity(func):
         return func
@@ -61,7 +62,7 @@ def _legacy_tool_decorator():
     return _identity
 
 
-@_legacy_tool_decorator()
+@_legacy_tool_decorator(annotations=MUTATING)
 @HelpSystem.register_tool(category="database")
 async def db_connection(
     operation: DbConnectionOperation,

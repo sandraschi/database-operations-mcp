@@ -18,16 +18,17 @@ from database_operations_mcp.tool_responses import (
     connection_not_found,
     unknown_operation_response,
 )
+from database_operations_mcp.tools._annotations import DESTRUCTIVE
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 ENABLE_LEGACY_DB_PORTMANTEAU = os.getenv("ENABLE_LEGACY_DB_PORTMANTEAU", "true").lower() == "true"
 
 
-def _legacy_tool_decorator():
+def _legacy_tool_decorator(annotations: dict[str, Any] | None = None):
     """Register legacy dispatcher tool only when explicitly enabled."""
     if ENABLE_LEGACY_DB_PORTMANTEAU:
-        return mcp.tool()
+        return mcp.tool(annotations=annotations)
 
     def _identity(func):
         return func
@@ -35,7 +36,7 @@ def _legacy_tool_decorator():
     return _identity
 
 
-@_legacy_tool_decorator()
+@_legacy_tool_decorator(annotations=DESTRUCTIVE)
 @HelpSystem.register_tool(category="database")
 async def db_operations(
     operation: DbOperationsOperation,
