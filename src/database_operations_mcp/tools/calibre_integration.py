@@ -10,6 +10,7 @@ from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
 from database_operations_mcp.services.database.connectors.sqlite_connector import SQLiteConnector
+from database_operations_mcp.tools._annotations import READ_ONLY
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ async def get_calibre_connector():
     return None
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY)
 async def calibre_list_books(limit: int = 50, offset: int = 0) -> dict[str, Any]:
     """List books from the Calibre library.
 
@@ -86,7 +87,7 @@ async def calibre_list_books(limit: int = 50, offset: int = 0) -> dict[str, Any]
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY)
 async def calibre_get_book_details(book_id: int) -> dict[str, Any]:
     """Get detailed information for a specific book.
 
@@ -144,7 +145,7 @@ async def calibre_get_book_details(book_id: int) -> dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY)
 async def calibre_query(query: str, params: list[Any] | None = None) -> dict[str, Any]:
     """Execute a custom SQL query against the Calibre database.
 

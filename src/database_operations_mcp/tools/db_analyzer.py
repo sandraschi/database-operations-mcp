@@ -10,6 +10,7 @@ from database_operations_mcp.services.analysis import (
     StructureAnalyzer,
 )
 from database_operations_mcp.tool_responses import unknown_operation_response
+from database_operations_mcp.tools._annotations import READ_ONLY
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 # Initialize analyzers
@@ -20,7 +21,7 @@ _health_checker = HealthChecker()
 _report_generator = ReportGenerator()
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY)
 @HelpSystem.register_tool(category="database")
 async def db_analyzer(
     db_file_path: str,

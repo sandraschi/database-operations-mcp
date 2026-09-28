@@ -5,12 +5,13 @@ from fastmcp import Context
 
 # Import the global MCP instance from the central config
 from database_operations_mcp.config.mcp_config import mcp
+from database_operations_mcp.tools._annotations import DESTRUCTIVE, MUTATING
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
 
 
-@mcp.tool()
+@mcp.tool(annotations=DESTRUCTIVE)
 @HelpSystem.register_tool(category="database")
 async def agentic_workflow_tool(
     goal: str,
@@ -125,7 +126,7 @@ async def agentic_workflow_tool(
         }
 
 
-@mcp.tool()
+@mcp.tool(annotations=MUTATING)
 @HelpSystem.register_tool(category="security")
 async def safety_guard_status(action: str = "status") -> dict[str, Any]:
     """Check or update the status of the Agentic Safety Guard.

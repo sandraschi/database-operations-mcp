@@ -13,6 +13,7 @@ from database_operations_mcp.tool_responses import (
     mcp_error,
     unknown_operation_response,
 )
+from database_operations_mcp.tools._annotations import READ_ONLY
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ _FTS_MAX_LIMIT = 10_000
 _FTS_MAX_OFFSET = 1_000_000
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY)
 @HelpSystem.register_tool(category="database")
 async def db_fts(
     operation: DbFtsOperation,
