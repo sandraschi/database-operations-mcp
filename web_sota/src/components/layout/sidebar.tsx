@@ -55,6 +55,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       label: "Connection manager",
       icon: Database,
     },
+    { href: "/nosql-manager", label: "NoSQL manager", icon: Database },
     { href: "/tools", label: "Tools", icon: Wrench },
     { href: "/tool-explorer", label: "Tool explorer", icon: Radar },
     { href: "/playground", label: "Playground", icon: Sparkles },

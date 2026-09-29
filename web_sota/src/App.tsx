@@ -18,6 +18,7 @@ import { Health } from "@/pages/health";
 import { JobsExports } from "@/pages/jobs-exports";
 import { LogsPage } from "@/pages/logs";
 import { McpCapabilities } from "@/pages/mcp-capabilities";
+import { NoSQLManager } from "@/pages/nosql-manager";
 import { Playground } from "@/pages/playground";
 import { Schema } from "@/pages/schema";
 import { SearchHub } from "@/pages/search-hub";
@@ -51,6 +52,7 @@ function App() {
           <Route path="/jobs-exports" element={<JobsExports />} />
           <Route path="/mcp-capabilities" element={<McpCapabilities />} />
           <Route path="/connection-manager" element={<ConnectionManager />} />
+          <Route path="/nosql-manager" element={<NoSQLManager />} />
           <Route path="/logs" element={<LogsPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
