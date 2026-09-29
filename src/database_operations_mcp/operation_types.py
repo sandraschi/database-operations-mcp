@@ -61,6 +61,10 @@ DbOperationsExtendedOperation = Literal[
     "get_keys",
     "get_value",
     "set_value",
+    "delete_key",
+    "get_ttl",
+    "get_type",
+    "flush",
 ]
 
 HelpSystemOperation = Literal[

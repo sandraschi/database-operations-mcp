@@ -9,7 +9,7 @@ import logging
 from typing import Any
 
 from database_operations_mcp.config.mcp_config import mcp
-from database_operations_mcp.database_manager import create_connector
+from database_operations_mcp.database_manager import create_connector, db_manager
 from database_operations_mcp.operation_types import DbOperationsExtendedOperation
 from database_operations_mcp.tool_responses import unknown_operation_response
 from database_operations_mcp.tools._annotations import DESTRUCTIVE
@@ -22,6 +22,7 @@ async def db_operations_extended(
     database_type: str,
     operation: DbOperationsExtendedOperation,
     connection_string: str | None = None,
+    connection_name: str | None = None,
     query: str | None = None,
     table_name: str | None = None,
     key: str | None = None,
@@ -34,6 +35,10 @@ async def db_operations_extended(
     Provides a unified interface for database operations across SQLite,
     PostgreSQL, MySQL, Redis, DuckDB, MongoDB, and more. Routes operations
     to the appropriate database-specific connector based on database type.
+
+    Pass `connection_name` to reuse an already-registered connection (from
+    db_connection) instead of `connection_string`, so credentials never need
+    to leave the backend.
 
     ## Return Format
     Returns success plus database_type/operation/result/message, or an error dict.
@@ -48,45 +53,57 @@ async def db_operations_extended(
         )
     """
     connector = None
+    owns_connector = False
     try:
-        # Parse connection string into a config dict
-        # Format depends on database type
-        config = {}
-        if connection_string:
-            if database_type in ["mysql", "postgresql"]:
-                parts = connection_string.split(":")
-                if len(parts) >= 5:
+        if connection_name:
+            connector = db_manager.get_connector(connection_name)
+            if not connector:
+                return {
+                    "success": False,
+                    "database_type": database_type,
+                    "operation": operation,
+                    "message": f"No such registered connection: {connection_name}",
+                }
+        else:
+            # Parse connection string into a config dict
+            # Format depends on database type
+            config = {}
+            if connection_string:
+                if database_type in ["mysql", "postgresql"]:
+                    parts = connection_string.split(":")
+                    if len(parts) >= 5:
+                        config = {
+                            "host": parts[0],
+                            "port": int(parts[1]),
+                            "user": parts[2],
+                            "password": parts[3],
+                            "database": parts[4],
+                        }
+                elif database_type == "redis":
+                    parts = connection_string.split(":")
                     config = {
                         "host": parts[0],
-                        "port": int(parts[1]),
-                        "user": parts[2],
-                        "password": parts[3],
-                        "database": parts[4],
+                        "port": int(parts[1]) if len(parts) > 1 else 6379,
+                        "password": parts[2] if len(parts) > 2 else None,
+                        "db": int(parts[3]) if len(parts) > 3 else 0,
                     }
-            elif database_type == "redis":
-                parts = connection_string.split(":")
-                config = {
-                    "host": parts[0],
-                    "port": int(parts[1]) if len(parts) > 1 else 6379,
-                    "password": parts[2] if len(parts) > 2 else None,
-                    "db": int(parts[3]) if len(parts) > 3 else 0,
+                elif database_type in ["sqlite", "duckdb"]:
+                    config = {"path": connection_string}
+
+            # Merge with config overrides
+            if config_overrides:
+                config.update(config_overrides)
+
+            # Get or create connector
+            connector = create_connector(database_type, config)
+            owns_connector = True
+            if not connector:
+                return {
+                    "success": False,
+                    "database_type": database_type,
+                    "operation": operation,
+                    "message": f"Failed to create connector for {database_type}",
                 }
-            elif database_type in ["sqlite", "duckdb"]:
-                config = {"path": connection_string}
-
-        # Merge with config overrides
-        if config_overrides:
-            config.update(config_overrides)
-
-        # Get or create connector
-        connector = create_connector(database_type, config)
-        if not connector:
-            return {
-                "success": False,
-                "database_type": database_type,
-                "operation": operation,
-                "message": f"Failed to create connector for {database_type}",
-            }
 
         # Perform operation
         result = None
@@ -147,10 +164,40 @@ async def db_operations_extended(
                 res = await connector.execute_query(f"SET {key} {value}")
                 success = res.success
                 result = res.data
+            elif operation == "delete_key":
+                if not key:
+                    return {"success": False, "message": "key required for delete_key"}
+                res = await connector.execute_query(f"DEL {key}")
+                success = res.success
+                result = res.data
+            elif operation == "get_ttl":
+                if not key:
+                    return {"success": False, "message": "key required for get_ttl"}
+                res = await connector.execute_query(f"TTL {key}")
+                success = res.success
+                result = res.data
+            elif operation == "get_type":
+                if not key:
+                    return {"success": False, "message": "key required for get_type"}
+                res = await connector.execute_query(f"TYPE {key}")
+                success = res.success
+                result = res.data
+            elif operation == "flush":
+                res = await connector.execute_query("FLUSHDB")
+                success = res.success
+                result = res.data
             else:
                 return unknown_operation_response(
                     operation,
-                    ["get_keys", "get_value", "set_value"],
+                    [
+                        "get_keys",
+                        "get_value",
+                        "set_value",
+                        "delete_key",
+                        "get_ttl",
+                        "get_type",
+                        "flush",
+                    ],
                     extra_recovery=["For non-Redis types, use execute_query, get_tables, etc."],
                 )
 
@@ -190,6 +237,7 @@ async def db_operations_extended(
             ],
         }
     finally:
-        # Disconnect if we created a temporary connector
-        if connector is not None:
+        # Only disconnect connectors we created ourselves; a connector reused
+        # via connection_name is owned by db_manager and stays connected.
+        if connector is not None and owns_connector:
             await connector.disconnect()
