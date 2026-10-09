@@ -135,7 +135,7 @@ async def init_database(
                 connection_name="bad_conn"
             )
             if result['status'] == 'error':
-                print(f"Connection failed: {result['message']}")
+                logger.warning(f"Connection failed: {result['message']}")
             # Logs: Connection failed: Failed to initialize database: Connection refused
 
     Notes:
@@ -258,13 +258,13 @@ async def list_connections() -> dict[str, Any]:
             result = await list_connections()
             conn_names = [c['name'] for c in result['connections']]
             if 'prod_db' in conn_names:
-                print("Production database is registered")
+                logger.info("Production database is registered")
 
         Find disconnected connections:
             result = await list_connections()
             disconnected = [c['name'] for c in result['connections'] if c['status'] != 'connected']
             if disconnected:
-                print(f"Disconnected: {disconnected}")
+                logger.info(f"Disconnected: {disconnected}")
 
     Notes:
         - Always returns success (even if no connections)
@@ -441,7 +441,7 @@ async def close_connection(connection_name: str) -> dict[str, Any]:
         Error handling:
             result = await close_connection("nonexistent")
             if result['status'] == 'error':
-                print(f"Failed: {result['message']}")
+                logger.warning(f"Failed: {result['message']}")
             # Logs: Failed: No such connection: nonexistent
 
     Notes:
@@ -517,7 +517,7 @@ async def test_connection(connection_name: str) -> dict[str, Any]:
         Handle connection errors:
             result = await test_connection("prod_db")
             if not result.get('is_connected'):
-                print("Connection down, reinitializing...")
+                logger.warning("Connection down, reinitializing...")
                 await init_database(...)
 
     Notes:
@@ -602,7 +602,7 @@ async def get_connection_info(connection_name: str) -> dict[str, Any]:
         Error handling:
             result = await get_connection_info("unknown")
             if result['status'] == 'error':
-                print(f"Not found: {result['message']}")
+                logger.warning(f"Not found: {result['message']}")
             # Logs: Not found: No such connection: unknown
 
     Notes:

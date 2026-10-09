@@ -81,7 +81,7 @@ async def execute_query(
                 query="SELECT * FROM users"
             )
             if not result['success']:
-                print(f"Query failed: {result['error']}")
+                logger.warning(f"Query failed: {result['error']}")
             # Logs: Query failed: Connection not found: nonexistent
 
         Complex aggregation query:
@@ -192,7 +192,7 @@ async def quick_data_sample(
                 table_name="nonexistent_table"
             )
             if not result['success']:
-                print(f"Sampling failed: {result['error']}")
+                logger.warning(f"Sampling failed: {result['error']}")
             # Logs: Sampling failed: Table 'nonexistent_table' does not exist
     """
     try:

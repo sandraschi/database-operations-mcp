@@ -11,6 +11,21 @@ from database_operations_mcp.tools._annotations import DESTRUCTIVE, MUTATING, RE
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 
+async def _with_message(result: dict[str, Any], ok: str) -> dict[str, Any]:
+    """Ensure a dialogic ``message`` key on delegate results (TOOL_DESIGN_STANDARDS 4.2).
+
+    Internals return ``{success, ..., error}``; the message is derived from the
+    actual outcome - never synthesized success.
+    """
+    if isinstance(result, dict) and "message" not in result:
+        result = dict(result)
+        if result.get("success"):
+            result["message"] = ok
+        else:
+            result["message"] = f"Operation failed: {result.get('error', 'unknown error')}"
+    return result
+
+
 @mcp.tool(annotations=READ_ONLY)
 @HelpSystem.register_tool(category="database")
 async def list_supported_databases() -> dict[str, Any]:
@@ -19,7 +34,7 @@ async def list_supported_databases() -> dict[str, Any]:
     Returns:
         dict: {"success": bool, "databases_by_category": dict, "total_supported": int, "categories": list[str]}
     """
-    return await _db_connection._list_supported_databases()
+    return await _with_message(await _db_connection._list_supported_databases(), "Supported database engines listed")
 
 
 @mcp.tool(annotations=MUTATING)
@@ -35,11 +50,14 @@ async def register_database_connection(
     Returns:
         dict: {"success": bool, "connection_name": str, "database_type": str, "error": str|None}
     """
-    return await _db_connection._register_database_connection(
-        connection_name=connection_name,
-        database_type=database_type,
-        connection_config=connection_config,
-        test_connection=test_connection,
+    return await _with_message(
+        await _db_connection._register_database_connection(
+            connection_name=connection_name,
+            database_type=database_type,
+            connection_config=connection_config,
+            test_connection=test_connection,
+        ),
+        f"Connection '{connection_name}' registered",
     )
 
 
@@ -51,7 +69,7 @@ async def list_database_connections() -> dict[str, Any]:
     Returns:
         dict: {"success": bool, "connections": dict, "total_connections": int}
     """
-    return await _db_connection._list_database_connections()
+    return await _with_message(await _db_connection._list_database_connections(), "Registered connections listed")
 
 
 @mcp.tool(annotations=READ_ONLY)
@@ -62,7 +80,10 @@ async def test_database_connection(connection_name: str) -> dict[str, Any]:
     Returns:
         dict: {"success": bool, "connection_name": str, "test_result": {"success": bool, "latency": float, "error": str|None}}
     """
-    return await _db_connection._test_database_connection(connection_name=connection_name)
+    return await _with_message(
+        await _db_connection._test_database_connection(connection_name=connection_name),
+        f"Connection '{connection_name}' tested",
+    )
 
 
 @mcp.tool(annotations=READ_ONLY)
@@ -76,7 +97,10 @@ async def test_all_database_connections(
     Returns:
         dict: {"success": bool, "test_results": dict, "summary": {"total_connections": int, "successful": int, "failed": int}}
     """
-    return await _db_connection._test_all_database_connections(timeout=timeout, parallel=parallel)
+    return await _with_message(
+        await _db_connection._test_all_database_connections(timeout=timeout, parallel=parallel),
+        "All registered connections tested",
+    )
 
 
 @mcp.tool(annotations=MUTATING)
@@ -87,7 +111,10 @@ async def close_database_connection(connection_name: str) -> dict[str, Any]:
     Returns:
         dict: {"success": bool, "message": str, "connection_name": str|None}
     """
-    return await _db_connection._close_connection(connection_name=connection_name)
+    return await _with_message(
+        await _db_connection._close_connection(connection_name=connection_name),
+        f"Connection '{connection_name}' closed",
+    )
 
 
 @mcp.tool(annotations=READ_ONLY)
@@ -98,7 +125,10 @@ async def get_database_connection_info(connection_name: str) -> dict[str, Any]:
     Returns:
         dict: {"success": bool, "connection_name": str, "db_type": str, "is_connected": bool, "connection_info": dict}
     """
-    return await _db_connection._get_connection_info(connection_name=connection_name)
+    return await _with_message(
+        await _db_connection._get_connection_info(connection_name=connection_name),
+        f"Connection info for '{connection_name}' retrieved",
+    )
 
 
 @mcp.tool(annotations=MUTATING)
@@ -109,7 +139,10 @@ async def restore_saved_database_connections(auto_reconnect: bool = False) -> di
     Returns:
         dict: {"success": bool, "saved_connections": dict, "reconnected": list[str], "message": str}
     """
-    return await _db_connection._restore_saved_connections(auto_reconnect=auto_reconnect)
+    return await _with_message(
+        await _db_connection._restore_saved_connections(auto_reconnect=auto_reconnect),
+        "Saved connections restored",
+    )
 
 
 @mcp.tool(annotations=MUTATING)
@@ -120,7 +153,10 @@ async def set_active_database_connection(connection_name: str) -> dict[str, Any]
     Returns:
         dict: {"success": bool, "message": str}
     """
-    return await _db_connection._set_active_connection(connection_name=connection_name)
+    return await _with_message(
+        await _db_connection._set_active_connection(connection_name=connection_name),
+        f"Active connection set to '{connection_name}'",
+    )
 
 
 @mcp.tool(annotations=READ_ONLY)
@@ -131,7 +167,7 @@ async def get_active_database_connection() -> dict[str, Any]:
     Returns:
         dict: {"success": bool, "active_connection": str|None}
     """
-    return await _db_connection._get_active_connection()
+    return await _with_message(await _db_connection._get_active_connection(), "Active connection retrieved")
 
 
 @mcp.tool(annotations=READ_ONLY)
@@ -142,7 +178,7 @@ async def get_database_user_preferences() -> dict[str, Any]:
     Returns:
         dict: {"success": bool, "preferences": dict}
     """
-    return await _db_connection._get_user_preferences()
+    return await _with_message(await _db_connection._get_user_preferences(), "User preferences retrieved")
 
 
 @mcp.tool(annotations=MUTATING)
@@ -153,7 +189,9 @@ async def set_database_user_preferences(preferences: dict[str, Any]) -> dict[str
     Returns:
         dict: {"success": bool, "message": str}
     """
-    return await _db_connection._set_user_preferences(preferences=preferences)
+    return await _with_message(
+        await _db_connection._set_user_preferences(preferences=preferences), "User preferences saved"
+    )
 
 
 @mcp.tool(annotations=DESTRUCTIVE)
@@ -168,7 +206,10 @@ async def execute_database_transaction(
     Returns:
         dict: {"success": bool, "connection_name": str, "rows_affected": int, "transaction_id": str|None, "error": str|None}
     """
-    return await _db_operations._execute_transaction(connection_name=connection_name, query=query, params=params)
+    return await _with_message(
+        await _db_operations._execute_transaction(connection_name=connection_name, query=query, params=params),
+        "Transaction executed",
+    )
 
 
 @mcp.tool(annotations=DESTRUCTIVE)
@@ -183,7 +224,10 @@ async def execute_database_write(
     Returns:
         dict: {"success": bool, "connection_name": str, "rows_affected": int, "last_insert_id": Any, "error": str|None}
     """
-    return await _db_operations._execute_write(connection_name=connection_name, query=query, params=params)
+    return await _with_message(
+        await _db_operations._execute_write(connection_name=connection_name, query=query, params=params),
+        "Write executed",
+    )
 
 
 @mcp.tool(annotations=MUTATING)
@@ -199,11 +243,14 @@ async def batch_insert_records(
     Returns:
         dict: {"success": bool, "connection_name": str, "table_name": str, "records_inserted": int, "batches_processed": int, "error": str|None}
     """
-    return await _db_operations._batch_insert(
-        connection_name=connection_name,
-        table_name=table_name,
-        data=data,
-        batch_size=batch_size,
+    return await _with_message(
+        await _db_operations._batch_insert(
+            connection_name=connection_name,
+            table_name=table_name,
+            data=data,
+            batch_size=batch_size,
+        ),
+        f"Batch insert into '{table_name}' completed",
     )
 
 
@@ -220,7 +267,10 @@ async def execute_database_query(
     Returns:
         dict: {"success": bool, "connection_name": str, "query": str, "applied_limit": int, "result": {"rows": list, "columns": list, "row_count": int}, "error": str|None}
     """
-    return await _db_operations._execute_query(connection_name=connection_name, query=query, params=params, limit=limit)
+    return await _with_message(
+        await _db_operations._execute_query(connection_name=connection_name, query=query, params=params, limit=limit),
+        "Query executed",
+    )
 
 
 @mcp.tool(annotations=READ_ONLY)
@@ -235,7 +285,10 @@ async def quick_table_data_sample(
     Returns:
         dict: {"success": bool, "connection_name": str, "table_name": str, "sample_size": int, "generated_query": str, "result": {"rows": list, "columns": list, "row_count": int}}
     """
-    return await _db_operations._quick_data_sample(connection_name=connection_name, table_name=table_name, limit=limit)
+    return await _with_message(
+        await _db_operations._quick_data_sample(connection_name=connection_name, table_name=table_name, limit=limit),
+        f"Sample from '{table_name}' retrieved",
+    )
 
 
 @mcp.tool(annotations=READ_ONLY)
@@ -252,10 +305,13 @@ async def export_database_query_results(
     Returns:
         dict: {"success": bool, "connection_name": str, "export_format": str, "row_count": int, "file_path": str|None, "exported_data": Any|None, "error": str|None}
     """
-    return await _db_operations._export_query_results(
-        connection_name=connection_name,
-        query=query,
-        params=params,
-        output_format=output_format,
-        output_path=output_path,
+    return await _with_message(
+        await _db_operations._export_query_results(
+            connection_name=connection_name,
+            query=query,
+            params=params,
+            output_format=output_format,
+            output_path=output_path,
+        ),
+        "Query results exported",
     )

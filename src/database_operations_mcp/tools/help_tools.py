@@ -4,9 +4,12 @@ Provides interactive help and documentation for all available tools.
 """
 
 import inspect
+import logging
 import re
 from collections.abc import Callable
 from typing import Any, ClassVar, TypeVar
+
+logger = logging.getLogger(__name__)
 
 # Import the global MCP instance
 
@@ -262,12 +265,12 @@ async def tool_help(tool_name: str) -> dict[str, Any]:
         Check if tool exists:
             result = await tool_help("my_tool")
             if result['status'] == 'error':
-                print("Tool not found, use help() to see available tools")
+                logger.info("Tool not found, use help() to see available tools")
 
         Read tool docstring:
             result = await tool_help("list_tables")
             if result['status'] == 'success':
-                print(result['tool']['docstring'])
+                logger.info(result['tool']['docstring'])
                 # Displays: Complete docstring with all sections
 
     Notes:

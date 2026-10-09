@@ -70,13 +70,13 @@ async def list_databases(connection_name: str) -> dict[str, Any]:
         Check specific database exists:
             result = await list_databases("prod_server")
             if 'my_database' in result.get('databases', []):
-                print("Database exists!")
+                logger.info("Database exists!")
             # Checks if database is available
 
         Error handling:
             result = await list_databases("invalid_connection")
             if not result['success']:
-                print(f"Failed: {result['error']}")
+                logger.warning(f"Failed: {result['error']}")
             # Logs: Failed: Connection not found: invalid_connection
 
     Notes:
@@ -179,9 +179,9 @@ async def list_tables(connection_name: str, database_name: str | None = None) ->
         Check if table exists:
             result = await list_tables("prod_db", "public")
             if 'my_table' in result.get('tables', []):
-                print("Table exists!")
+                logger.info("Table exists!")
             else:
-                print("Table not found")
+                logger.info("Table not found")
 
     Notes:
         - PostgreSQL requires schema name (use 'public' for default schema)
@@ -311,7 +311,7 @@ async def describe_table(connection_name: str, table_name: str, database_name: s
                 table_name="nonexistent"
             )
             if not result['success']:
-                print(f"Schema fetch failed: {result['error']}")
+                logger.warning(f"Schema fetch failed: {result['error']}")
             # Logs: Schema fetch failed: Table 'nonexistent' does not exist
 
     Notes:
@@ -448,9 +448,9 @@ async def get_schema_diff(
         Check if schemas match:
             result = await get_schema_diff("db", "table_v1", "table_v2")
             if result.get('diff', {}).get('tables_match'):
-                print("Schemas are identical!")
+                logger.info("Schemas are identical!")
             else:
-                print("Schemas differ:", result['diff'])
+                logger.info("Schemas differ: %s", result['diff'])
 
     Notes:
         - Comparison is structural (columns/types), not data
