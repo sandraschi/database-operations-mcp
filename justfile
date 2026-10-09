@@ -17,7 +17,7 @@ install sync:
 bootstrap:
     uv sync --extra dev
     uv run pre-commit install
-    Set-Location web_sota; npm ci; if ($LASTEXITCODE -ne 0) { npm install }
+    Set-Location web_sota; if (Get-Command bun -ErrorAction SilentlyContinue) { bun install --frozen-lockfile } elseif (Test-Path "$env:USERPROFILE\.bun\bin\bun.exe") { & "$env:USERPROFILE\.bun\bin\bun.exe" install --frozen-lockfile } else { npm ci; if ($LASTEXITCODE -ne 0) { npm install } }
     Write-Host "Pre-commit hooks installed." -ForegroundColor Green
 
 # --- Runtime ---
@@ -83,9 +83,9 @@ audit-deps:
 
 MCPB_IGNORE := "{{REPO}}/.mcpbignore"
 
-# Build .mcpb bundle for Claude Desktop
+# Build .mcpb bundle for Claude Desktop (fleet shim -> canonical pipeline)
 pack mcpb-pack:
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "D:\Dev\repos\mcp-central-docs\scripts\make-mcpb.ps1" -RepoPath "{{REPO}}"
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "{{REPO}}/scripts/mcpb-pack.ps1"
 
 # --- Native  Tauri ---
 

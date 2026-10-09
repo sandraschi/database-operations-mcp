@@ -1,10 +1,11 @@
 """PyInstaller entry point — dual transport."""
+
 import _datetime  # noqa: F401 -- eager import stdlib C extensions
 import _strptime  # noqa: F401 -- eager import stdlib C extensions
-import mcp.types  # noqa: F401 -- eager bootstrap mcp types
-
 import os
 import sys
+
+import mcp.types  # noqa: F401 -- eager bootstrap mcp types
 
 # Setup extraction path
 if getattr(sys, "frozen", False):
@@ -14,7 +15,13 @@ if getattr(sys, "frozen", False):
         if _p not in sys.path:
             sys.path.insert(0, _p)
 else:
-    sys.path.insert(0, "src")
+    # __file__-relative (never CWD-relative): correct both at the repo root
+    # (run_server.py next to src/) and in the packed bundle (same layout),
+    # and lets the MCPB import-isolation check resolve the staged copy.
+    _base = os.path.dirname(os.path.abspath(__file__))
+    _src = os.path.join(_base, "src")
+    if _src not in sys.path:
+        sys.path.insert(0, _src)
 
 # Configure default CORS origins environment variable for the backend
 _tauri_port = os.environ.get("PORT", "10709")

@@ -75,6 +75,15 @@ if (Test-Path $envExample) {
     Write-Host "  WARNING: No .env.example at repo root" -ForegroundColor DarkYellow
 }
 
+# Step 3b: Vendor fleet MCP-client registration (nsh include + ps1 installer) from
+# mcp-central-docs, so the NSIS hooks register the app in AI clients. The .nsh is
+# vendored into native/windows (do not edit it here); the .ps1 ships under resources/.
+$Central = Join-Path (Split-Path -Parent $Root) 'mcp-central-docs\scripts'
+if (-not (Test-Path $Central)) { throw "mcp-central-docs not found next to this repo: $Central" }
+Copy-Item "$Central\install-mcp-clients.ps1" "$ResourceDir\install-mcp-clients.ps1" -Force
+Copy-Item "$Central\nsis\mcp-clients.nsh" "$PSScriptRoot\windows\mcp-clients.nsh" -Force
+Write-Host "  Vendored mcp-clients.nsh + install-mcp-clients.ps1" -ForegroundColor Green
+
 # Step 4: Single NSIS installer
 Write-Host "-> [4/4] Tauri NSIS bundle..." -ForegroundColor Yellow
 Push-Location $PSScriptRoot
