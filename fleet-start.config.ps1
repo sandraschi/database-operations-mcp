@@ -10,6 +10,7 @@
         Kind          = 'uvicorn'
         UvicornTarget = 'database_operations_mcp.http_app:web_app'
         SyncExtras    = @('dev')
+        SyncOnStart  = $true
         Env           = @{ WEB_PORT = '10709' }
     }
     Frontend = @{
