@@ -8,7 +8,7 @@ import os
 from typing import Any
 
 from fastapi import APIRouter, Query
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 from database_operations_mcp.activity_log import (
@@ -166,6 +166,36 @@ async def _build_capabilities(mcp_app) -> dict[str, Any]:
     }
 
 
+async def _discover_llm_providers() -> dict[str, list[dict[str, str]]]:
+    """Probe Ollama (:11434) and LM Studio (:1234) for live models."""
+    import httpx
+
+    ollama_models: list[dict[str, str]] = []
+    lm_studio_models: list[dict[str, str]] = []
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get("http://localhost:11434/api/tags", timeout=2.0)
+            if response.status_code == 200:
+                data = response.json()
+                ollama_models = [{"name": m["name"]} for m in data.get("models", [])]
+    except Exception as e:
+        err_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
+        logger.debug(f"Ollama discovery failed: {err_msg}")
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get("http://localhost:1234/v1/models", timeout=2.0)
+            if response.status_code == 200:
+                data = response.json()
+                lm_studio_models = [{"name": m["id"]} for m in data.get("data", [])]
+    except Exception as e:
+        err_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
+        logger.debug(f"LM Studio discovery failed: {err_msg}")
+
+    return {"ollama": ollama_models, "lm_studio": lm_studio_models}
+
+
 router = APIRouter(prefix="/api")
 
 
@@ -183,35 +213,7 @@ def setup_webapp(app, mcp_app=None) -> None:
 
     @router.get("/llm/providers")
     async def get_llm_providers():
-        import httpx
-
-        ollama_models = []
-        lm_studio_models = []
-
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get("http://localhost:11434/api/tags", timeout=2.0)
-                if response.status_code == 200:
-                    data = response.json()
-                    ollama_models = [{"name": m["name"]} for m in data.get("models", [])]
-        except Exception as e:
-            err_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
-            logger.debug(f"Ollama discovery failed: {err_msg}")
-
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get("http://localhost:1234/v1/models", timeout=2.0)
-                if response.status_code == 200:
-                    data = response.json()
-                    lm_studio_models = [{"name": m["id"]} for m in data.get("data", [])]
-        except Exception as e:
-            err_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
-            logger.debug(f"LM Studio discovery failed: {err_msg}")
-
-        return {
-            "ollama": ollama_models,
-            "lm_studio": lm_studio_models,
-        }
+        return await _discover_llm_providers()
 
     @router.get("/capabilities")
     async def api_capabilities():
@@ -345,6 +347,85 @@ def setup_webapp(app, mcp_app=None) -> None:
             "provider": "ollama",
             "model": "gemma4:e4b",
             "endpoint": os.getenv("OLLAMA_HOST", "http://localhost:11434"),
+        }
+
+    @router.post("/chat")
+    async def chat_canonical(request: ChatRequest):
+        """Canonical chat completion (fleet SOP 1E) - same service as /v1/chat."""
+        return await chat_service.ask(request)
+
+    @router.post("/chat/stream")
+    async def chat_stream(request: ChatRequest):
+        """SSE stream of the chat reply (chunked delivery of the service answer)."""
+        result = await chat_service.ask(request)
+        reply = str(result.get("reply", ""))
+        provider = result.get("provider")
+
+        def event_frames():
+            for i in range(0, len(reply), 200):
+                yield f"data: {json.dumps({'delta': reply[i : i + 200], 'provider': provider})}\n\n"
+            yield f"data: {json.dumps({'done': True, 'provider': provider})}\n\n"
+
+        return StreamingResponse(event_frames(), media_type="text/event-stream")
+
+    @router.post("/llm/chat")
+    async def llm_chat_proxy(request: ChatRequest):
+        """Backend LLM chat proxy - the only path Chat uses, keys never leave the server."""
+        return await chat_service.ask(request)
+
+    @router.post("/llm/chat/stream")
+    async def llm_chat_stream(request: ChatRequest):
+        """Streaming backend LLM chat proxy (SSE)."""
+        return await chat_stream(request)
+
+    @router.get("/skills")
+    async def list_skills():
+        """Skill listing for skill-first chat prompt construction."""
+        from pathlib import Path
+
+        skills: list[dict[str, Any]] = []
+        pkg_skills = Path(__file__).resolve().parent / "skills"
+        if pkg_skills.is_dir():
+            for md in sorted(pkg_skills.rglob("SKILL.md")):
+                try:
+                    rel = md.relative_to(pkg_skills)
+                    skills.append({"name": rel.parts[0], "uri": f"skill://{rel.parts[0]}/SKILL.md"})
+                except Exception as exc:
+                    logger.debug("Skipping skill file %s: %s", md, exc)
+                    continue
+        uris: list[str] = []
+        if mcp_app is not None and hasattr(mcp_app, "list_skills"):
+            try:
+                listed = await mcp_app.list_skills()
+                uris = [str(s.uri) for s in listed]
+            except Exception:
+                logger.warning("Failed to list skills")
+        return {"skills": skills, "uris": uris, "count": len(skills)}
+
+    @router.get("/llm/discover")
+    async def llm_discover():
+        """LLM provider auto-discovery (Ollama :11434, LM Studio :1234)."""
+        providers = await _discover_llm_providers()
+        return {
+            "ollama": {"detected": len(providers["ollama"]) > 0, "models": providers["ollama"]},
+            "lm_studio": {"detected": len(providers["lm_studio"]) > 0, "models": providers["lm_studio"]},
+        }
+
+    @router.get("/llm/models")
+    async def llm_models():
+        """Model list per provider (live when reachable, else empty)."""
+        return await _discover_llm_providers()
+
+    @router.get("/llm/onboarding")
+    async def llm_onboarding():
+        """Fresh-install starter facts + recommended path."""
+        return {
+            "facts": [
+                "Chat answers come from a local LLM (Ollama :11434 or LM Studio :1234) - no cloud key needed.",
+                "Start Ollama or LM Studio, then reload this page; providers auto-detect on mount.",
+                "Without a local model, chat returns a disabled-state message instead of failing.",
+            ],
+            "recommended_path": "Install Ollama -> pull gemma4:e4b (or llama3.2:3b) -> start it -> chat here.",
         }
 
     app.include_router(router)

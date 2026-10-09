@@ -1,7 +1,9 @@
 # System initialization portmanteau tool.
 # Consolidates initialization and setup operations into a single interface.
 
+import asyncio
 import logging
+import os
 from typing import Any
 
 # Import the global MCP instance from the central config
@@ -10,6 +12,30 @@ from database_operations_mcp.tools._annotations import DESTRUCTIVE
 from database_operations_mcp.tools.help_tools import HelpSystem
 
 logger = logging.getLogger(__name__)
+
+
+@mcp.tool(annotations=DESTRUCTIVE)
+@HelpSystem.register_tool(category="system")
+async def shutdown_server() -> dict[str, Any]:
+    """Graceful self-termination (agent shutdown path).
+
+    Responds first so the caller sees the result, then exits the process
+    ~500 ms later so in-flight writes can flush.
+
+    ## Return Format
+    Returns success plus a human-readable message.
+
+    ## Examples
+    Shut down after an assfix run:
+        result = await shutdown_server()
+    """
+    logger.warning("Shutdown requested via shutdown_server MCP tool")
+    try:
+        loop = asyncio.get_running_loop()
+        loop.call_later(0.5, lambda: os._exit(0))
+    except RuntimeError:
+        os._exit(0)
+    return {"success": True, "message": "database-operations-mcp shutting down in ~500 ms"}
 
 
 @mcp.tool(annotations=DESTRUCTIVE)
