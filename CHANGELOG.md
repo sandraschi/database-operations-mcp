@@ -1,4 +1,26 @@
 
+## [Unreleased] — 2026-10-09 (assfix)
+
+### Fixed
+- MCPB manifest `${PWD}` -> `${__dirname}` (root + mcpb manifests); bundle now starts on real installs.
+- `just bootstrap`: bun-first frontend install (`bun install --frozen-lockfile`, npm fallback) for `bun.lock` tree.
+- REST gaps closed (all live-probed 200): `POST /api/chat` + `/api/chat/stream` (SSE),
+  `POST /api/llm/chat` + `/api/llm/chat/stream` backend proxy, `GET /api/skills`,
+  `GET /api/llm/discover`, `GET /api/llm/models`, `GET /api/llm/onboarding`.
+- Added MCP `shutdown_server` self-termination tool (DESTRUCTIVE, 500 ms orderly exit).
+- Server-runtime `print()` -> `logger.warning/info` (init/query/schema/help tools, 17 sites).
+- `scripts/mcpb-pack.ps1` fleet shim installed; vendored `mcpb/pack.ps1` removed;
+  `just pack` now targets the shim (canonical pipeline).
+- Dialogic returns: all 18 `db_atomic` tools now guarantee a `message` key via `_with_message`.
+- README: Claude Desktop one-liner (`releases/latest/download/install.ps1`) + uvx snippet reference.
+- Deleted 11 stale `.bak` files.
+- Triaged dependabot PRs #1,2,3,4,6 (commented + closed as superseded: no pinned actions in tree).
+
+### Deferred
+- H6 runt domain skill -> `SUGGESTED: skillbuild database-operations-mcp` (needs repo-wide harvest).
+- M3 Fleet Starts launcher (lives in mcp-central-docs repo, out of scope for this run).
+- Coverage `--cov-fail-under` threshold (tests green; follow-up).
+
 ## [Unreleased] — 2026-09-11 (assfix)
 
 ### Fixed

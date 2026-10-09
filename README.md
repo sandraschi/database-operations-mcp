@@ -214,6 +214,11 @@ pip install git+https://github.com/sandraschi/database-operations-mcp.git
 
 ### For Claude Desktop (MCPB Package)
 
+One-click install for Claude Desktop: download and run
+[install.ps1](https://github.com/sandraschi/database-operations-mcp/releases/latest/download/install.ps1)
+from the [latest release](https://github.com/sandraschi/database-operations-mcp/releases/latest)
+(or drag-and-drop the `database-operations-mcp.mcpb` bundle from the same release):
+
 1. Download or build the latest `.mcpb` file.
 2. Open Claude Desktop  Settings  Extensions
 3. Drag and drop the `.mcpb` file
