@@ -1,6 +1,7 @@
 # database_operations_mcp/chat/service.py
 """Chat service for database-operations-mcp backend."""
 
+import asyncio
 import json as _json
 import logging
 import os
@@ -120,7 +121,7 @@ class ChatService:
                     try:
                         # discover available models
                         try:
-                            avail_req = _req.urlopen(f"{endpoint}/api/tags", timeout=3)  # noqa: S310
+                            avail_req = await asyncio.to_thread(_req.urlopen, f"{endpoint}/api/tags", timeout=3)
                             avail_data = _json.loads(avail_req.read())
                             models = [m["name"] for m in avail_data.get("models", [])]
                         except Exception:
@@ -152,7 +153,7 @@ class ChatService:
                             data=payload,
                             headers={"Content-Type": "application/json"},
                         )
-                        with _req.urlopen(oreq, timeout=120) as r:  # noqa: S310
+                        with await asyncio.to_thread(_req.urlopen, oreq, timeout=120) as r:
                             data = _json.loads(r.read())
                         reply = data.get("message", {}).get("content", "")
                         if reply:
@@ -185,7 +186,7 @@ class ChatService:
                             }
                         ).encode()
                         oreq = _req.Request(openai_url, data=payload, headers=headers)  # noqa: S310
-                        with _req.urlopen(oreq, timeout=60) as r:  # noqa: S310
+                        with await asyncio.to_thread(_req.urlopen, oreq, timeout=60) as r:
                             data = _json.loads(r.read())
                         reply = data.get("choices", [{}])[0].get("message", {}).get("content", "")
                         if reply:
@@ -217,7 +218,7 @@ class ChatService:
                             }
                         ).encode()
                         oreq = _req.Request(url, data=payload, headers=headers)  # noqa: S310
-                        with _req.urlopen(oreq, timeout=60) as r:  # noqa: S310
+                        with await asyncio.to_thread(_req.urlopen, oreq, timeout=60) as r:
                             data = _json.loads(r.read())
                         reply = data.get("choices", [{}])[0].get("message", {}).get("content", "")
                         if reply:
@@ -249,7 +250,7 @@ class ChatService:
                             }
                         ).encode()
                         oreq = _req.Request(url, data=payload, headers=headers)  # noqa: S310
-                        with _req.urlopen(oreq, timeout=60) as r:  # noqa: S310
+                        with await asyncio.to_thread(_req.urlopen, oreq, timeout=60) as r:
                             data = _json.loads(r.read())
                         reply = data.get("content", [{}])[0].get("text", "")
                         if reply:
@@ -275,7 +276,7 @@ class ChatService:
                             }
                         ).encode()
                         oreq = _req.Request(lm_url, data=payload, headers=headers)  # noqa: S310
-                        with _req.urlopen(oreq, timeout=60) as r:  # noqa: S310
+                        with await asyncio.to_thread(_req.urlopen, oreq, timeout=60) as r:
                             data = _json.loads(r.read())
                         reply = data.get("choices", [{}])[0].get("message", {}).get("content", "")
                         if reply:
@@ -288,7 +289,7 @@ class ChatService:
                         try:
                             fallback_url = "http://127.0.0.1:1234/v1/chat/completions"
                             oreq = _req.Request(fallback_url, data=payload, headers=headers)
-                            with _req.urlopen(oreq, timeout=60) as r:  # noqa: S310
+                            with await asyncio.to_thread(_req.urlopen, oreq, timeout=60) as r:
                                 data = _json.loads(r.read())
                             reply = data.get("choices", [{}])[0].get("message", {}).get("content", "")
                             if reply:
