@@ -1,82 +1,22 @@
 # Security Policy
 
-## Supported Versions
+## Reporting a vulnerability
 
-The following versions of this project are currently supported with security updates:
+Please report security problems **privately** through GitHub's private vulnerability reporting:
 
-| Version | Supported          |
-|---------|--------------------|
-| 1.0.0   | ✅ Yes            |
-| < 1.0.0 | ❌ No             |
+1. Open the repository's **Security** tab.
+2. Click **Report a vulnerability**.
 
-## Reporting Security Vulnerabilities
+Direct link: https://github.com/sandraschi/database-operations-mcp/security/advisories/new
 
-We take the security of our MCP server seriously. If you discover a security vulnerability, please report it responsibly.
+Please do **not** open a public issue, discussion or pull request for a security problem, and do not include working exploits or real secrets in anything public.
 
-### How to Report
+## What happens next
 
-**DO NOT** create a public GitHub issue for security vulnerabilities.
+- You will get an acknowledgement in the private advisory thread.
+- Confirmed issues are fixed and published as a GitHub Security Advisory (with a CVE where appropriate), crediting you unless you prefer otherwise.
+- We follow coordinated disclosure and are happy to agree on a timeline with you.
 
-Instead, please report security vulnerabilities by:
+## Scope
 
-1. **Email**: Send details to security@example.com (replace with actual security contact)
-2. **Private Report**: Use GitHub's private vulnerability reporting if available
-3. **Discord**: Contact maintainers through our community channels
-
-### What to Include
-
-When reporting a security vulnerability, please include:
-
-- **Description**: Clear description of the vulnerability
-- **Impact**: Potential impact and attack scenarios
-- **Steps to Reproduce**: Detailed steps to reproduce the issue
-- **Affected Versions**: Which versions are affected
-- **Environment**: Operating system, Python version, dependencies
-- **Proof of Concept**: If possible, include a minimal PoC
-
-### Response Process
-
-1. **Acknowledgment**: We'll acknowledge your report within 24 hours
-2. **Investigation**: Our team will investigate the reported issue
-3. **Fix Development**: If confirmed, we'll develop and test a fix
-4. **Disclosure**: We'll coordinate disclosure timing with you
-5. **Release**: Security fixes will be released as patch versions
-
-## Security Best Practices
-
-### For Users
-
-- Keep your MCP server updated to the latest version
-- Use strong, unique API keys and credentials
-- Run the server in appropriate network environments
-- Monitor server logs for suspicious activity
-- Regularly review and update dependencies
-
-### For Developers
-
-- Follow secure coding practices
-- Implement proper input validation
-- Use parameterized queries to prevent SQL injection
-- Keep dependencies updated and audited
-- Implement rate limiting where appropriate
-- Use HTTPS for any external communications
-
-## Vulnerability Disclosure Policy
-
-We believe in responsible disclosure and will:
-
-- **Credit researchers** who report valid security issues
-- **Provide clear timelines** for fix development and release
-- **Coordinate disclosure** to minimize risk to users
-- **Release fixes promptly** once validated and tested
-
-## Contact Information
-
-- **Security Email**: security@example.com
-- **Project Maintainers**: Contact through GitHub issues for non-security matters
-- **Community**: Join our Discord for general discussions
-
----
-
-**Last Updated**: 2025-01-01
-**Version**: 1.0.0
+These projects are mostly MCP servers and tools that run locally with the privileges of the user who starts them. Issues that let a client, an agent or prompt-injected content reach beyond a tool's intended scope (for example file access outside a configured directory, command execution, or credential exposure) are in scope.
