@@ -1,6 +1,6 @@
 """MCP Server Template Implementation."""
 
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import FastAPI
 from mcp import Application
@@ -10,7 +10,7 @@ mcp = Application()
 
 
 @mcp.tool()
-async def example_tool(param1: str, param2: int = 42) -> Dict[str, Any]:
+async def example_tool(param1: str, param2: int = 42) -> dict[str, Any]:
     """Example tool that demonstrates the interface.
 
     Args:
@@ -38,4 +38,4 @@ async def shutdown_event():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
